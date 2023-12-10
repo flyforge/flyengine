@@ -1,0 +1,19 @@
+[EXCLUDE]
+
+*.exe
+*.loaded
+*.pdb
+*/iconengines/*
+*/imageformats/*
+*/platforms/*
+*/plasmaEditorPlugin*
+*/PlasmaEnginePlugin*
+*/plSharedPlugin*
+*/Qt5*
+*/Qt6*
+
+[INCLUDE]
+
+#if PLATFORM_PROFILE_PC
+/Player.exe
+#endif

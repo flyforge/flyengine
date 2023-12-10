@@ -1,0 +1,267 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{4746343837574186671,4963508747386251216}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Material"}
+		VarArray %Dependencies
+		{
+			s{"Shaders/Materials/ReflectionProbeVisualization.plShader"}
+		}
+		Uuid %DocumentID{u4{4746343837574186671,4963508747386251216}}
+		u4 %Hash{11418137837332591521}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{711415318727470299,5081108790625050273}}
+	s %t{"Shaders/Materials/ReflectionProbeVisualization.plShader"}
+	u3 %v{2}
+	p
+	{
+		i3 %MipLevel{0}
+		i3 %ReflectionProbeIndex{0}
+	}
+}
+o
+{
+	Uuid %id{u4{13770327648996518283,5448073115523207444}}
+	s %t{"plMaterialAssetProperties"}
+	u3 %v{4}
+	p
+	{
+		s %BaseMaterial{""}
+		s %Shader{"Shaders/Materials/ReflectionProbeVisualization.plShader"}
+		s %ShaderMode{"plMaterialShaderMode::File"}
+		Uuid %ShaderProperties{u4{711415318727470299,5081108790625050273}}
+		s %Surface{""}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{13770327648996518283,5448073115523207444}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{14831359824912569370,1828982774811006507}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialAssetProperties"}
+		u3 %TypeVersion{4}
+	}
+}
+o
+{
+	Uuid %id{u4{18200256455121510126,5460019644832151135}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties{}
+		s %TypeName{"plShaderTypeBase"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{7844678448146089445,6309018175614680192}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{12123694589359637393,6797358509465135799}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialShaderMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{5472468647564224469,8361537235818373684}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{8535422935335121264,11593030280177656100}}
+			Uuid{u4{2577061129434477094,9164274921392258157}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"ReflectionProbeIndex"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{2577061129434477094,9164274921392258157}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		i4 %Value{0}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13516823575585411199,11073926677079700052}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{7844678448146089445,6309018175614680192}}
+			Uuid{u4{6902669273487170564,14465707370782787784}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MipLevel"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{8535422935335121264,11593030280177656100}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{6902669273487170564,14465707370782787784}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		i4 %Value{0}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17872226537824524141,18333869227736755619}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plShaderTypeBase"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{13516823575585411199,11073926677079700052}}
+			Uuid{u4{5472468647564224469,8361537235818373684}}
+		}
+		s %TypeName{"Shaders/Materials/ReflectionProbeVisualization.plShader"}
+		u3 %TypeVersion{2}
+	}
+}
+}

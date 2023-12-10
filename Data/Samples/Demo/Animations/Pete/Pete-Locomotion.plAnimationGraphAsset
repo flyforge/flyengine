@@ -1,0 +1,1565 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{17964102729969196986,5166971713377147926}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Animation Graph"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{17964102729969196986,5166971713377147926}}
+		u4 %Hash{17772359476868470950}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References
+		{
+			s{"{ 06162822-82f5-4894-90b5-2efd9712f304 }"}
+			s{"{ 1fbeda80-220f-47f0-ab9a-2ba807de3b8d }"}
+			s{"{ 2929768b-e7c7-4a48-a1c7-32ea3ec259ce }"}
+			s{"{ 488cb9ab-a167-4902-b859-ba67c94a3855 }"}
+			s{"{ 75416056-9e57-4900-847b-c7c5a4fc47d6 }"}
+			s{"{ a5d51399-dc44-4c5a-a8d2-0a21cc11d5b0 }"}
+			s{"{ af2df214-acc2-437a-a009-983782ffb53e }"}
+			s{"{ da29b8ad-f9eb-473a-9fe6-4b03992f69c6 }"}
+		}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{11929790545297768798,352729525640922729}}
+	s %t{"plAnimGraphBoneWeightsInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{2435838125598448838,425226810585493666}}
+	s %t{"plAnimGraphNumberOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{12340197756002094159,541548536971192931}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{14477760613137927764,826512307238713363}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{15363680199221412642,1295347061847803458}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{747546312616595098,1349155171520121575}}
+	s %t{"plAnimGraphBoolInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{8057186536475267354,2983476909158540216}}
+	s %t{"plAnimGraphBoolInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{11182999218200027450,3079479006186514953}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{4629189643996165908,3190566285516626169}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{10048936230096443861,4583063206759221249}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{17800550050724964752,4628547542570691565}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{18014415523343698652,14822074778268206906}}
+		s %Connection::SourcePin{"OutNumber"}
+		Uuid %Connection::Target{u4{15032291391940579938,10594966176051485899}}
+		s %Connection::TargetPin{"b"}
+	}
+}
+o
+{
+	Uuid %id{u4{13551244015520002714,4654567651443652760}}
+	s %t{"plAnimationClip2D"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"Walk_Left"}
+		Vec2 %Position{f{0,0x000080BF}}
+	}
+}
+o
+{
+	Uuid %id{u4{12059758209618648203,4687675865945486183}}
+	s %t{"plAnimationClip2D"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"Run_Fwd"}
+		Vec2 %Position{f{0x0000803F,0}}
+	}
+}
+o
+{
+	Uuid %id{u4{3347642214330450060,4732740129651418047}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ 488cb9ab-a167-4902-b859-ba67c94a3855 }"}
+		s %ClipName{"Walk_Left"}
+	}
+}
+o
+{
+	Uuid %id{u4{1378058494555675784,4783201716514459514}}
+	s %t{"plSampleAnimClipSequenceAnimNode"}
+	u3 %v{1}
+	p
+	{
+		Uuid %ClipIndex{u4{16761778499792591550,6567310509465962003}}
+		s %CustomTitle{""}
+		s %EndClip{"Jump_End"}
+		Uuid %InLoop{u4{8057186536475267354,2983476909158540216}}
+		Uuid %InSpeed{u4{6702877709405864497,8227141344377208432}}
+		Uuid %InStart{u4{5060250128944778315,18143602729733844302}}
+		b %Loop{0}
+		VarArray %MiddleClips
+		{
+			s{"Jump_Loop"}
+		}
+		Vec2 %Node::Pos{f{0x6B910044,0xA5042043}}
+		Uuid %OutOnEndStarted{u4{11725142677181844036,7256229321854591270}}
+		Uuid %OutOnFinished{u4{15363680199221412642,1295347061847803458}}
+		Uuid %OutOnMiddleStarted{u4{4629189643996165908,3190566285516626169}}
+		Uuid %OutPose{u4{4834785467077978329,13317754860742932239}}
+		f %PlaybackSpeed{0x0000803F}
+		s %StartClip{"Jump_Start"}
+	}
+}
+o
+{
+	Uuid %id{u4{6841795179185398964,4793046947158690206}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{6337105908215428264,5018163708788093755}}
+		s %Connection::SourcePin{"Result"}
+		Uuid %Connection::Target{u4{3192046013127642762,4877779214047655801}}
+		s %Connection::TargetPin{"X"}
+	}
+}
+o
+{
+	Uuid %id{u4{3192046013127642762,4877779214047655801}}
+	s %t{"plSampleBlendSpace2DAnimNode"}
+	u3 %v{1}
+	p
+	{
+		b %ApplyRootMotion{1}
+		s %CenterClip{"Idle"}
+		VarArray %Clips
+		{
+			Uuid{u4{8679688083858994071,5683880689966058925}}
+			Uuid{u4{4792768995658649001,4892174240580666757}}
+			Uuid{u4{13551244015520002714,4654567651443652760}}
+			Uuid{u4{1405746732424896432,5718706501102198804}}
+			Uuid{u4{12059758209618648203,4687675865945486183}}
+		}
+		s %CustomTitle{""}
+		Uuid %InLoop{u4{747546312616595098,1349155171520121575}}
+		Uuid %InSpeed{u4{6889648194567893227,9065686209560594364}}
+		Uuid %InStart{u4{17059075894949119196,9662499356764773687}}
+		Time %InputResponse{d{0x9A9999999999C93F}}
+		b %Loop{1}
+		Vec2 %Node::Pos{f{0x8C270E44,0x1AEBDE43}}
+		Uuid %OutOnFinished{u4{12978570448061583900,18160045423633588476}}
+		Uuid %OutOnStarted{u4{11568061102267613357,12211049720652691682}}
+		Uuid %OutPose{u4{1550834802127048085,17398889694686574431}}
+		f %PlaybackSpeed{0x0000803F}
+		Uuid %X{u4{7288184520313353547,9834628201686993681}}
+		Uuid %Y{u4{17501173895468755339,12194465136570115408}}
+	}
+}
+o
+{
+	Uuid %id{u4{4792768995658649001,4892174240580666757}}
+	s %t{"plAnimationClip2D"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"Walk_Back"}
+		Vec2 %Position{f{0xCDCCCCBD,0}}
+	}
+}
+o
+{
+	Uuid %id{u4{6590120783748477844,4989044980811187892}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{3192046013127642762,4877779214047655801}}
+		s %Connection::SourcePin{"OutPose"}
+		Uuid %Connection::Target{u4{9572787045357624466,5393411885935972941}}
+		s %Connection::TargetPin{"InPoses[1]"}
+	}
+}
+o
+{
+	Uuid %id{u4{6337105908215428264,5018163708788093755}}
+	s %t{"plMathExpressionAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %CustomTitle{""}
+		s %Expression{"a+b"}
+		Vec2 %Node::Pos{f{0xF6545143,0xD435BE43}}
+		Uuid %Result{u4{9158905427783084002,13046152377477809749}}
+		Uuid %a{u4{12340197756002094159,541548536971192931}}
+		Uuid %b{u4{11752866304101956195,17346567847203388790}}
+		Uuid %c{u4{13696901832259985722,5550966495461870878}}
+		Uuid %d{u4{441253361746704460,13859295861660657970}}
+	}
+}
+o
+{
+	Uuid %id{u4{467190528607301263,5058710571388667994}}
+	s %t{"plGetBlackboardNumberAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %BlackboardEntry{"MoveForwards"}
+		s %CustomTitle{""}
+		Vec2 %Node::Pos{f{0x1562D9C2,0x4906A143}}
+		Uuid %OutNumber{u4{17298441396298219765,8155542413679388691}}
+	}
+}
+o
+{
+	Uuid %id{u4{13681736832547281284,5071280544913003437}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{9572787045357624466,5393411885935972941}}
+		s %Connection::SourcePin{"OutPose"}
+		Uuid %Connection::Target{u4{8785238116174197178,5349926269001747876}}
+		s %Connection::TargetPin{"InPose"}
+	}
+}
+o
+{
+	Uuid %id{u4{5160375318420192678,5086751934769344817}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{17554691661344999315,5572109920992268744}}
+		s %Connection::SourcePin{"OutIsTrue"}
+		Uuid %Connection::Target{u4{1378058494555675784,4783201716514459514}}
+		s %Connection::TargetPin{"InLoop"}
+	}
+}
+o
+{
+	Uuid %id{u4{17199326765899728304,5090213356583436254}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{11270771480256618790,10699085830915563635}}
+		s %Connection::SourcePin{"OutNumber"}
+		Uuid %Connection::Target{u4{6337105908215428264,5018163708788093755}}
+		s %Connection::TargetPin{"b"}
+	}
+}
+o
+{
+	Uuid %id{u4{4971005476171463817,5134435703122217050}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{15032291391940579938,10594966176051485899}}
+		s %Connection::SourcePin{"Result"}
+		Uuid %Connection::Target{u4{3192046013127642762,4877779214047655801}}
+		s %Connection::TargetPin{"Y"}
+	}
+}
+o
+{
+	Uuid %id{u4{504013494939194534,5202061483480040933}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{5612421287915246643,10110459335226795566}}
+		s %Connection::SourcePin{"OutNumber"}
+		Uuid %Connection::Target{u4{15032291391940579938,10594966176051485899}}
+		s %Connection::TargetPin{"a"}
+	}
+}
+o
+{
+	Uuid %id{u4{14971023634329232800,5252274344311475354}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ 2929768b-e7c7-4a48-a1c7-32ea3ec259ce }"}
+		s %ClipName{"Jump_Start"}
+	}
+}
+o
+{
+	Uuid %id{u4{8785238116174197178,5349926269001747876}}
+	s %t{"plPoseResultAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %CustomTitle{""}
+		Time %FadeDuration{d{0x9A9999999999C93F}}
+		Uuid %InFadeDuration{u4{12462148328854540312,14935479407446606773}}
+		Uuid %InPose{u4{3493321452707310891,16834540836345627919}}
+		Uuid %InTargetWeight{u4{8746760973993992737,16872230592219000245}}
+		Uuid %InWeights{u4{11929790545297768798,352729525640922729}}
+		Vec2 %Node::Pos{f{0x718B9044,0x15B0BA43}}
+		Uuid %OutCurrentWeight{u4{6691582480161133727,16577507216918999737}}
+		Uuid %OutOnFadedIn{u4{11182999218200027450,3079479006186514953}}
+		Uuid %OutOnFadedOut{u4{10787100221395560707,17077119986224881481}}
+	}
+}
+o
+{
+	Uuid %id{u4{16447217708101463716,5379627289923950985}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{1378058494555675784,4783201716514459514}}
+		s %Connection::SourcePin{"OutPose"}
+		Uuid %Connection::Target{u4{9572787045357624466,5393411885935972941}}
+		s %Connection::TargetPin{"InPoses[0]"}
+	}
+}
+o
+{
+	Uuid %id{u4{9572787045357624466,5393411885935972941}}
+	s %t{"plSwitchPoseAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %CustomTitle{""}
+		Uuid %InIndex{u4{14193982901059494466,15042653642395229134}}
+		VarArray %InPoses{}
+		Vec2 %Node::Pos{f{0xD2E75C44,0x54A1B143}}
+		Uuid %OutPose{u4{5303008787613220097,7371021802385880629}}
+		u1 %PosesCount{2}
+		Time %TransitionDuration{d{0x9A9999999999C93F}}
+	}
+}
+o
+{
+	Uuid %id{u4{6341888601767680921,5442086456900515062}}
+	s %t{"plAnimationGraphAssetProperties"}
+	u3 %v{1}
+	p
+	{
+		VarArray %AnimationClipMapping
+		{
+			Uuid{u4{9375426508122770070,5568282091464386306}}
+			Uuid{u4{14971023634329232800,5252274344311475354}}
+			Uuid{u4{3819031621161275562,5591768294938737909}}
+			Uuid{u4{12087999713523571333,5495744002754141432}}
+			Uuid{u4{10877988197983722386,5709727063053399605}}
+			Uuid{u4{15789195960537591454,5708675596166309955}}
+			Uuid{u4{3347642214330450060,4732740129651418047}}
+			Uuid{u4{1451490213733303447,5615320205386817513}}
+			Uuid{u4{12491715716533697965,5689349743817150768}}
+		}
+		VarArray %IncludeGraphs{}
+	}
+}
+o
+{
+	Uuid %id{u4{401716160466480033,5445669717857598219}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{467190528607301263,5058710571388667994}}
+		s %Connection::SourcePin{"OutNumber"}
+		Uuid %Connection::Target{u4{6337105908215428264,5018163708788093755}}
+		s %Connection::TargetPin{"a"}
+	}
+}
+o
+{
+	Uuid %id{u4{12087999713523571333,5495744002754141432}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ af2df214-acc2-437a-a009-983782ffb53e }"}
+		s %ClipName{"Jump_End"}
+	}
+}
+o
+{
+	Uuid %id{u4{17674295926734566296,5510120112270226759}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{17554691661344999315,5572109920992268744}}
+		s %Connection::SourcePin{"OutOnTrue"}
+		Uuid %Connection::Target{u4{1378058494555675784,4783201716514459514}}
+		s %Connection::TargetPin{"InStart"}
+	}
+}
+o
+{
+	Uuid %id{u4{13696901832259985722,5550966495461870878}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{9375426508122770070,5568282091464386306}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ 1fbeda80-220f-47f0-ab9a-2ba807de3b8d }"}
+		s %ClipName{"Idle"}
+	}
+}
+o
+{
+	Uuid %id{u4{17554691661344999315,5572109920992268744}}
+	s %t{"plCompareBlackboardNumberAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %BlackboardEntry{"TouchingGround"}
+		s %Comparison{"plComparisonOperator::Equal"}
+		s %CustomTitle{""}
+		Vec2 %Node::Pos{f{0xD199FB42,0x0879E742}}
+		Uuid %OutIsTrue{u4{18172739513958151983,6191966980308352748}}
+		Uuid %OutOnFalse{u4{10048936230096443861,4583063206759221249}}
+		Uuid %OutOnTrue{u4{14477760613137927764,826512307238713363}}
+		d %ReferenceValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{4804726374071372712,5588618455431567087}}
+	s %t{"plGetBlackboardNumberAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %BlackboardEntry{"TouchingGround"}
+		s %CustomTitle{""}
+		Vec2 %Node::Pos{f{0x17A50C44,0x3C1DAF43}}
+		Uuid %OutNumber{u4{2059062939261903864,15597769477342998541}}
+	}
+}
+o
+{
+	Uuid %id{u4{3819031621161275562,5591768294938737909}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ da29b8ad-f9eb-473a-9fe6-4b03992f69c6 }"}
+		s %ClipName{"Jump_Loop"}
+	}
+}
+o
+{
+	Uuid %id{u4{1451490213733303447,5615320205386817513}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ a5d51399-dc44-4c5a-a8d2-0a21cc11d5b0 }"}
+		s %ClipName{"Walk_Right"}
+	}
+}
+o
+{
+	Uuid %id{u4{8679688083858994071,5683880689966058925}}
+	s %t{"plAnimationClip2D"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"Walk_Fwd"}
+		Vec2 %Position{f{0x0000003F,0}}
+	}
+}
+o
+{
+	Uuid %id{u4{12491715716533697965,5689349743817150768}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ 06162822-82f5-4894-90b5-2efd9712f304 }"}
+		s %ClipName{"Walk_Fwd"}
+	}
+}
+o
+{
+	Uuid %id{u4{15789195960537591454,5708675596166309955}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ 75416056-9e57-4900-847b-c7c5a4fc47d6 }"}
+		s %ClipName{"Walk_Back"}
+	}
+}
+o
+{
+	Uuid %id{u4{10877988197983722386,5709727063053399605}}
+	s %t{"plAnimationClipMapping"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"{ 06162822-82f5-4894-90b5-2efd9712f304 }"}
+		s %ClipName{"Run_Fwd"}
+	}
+}
+o
+{
+	Uuid %id{u4{1405746732424896432,5718706501102198804}}
+	s %t{"plAnimationClip2D"}
+	u3 %v{1}
+	p
+	{
+		s %Clip{"Walk_Right"}
+		Vec2 %Position{f{0,0x0000803F}}
+	}
+}
+o
+{
+	Uuid %id{u4{3321416643538900900,5725680741944931188}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{4804726374071372712,5588618455431567087}}
+		s %Connection::SourcePin{"OutNumber"}
+		Uuid %Connection::Target{u4{9572787045357624466,5393411885935972941}}
+		s %Connection::TargetPin{"InIndex"}
+	}
+}
+o
+{
+	Uuid %id{u4{895183858042945766,5953167346237834277}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{18172739513958151983,6191966980308352748}}
+	s %t{"plAnimGraphBoolOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{6808419977459684080,6357792883414621969}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{6341888601767680921,5442086456900515062}}
+			Uuid{u4{8785238116174197178,5349926269001747876}}
+			Uuid{u4{9572787045357624466,5393411885935972941}}
+			Uuid{u4{4804726374071372712,5588618455431567087}}
+			Uuid{u4{3321416643538900900,5725680741944931188}}
+			Uuid{u4{1378058494555675784,4783201716514459514}}
+			Uuid{u4{16447217708101463716,5379627289923950985}}
+			Uuid{u4{17554691661344999315,5572109920992268744}}
+			Uuid{u4{17674295926734566296,5510120112270226759}}
+			Uuid{u4{5160375318420192678,5086751934769344817}}
+			Uuid{u4{3192046013127642762,4877779214047655801}}
+			Uuid{u4{6590120783748477844,4989044980811187892}}
+			Uuid{u4{6337105908215428264,5018163708788093755}}
+			Uuid{u4{6841795179185398964,4793046947158690206}}
+			Uuid{u4{467190528607301263,5058710571388667994}}
+			Uuid{u4{401716160466480033,5445669717857598219}}
+			Uuid{u4{11270771480256618790,10699085830915563635}}
+			Uuid{u4{17199326765899728304,5090213356583436254}}
+			Uuid{u4{15032291391940579938,10594966176051485899}}
+			Uuid{u4{4971005476171463817,5134435703122217050}}
+			Uuid{u4{5612421287915246643,10110459335226795566}}
+			Uuid{u4{18014415523343698652,14822074778268206906}}
+			Uuid{u4{504013494939194534,5202061483480040933}}
+			Uuid{u4{17800550050724964752,4628547542570691565}}
+			Uuid{u4{13681736832547281284,5071280544913003437}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{16761778499792591550,6567310509465962003}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{11633915275507650660,6677667196656769034}}
+	s %t{"plAnimGraphNumberOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{11725142677181844036,7256229321854591270}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{5303008787613220097,7371021802385880629}}
+	s %t{"plAnimGraphLocalPoseOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{17298441396298219765,8155542413679388691}}
+	s %t{"plAnimGraphNumberOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{6702877709405864497,8227141344377208432}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{6889648194567893227,9065686209560594364}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{17059075894949119196,9662499356764773687}}
+	s %t{"plAnimGraphTriggerInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{7288184520313353547,9834628201686993681}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{5612421287915246643,10110459335226795566}}
+	s %t{"plGetBlackboardNumberAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %BlackboardEntry{"StrafeRight"}
+		s %CustomTitle{""}
+		Vec2 %Node::Pos{f{0xB151CFC2,0x6F1A0644}}
+		Uuid %OutNumber{u4{2435838125598448838,425226810585493666}}
+	}
+}
+o
+{
+	Uuid %id{u4{3924968643349539720,10205781903966477736}}
+	s %t{"plAnimGraphNumberOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{15032291391940579938,10594966176051485899}}
+	s %t{"plMathExpressionAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %CustomTitle{""}
+		s %Expression{"a+b"}
+		Vec2 %Node::Pos{f{0x54535043,0x1F5E0844}}
+		Uuid %Result{u4{3924968643349539720,10205781903966477736}}
+		Uuid %a{u4{895183858042945766,5953167346237834277}}
+		Uuid %b{u4{11387833418153271019,13430429772877527186}}
+		Uuid %c{u4{6808419977459684080,6357792883414621969}}
+		Uuid %d{u4{1764588970845196368,17249882569848566365}}
+	}
+}
+o
+{
+	Uuid %id{u4{11270771480256618790,10699085830915563635}}
+	s %t{"plGetBlackboardNumberAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %BlackboardEntry{"MoveBackwards"}
+		s %CustomTitle{""}
+		Vec2 %Node::Pos{f{0x875BD5C2,0x053EC343}}
+		Uuid %OutNumber{u4{11633915275507650660,6677667196656769034}}
+	}
+}
+o
+{
+	Uuid %id{u4{12000027763158299439,11012953277130337616}}
+	s %t{"plAnimGraphNumberOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{17501173895468755339,12194465136570115408}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{11568061102267613357,12211049720652691682}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{9158905427783084002,13046152377477809749}}
+	s %t{"plAnimGraphNumberOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{4834785467077978329,13317754860742932239}}
+	s %t{"plAnimGraphLocalPoseOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{11387833418153271019,13430429772877527186}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{441253361746704460,13859295861660657970}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{18014415523343698652,14822074778268206906}}
+	s %t{"plGetBlackboardNumberAnimNode"}
+	u3 %v{1}
+	p
+	{
+		s %BlackboardEntry{"StrafeLeft"}
+		s %CustomTitle{""}
+		Vec2 %Node::Pos{f{0xA02DB9C2,0x1FB71744}}
+		Uuid %OutNumber{u4{12000027763158299439,11012953277130337616}}
+	}
+}
+o
+{
+	Uuid %id{u4{12462148328854540312,14935479407446606773}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{14193982901059494466,15042653642395229134}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{2059062939261903864,15597769477342998541}}
+	s %t{"plAnimGraphNumberOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{6691582480161133727,16577507216918999737}}
+	s %t{"plAnimGraphNumberOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{3493321452707310891,16834540836345627919}}
+	s %t{"plAnimGraphLocalPoseInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{8746760973993992737,16872230592219000245}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{10787100221395560707,17077119986224881481}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{1764588970845196368,17249882569848566365}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{11752866304101956195,17346567847203388790}}
+	s %t{"plAnimGraphNumberInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{1550834802127048085,17398889694686574431}}
+	s %t{"plAnimGraphLocalPoseOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{5060250128944778315,18143602729733844302}}
+	s %t{"plAnimGraphTriggerInputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+o
+{
+	Uuid %id{u4{12978570448061583900,18160045423633588476}}
+	s %t{"plAnimGraphTriggerOutputPin"}
+	u3 %v{1}
+	p
+	{
+		u1 %NumConnections{0}
+		i2 %PinIdx{0}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{3942999501643836470,117188540908545965}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphInputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphBoolInputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13717573920115100109,737262229013315079}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimationClipMapping"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13346447520137948130,945587745652602869}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphNode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{18300129895862954167,1749738555392286438}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphOutputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{5859629827374712925,1961091080339109065}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{14837175901381113664,2246605665366736213}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphNode"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plPoseResultAnimNode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15256620954947959995,3770570173196244977}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphInputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphBoneWeightsInputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{3971735314236135992,5603453473325471093}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphOutputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphBoolOutputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{14513588388374325010,5737517947657318872}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimationClip2D"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{1207886138978403854,7236063097490109317}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphNode"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSampleAnimClipSequenceAnimNode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{5202535662181113312,8501890367855413296}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphInputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{6949095570503384057,9986350457221755203}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphInputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphNumberInputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{1988646526571382668,10729334715299371304}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"DocumentNodeManager_DefaultConnection"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{58733178723165192,11444663138280537383}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphNode"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plGetBlackboardNumberAnimNode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{9762479073531236414,12175659135044987989}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphOutputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphTriggerOutputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{3982961884723598894,12216012852680949296}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphOutputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphLocalPoseOutputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{5276094201952520210,13733790733446997615}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimationGraphAssetProperties"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17329234527767554177,14821845768964575812}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphInputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphTriggerInputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13687204919475960214,15161168465155829936}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphNode"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCompareBlackboardNumberAnimNode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{1161428842990506363,15470509737476490635}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plComparisonOperator"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13409146698861429925,16152838776783899175}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphNode"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSwitchPoseAnimNode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{12020224481202880829,16410186577515729731}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphOutputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphNumberOutputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{11372578604286417943,16510481031734732925}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphNode"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plMathExpressionAnimNode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{5571090672607989154,17168209920440221016}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphInputPin"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimGraphLocalPoseInputPin"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13570497479689206642,17297912242389588184}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAnimGraphNode"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSampleBlendSpace2DAnimNode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+}

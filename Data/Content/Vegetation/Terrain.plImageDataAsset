@@ -1,0 +1,107 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{12501342827884209586,5072981349215090546}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Image Data"}
+		VarArray %Dependencies
+		{
+			s{"Vegetation/Terrain.png"}
+		}
+		Uuid %DocumentID{u4{12501342827884209586,5072981349215090546}}
+		u4 %Hash{3936604507411989987}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{2220582257362780311,5455573849489233416}}
+	s %t{"plImageDataAssetProperties"}
+	u3 %v{1}
+	p
+	{
+		s %Input{"Vegetation/Terrain.png"}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{2220582257362780311,5455573849489233416}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{7311963824766092013,3079277721885661103}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plImageDataAssetProperties"}
+		u3 %TypeSize{72}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeSize{72}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeSize{8}
+		u3 %TypeVersion{1}
+	}
+}
+}

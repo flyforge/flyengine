@@ -1,0 +1,3 @@
+string %Shader { "Shaders/Editor/Visualizer.plShader" }
+string %RenderDataCategory { "SimpleOpaque" }
+

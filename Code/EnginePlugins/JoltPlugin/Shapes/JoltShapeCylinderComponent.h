@@ -1,0 +1,44 @@
+#pragma once
+
+#include <JoltPlugin/Shapes/JoltShapeComponent.h>
+
+using plJoltShapeCylinderComponentManager = plComponentManager<class plJoltShapeCylinderComponent, plBlockStorageType::FreeList>;
+
+class PLASMA_JOLTPLUGIN_DLL plJoltShapeCylinderComponent : public plJoltShapeComponent
+{
+  PLASMA_DECLARE_COMPONENT_TYPE(plJoltShapeCylinderComponent, plJoltShapeComponent, plJoltShapeCylinderComponentManager);
+
+  //////////////////////////////////////////////////////////////////////////
+  // plComponent
+
+public:
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
+
+
+  //////////////////////////////////////////////////////////////////////////
+  // plJoltShapeComponent
+
+protected:
+  virtual void CreateShapes(plDynamicArray<plJoltSubShape>& out_Shapes, const plTransform& rootTransform, float fDensity, const plJoltMaterial* pMaterial) override;
+
+
+  //////////////////////////////////////////////////////////////////////////
+  // plJoltShapeCylinderComponent
+
+public:
+  plJoltShapeCylinderComponent();
+  ~plJoltShapeCylinderComponent();
+
+  void SetRadius(float f);                      // [ property ]
+  float GetRadius() const { return m_fRadius; } // [ property ]
+
+  void SetHeight(float f);                      // [ property ]
+  float GetHeight() const { return m_fHeight; } // [ property ]
+
+protected:
+  void OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const;
+
+  float m_fRadius = 0.5f;
+  float m_fHeight = 0.5f;
+};

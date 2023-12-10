@@ -1,0 +1,227 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{10970696399919539345,4649212555401576139}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Curve1D"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{10970696399919539345,4649212555401576139}}
+		u4 %Hash{6947774346352052421}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{10860602398111748775,4749687737033332279}}
+	s %t{"plCurveGroupData"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Curves
+		{
+			Uuid{u4{8105211929609362822,5086945270823467198}}
+		}
+		u2 %FPS{60}
+	}
+}
+o
+{
+	Uuid %id{u4{13662631764712002747,4804287483551144677}}
+	s %t{"plCurveControlPointData"}
+	u3 %v{5}
+	p
+	{
+		Vec2 %LeftTangent{f{0xCDCCCCBD,0}}
+		s %LeftTangentMode{"plCurveTangentMode::Linear"}
+		b %Linked{1}
+		Vec2 %RightTangent{f{0xCDCCCC3D,0}}
+		s %RightTangentMode{"plCurveTangentMode::Linear"}
+		i4 %Tick{4800}
+		d %Value{0x000000000000F03F}
+	}
+}
+o
+{
+	Uuid %id{u4{8105211929609362822,5086945270823467198}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{173,255,47,255}}
+		VarArray %ControlPoints
+		{
+			Uuid{u4{10964237803163641488,5539279224060394828}}
+			Uuid{u4{13662631764712002747,4804287483551144677}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{10964237803163641488,5539279224060394828}}
+	s %t{"plCurveControlPointData"}
+	u3 %v{5}
+	p
+	{
+		Vec2 %LeftTangent{f{0xCDCCCCBD,0}}
+		s %LeftTangentMode{"plCurveTangentMode::Linear"}
+		b %Linked{1}
+		Vec2 %RightTangent{f{0xCDCCCC3D,0}}
+		s %RightTangentMode{"plCurveTangentMode::Linear"}
+		i4 %Tick{0}
+		d %Value{0}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{10860602398111748775,4749687737033332279}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{3764267399378570767,5032250169399439294}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCurveGroupData"}
+		u3 %TypeSize{48}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{801625683788323587,5358237981595257874}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSingleCurveData"}
+		u3 %TypeSize{40}
+		u3 %TypeVersion{3}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeSize{72}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16079397987993824823,10440771357117927475}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCurveControlPointData"}
+		u3 %TypeSize{48}
+		u3 %TypeVersion{5}
+	}
+}
+o
+{
+	Uuid %id{u4{4402620705079210759,10588792762471340450}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCurveTangentMode"}
+		u3 %TypeSize{1}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeSize{1}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeSize{8}
+		u3 %TypeVersion{1}
+	}
+}
+}

@@ -1,0 +1,15 @@
+<RCC>
+  <qresource prefix="AssetIcons">
+        <file>ProcGen_Graph.svg</file>
+  </qresource>
+  <qresource prefix="TypeIcons">
+    <file>plProcPlacementComponent.svg</file>
+    <file>plProcVolumeBoxComponent.svg</file>
+    <file>plProcVolumeSphereComponent.svg</file>
+    <file>plProcVolumeImageComponent.svg</file>
+    <file>plProcVertexColorComponent.svg</file>
+  </qresource>
+  <qresource prefix="Icons">
+  </qresource>
+</RCC>
+

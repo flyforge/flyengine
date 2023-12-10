@@ -1,0 +1,7 @@
+add_subdirectory(ThirdParty)
+add_subdirectory(Engine)
+add_subdirectory(EnginePlugins)
+add_subdirectory(Tools)
+add_subdirectory(Editor)
+add_subdirectory(EditorPlugins)
+# add_subdirectory(UnitTests)

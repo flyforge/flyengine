@@ -1,0 +1,355 @@
+{
+  "configurations": [
+    {
+      "name": "Android-arm-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-arm"
+    },
+    {
+      "name": "Android-arm-Dev",
+      "generator": "Ninja",
+      "configurationType": "Dev",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-arm"
+    },
+    {
+      "name": "Android-arm-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-arm"
+    },
+    {
+      "name": "Android-arm64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "arm64-v8a",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-arm"
+    },
+    {
+      "name": "Android-arm64-Dev",
+      "generator": "Ninja",
+      "configurationType": "Dev",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "arm64-v8a",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-arm"
+    },
+    {
+      "name": "Android-arm64-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "arm64-v8a",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-arm"
+    },
+    {
+      "name": "Android-x86-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "x86",
+          "type": "STRING"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-x86"
+    },
+    {
+      "name": "Android-x86-Dev",
+      "generator": "Ninja",
+      "configurationType": "Dev",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "x86",
+          "type": "STRING"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-x86"
+    },
+    {
+      "name": "Android-x86-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "inheritEnvironments": [ "vsdev" ],
+      "buildRoot": "${workspaceRoot}\\build\\${name}",
+      "installRoot": "${workspaceRoot}\\install\\${name}",
+      "variables": [
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "${env.ANDROID_NDK_HOME}\\build\\cmake\\android.toolchain.cmake",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "x86",
+          "type": "STRING"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "23",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_ENABLE_QT_SUPPORT",
+          "value": "0",
+          "type": "STRING"
+        },
+        {
+          "name": "PLASMA_BUILD_SAMPLES",
+          "value": "1",
+          "type": "STRING"
+        }
+      ],
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "android-clang-x86"
+    },
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": []
+    },
+    {
+      "name": "x64-Dev",
+      "generator": "Ninja",
+      "configurationType": "Dev",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": []
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+[PLATFORMS]
+ALL
+
+[PERMUTATIONS]
+
+CAMERA_MODE
+TOPOLOGY
+
+[RENDERSTATE]
+
+BlendingEnabled0 = true
+DestBlend0 = Blend_InvSrcAlpha
+SourceBlend0 = Blend_SrcAlpha
+DestBlendAlpha0 = Blend_InvSrcAlpha
+
+DepthTest = false
+DepthWrite = false
+
+[VERTEXSHADER]
+
+#define USE_TEXCOORD0
+#define USE_COLOR0
+
+#include <Shaders/Common/GlobalConstants.h>
+#include <Shaders/Materials/MaterialInterpolator.h>
+
+struct GlyphData
+{
+	float2 topLeftCorner;
+	uint color;
+	uint glyphIndexAndSize;
+};
+
+StructuredBuffer<GlyphData> glyphData;
+
+VS_OUT main(uint VertexID : SV_VertexID, uint InstanceID : SV_InstanceID)
+{
+	float2 vertexPositions[6] =
+	{
+		float2(0.0, 0.0),
+		float2(1.0, 1.0),
+		float2(0.0, 1.0),
+		float2(0.0, 0.0),
+		float2(1.0, 0.0),
+		float2(1.0, 1.0),
+	};
+
+	uint index = VertexID / 6;
+	uint vertexIndex = VertexID % 6;
+
+	GlyphData data = glyphData[index];
+
+	float glyphIndex = float(data.glyphIndexAndSize & 0xFFFF);
+	float size = float((data.glyphIndexAndSize >> 16) & 0xFFFF);
+
+	float2 vertexPosition = vertexPositions[vertexIndex];
+	float2 positionInPixel = (vertexPosition * size + data.topLeftCorner);
+	float2 screenPosition = (positionInPixel * ViewportSize.zw) * float2(2.0, -2.0) + float2(-1.0, 1.0);
+
+	float2 invAtlasSize = 1.0 / float2(16.0, 8.0);
+	float texCoordX = fmod( glyphIndex, 16.0 );
+	float texCoordY = floor( glyphIndex * invAtlasSize.x );
+
+	VS_OUT RetVal;
+	RetVal.Position = float4(screenPosition, 0.0, 1.0);
+	RetVal.TexCoord0 = (float2(texCoordX, texCoordY) + vertexPosition) * invAtlasSize;
+	RetVal.Color0 = RGBA8ToFloat4(data.color);
+	RetVal.InstanceID = InstanceID;
+
+	return RetVal;
+}
+
+[GEOMETRYSHADER]
+
+#define USE_TEXCOORD0
+#define USE_COLOR0
+
+#include <Shaders/Materials/StereoGeometryShader.h>
+
+[PIXELSHADER]
+
+#define USE_TEXCOORD0
+#define USE_COLOR0
+
+#include <Shaders/Materials/MaterialInterpolator.h>
+
+Texture2D FontTexture;
+SamplerState FontTexture_AutoSampler;
+
+float4 main(PS_IN Input) : SV_Target
+{
+	return FontTexture.Sample(FontTexture_AutoSampler, Input.TexCoord0.xy) * Input.Color0;
+}

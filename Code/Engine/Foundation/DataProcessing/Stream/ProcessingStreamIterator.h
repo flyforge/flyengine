@@ -1,0 +1,36 @@
+
+#pragma once
+
+#include <Foundation/DataProcessing/Stream/ProcessingStream.h>
+#include <Foundation/Memory/MemoryUtils.h>
+
+/// \brief Helper template class to iterate over stream elements.
+template <typename Type>
+class plProcessingStreamIterator
+{
+public:
+  /// \brief Constructor.
+  plProcessingStreamIterator(const plProcessingStream* pStream, plUInt64 uiNumElements, plUInt64 uiStartIndex);
+
+  /// \brief Returns a reference to the current element. Note that the behavior is undefined if HasReachedEnd() is true!
+  Type& Current() const;
+
+  /// \brief Returns true of the iterator has reached the end of the stream or the number of elements it should iterate over.
+  bool HasReachedEnd() const;
+
+  /// \brief Advances the current pointer to the next element in the stream.
+  void Advance();
+
+  /// \brief Advances the current pointer by the given number of elements.
+  void Advance(plUInt32 uiNumElements);
+
+  // TODO: Add iterator interface? Only makes really sense for element spawners and processors which work on a single stream
+
+protected:
+  void* m_pCurrentPtr = nullptr;
+  void* m_pEndPtr = nullptr;
+
+  plUInt64 m_uiElementStride = 0;
+};
+
+#include <Foundation/DataProcessing/Stream/Implementation/ProcessingStreamIterator_inl.h>

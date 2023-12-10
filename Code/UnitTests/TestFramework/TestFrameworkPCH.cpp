@@ -1,0 +1,22 @@
+#include <TestFramework/TestFrameworkPCH.h>
+
+PLASMA_STATICLINK_LIBRARY(TestFramework)
+{
+  if (bReturn)
+    return;
+
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_Qt_qtLogMessageDock);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_Qt_qtTestDelegate);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_Qt_qtTestFramework);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_Qt_qtTestGUI);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_Qt_qtTestModel);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_SimpleTest);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_TestBaseClass);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_TestFramework);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_TestResults);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_uwp_uwpTestApplication);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Framework_uwp_uwpTestFramework);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Utilities_TestLogInterface);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Utilities_TestOrder);
+  PLASMA_STATICLINK_REFERENCE(TestFramework_Utilities_TestSetup);
+}

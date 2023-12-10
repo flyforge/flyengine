@@ -1,0 +1,38 @@
+# Asset Types
+
+StateMachine;State Machine
+
+# Component Types
+
+plStateMachineComponent;State Machine;;https://plasmaengine.github.io/PlasmaDocs/#ai/state-machine-component/
+
+# Properties
+
+plComparisonOperator::Equal;==
+plComparisonOperator::NotEqual;<>
+plComparisonOperator::Less;<
+plComparisonOperator::LessEqual;<=
+plComparisonOperator::Greater;>
+plComparisonOperator::GreaterEqual;>=
+
+plStateMachineLogicOperator::And;AND
+plStateMachineLogicOperator::Or;OR
+
+plStateMachineNodeAny;New Any State
+
+plStateMachineTransition_Timeout;Timeout Transition
+
+plStateMachineTransition_Compound;Compound Transition
+
+
+plStateMachineNode;New State
+
+plStateMachineTransition_BlackboardConditions;Blackboard Conditions
+
+plStateMachineState_NestedStateMachine;Nested State Machine
+
+plStateMachineState_Compound;Compound State
+
+plStateMachineState_SendMsg;Send Message
+
+plStateMachineState_SwitchObject;Switch Object

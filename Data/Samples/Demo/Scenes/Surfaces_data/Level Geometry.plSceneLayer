@@ -1,0 +1,526 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{15036442609172644244,4759523109657735372}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Layer"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{15036442609172644244,4759523109657735372}}
+		u4 %Hash{5644976292467762823}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References
+		{
+			s{"{ aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 }"}
+			s{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+		}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{10220194735494829153,2042824348291187869}}
+	s %t{"plGreyBoxComponent"}
+	u3 %v{5}
+	p
+	{
+		b %Active{1}
+		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		Angle %Curvature{f{0}}
+		u3 %Detail{16}
+		b %GenerateCollision{1}
+		b %IncludeInNavmesh{1}
+		s %Material{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+		s %Shape{"plGreyBoxShape::Box"}
+		f %SizeNegX{0x00000040}
+		f %SizeNegY{0x00004842}
+		f %SizeNegZ{0}
+		f %SizePosX{0x00000040}
+		f %SizePosY{0x00004842}
+		f %SizePosZ{0x00000041}
+		b %SlopedBottom{0}
+		b %SlopedTop{0}
+		f %Thickness{0x0000003F}
+		b %UseAsOccluder{1}
+	}
+}
+o
+{
+	Uuid %id{u4{14855823199802318921,2677077802879786440}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{10220194735494829153,2042824348291187869}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0x00004042,0,0}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{"Walls"}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{3392115433822055094,5667133092751570273}}
+	s %t{"plLayerDocumentSettings"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plSceneDocumentRoot"}
+	u3 %v{2}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{4947411864722774538,11100740247601431070}}
+			Uuid{u4{17111995709766661285,16409817317614056433}}
+			Uuid{u4{14855823199802318921,2677077802879786440}}
+			Uuid{u4{11986067383724823302,7546066142294013003}}
+			Uuid{u4{11079499275207887648,11051382859936104936}}
+		}
+		Uuid %Settings{u4{3392115433822055094,5667133092751570273}}
+	}
+}
+o
+{
+	Uuid %id{u4{7350438919417333534,6911812687705414432}}
+	s %t{"plGreyBoxComponent"}
+	u3 %v{5}
+	p
+	{
+		b %Active{1}
+		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		Angle %Curvature{f{0}}
+		u3 %Detail{16}
+		b %GenerateCollision{1}
+		b %IncludeInNavmesh{1}
+		s %Material{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+		s %Shape{"plGreyBoxShape::Box"}
+		f %SizeNegX{0x00000040}
+		f %SizeNegY{0x00004842}
+		f %SizeNegZ{0}
+		f %SizePosX{0x00000040}
+		f %SizePosY{0x00004842}
+		f %SizePosZ{0x00000041}
+		b %SlopedBottom{0}
+		b %SlopedTop{0}
+		f %Thickness{0x0000003F}
+		b %UseAsOccluder{1}
+	}
+}
+o
+{
+	Uuid %id{u4{11986067383724823302,7546066142294013003}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{7350438919417333534,6911812687705414432}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0x000040C2,0,0}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{"Walls"}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{311783400415284770,10466486793012832499}}
+	s %t{"plGreyBoxComponent"}
+	u3 %v{5}
+	p
+	{
+		b %Active{1}
+		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		Angle %Curvature{f{0}}
+		u3 %Detail{16}
+		b %GenerateCollision{1}
+		b %IncludeInNavmesh{1}
+		s %Material{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+		s %Shape{"plGreyBoxShape::Box"}
+		f %SizeNegX{0x00004842}
+		f %SizeNegY{0x00000040}
+		f %SizeNegZ{0}
+		f %SizePosX{0x00004842}
+		f %SizePosY{0x00000040}
+		f %SizePosZ{0x00000041}
+		b %SlopedBottom{0}
+		b %SlopedTop{0}
+		f %Thickness{0x0000003F}
+		b %UseAsOccluder{1}
+	}
+}
+o
+{
+	Uuid %id{u4{11079499275207887648,11051382859936104936}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{7260559836171555902,11234697727437730498}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0,0,0}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{"Ground"}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+			s{"AutoColMesh"}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{4947411864722774538,11100740247601431070}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{311783400415284770,10466486793012832499}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0,0x00004042,0}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{"Walls"}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{7260559836171555902,11234697727437730498}}
+	s %t{"plGreyBoxComponent"}
+	u3 %v{5}
+	p
+	{
+		b %Active{1}
+		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		Angle %Curvature{f{0}}
+		u3 %Detail{16}
+		b %GenerateCollision{1}
+		b %IncludeInNavmesh{1}
+		s %Material{"{ aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 }"}
+		s %Shape{"plGreyBoxShape::Box"}
+		f %SizeNegX{0x00004842}
+		f %SizeNegY{0x00004842}
+		f %SizeNegZ{0x0000803F}
+		f %SizePosX{0x00004842}
+		f %SizePosY{0x00004842}
+		f %SizePosZ{0}
+		b %SlopedBottom{0}
+		b %SlopedTop{0}
+		f %Thickness{0x0000003F}
+		b %UseAsOccluder{1}
+	}
+}
+o
+{
+	Uuid %id{u4{12476367245459171517,15775563863025457862}}
+	s %t{"plGreyBoxComponent"}
+	u3 %v{5}
+	p
+	{
+		b %Active{1}
+		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		Angle %Curvature{f{0}}
+		u3 %Detail{16}
+		b %GenerateCollision{1}
+		b %IncludeInNavmesh{1}
+		s %Material{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+		s %Shape{"plGreyBoxShape::Box"}
+		f %SizeNegX{0x00004842}
+		f %SizeNegY{0x00000040}
+		f %SizeNegZ{0}
+		f %SizePosX{0x00004842}
+		f %SizePosY{0x00000040}
+		f %SizePosZ{0x00000041}
+		b %SlopedBottom{0}
+		b %SlopedTop{0}
+		f %Thickness{0x0000003F}
+		b %UseAsOccluder{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17111995709766661285,16409817317614056433}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{12476367245459171517,15775563863025457862}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0,0x000040C2,0}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{"Walls"}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{17355104657019131422,2603934264610161431}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plGreyBoxShape"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{5090140418944865950,3172852594581671215}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plDocumentRoot"}
+		s %PluginName{"plasmaEditorPluginScene"}
+		VarArray %Properties{}
+		s %TypeName{"plSceneDocumentRoot"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{14187911491586291717,6357927790796962117}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plObjectMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10411385167834517523,6666974454840060292}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plComponent"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plRenderComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15762322430047782439,7432360605352045857}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plRenderComponent"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plGreyBoxComponent"}
+		u3 %TypeVersion{5}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{8399423596297715122,9970706930732107724}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10799938453523757431,11702988725276979427}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginScene"}
+		VarArray %Properties{}
+		s %TypeName{"plSceneDocumentSettingsBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4862719181471848392,16023915775579166190}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plGameObject"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{14065145458577015793,18047270226841818433}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plSceneDocumentSettingsBase"}
+		s %PluginName{"plasmaEditorPluginScene"}
+		VarArray %Properties{}
+		s %TypeName{"plLayerDocumentSettings"}
+		u3 %TypeVersion{1}
+	}
+}
+}

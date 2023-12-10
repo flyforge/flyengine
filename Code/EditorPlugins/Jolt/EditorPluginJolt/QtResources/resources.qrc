@@ -1,0 +1,33 @@
+<RCC>
+  <qresource prefix="AssetIcons">
+    <file>Jolt_Collision_Mesh.svg</file>
+    <file>Jolt_Collision_Mesh_Convex.svg</file>
+  </qresource>
+  <qresource prefix="TypeIcons">
+    <file>plJoltShapeCapsuleComponent.svg</file>
+    <file>plJoltShapeBoxComponent.svg</file>
+    <file>plJoltShapeSphereComponent.svg</file>
+    <file>plJoltStaticActorComponent.svg</file>
+    <file>plJoltDynamicActorComponent.svg</file>
+    <file>plJoltDistanceConstraintComponent.svg</file>
+    <file>plJoltFixedConstraintComponent.svg</file>
+    <file>plJoltCenterOfMassComponent.svg</file>
+    <file>plJoltShapeConvexHullComponent.svg</file>
+    <file>plJoltCharacterControllerComponent.svg</file>
+    <file>plJoltSettingsComponent.svg</file>
+    <file>plJoltTriggerComponent.svg</file>
+	<file>plJoltVisColMeshComponent.svg</file>
+	<file>plJolt6DOFConstraintComponent.svg</file>
+	<file>plJoltHingeConstraintComponent.svg</file>
+	<file>plJoltPointConstraintComponent.svg</file>
+	<file>plJoltDefaultCharacterComponent.svg</file>
+	<file>plJoltSliderConstraintComponent.svg</file>
+	<file>plJoltBoneColliderComponent.svg</file>
+	<file>plJoltRopeComponent.svg</file>
+	<file>plJoltShapeCylinderComponent.svg</file>
+	<file>plJoltRagdollComponent.svg</file>
+	<file>plJoltSwingTwistConstraintComponent.svg</file>
+	<file>plJoltConeConstraintComponent.svg</file>
+  </qresource>
+</RCC>
+

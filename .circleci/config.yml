@@ -1,0 +1,29 @@
+version: 2.1
+
+orbs:
+    win: circleci/windows@4.1.1
+
+jobs:
+  windows-msvc:
+    executor: win/server-2022
+    steps:
+      - checkout
+      - run:
+          name: Install Software
+          command: |
+            choco install -y --no-progress cmake --installargs "ADD_CMAKE_TO_PATH=User"
+      - run:
+          name: Generate 
+          command: .\Generate.ps1 -Target Win64vs2022 -NoVulkan
+      - run:
+          name: Build 
+          command: msbuild .\Workspace\vs2022x64\project_vs2022x64.sln /p:Configuration=Dev /p:Platform=x64
+      - run:
+          name: Compress
+          command: Compress-Archive -Path C:\Users\circleci\project\Output -DestinationPath C:\Users\circleci\project\build
+      - store_artifacts:
+          path: C:\Users\circleci\project\build.zip
+workflows:
+  plasma-workflow:
+    jobs:
+      - windows-msvc

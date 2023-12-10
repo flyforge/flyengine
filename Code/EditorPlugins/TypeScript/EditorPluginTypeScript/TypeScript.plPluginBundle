@@ -1,0 +1,15 @@
+// for a description of the options see:
+// Code/EditorPlugins/Assets/EditorPluginAssets/Assets.plPluginBundle
+
+PluginInfo
+{
+	string %DisplayName{"TypeScript"}
+	string %Description{"Adds support for scripting objects via TypeScript."}
+	string %EditorPlugins{"plasmaEditorPluginTypeScript"}
+	string %EditorEnginePlugins{}
+	string %RuntimePlugins{"plasmaTypeScriptPlugin"}
+	string %PackageDependencies{}
+	string %RequiredPlugins{}
+	string %ExclusiveFeatures{}
+	string %EnabledInTemplates{"General2D", "General3D"}
+}

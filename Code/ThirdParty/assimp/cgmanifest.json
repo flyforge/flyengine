@@ -1,0 +1,15 @@
+{
+  "Registrations": [
+    {
+      "component": {
+        "type": "git",
+        "git": {
+		  "Version": "5.2.4",
+          "repositoryUrl": "https://github.com/assimp/assimp",
+          "commitHash": "c8dafe0d2887242285c0080c6cbbea8c1f1c8094"
+        }
+      }
+    }
+  ],
+  "version" : 1
+}

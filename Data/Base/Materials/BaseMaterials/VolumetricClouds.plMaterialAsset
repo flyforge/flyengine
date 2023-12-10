@@ -1,0 +1,414 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{2488574320626999175,5462427166387230701}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Material"}
+		VarArray %Dependencies
+		{
+			s{"Shaders/Materials/VolumetricClouds.plShader"}
+		}
+		Uuid %DocumentID{u4{2488574320626999175,5462427166387230701}}
+		u4 %Hash{11251852996692719387}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References
+		{
+			s{"{ 9b0145e8-4c39-4326-af73-f75cf78eb7fa }"}
+		}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{14690499623532337904,5234031184034712101}}
+	s %t{"Shaders/Materials/VolumetricClouds.plShader"}
+	u3 %v{2}
+	p
+	{
+		s %BLEND_MODE{"BLEND_MODE::BLEND_MODE_TRANSPARENT"}
+		s %NoiseMap{"{ 9b0145e8-4c39-4326-af73-f75cf78eb7fa }"}
+		Vec3 %SunDir{f{0x0000803F,0,0}}
+	}
+}
+o
+{
+	Uuid %id{u4{9302667880091834272,5600995508932869272}}
+	s %t{"plMaterialAssetProperties"}
+	u3 %v{4}
+	p
+	{
+		s %BaseMaterial{""}
+		s %Shader{"Shaders/Materials/VolumetricClouds.plShader"}
+		s %ShaderMode{"plMaterialShaderMode::File"}
+		Uuid %ShaderProperties{u4{14690499623532337904,5234031184034712101}}
+		s %Surface{""}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{9302667880091834272,5600995508932869272}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{10864664776775106507,1328102928269309656}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Vec3 %Value{f{0x0000803F,0,0}}
+	}
+}
+o
+{
+	Uuid %id{u4{14831359824912569370,1828982774811006507}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialAssetProperties"}
+		u3 %TypeVersion{4}
+	}
+}
+o
+{
+	Uuid %id{u4{18311245008988910186,1895067994934075466}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{773668148553828920,15966949596821666881}}
+			Uuid{u4{540429536914844576,8213819539779215949}}
+			Uuid{u4{15543418230834458689,5548684801941186544}}
+			Uuid{u4{16393153594407016602,3744118329769567614}}
+			Uuid{u4{7757084663128585029,8011669779036733373}}
+			Uuid{u4{5650026407490086663,5768478847879086899}}
+		}
+		s %TypeName{"BLEND_MODE"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{1142198278115786132,3074878619479210503}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{3395041879096496704,17250813061816209276}}
+			Uuid{u4{13713021256220283134,15826217727733741660}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"NoiseMap"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{16393153594407016602,3744118329769567614}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{2}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_TRANSPARENT"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{12784312669795089808,4789337233775051958}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{10789874729167158254,17913264105059310725}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		s %Flags{"plPropertyFlags::IsEnum|plPropertyFlags::Phantom"}
+		s %Name{"BLEND_MODE"}
+		s %Type{"BLEND_MODE"}
+	}
+}
+o
+{
+	Uuid %id{u4{18200256455121510126,5460019644832151135}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties{}
+		s %TypeName{"plShaderTypeBase"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{12141658163711089149,5539807818584853917}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plShaderTypeBase"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{12784312669795089808,4789337233775051958}}
+			Uuid{u4{2678741566273866065,7312975238029236726}}
+			Uuid{u4{1142198278115786132,3074878619479210503}}
+		}
+		s %TypeName{"Shaders/Materials/VolumetricClouds.plShader"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{15543418230834458689,5548684801941186544}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{1}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_MASKED"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{5650026407490086663,5768478847879086899}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{4}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_MODULATE"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{12123694589359637393,6797358509465135799}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialShaderMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{2678741566273866065,7312975238029236726}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{10427492707736155345,9879906807221671495}}
+			Uuid{u4{10864664776775106507,1328102928269309656}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"SunDir"}
+		s %Type{"plVec3"}
+	}
+}
+o
+{
+	Uuid %id{u4{7757084663128585029,8011669779036733373}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{3}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_ADDITIVE"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{540429536914844576,8213819539779215949}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{0}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_OPAQUE"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10427492707736155345,9879906807221671495}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13713021256220283134,15826217727733741660}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Filter{";CompatibleAsset_Texture_3D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{773668148553828920,15966949596821666881}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		u3 %ConstantValue{0}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::Default"}
+		s %Type{"plUInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{3395041879096496704,17250813061816209276}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 3D"}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10789874729167158254,17913264105059310725}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Permutation"}
+	}
+}
+}

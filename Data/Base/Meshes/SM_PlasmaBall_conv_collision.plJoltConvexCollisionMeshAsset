@@ -1,0 +1,182 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{14782233029768585121,5448189885727001688}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Jolt_Colmesh_Convex"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{14782233029768585121,5448189885727001688}}
+		u4 %Hash{9737786403020864137}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{2857909121389168260,5653181050344729913}}
+	s %t{"plJoltCollisionMeshAssetProperties"}
+	u3 %v{1}
+	p
+	{
+		s %ConvexMeshType{"plJoltConvexCollisionMeshType::ConvexDecomposition"}
+		u1 %Detail{1}
+		b %FlipForwardDir{0}
+		f %Height{0x0000803F}
+		b %IsConvexMesh{1}
+		u2 %MaxConvexPieces{10}
+		s %MeshFile{"Meshes/SM_PlasmaBall.fbx"}
+		f %Radius{0x0000003F}
+		f %Radius2{0x0000003F}
+		s %RightDir{"plBasisAxis::PositiveX"}
+		s %Surface{""}
+		VarArray %Surfaces{}
+		f %UniformScaling{0x0000C842}
+		s %UpDir{"plBasisAxis::PositiveY"}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{2857909121389168260,5653181050344729913}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{10810976589383933075,6002960019375166762}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plasmaEditorPluginJolt"}
+		VarArray %Properties{}
+		s %TypeName{"plJoltConvexCollisionMeshType"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{6571024120247769381,10642976429244489738}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"plasmaEditorPluginJolt"}
+		VarArray %Properties{}
+		s %TypeName{"plJoltSurfaceResourceSlot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{698364993276436088,17804542439804637414}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBasisAxis"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15668583985684884940,17879383359522613105}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginJolt"}
+		VarArray %Properties{}
+		s %TypeName{"plJoltCollisionMeshAssetProperties"}
+		u3 %TypeVersion{1}
+	}
+}
+}

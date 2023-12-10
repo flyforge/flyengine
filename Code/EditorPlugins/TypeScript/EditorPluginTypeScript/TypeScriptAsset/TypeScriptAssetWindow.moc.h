@@ -1,0 +1,71 @@
+#pragma once
+
+#include <EditorEngineProcessFramework/EngineProcess/ViewRenderSettings.h>
+#include <EditorFramework/DocumentWindow/EngineDocumentWindow.moc.h>
+#include <EditorPluginTypeScript/TypeScriptAsset/TypeScriptAsset.h>
+#include <ToolsFoundation/Object/DocumentObjectManager.h>
+
+class QTextEdit;
+class QSyntaxHighlighter;
+
+class plQtTypeScriptAssetDocumentWindow : public plQtDocumentWindow
+{
+  Q_OBJECT
+
+public:
+  plQtTypeScriptAssetDocumentWindow(plAssetDocument* pDocument);
+  ~plQtTypeScriptAssetDocumentWindow();
+
+  void UpdateFileContentDisplay();
+
+  virtual const char* GetWindowLayoutGroupName() const override { return "TypeScriptAsset"; }
+
+private:
+  void TsDocumentEventHandler(const plTypeScriptAssetDocumentEvent& e);
+
+  plTypeScriptAssetDocument* m_pAssetDoc = nullptr;
+  QTextEdit* m_pSourceLabel = nullptr;
+  QSyntaxHighlighter* m_pHighlighter = nullptr;
+};
+
+//////////////////////////////////////////////////////////////////////////
+
+#include <QSyntaxHighlighter>
+
+struct JSEdit
+{
+  enum ColorComponent
+  {
+    Comment,
+    Number,
+    String,
+    Operator,
+    KeywordBlue,
+    KeywordPink,
+    KeywordGreen,
+    BuiltIn,
+  };
+};
+
+class JSBlockData : public QTextBlockUserData
+{
+public:
+  QList<int> bracketPositions;
+};
+
+class JSHighlighter : public QSyntaxHighlighter
+{
+public:
+  JSHighlighter(QTextDocument* parent = 0);
+
+protected:
+  void highlightBlock(const QString& text) override;
+
+private:
+  QSet<QString> m_KeywordsBlue;
+  QSet<QString> m_KeywordsPink;
+  QSet<QString> m_KeywordsGreen;
+  QSet<QString> m_BuiltIn;
+  QHash<JSEdit::ColorComponent, QColor> m_Colors;
+};
+

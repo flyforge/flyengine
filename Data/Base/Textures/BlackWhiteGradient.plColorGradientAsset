@@ -1,0 +1,184 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{13621572428772333617,1444910283028215760}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"ColorGradient"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{13621572428772333617,1444910283028215760}}
+		u4 %Hash{10855487959979349864}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{10998326705967900288,4699998352626940764}}
+	s %t{"plColorControlPoint"}
+	u3 %v{2}
+	p
+	{
+		u1 %Blue{255}
+		u1 %Green{255}
+		u1 %Red{255}
+		i4 %Tick{4800}
+	}
+}
+o
+{
+	Uuid %id{u4{13790301658960929159,4937105452087822498}}
+	s %t{"plColorGradientAssetData"}
+	u3 %v{2}
+	p
+	{
+		VarArray %AlphaCPs{}
+		VarArray %ColorCPs
+		{
+			Uuid{u4{9145372021303067580,5381883931942926682}}
+			Uuid{u4{10998326705967900288,4699998352626940764}}
+		}
+		VarArray %IntensityCPs{}
+	}
+}
+o
+{
+	Uuid %id{u4{9145372021303067580,5381883931942926682}}
+	s %t{"plColorControlPoint"}
+	u3 %v{2}
+	p
+	{
+		u1 %Blue{0}
+		u1 %Green{0}
+		u1 %Red{0}
+		i4 %Tick{0}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{13790301658960929159,4937105452087822498}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{14200200698897901346,5259721858618902128}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plColorGradientAssetData"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{16258844364505849736,5307818732291421299}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plIntensityControlPoint"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{12343843963841529452,6934176365839250076}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plAlphaControlPoint"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{5125754200392540009,7630867336988665107}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plColorControlPoint"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+}

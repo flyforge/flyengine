@@ -1,0 +1,289 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{2810369475037262247,5399110538894319066}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Audio Control Collection"}
+		VarArray %Dependencies
+		{
+			s{"Sounds/ATL/Amplitude/SoundBanks/sample_01.plAudioSystemControl"}
+			s{"Sounds/ATL/Amplitude/SoundBanks/sample_02.plAudioSystemControl"}
+			s{"Sounds/ATL/Amplitude/Triggers/player_footstep.plAudioSystemControl"}
+		}
+		Uuid %DocumentID{u4{2810369475037262247,5399110538894319066}}
+		u4 %Hash{3201619307606450073}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{3884265436336408509,4975494232317437047}}
+	s %t{"plAmplitudeAudioControlCollectionAssetTriggerEntry"}
+	u3 %v{1}
+	p
+	{
+		s %Control{"Sounds/ATL/Amplitude/Triggers/player_footstep.plAudioSystemControl"}
+		s %Name{"player_footstep"}
+		s %Type{"plAmplitudeAudioControlType::Invalid"}
+	}
+}
+o
+{
+	Uuid %id{u4{9529702303969087679,5109778168651277627}}
+	s %t{"plAmplitudeAudioControlCollectionAssetSoundBankEntry"}
+	u3 %v{1}
+	p
+	{
+		s %Control{"Sounds/ATL/Amplitude/SoundBanks/sample_01.plAudioSystemControl"}
+		s %Name{"sample_01"}
+		s %Type{"plAmplitudeAudioControlType::Invalid"}
+	}
+}
+o
+{
+	Uuid %id{u4{12773216198768925068,5244054103666143239}}
+	s %t{"plAmplitudeAudioControlCollectionAsset"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Environments{}
+		VarArray %RTPCs{}
+		VarArray %SoundBanks
+		{
+			Uuid{u4{9529702303969087679,5109778168651277627}}
+			Uuid{u4{5745993944467676037,5564890659850324901}}
+		}
+		VarArray %SwitchStates{}
+		VarArray %Triggers
+		{
+			Uuid{u4{3884265436336408509,4975494232317437047}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{5745993944467676037,5564890659850324901}}
+	s %t{"plAmplitudeAudioControlCollectionAssetSoundBankEntry"}
+	u3 %v{1}
+	p
+	{
+		s %Control{"Sounds/ATL/Amplitude/SoundBanks/sample_02.plAudioSystemControl"}
+		s %Name{"sample_02"}
+		s %Type{"plAmplitudeAudioControlType::Invalid"}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{12773216198768925068,5244054103666143239}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{6115345584087639515,6389666640617682392}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAmplitudeAudioControlCollectionAssetEntry"}
+		s %PluginName{"plasmaEditorPluginAmplitudeAudio"}
+		VarArray %Properties{}
+		s %TypeName{"plAmplitudeAudioControlCollectionAssetEnvironmentEntry"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{6810360423168533859,6750534433916121187}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAmplitudeAudio"}
+		VarArray %Properties{}
+		s %TypeName{"plAmplitudeAudioControlCollectionAssetEntry"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13152664310365728490,9369972347690642390}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAmplitudeAudioControlCollectionAssetEntry"}
+		s %PluginName{"plasmaEditorPluginAmplitudeAudio"}
+		VarArray %Properties{}
+		s %TypeName{"plAmplitudeAudioControlCollectionAssetSwitchEntry"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{18191838014032684976,12429823619898708052}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAmplitudeAudio"}
+		VarArray %Properties{}
+		s %TypeName{"plAmplitudeAudioControlCollectionAsset"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{7462773332292474955,13092501624423993836}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAmplitudeAudioControlCollectionAssetEntry"}
+		s %PluginName{"plasmaEditorPluginAmplitudeAudio"}
+		VarArray %Properties{}
+		s %TypeName{"plAmplitudeAudioControlCollectionAssetSoundBankEntry"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{533269773395739494,13555509908063276741}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAmplitudeAudioControlCollectionAssetEntry"}
+		s %PluginName{"plasmaEditorPluginAmplitudeAudio"}
+		VarArray %Properties{}
+		s %TypeName{"plAmplitudeAudioControlCollectionAssetRtpcEntry"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{8491295351213851579,17196583971880107509}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plasmaEditorPluginAmplitudeAudio"}
+		VarArray %Properties{}
+		s %TypeName{"plAmplitudeAudioControlType"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13683814744633771820,17373018566422090707}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plAmplitudeAudioControlCollectionAssetEntry"}
+		s %PluginName{"plasmaEditorPluginAmplitudeAudio"}
+		VarArray %Properties{}
+		s %TypeName{"plAmplitudeAudioControlCollectionAssetTriggerEntry"}
+		u3 %TypeVersion{1}
+	}
+}
+}

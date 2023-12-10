@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="Icons">
+    <file>Fileserve.svg</file>
+  </qresource>
+</RCC>

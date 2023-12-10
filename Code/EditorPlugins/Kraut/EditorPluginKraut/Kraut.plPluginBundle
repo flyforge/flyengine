@@ -1,0 +1,15 @@
+// for a description of the options see:
+// Code/EditorPlugins/Assets/EditorPluginAssets/Assets.plPluginBundle
+
+PluginInfo
+{
+	string %DisplayName{"Kraut Tree"}
+	string %Description{"Adds support for procedurally generated trees."}
+	string %EditorPlugins{"plasmaEditorPluginKraut"}
+	string %EditorEnginePlugins{"plasmaEnginePluginKraut"}
+	string %RuntimePlugins{"plasmaKrautPlugin"}
+	string %PackageDependencies{}
+	string %RequiredPlugins{}
+	string %ExclusiveFeatures{}
+	string %EnabledInTemplates{"General3D"}
+}

@@ -1,0 +1,515 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{6634030205782493058,4663238190323269066}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Visual Script"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{6634030205782493058,4663238190323269066}}
+		u4 %Hash{11133654245016663141}
+		VarArray %MetaInfo
+		{
+			Uuid{u4{4722927205729107908,11449017567547628214}}
+		}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+o
+{
+	Uuid %id{u4{4722927205729107908,11449017567547628214}}
+	s %t{"plExposedParameters"}
+	u3 %v{3}
+	p
+	{
+		VarArray %Parameters{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{10061546591367047000,2488224621910844488}}
+	s %t{"VisualScriptNode::plVisualScriptNode_ActivateComponent"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0xBBDEB244,0x908C5E43}}
+	}
+}
+o
+{
+	Uuid %id{u4{9655029696253824381,2920626709362129154}}
+	s %t{"VisualScriptNode::plVisualScriptNode_FindComponent"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0x09F48844,0x2433F443}}
+		s %Type{"plJoltRagdollComponent"}
+	}
+}
+o
+{
+	Uuid %id{u4{9628982610428691642,4798228537947125583}}
+	s %t{"plVisualScriptConnection_Legacy"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{12638453805061053059,5018451885121096419}}
+		s %Connection::SourcePin{"then"}
+		Uuid %Connection::Target{u4{642119249262456638,10467200329774375975}}
+		s %Connection::TargetPin{"Deactivate"}
+	}
+}
+o
+{
+	Uuid %id{u4{10009123327909618842,4923787895578003149}}
+	s %t{"plVisualScriptConnection_Legacy"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{11608616933996521646,5733434194699337071}}
+		s %Connection::SourcePin{"Component"}
+		Uuid %Connection::Target{u4{12638453805061053059,5018451885121096419}}
+		s %Connection::TargetPin{"Component"}
+	}
+}
+o
+{
+	Uuid %id{u4{17169482096365300890,4976471416691722278}}
+	s %t{"plVisualScriptConnection_Legacy"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{9655029696253824381,2920626709362129154}}
+		s %Connection::SourcePin{"Component"}
+		Uuid %Connection::Target{u4{10061546591367047000,2488224621910844488}}
+		s %Connection::TargetPin{"Component"}
+	}
+}
+o
+{
+	Uuid %id{u4{12638453805061053059,5018451885121096419}}
+	s %t{"VisualScriptNode::plVisualScriptNode_ActivateComponent"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0x0AB4F443,0x99C0FB42}}
+	}
+}
+o
+{
+	Uuid %id{u4{14307614450060004003,5040000064421023257}}
+	s %t{"plVisualScriptConnection_Legacy"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{17863036594644460368,10944715349799528238}}
+		s %Connection::SourcePin{"Component"}
+		Uuid %Connection::Target{u4{642119249262456638,10467200329774375975}}
+		s %Connection::TargetPin{"Component"}
+	}
+}
+o
+{
+	Uuid %id{u4{10638624188195202739,5361628173153039388}}
+	s %t{"plVisualScriptConnection_Legacy"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{3781966001174909668,15688123279680047005}}
+		s %Connection::SourcePin{"Component"}
+		Uuid %Connection::Target{u4{6297258121148936402,15575780007484278455}}
+		s %Connection::TargetPin{"Component"}
+	}
+}
+o
+{
+	Uuid %id{u4{4403216444771287939,5403251139813140510}}
+	s %t{"VisualScriptNode::plVisualScriptNode_OnDamage"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0x697C5543,0x4DA06942}}
+	}
+}
+o
+{
+	Uuid %id{u4{4511563851737539738,5456874675858643643}}
+	s %t{"plVisualScriptAssetProperties"}
+	u3 %v{1}
+	p
+	{
+		VarArray %BoolParameters{}
+		VarArray %NumberParameters{}
+		VarArray %StringParameters{}
+	}
+}
+o
+{
+	Uuid %id{u4{13163652941603017903,5478447368029029961}}
+	s %t{"plVisualScriptConnection_Legacy"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{4403216444771287939,5403251139813140510}}
+		s %Connection::SourcePin{"OnEvent"}
+		Uuid %Connection::Target{u4{12638453805061053059,5018451885121096419}}
+		s %Connection::TargetPin{"Deactivate"}
+	}
+}
+o
+{
+	Uuid %id{u4{4974198441353348022,5488539714748039520}}
+	s %t{"plVisualScriptConnection_Legacy"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{6297258121148936402,15575780007484278455}}
+		s %Connection::SourcePin{"then"}
+		Uuid %Connection::Target{u4{10061546591367047000,2488224621910844488}}
+		s %Connection::TargetPin{"Activate"}
+	}
+}
+o
+{
+	Uuid %id{u4{11608616933996521646,5733434194699337071}}
+	s %t{"VisualScriptNode::plVisualScriptNode_FindComponent"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0x9B3D3243,0x11AB6F43}}
+		s %Type{"plAiComponent"}
+	}
+}
+o
+{
+	Uuid %id{u4{12501392263002762630,5758104396297753772}}
+	s %t{"plVisualScriptConnection_Legacy"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{642119249262456638,10467200329774375975}}
+		s %Connection::SourcePin{"then"}
+		Uuid %Connection::Target{u4{6297258121148936402,15575780007484278455}}
+		s %Connection::TargetPin{"Deactivate"}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{4511563851737539738,5456874675858643643}}
+			Uuid{u4{4403216444771287939,5403251139813140510}}
+			Uuid{u4{12638453805061053059,5018451885121096419}}
+			Uuid{u4{11608616933996521646,5733434194699337071}}
+			Uuid{u4{10009123327909618842,4923787895578003149}}
+			Uuid{u4{13163652941603017903,5478447368029029961}}
+			Uuid{u4{642119249262456638,10467200329774375975}}
+			Uuid{u4{9628982610428691642,4798228537947125583}}
+			Uuid{u4{17863036594644460368,10944715349799528238}}
+			Uuid{u4{14307614450060004003,5040000064421023257}}
+			Uuid{u4{6297258121148936402,15575780007484278455}}
+			Uuid{u4{12501392263002762630,5758104396297753772}}
+			Uuid{u4{3781966001174909668,15688123279680047005}}
+			Uuid{u4{10638624188195202739,5361628173153039388}}
+			Uuid{u4{10061546591367047000,2488224621910844488}}
+			Uuid{u4{4974198441353348022,5488539714748039520}}
+			Uuid{u4{9655029696253824381,2920626709362129154}}
+			Uuid{u4{17169482096365300890,4976471416691722278}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{642119249262456638,10467200329774375975}}
+	s %t{"VisualScriptNode::plVisualScriptNode_ActivateComponent"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0xBB564044,0x053A3043}}
+	}
+}
+o
+{
+	Uuid %id{u4{17863036594644460368,10944715349799528238}}
+	s %t{"VisualScriptNode::plVisualScriptNode_FindComponent"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0xF64BBA43,0x26B0AA43}}
+		s %Type{"plAnimationControllerComponent"}
+	}
+}
+o
+{
+	Uuid %id{u4{6297258121148936402,15575780007484278455}}
+	s %t{"VisualScriptNode::plVisualScriptNode_ActivateComponent"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0x7C348944,0xEF543F43}}
+	}
+}
+o
+{
+	Uuid %id{u4{3781966001174909668,15688123279680047005}}
+	s %t{"VisualScriptNode::plVisualScriptNode_FindComponent"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0x4DC03344,0x0080D743}}
+		s %Type{"plJoltDefaultCharacterComponent"}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{11697560740414754993,855625332137296679}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualScriptParameter"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualScriptParameterNumber"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15141570793069792255,1511884534663467364}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualScriptConnection_Legacy"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4611218399067106666,1775439041926436429}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"VisualScriptTypes"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualScriptNodeBase_Legacy"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17834639507640992333,3079144494046895730}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualScriptParameter"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualScriptParameterString"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{14448684378931386067,6782530168378869358}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualScriptNodeBase_Legacy"}
+		s %PluginName{"VisualScriptTypes"}
+		VarArray %Properties{}
+		s %TypeName{"VisualScriptNode::plVisualScriptNode_OnDamage"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{5860129693498402992,10141021042637662866}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualScriptNodeBase_Legacy"}
+		s %PluginName{"VisualScriptTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{10553803908063514918,17133479476048065802}}
+		}
+		s %TypeName{"VisualScriptNode::plVisualScriptNode_FindComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4393285748109561309,10907779772838760048}}
+	s %t{"plDynamicStringEnumAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DynamicEnum{"ComponentTypes"}
+	}
+}
+o
+{
+	Uuid %id{u4{7433163198736003377,11308460791211248402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualScriptParameter"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{6774774183539556869,11344545122466836291}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualScriptNodeBase_Legacy"}
+		s %PluginName{"VisualScriptTypes"}
+		VarArray %Properties{}
+		s %TypeName{"VisualScriptNode::plVisualScriptNode_ActivateComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10582339474330525388,13017414478455776107}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualScriptAssetProperties"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{6390832896142055421,16045291663819366092}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualScriptParameter"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualScriptParameterBool"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10553803908063514918,17133479476048065802}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{4393285748109561309,10907779772838760048}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Type"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+}

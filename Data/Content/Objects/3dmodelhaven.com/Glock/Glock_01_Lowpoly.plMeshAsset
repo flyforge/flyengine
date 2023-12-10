@@ -1,0 +1,277 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{6742989055110145668,5486049412456343846}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Mesh"}
+		VarArray %Dependencies
+		{
+			s{"Objects/3dmodelhaven.com/Glock/Glock_01_Lowpoly.FBX"}
+		}
+		Uuid %DocumentID{u4{6742989055110145668,5486049412456343846}}
+		u4 %Hash{9275746191240920592}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References
+		{
+			s{"{ 2c01e68f-69e0-4170-95b4-b6823bd561ff }"}
+			s{"{ 6e75b773-2235-4f9a-a9fa-192530870fca }"}
+			s{"{ e7ae4a61-432f-406b-a939-e6ce521c572b }"}
+		}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{3342859393571396493,4726534743139374984}}
+	s %t{"plMeshAssetProperties"}
+	u3 %v{3}
+	p
+	{
+		Angle %Angle{f{0xDB0FC940}}
+		b %Cap{1}
+		b %Cap2{1}
+		u2 %Detail{1}
+		u2 %Detail2{1}
+		b %FlipForwardDir{0}
+		f %Height{0x0000803F}
+		b %ImportMaterials{1}
+		VarArray %Materials
+		{
+			Uuid{u4{2825875321378735027,5008478353713346503}}
+			Uuid{u4{3173521484376225964,4991677765934146732}}
+			Uuid{u4{17960794036046847159,5502130410289191916}}
+		}
+		s %MeshFile{"Objects/3dmodelhaven.com/Glock/Glock_01_Lowpoly.FBX"}
+		s %NormalPrecision{"plMeshNormalPrecision::_10Bit"}
+		s %PrimitiveType{"plMeshPrimitive::File"}
+		f %Radius{0x0000003F}
+		f %Radius2{0x0000003F}
+		b %RecalculateNormals{0}
+		b %RecalculateTangents{1}
+		s %RightDir{"plBasisAxis::PositiveX"}
+		s %TexCoordPrecision{"plMeshTexCoordPrecision::_16Bit"}
+		f %UniformScaling{0x0000803F}
+		s %UpDir{"plBasisAxis::PositiveY"}
+	}
+}
+o
+{
+	Uuid %id{u4{3173521484376225964,4991677765934146732}}
+	s %t{"plMaterialResourceSlot"}
+	u3 %v{1}
+	p
+	{
+		s %Label{"Magazine"}
+		s %Resource{"{ e7ae4a61-432f-406b-a939-e6ce521c572b }"}
+	}
+}
+o
+{
+	Uuid %id{u4{2825875321378735027,5008478353713346503}}
+	s %t{"plMaterialResourceSlot"}
+	u3 %v{1}
+	p
+	{
+		s %Label{"Glock"}
+		s %Resource{"{ 2c01e68f-69e0-4170-95b4-b6823bd561ff }"}
+	}
+}
+o
+{
+	Uuid %id{u4{17960794036046847159,5502130410289191916}}
+	s %t{"plMaterialResourceSlot"}
+	u3 %v{1}
+	p
+	{
+		s %Label{"Bullet"}
+		s %Resource{"{ 6e75b773-2235-4f9a-a9fa-192530870fca }"}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{3342859393571396493,4726534743139374984}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{11674692945138119280,7958532569312584972}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialResourceSlot"}
+		u3 %TypeSize{136}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4572215149935407619,9171673326008965719}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshAssetProperties"}
+		u3 %TypeSize{1240}
+		u3 %TypeVersion{3}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeSize{72}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeSize{1}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{11264905787349757498,13035192948806003434}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshPrimitive"}
+		u3 %TypeSize{1}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4101022314413477917,13769697156274436726}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshNormalPrecision"}
+		u3 %TypeSize{1}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4664618235186762955,16317954485104532494}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshTexCoordPrecision"}
+		u3 %TypeSize{1}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeSize{8}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{698364993276436088,17804542439804637414}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBasisAxis"}
+		u3 %TypeSize{1}
+		u3 %TypeVersion{1}
+	}
+}
+}

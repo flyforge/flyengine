@@ -1,0 +1,1914 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{3718397295852439455,4920227603756088116}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Kraut Tree"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{3718397295852439455,4920227603756088116}}
+		u4 %Hash{2429037445605887751}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References
+		{
+			s{"{ 1dfc89c5-b81a-4b2e-bc81-67384fc190fd }"}
+			s{"{ 463e8d2f-fc7c-466f-a14c-d1877ba61337 }"}
+		}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{15711452399458487963,203957138299884723}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{9455201115598107576,690445211783216968}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{10297441335004851129,811657975755148103}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{2934905805889056007,6939702480257004020}}
+		s %BranchMaterial{""}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{6607551245848531377,5340589718946583770}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{14910575164660416191,18034123093582178058}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{4478816155193110016,6548344126615619044}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{7095362121290149237,4001963837255566646}}
+		b %GrowSubBranchType1{0}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{8623367117298831667,15677093047828069675}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{0}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{100}
+		Uuid %MaxBranchLengthParentScale{u4{10723422174817791962,11352333820374146635}}
+		u2 %MaxBranchThickness{20}
+		u1 %MaxBranchesPerNode{4}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0xC2B8B23E}}
+		u2 %MinBranchLength{100}
+		u2 %MinBranchThickness{20}
+		u1 %MinBranchesPerNode{4}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{5}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Straight"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{14644813610610951123,986535693742863657}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{14167794906013915683,1027398146344229671}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{2840101387872216497,1117741265452957594}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{9455201115598107576,690445211783216968}}
+		s %BranchMaterial{""}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{14167794906013915683,1027398146344229671}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{7995839785343132941,10904517663939569534}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{94041723234703844,10741521133059383365}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{4917002895453082429,1471741655809899534}}
+		b %GrowSubBranchType1{0}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{7631699255995477219,11303577804323746393}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{0}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{100}
+		Uuid %MaxBranchLengthParentScale{u4{17361261361695478111,16108514939850723486}}
+		u2 %MaxBranchThickness{20}
+		u1 %MaxBranchesPerNode{4}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0xC2B8B23E}}
+		u2 %MinBranchLength{100}
+		u2 %MinBranchThickness{20}
+		u1 %MinBranchesPerNode{4}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{5}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Straight"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{17800597006411755016,1449084360203442006}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{4917002895453082429,1471741655809899534}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{12174568957409512014,1491805935324450065}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{17685587532289502606,1581029742689768860}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{18148130895575765712,1875940555489881473}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{5754068466011565475,2056418029283710933}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{5020896068376814454,2294375739606935487}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{6655891664128963955,2626862941411843580}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints
+		{
+			Uuid{u4{7431370499585732534,5523235006712610074}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{14347194817672028640,2744366463750285181}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{11512488090458200278,10169372223503064225}}
+		s %BranchMaterial{""}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{11621576921133083763,8330001465231074754}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{849328625310038990,11855977334117410860}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{3463822893214051346,14555522604819077800}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{11677006744632542424,17228568776054771059}}
+		b %GrowSubBranchType1{0}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{17533601924495455960,5127674579141151928}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{0}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{100}
+		Uuid %MaxBranchLengthParentScale{u4{259155711538851706,3091295515710028407}}
+		u2 %MaxBranchThickness{20}
+		u1 %MaxBranchesPerNode{4}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0xC2B8B23E}}
+		u2 %MinBranchLength{100}
+		u2 %MinBranchThickness{20}
+		u1 %MinBranchesPerNode{4}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{5}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Straight"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{14451151615330786369,2896136679605252016}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{8659475408851232536,2954285283475769203}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{18148130895575765712,1875940555489881473}}
+		s %BranchMaterial{""}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{12174568957409512014,1491805935324450065}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{5754068466011565475,2056418029283710933}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{18135253815465745046,6756292740472320545}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{7744096036359223641,11032530061645676880}}
+		b %GrowSubBranchType1{0}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{10935471839150791330,6464062986244907867}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{0}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{100}
+		Uuid %MaxBranchLengthParentScale{u4{17685587532289502606,1581029742689768860}}
+		u2 %MaxBranchThickness{20}
+		u1 %MaxBranchesPerNode{4}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0xC2B8B23E}}
+		u2 %MinBranchLength{100}
+		u2 %MinBranchThickness{20}
+		u1 %MinBranchesPerNode{4}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{5}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Straight"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{259155711538851706,3091295515710028407}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{8245192860651161250,3538902532426488455}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{7190621424427875894,3976201114548073382}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{7095362121290149237,4001963837255566646}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{5541987282989866172,4099708526234040951}}
+	s %t{"plKrautAssetMaterial"}
+	u3 %v{1}
+	p
+	{
+		s %Label{"Branch 1 - Leaf"}
+		s %Material{"{ 463e8d2f-fc7c-466f-a14c-d1877ba61337 }"}
+	}
+}
+o
+{
+	Uuid %id{u4{4199365886273656901,4171691093001300771}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{7708772094876378512,6876391942618677651}}
+		s %BranchMaterial{""}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{9804506151855469559,13524877661995612362}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{5790579448165363534,4966661846347006834}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{8245192860651161250,3538902532426488455}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{7477714084353156238,14133905188608541022}}
+		b %GrowSubBranchType1{0}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{10911022798733905235,14851985271508816563}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{0}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{100}
+		Uuid %MaxBranchLengthParentScale{u4{1813143759519129998,11528885205482612606}}
+		u2 %MaxBranchThickness{20}
+		u1 %MaxBranchesPerNode{4}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0xC2B8B23E}}
+		u2 %MinBranchLength{100}
+		u2 %MinBranchThickness{20}
+		u1 %MinBranchesPerNode{4}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{5}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Straight"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{11973504738954871723,4409879068259599399}}
+	s %t{"plKrautAssetMaterial"}
+	u3 %v{1}
+	p
+	{
+		s %Label{"Twig 1 - Stem"}
+		s %Material{"{ 1dfc89c5-b81a-4b2e-bc81-67384fc190fd }"}
+	}
+}
+o
+{
+	Uuid %id{u4{16295236760882001060,4415472699245925053}}
+	s %t{"plKrautAssetMaterial"}
+	u3 %v{1}
+	p
+	{
+		s %Label{"Branch 1 - Stem"}
+		s %Material{"{ 1dfc89c5-b81a-4b2e-bc81-67384fc190fd }"}
+	}
+}
+o
+{
+	Uuid %id{u4{3073052722619043822,4513122703274203284}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{14816102050756826784,4631544741477439133}}
+	s %t{"plCurveControlPointData"}
+	u3 %v{5}
+	p
+	{
+		Vec2 %LeftTangent{f{0xCDCCCCBD,0}}
+		s %LeftTangentMode{"plCurveTangentMode::Auto"}
+		b %Linked{1}
+		Vec2 %RightTangent{f{0xCDCCCC3D,0}}
+		s %RightTangentMode{"plCurveTangentMode::Auto"}
+		i4 %Tick{0}
+		d %Value{0x0000000000001440}
+	}
+}
+o
+{
+	Uuid %id{u4{3287889597337337219,4688487854081928144}}
+	s %t{"plCurveControlPointData"}
+	u3 %v{5}
+	p
+	{
+		Vec2 %LeftTangent{f{0xCDCCCCBD,0}}
+		s %LeftTangentMode{"plCurveTangentMode::Auto"}
+		b %Linked{1}
+		Vec2 %RightTangent{f{0xCDCCCC3D,0}}
+		s %RightTangentMode{"plCurveTangentMode::Auto"}
+		i4 %Tick{0}
+		d %Value{0x000000000000F03F}
+	}
+}
+o
+{
+	Uuid %id{u4{10711762112736172979,4754516261310181169}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{14793038755988240045,4767548370166205988}}
+	s %t{"plKrautTreeAssetProperties"}
+	u3 %v{1}
+	p
+	{
+		Uuid %BT_MainBranch1{u4{17390885674944361676,7875957101709250263}}
+		Uuid %BT_MainBranch2{u4{13267433022788531206,16641296592061567993}}
+		Uuid %BT_MainBranch3{u4{10297441335004851129,811657975755148103}}
+		Uuid %BT_SubBranch1{u4{2275417583716449491,9553056116384926619}}
+		Uuid %BT_SubBranch2{u4{8659475408851232536,2954285283475769203}}
+		Uuid %BT_SubBranch3{u4{9779184604876307941,11116053072197433474}}
+		Uuid %BT_Trunk1{u4{9187560687559135358,10355196504063166486}}
+		Uuid %BT_Twig1{u4{4199365886273656901,4171691093001300771}}
+		Uuid %BT_Twig2{u4{2840101387872216497,1117741265452957594}}
+		Uuid %BT_Twig3{u4{14347194817672028640,2744366463750285181}}
+		u2 %DisplayRandomSeed{14}
+		VarArray %GoodRandomSeeds
+		{
+			u2{0}
+			u2{2}
+			u2{5}
+			u2{7}
+			u2{8}
+			u2{10}
+			u2{14}
+		}
+		VarArray %Materials
+		{
+			Uuid{u4{16519252451053332137,4843138847675582089}}
+			Uuid{u4{16295236760882001060,4415472699245925053}}
+			Uuid{u4{5541987282989866172,4099708526234040951}}
+			Uuid{u4{11973504738954871723,4409879068259599399}}
+			Uuid{u4{12632397429606048957,5149754963698933905}}
+		}
+		f %StaticColliderRadius{0x9A99193F}
+		s %Surface{""}
+		f %TreeStiffness{0x00002041}
+	}
+}
+o
+{
+	Uuid %id{u4{16519252451053332137,4843138847675582089}}
+	s %t{"plKrautAssetMaterial"}
+	u3 %v{1}
+	p
+	{
+		s %Label{"Trunk 1 - Stem"}
+		s %Material{"{ 1dfc89c5-b81a-4b2e-bc81-67384fc190fd }"}
+	}
+}
+o
+{
+	Uuid %id{u4{15155122341050911070,4954393128781212382}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{5790579448165363534,4966661846347006834}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{17842968383127995325,5104138748664340935}}
+	s %t{"plCurveControlPointData"}
+	u3 %v{5}
+	p
+	{
+		Vec2 %LeftTangent{f{0xCDCCCCBD,0}}
+		s %LeftTangentMode{"plCurveTangentMode::Auto"}
+		b %Linked{1}
+		Vec2 %RightTangent{f{0xCDCCCC3D,0}}
+		s %RightTangentMode{"plCurveTangentMode::Auto"}
+		i4 %Tick{0}
+		d %Value{0x000000000000F03F}
+	}
+}
+o
+{
+	Uuid %id{u4{17533601924495455960,5127674579141151928}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{12632397429606048957,5149754963698933905}}
+	s %t{"plKrautAssetMaterial"}
+	u3 %v{1}
+	p
+	{
+		s %Label{"Twig 1 - Leaf"}
+		s %Material{"{ 463e8d2f-fc7c-466f-a14c-d1877ba61337 }"}
+	}
+}
+o
+{
+	Uuid %id{u4{6607551245848531377,5340589718946583770}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{7431370499585732534,5523235006712610074}}
+	s %t{"plCurveControlPointData"}
+	u3 %v{5}
+	p
+	{
+		Vec2 %LeftTangent{f{0xCDCCCCBD,0}}
+		s %LeftTangentMode{"plCurveTangentMode::Auto"}
+		b %Linked{1}
+		Vec2 %RightTangent{f{0xCDCCCC3D,0}}
+		s %RightTangentMode{"plCurveTangentMode::Auto"}
+		i4 %Tick{0}
+		d %Value{0x000000000000F03F}
+	}
+}
+o
+{
+	Uuid %id{u4{6575445547955197162,5648650159531599186}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{9616535461719871370,5705352863350536985}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{3349560543762975390,6182669413133774175}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{10491357401988727099,6195449348061008897}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints
+		{
+			Uuid{u4{14816102050756826784,4631544741477439133}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{14793038755988240045,4767548370166205988}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{10935471839150791330,6464062986244907867}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{5125808729845006463,6524585902961259194}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{4478816155193110016,6548344126615619044}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{18135253815465745046,6756292740472320545}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{7708772094876378512,6876391942618677651}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{2934905805889056007,6939702480257004020}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{2417332321540605195,7459560265536014606}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{9388317823469091015,7553544062016925649}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{17390885674944361676,7875957101709250263}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0F493F}}
+		Uuid %BranchContour{u4{6655891664128963955,2626862941411843580}}
+		s %BranchMaterial{"{ 1dfc89c5-b81a-4b2e-bc81-67384fc190fd }"}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{1}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{13421614492801583219,12857571054727809600}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{18079075266345620885,8823906966154142020}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{5020896068376814454,2294375739606935487}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{15711452399458487963,203957138299884723}}
+		b %GrowSubBranchType1{1}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0x3333B33F}
+		s %LeafMaterial{"{ 463e8d2f-fc7c-466f-a14c-d1877ba61337 }"}
+		Uuid %LeafScale{u4{13397500609723991692,18128209229998528022}}
+		f %LeafSize{0x6666663F}
+		u1 %LowerBound{73}
+		Angle %MaxBranchAngleDeviation{f{0xF3665F3F}}
+		u2 %MaxBranchLength{500}
+		Uuid %MaxBranchLengthParentScale{u4{6705601971936053676,14640875493277246184}}
+		u2 %MaxBranchThickness{40}
+		u1 %MaxBranchesPerNode{6}
+		Angle %MaxRotationalDeviation{f{0x35FA0E3D}}
+		Angle %MaxTargetDirDeviation{f{0x35FA0E3D}}
+		u2 %MinBranchLength{400}
+		u2 %MinBranchThickness{25}
+		u1 %MinBranchesPerNode{5}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{5}
+		f %TargetDir2Offset{0x0AD7233C}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0xDB0F493F}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Upwards"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{11621576921133083763,8330001465231074754}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{18079075266345620885,8823906966154142020}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{2275417583716449491,9553056116384926619}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{12863826346112937162,12562648659954170948}}
+		s %BranchMaterial{"{ 1dfc89c5-b81a-4b2e-bc81-67384fc190fd }"}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{9388317823469091015,7553544062016925649}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{10711762112736172979,4754516261310181169}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{15155122341050911070,4954393128781212382}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{3073052722619043822,4513122703274203284}}
+		b %GrowSubBranchType1{1}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{13045978071153771182,11806578762645529539}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{57}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{100}
+		Uuid %MaxBranchLengthParentScale{u4{1353812778425223556,17839090533910274675}}
+		u2 %MaxBranchThickness{37}
+		u1 %MaxBranchesPerNode{6}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0x869DB33E}}
+		u2 %MinBranchLength{100}
+		u2 %MinBranchThickness{29}
+		u1 %MinBranchesPerNode{4}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{7}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0xC2B8B23E}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Upwards"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{92}
+	}
+}
+o
+{
+	Uuid %id{u4{11512488090458200278,10169372223503064225}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{9187560687559135358,10355196504063166486}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{10491357401988727099,6195449348061008897}}
+		s %BranchMaterial{"{ 1dfc89c5-b81a-4b2e-bc81-67384fc190fd }"}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{3349560543762975390,6182669413133774175}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{7190621424427875894,3976201114548073382}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{5125808729845006463,6524585902961259194}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{6575445547955197162,5648650159531599186}}
+		b %GrowSubBranchType1{0}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{14451151615330786369,2896136679605252016}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{11}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{500}
+		Uuid %MaxBranchLengthParentScale{u4{6651015922666254948,12085733302819029330}}
+		u2 %MaxBranchThickness{20}
+		u1 %MaxBranchesPerNode{1}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0xC2B8B23E}}
+		u2 %MinBranchLength{500}
+		u2 %MinBranchThickness{20}
+		u1 %MinBranchesPerNode{1}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{30}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Straight"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{11011782542033388658,10387972810987665453}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{3208388607061711874,10651044741733760840}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{94041723234703844,10741521133059383365}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{7995839785343132941,10904517663939569534}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{7744096036359223641,11032530061645676880}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{9779184604876307941,11116053072197433474}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{9658321938202085552,14539900860053653295}}
+		s %BranchMaterial{""}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{9616535461719871370,5705352863350536985}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{17800597006411755016,1449084360203442006}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{3208388607061711874,10651044741733760840}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{10744649679267396130,15767844960118613540}}
+		b %GrowSubBranchType1{0}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{2989021201177289324,14009866221071258763}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{0}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{100}
+		Uuid %MaxBranchLengthParentScale{u4{14644813610610951123,986535693742863657}}
+		u2 %MaxBranchThickness{20}
+		u1 %MaxBranchesPerNode{4}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0xC2B8B23E}}
+		u2 %MinBranchLength{100}
+		u2 %MinBranchThickness{20}
+		u1 %MinBranchesPerNode{4}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{5}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Straight"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{7631699255995477219,11303577804323746393}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{10723422174817791962,11352333820374146635}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{1813143759519129998,11528885205482612606}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{13045978071153771182,11806578762645529539}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{849328625310038990,11855977334117410860}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{6651015922666254948,12085733302819029330}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{515170198327103246,12146667582703291696}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{12863826346112937162,12562648659954170948}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints
+		{
+			Uuid{u4{17842968383127995325,5104138748664340935}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{13421614492801583219,12857571054727809600}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{14168093348583911932,13116451658259244071}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{9804506151855469559,13524877661995612362}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{2989021201177289324,14009866221071258763}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{7477714084353156238,14133905188608541022}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{1868423760694856827,14338944311177500735}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{9658321938202085552,14539900860053653295}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{3463822893214051346,14555522604819077800}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{6705601971936053676,14640875493277246184}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints
+		{
+			Uuid{u4{3287889597337337219,4688487854081928144}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{10911022798733905235,14851985271508816563}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{1982732469988010056,14863107638607996321}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{8623367117298831667,15677093047828069675}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{10744649679267396130,15767844960118613540}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{17361261361695478111,16108514939850723486}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{2444077887586643455,16520186925316486277}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{13267433022788531206,16641296592061567993}}
+	s %t{"plKrautAssetBranchType"}
+	u3 %v{1}
+	p
+	{
+		b %AlignFrondsOnSurface{0}
+		b %BillboardLeaves{1}
+		Angle %BranchAngle{f{0xDB0FC93F}}
+		Uuid %BranchContour{u4{1982732469988010056,14863107638607996321}}
+		s %BranchMaterial{""}
+		s %BranchType{"plKrautBranchTypeMode::Regular"}
+		f %BranchlessPartABS{0}
+		f %BranchlessPartEndABS{0}
+		Angle %DirChangePerSegment{f{0xC2B8B23D}}
+		b %EnableFronds{0}
+		b %EnableLeaves{0}
+		b %EnableMesh{1}
+		Angle %FlareRotation{f{0}}
+		f %FlareWidth{0x00000040}
+		Uuid %FlareWidthCurve{u4{1868423760694856827,14338944311177500735}}
+		u1 %Flares{0}
+		Uuid %FrondContour{u4{2417332321540605195,7459560265536014606}}
+		s %FrondContourMode{"plKrautFrondContourMode::Full"}
+		u1 %FrondDetail{1}
+		f %FrondHeight{0x0000003F}
+		Uuid %FrondHeightScale{u4{2444077887586643455,16520186925316486277}}
+		s %FrondMaterial{""}
+		Angle %FrondOrientationDeviation{f{0}}
+		s %FrondUpOrientation{"plKrautLeafOrientation::Upwards"}
+		f %FrondWidth{0x0000003F}
+		Uuid %FrondWidthScale{u4{515170198327103246,12146667582703291696}}
+		b %GrowSubBranchType1{0}
+		b %GrowSubBranchType2{0}
+		b %GrowSubBranchType3{0}
+		f %LeafInterval{0}
+		s %LeafMaterial{""}
+		Uuid %LeafScale{u4{14168093348583911932,13116451658259244071}}
+		f %LeafSize{0x0000803E}
+		u1 %LowerBound{0}
+		Angle %MaxBranchAngleDeviation{f{0xC2B8323E}}
+		u2 %MaxBranchLength{100}
+		Uuid %MaxBranchLengthParentScale{u4{11011782542033388658,10387972810987665453}}
+		u2 %MaxBranchThickness{20}
+		u1 %MaxBranchesPerNode{4}
+		Angle %MaxRotationalDeviation{f{0}}
+		Angle %MaxTargetDirDeviation{f{0xC2B8B23E}}
+		u2 %MinBranchLength{100}
+		u2 %MinBranchThickness{20}
+		u1 %MinBranchesPerNode{4}
+		f %NodeHeight{0}
+		f %NodeSpacingAfter{0}
+		f %NodeSpacingBefore{0x0000003F}
+		u1 %NumFronds{1}
+		b %OnlyGrowUpAndDown{0}
+		b %RotateTexCoords{1}
+		f %Roundness{0x0000003F}
+		u1 %SegmentLength{5}
+		f %TargetDir2Offset{0x00002040}
+		s %TargetDir2Uage{"plKrautBranchTargetDir2Usage::Off"}
+		Angle %TargetDirDeviation{f{0}}
+		b %TargetDirRelative{0}
+		s %TargetDirection{"plKrautBranchTargetDir::Straight"}
+		s %TargetDirection2{"plKrautBranchTargetDir::Straight"}
+		f %TextureRepeat{0}
+		u1 %UpperBound{100}
+	}
+}
+o
+{
+	Uuid %id{u4{11677006744632542424,17228568776054771059}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{1353812778425223556,17839090533910274675}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{14910575164660416191,18034123093582178058}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{13397500609723991692,18128209229998528022}}
+	s %t{"plSingleCurveData"}
+	u3 %v{3}
+	p
+	{
+		ColorGamma %Color{u1{148,216,45,255}}
+		VarArray %ControlPoints{}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{3647220083124761668,3861885360661097228}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"PlasmaEditorPluginKraut"}
+		VarArray %Properties{}
+		s %TypeName{"plKrautFrondContourMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{801625683788323587,5358237981595257874}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSingleCurveData"}
+		u3 %TypeVersion{3}
+	}
+}
+o
+{
+	Uuid %id{u4{12627855109764198871,5498413103339782808}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"PlasmaEditorPluginKraut"}
+		VarArray %Properties{}
+		s %TypeName{"plKrautTreeAssetProperties"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{12520686958690349141,7836332879214074346}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"PlasmaEditorPluginKraut"}
+		VarArray %Properties{}
+		s %TypeName{"plKrautAssetBranchType"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16079397987993824823,10440771357117927475}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCurveControlPointData"}
+		u3 %TypeVersion{5}
+	}
+}
+o
+{
+	Uuid %id{u4{4402620705079210759,10588792762471340450}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCurveTangentMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13588208875150832200,13079214909108726784}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"PlasmaEditorPluginKraut"}
+		VarArray %Properties{}
+		s %TypeName{"plKrautAssetMaterial"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10544197038248443365,13289637652435773725}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"PlasmaEditorPluginKraut"}
+		VarArray %Properties{}
+		s %TypeName{"plKrautBranchTargetDir2Usage"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16014991883971321038,13307758177466914643}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"PlasmaEditorPluginKraut"}
+		VarArray %Properties{}
+		s %TypeName{"plKrautLeafOrientation"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13844619161502336176,14113525268987056369}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"PlasmaEditorPluginKraut"}
+		VarArray %Properties{}
+		s %TypeName{"plKrautBranchTypeMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17487726504722288747,14195790339271010680}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"PlasmaEditorPluginKraut"}
+		VarArray %Properties{}
+		s %TypeName{"plKrautBranchTargetDir"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+}

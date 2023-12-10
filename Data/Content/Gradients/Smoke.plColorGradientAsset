@@ -1,0 +1,228 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{1953775876803924613,4637095794991954226}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"ColorGradient"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{1953775876803924613,4637095794991954226}}
+		u4 %Hash{16794325648153801504}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{12370740834472812970,4620599275500909666}}
+	s %t{"plAlphaControlPoint"}
+	u3 %v{2}
+	p
+	{
+		u1 %Alpha{255}
+		i4 %Tick{960}
+	}
+}
+o
+{
+	Uuid %id{u4{3842177069831058866,5077381260452018377}}
+	s %t{"plColorGradientAssetData"}
+	u3 %v{2}
+	p
+	{
+		VarArray %AlphaCPs
+		{
+			Uuid{u4{8447079529272503701,5418187768000580881}}
+			Uuid{u4{17628392175318775179,5660053802338883852}}
+			Uuid{u4{12370740834472812970,4620599275500909666}}
+		}
+		VarArray %ColorCPs
+		{
+			Uuid{u4{9431214723803615635,5694771006976281790}}
+			Uuid{u4{3975014933305590966,5501549768712998957}}
+		}
+		VarArray %IntensityCPs{}
+	}
+}
+o
+{
+	Uuid %id{u4{8447079529272503701,5418187768000580881}}
+	s %t{"plAlphaControlPoint"}
+	u3 %v{2}
+	p
+	{
+		u1 %Alpha{0}
+		i4 %Tick{4800}
+	}
+}
+o
+{
+	Uuid %id{u4{3975014933305590966,5501549768712998957}}
+	s %t{"plColorControlPoint"}
+	u3 %v{2}
+	p
+	{
+		u1 %Blue{102}
+		u1 %Green{102}
+		u1 %Red{102}
+		i4 %Tick{4800}
+	}
+}
+o
+{
+	Uuid %id{u4{17628392175318775179,5660053802338883852}}
+	s %t{"plAlphaControlPoint"}
+	u3 %v{2}
+	p
+	{
+		u1 %Alpha{0}
+		i4 %Tick{0}
+	}
+}
+o
+{
+	Uuid %id{u4{9431214723803615635,5694771006976281790}}
+	s %t{"plColorControlPoint"}
+	u3 %v{2}
+	p
+	{
+		u1 %Blue{144}
+		u1 %Green{144}
+		u1 %Red{144}
+		i4 %Tick{0}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{3842177069831058866,5077381260452018377}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{14200200698897901346,5259721858618902128}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plColorGradientAssetData"}
+		u3 %TypeSize{80}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{16258844364505849736,5307818732291421299}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plIntensityControlPoint"}
+		u3 %TypeSize{24}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{12343843963841529452,6934176365839250076}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plAlphaControlPoint"}
+		u3 %TypeSize{24}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{5125754200392540009,7630867336988665107}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plColorControlPoint"}
+		u3 %TypeSize{24}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeSize{72}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeSize{8}
+		u3 %TypeVersion{1}
+	}
+}
+}

@@ -1,0 +1,70 @@
+[PLATFORMS]
+ALL
+
+[PERMUTATIONS]
+
+PRE_TRANSFORMED_VERTICES
+CAMERA_MODE
+TOPOLOGY
+
+[RENDERSTATE]
+
+BlendingEnabled0 = true
+DestBlend0 = Blend_InvSrcAlpha
+SourceBlend0 = Blend_SrcAlpha
+DestBlendAlpha0 = Blend_InvSrcAlpha
+
+DepthTest = true
+#if PRE_TRANSFORMED_VERTICES
+  DepthWrite = false
+#else
+  DepthWrite = true
+#endif
+
+[VERTEXSHADER]
+
+#define USE_COLOR0
+
+#include <Shaders/Common/GlobalConstants.h>
+#include <Shaders/Materials/MaterialInterpolator.h>
+
+VS_OUT main(VS_IN Input)
+{
+#if CAMERA_MODE == CAMERA_MODE_STEREO
+  s_ActiveCameraEyeIndex = Input.InstanceID % 2;
+#endif
+
+  VS_OUT RetVal;
+
+  #if PRE_TRANSFORMED_VERTICES
+    float2 screenPosition = (Input.Position.xy * ViewportSize.zw) * float2(2.0, -2.0) + float2(-1.0, 1.0);
+    RetVal.Position = float4(screenPosition, Input.Position.z, 1.0f);
+  #else
+    RetVal.Position = mul(GetWorldToScreenMatrix(), float4(Input.Position, 1.0f));
+  #endif
+
+  RetVal.Color0 = Input.Color0;
+  RetVal.InstanceID = Input.InstanceID;
+
+  return RetVal;
+}
+
+[GEOMETRYSHADER]
+
+#define USE_COLOR0
+
+#include <Shaders/Materials/StereoGeometryShader.h>
+
+[PIXELSHADER]
+
+#define USE_COLOR0
+
+
+#include <Shaders/Materials/MaterialInterpolator.h>
+#include <Shaders/Common/GlobalConstants.h>
+
+float4 main(PS_IN Input) : SV_Target
+{
+  return Input.Color0;
+}
+

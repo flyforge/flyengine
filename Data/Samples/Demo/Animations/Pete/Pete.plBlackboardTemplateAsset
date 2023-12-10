@@ -1,0 +1,298 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{7747797708844804519,4615546137376564704}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"BlackboardTemplate"}
+		VarArray %Dependencies{}
+		Uuid %DocumentID{u4{7747797708844804519,4615546137376564704}}
+		u4 %Hash{10537566213966270359}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References{}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{8249539454670374326,4671046989128781454}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"Use"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{14452464627911743161,4791468959068682234}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"Wave"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{5073446735784039332,4810202378898256910}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"Aim"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{7110687618264482442,4839845708450088742}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"MoveBackwards"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{2702701378958036898,5141853633925470884}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"RotateRight"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{11065259176321978036,5160642751112217094}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"StrafeLeft"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{14264539588465544633,5189590897415105652}}
+	s %t{"plBlackboardTemplateAssetObject"}
+	u3 %v{1}
+	p
+	{
+		VarArray %BaseTemplates{}
+		VarArray %Entries
+		{
+			Uuid{u4{3500122204483166371,5227204658618179717}}
+			Uuid{u4{7110687618264482442,4839845708450088742}}
+			Uuid{u4{13646539320909717137,5606573479575678796}}
+			Uuid{u4{11065259176321978036,5160642751112217094}}
+			Uuid{u4{14452464627911743161,4791468959068682234}}
+			Uuid{u4{2702701378958036898,5141853633925470884}}
+			Uuid{u4{18311175222827186062,5742361582325762954}}
+			Uuid{u4{4297212641873874305,5225726915972943912}}
+			Uuid{u4{8249539454670374326,4671046989128781454}}
+			Uuid{u4{5073446735784039332,4810202378898256910}}
+			Uuid{u4{7883684398005547665,5373537838327105300}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{4297212641873874305,5225726915972943912}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"TouchingGround"}
+		s %Flags{""}
+		f %InitialValue{0x0000803F}
+	}
+}
+o
+{
+	Uuid %id{u4{3500122204483166371,5227204658618179717}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"MoveForwards"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{7883684398005547665,5373537838327105300}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"Shoot"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{13646539320909717137,5606573479575678796}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"StrafeRight"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{18311175222827186062,5742361582325762954}}
+	s %t{"plBlackboardEntry"}
+	u3 %v{1}
+	p
+	{
+		s %EntryName{"RotateLeft"}
+		s %Flags{""}
+		f %InitialValue{0}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{14264539588465544633,5189590897415105652}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{15858200799249084397,1020464219854223548}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBitflagsBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{5207958978996920162,9215524708039841609}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBlackboardEntry"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{2930256075510930816,10357986925757933379}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Bitflags|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plBitflagsBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBlackboardEntryFlags"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{3329234228273350345,13588094807517538161}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plBlackboardTemplateAssetObject"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+}

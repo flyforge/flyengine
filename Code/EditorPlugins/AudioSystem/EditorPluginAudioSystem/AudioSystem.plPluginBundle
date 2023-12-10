@@ -1,0 +1,15 @@
+// for a description of the options see:
+// Code/EditorPlugins/Assets/EditorPluginAssets/Assets.plPluginBundle
+
+PluginInfo
+{
+	string %DisplayName{"Audio System"}
+	string %Description{"Base plugin abstracting most of the audio features provided by audio middlewares such as FMOD, Wwise or Amplitude."}
+	string %EditorPlugins{"plasmaEditorPluginAudioSystem"}
+	string %EditorEnginePlugins{}
+	string %RuntimePlugins{"plasmaAudioSystemPlugin"}
+	string %PackageDependencies{}
+	string %RequiredPlugins{}
+	string %ExclusiveFeatures{"ATL", "Audio", "Sound"}
+	string %EnabledInTemplates{}
+}

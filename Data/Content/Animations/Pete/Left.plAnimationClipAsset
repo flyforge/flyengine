@@ -1,0 +1,209 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{6140740320808819128,5260944779693046187}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Animation Clip"}
+		VarArray %Dependencies
+		{
+			s{"Animations/Pete/Pete.glb"}
+		}
+		Uuid %DocumentID{u4{6140740320808819128,5260944779693046187}}
+		u4 %Hash{10316952016392338904}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %References
+		{
+			s{"{ 8be1b52f-792f-491c-9975-4eedfd1894b1 }"}
+		}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{5063520443836594348,5180296048435121898}}
+	s %t{"plAnimationClipAssetProperties"}
+	u3 %v{3}
+	p
+	{
+		b %Additive{0}
+		VarArray %AvailableClips
+		{
+			s{"Gun Hold Pose"}
+			s{"Gun Point Pose"}
+			s{"Gun Shoot"}
+			s{"Idle Breath"}
+			s{"Idle_Pose"}
+			s{"Jump"}
+			s{"Rest Pose"}
+			s{"Run"}
+			s{"Step Backwards"}
+			s{"Step Left"}
+			s{"Step Right"}
+			s{"Walk"}
+			s{"Wave"}
+		}
+		Vec3 %ConstantRootMotion{f{0,0,0}}
+		Uuid %EventTrack{u4{17386493780510517754,5500134510350446236}}
+		s %File{"Animations/Pete/Pete.glb"}
+		u3 %FirstFrame{0}
+		u3 %NumFrames{0}
+		s %PreviewMesh{"{ 8be1b52f-792f-491c-9975-4eedfd1894b1 }"}
+		s %RootMotion{"plRootMotionSource::None"}
+		s %UseAnimationClip{"Step Left"}
+	}
+}
+o
+{
+	Uuid %id{u4{17386493780510517754,5500134510350446236}}
+	s %t{"plEventTrackData"}
+	u3 %v{3}
+	p
+	{
+		VarArray %ControlPoints{}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{5063520443836594348,5180296048435121898}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{14396925473888178982,2545635369424926843}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plAnimationClipAssetProperties"}
+		u3 %TypeVersion{3}
+	}
+}
+o
+{
+	Uuid %id{u4{15677918693486282428,3984032038245140361}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEventTrackControlPointData"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{300909205463874214,11999882847947189273}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plasmaEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plRootMotionSource"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{2669185325745625968,14650865003168191251}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEventTrackData"}
+		u3 %TypeVersion{3}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+}

@@ -1,0 +1,13 @@
+<RCC>
+  <qresource prefix="AssetIcons">
+  </qresource>
+  <qresource prefix="TypeIcons">
+    <file>plRcNavMeshComponent.svg</file>
+    <file>plSoldierComponent.svg</file>
+    <file>plRcAgentComponent.svg</file>
+    <file>plRcMarkPoiVisibleComponent.svg</file>
+  </qresource>
+  <qresource prefix="Icons">
+  </qresource>
+</RCC>
+

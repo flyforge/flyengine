@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="AssetIcons">
+    <file>RmlUi.svg</file>
+  </qresource>
+  <qresource prefix="TypeIcons">
+    <file>plRmlUiCanvas2DComponent.svg</file>
+  </qresource>
+</RCC>
+

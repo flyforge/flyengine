@@ -1,0 +1,9 @@
+diff a/Code/Engine/Core/World/Implementation/GameObject.cpp b/Code/Engine/Core/World/Implementation/GameObject.cpp	(rejected hunks)
+@@ -344,7 +344,6 @@
+   return GetWorld()->GetObjectGlobalKey(this);
+ }
+ 
+-void plGameObject::SetParent(const plGameObjectHandle& parent, plGameObject::TransformPreservation preserve)
+ const char* plGameObject::GetGlobalKeyInternal() const
+ {
+   return GetWorld()->GetObjectGlobalKey(this).GetStartPointer(); // we know that it's zero terminated

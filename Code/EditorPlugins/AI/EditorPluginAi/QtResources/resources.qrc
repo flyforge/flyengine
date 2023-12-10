@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="AiPlugin">
+    <file>plAiPlugin.svg</file>
+  </qresource>  
+  <qresource prefix="TypeIcons">
+    <file>plAiNavMeshPathTestComponent.svg</file>
+  </qresource>  
+</RCC>
+

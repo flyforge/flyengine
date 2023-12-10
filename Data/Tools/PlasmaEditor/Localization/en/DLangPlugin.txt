@@ -1,0 +1,10 @@
+DLang.Edit;Edit Script;Edit Script - Creates the script file if necessary
+StringParameters;String Variables
+Vec3Parameters;Vec3 Variables
+plDLangParameterBool;Boolean
+plDLangParameterColor;Color
+plDLangParameterNumber;Number
+plDLangParameterString;String
+plDLangParameterVec3;Vec3
+plDLangComponent;DLang Component;;https://plasmaengine.github.io/PlasmaDocs/custom-code/typescript/ts-component.html
+DLang;DLang

@@ -1,0 +1,149 @@
+QAbstractSpinBox:hover:!focus, QLineEdit:hover:!focus, QPushButton:hover:!focus, QComboBox:hover:!focus{
+    border: 0.5px solid palette(mid);
+}
+
+QAbstractSpinBox{
+    border: 0.5px solid palette(Button);
+    border-radius: 5px;
+    margin-bottom:2px;
+}
+
+
+QToolBar{
+    border: 0.0px
+}
+
+QAbstractSpinBox:focus, QLineEdit:focus, QPushButton:focus, QComboBox:focus{
+    border:0.5px solid palette(highlight);
+}
+
+QAbstractSpinBox::down-button{
+    width: 0px;
+}
+QAbstractSpinBox::up-button{
+    width: 0px;
+}
+
+QPushButton {
+    border: 0.5px solid palette(Button);
+    border-radius: 5px;
+    padding-right:5px;
+    padding-left:5px;
+    margin-bottom:2px;
+}
+
+QScrollBar:vertical {
+    background-color:palette(window);
+}
+
+QScrollBar::handle:vertical {
+    background: palette(button);
+    border: 0px solid transparent;
+    border-radius: 0px;
+}
+
+ QScrollBar::add-line:vertical {
+     border: 0px solid transparent;
+     background: transparent;
+ }
+
+ QScrollBar::sub-line:vertical {
+     border: 0px solid transparent;
+     background: transparent;
+ }
+
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+     border: 0px solid transparent;
+     background: transparent;
+ }
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+ background: none;
+}
+
+QScrollBar:horizontal {
+    background-color:palette(window);
+}
+
+QScrollBar::handle:horizontal {
+    background: palette(button);
+    border: 0px solid transparent;
+    border-radius: 0px;
+}
+
+ QScrollBar::add-line:horizontal {
+     border: 0px solid transparent;
+     background: transparent;
+ }
+
+ QScrollBar::sub-line:horizontal {
+     border: 0px solid transparent;
+     background: transparent;
+ }
+
+QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:horizontal {
+     border: 0px solid transparent;
+     background: transparent;
+ }
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+ background: none;
+}
+
+QHBoxLayout{
+    border: 0.5px solid palette(Button);
+    border-radius: 5px;
+}
+
+QComboBox{
+    border: 0.5px solid palette(Button);
+    padding-right:5px;
+    border-radius: 5px;
+    padding-left:5px;
+    margin-bottom:2px;
+}
+
+QCheckBox{
+    margin-bottom:2px;
+    border-radius:5px;
+}
+
+QCheckBox::indicator {
+    width: 13px;
+    height: 13px;
+}
+
+QCheckBox::indicator:unchecked {
+    image: url(:/EditorFramework/Theme/checkbox_unchecked.png);
+}
+
+QCheckBox::indicator:unchecked:hover {
+    image: url(:/EditorFramework/Theme/checkbox_unchecked_hover.png);
+}
+
+QCheckBox::indicator:unchecked:pressed {
+    image: url(:/EditorFramework/Theme/checkbox_unchecked_pressed.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:/EditorFramework/Theme/checkbox_checked.png);
+}
+
+QCheckBox::indicator:checked:hover {
+    image: url(:/EditorFramework/Theme/checkbox_checked_hover.png);
+}
+
+QCheckBox::indicator:checked:pressed {
+    image: url(:/EditorFramework/Theme/checkbox_checked_pressed.png);
+}
+
+QLineEdit{
+    margin-bottom:2px;
+    border: 0.5px solid palette(Button);
+    border-radius: 5px;
+}
+
+QLabel{
+    border: 0.5px solid transparent;
+    border-radius: 5px;
+}

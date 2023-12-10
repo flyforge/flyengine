@@ -1,0 +1,46 @@
+<RCC>
+  <qresource prefix="AssetIcons">
+    <file>Texture_2D.svg</file>
+    <file>Texture_Cube.svg</file>
+    <file>Material.svg</file>
+    <file>Mesh.svg</file>
+    <file>Shader.svg</file>
+    <file>Sound.svg</file>
+    <file>Prefab.svg</file>
+    <file>Scene.svg</file>
+    <file>Layer.svg</file>
+    <file>Surface.svg</file>
+    <file>RenderPipeline.svg</file>
+    <file>Collection.svg</file>
+    <file>ColorGradient.svg</file>
+    <file>Curve1D.svg</file>
+    <file>PropertyAnim.svg</file>
+    <file>Decal.svg</file>
+    <file>Texture_Normals.svg</file>
+    <file>Texture_Linear.svg</file>
+    <file>Animation_Clip.svg</file>
+    <file>Skeleton.svg</file>
+    <file>Render_Target.svg</file>
+    <file>Animated_Mesh.svg</file>
+    <file>LUT.svg</file>
+    <file>AnimationGraph.svg</file>
+    <file>ImageData.svg</file>
+    <file>StateMachine.svg</file>
+    <file>BlackboardTemplate.svg</file>
+  </qresource>
+  <qresource prefix="EditorPluginAssets">
+    <file>Cleanup.svg</file>
+    <file>PickTarget.svg</file>
+    <file>CurveX.svg</file>
+    <file>CurveY.svg</file>
+    <file>CurveZ.svg</file>
+    <file>CurveW.svg</file>
+    <file>SkeletonBones.svg</file>
+    <file>SkeletonJoints.svg</file>
+    <file>SkeletonColliders.svg</file>
+    <file>JointSwingLimits.svg</file>
+    <file>JointTwistLimits.svg</file>
+    <file>PreviewMesh.svg</file>
+  </qresource>
+</RCC>
+
