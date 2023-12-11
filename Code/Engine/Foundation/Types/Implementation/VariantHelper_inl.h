@@ -161,7 +161,7 @@ auto plVariant::DispatchTo(Functor& ref_functor, Type::Enum type, Args&&... args
       break;
 
     default:
-      //PLASMA_REPORT_FAILURE("Could not dispatch type '{0}'", type);
+      PLASMA_REPORT_FAILURE("Could not dispatch type '{0}'", type);
       // Intended fall through to disable warning.
     case Type::TypedPointer:
       CALL_FUNCTOR(ref_functor, plTypedPointer);
