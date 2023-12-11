@@ -4,3 +4,5 @@ Workspace/
 Output/
 
 Code/Engine/plBuildInfo.h
+
+Data/Base/AssetCache/
