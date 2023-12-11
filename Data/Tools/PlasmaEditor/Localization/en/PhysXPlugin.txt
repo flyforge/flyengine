@@ -1,0 +1,49 @@
+PhysX.Settings.Project;PhysX Project Settings...
+Physics;Physics
+Joints;Joints
+Shapes;Shapes
+plPxCenterOfMassComponent;PhysX Center of Mass
+plPxCharacterControllerComponent;PhysX Character Controller
+plPxDynamicActorComponent;PhysX Dynamic Actor
+plPxStaticActorComponent;PhysX Static Actor
+plPx6DOFJointComponent;PhysX 6DOF Joint
+plPxDistanceJointComponent;PhysX Distance Joint
+plPxFixedJointComponent;PhysX Fixed Joint
+plPxShapeBoxComponent;PhysX Box Shape
+plPxShapeSphereComponent;PhysX Sphere Shape
+plPxShapeCapsuleComponent;PhysX Capsule Shape
+plPxShapeConvexComponent;PhysX Convex Mesh Shape
+plPxSettingsComponent;PhysX Settings
+plPhysXComponent;PhysX Component
+plPxActorComponent;PhysX Actor
+plPxSteppingMode::Variable;Variable
+plPxSteppingMode::Fixed;Fixed
+plPxSteppingMode::SemiFixed;SemiFixed
+plPxTriggerComponent;PhysX Trigger
+plPxVisColMeshComponent;PhysX Collision Mesh Visualization
+CollisionMeshImport.TriangleMesh;Triangle Collision Mesh
+CollisionMeshImport.ConvexMesh;Convex Collision Mesh
+plBreakableSheetComponent;PhysX Breakable Sheet
+plPxAxis::X;X
+plPxAxis::Y;Y
+plPxAxis::Z;Z
+plConvexCollisionMeshType::ConvexHull;Convex Hull
+plConvexCollisionMeshType::Cylinder;Cylinder
+plConvexCollisionMeshType::ConvexDecomposition;Convex Decomposition
+plOnPhysXContact::SendReportMsg;Send Contact Reports
+plOnPhysXContact::ImpactReactions;Impact Reactions
+plOnPhysXContact::SlideReactions;Slide Reactions
+plOnPhysXContact::RollXReactions;Roll X Reactions
+plOnPhysXContact::RollYReactions;Roll Y Reactions
+plOnPhysXContact::RollZReactions;Roll Z Reactions
+plPxPrismaticJointComponent;PhysX Prismatic Joint
+plPxRevoluteJointComponent;PhysX Revolute Joint
+plPxSphericalJointComponent;PhysX Spherical Joint
+plPxJointLimitMode::NoLimit; No Limit
+plPxJointLimitMode::HardLimit; Hard Limit
+plPxJointLimitMode::SoftLimit; Soft Limit
+plPxJointDriveMode::NoDrive;No Drive
+plPxJointDriveMode::DriveAndSpin; Drive and Spin
+plPxJointDriveMode::DriveAndBrake; Drive and Brake
+plPxGrabObjectComponent;PhysX Grab Object
+plPxCharacterCapsuleShapeComponent;PhysX Character Capsule Shape

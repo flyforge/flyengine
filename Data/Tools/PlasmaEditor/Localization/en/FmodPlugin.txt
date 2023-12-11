@@ -1,17 +1,6 @@
-# Asset Types
-
-Sound Bank;Fmod Sound Bank
-Sound Event;Fmod Sound Event
-
-# Component Types
-
-plFmodEventComponent;Fmod Sound Event;;https://plasmaengine.github.io/PlasmaDocs/#sound/fmod-event-component/
-plFmodListenerComponent;Fmod Listener;;https://plasmaengine.github.io/PlasmaDocs/#sound/fmod-listener-component/
-
-# UI
-
 Fmod.Settings.Project;Fmod Project Settings...
 Fmod.Mute;Mute Sounds
 Fmod.MasterVolume;Volume
-
-# Properties
+Sound;Sound
+plFmodEventComponent;Fmod Sound Event
+plFmodListenerComponent;Fmod Listener

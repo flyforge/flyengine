@@ -93,44 +93,38 @@ Scene.Simulation.Speed.3;300%
 Scene.Simulation.Speed.4;400%
 Scene.Simulation.Speed.5;500%
 Scene.Simulation.Speed.10;1000%
-Layer.CreateLayer;Create Layer...
-Layer.DeleteLayer;Delete Layer
-Layer.SaveLayer;Save Layer
-Layer.SaveActiveLayer;Save Active Layer
-Layer.LayerLoaded;Layer Loaded
-Layer.LayerVisible;Layer Visible
 General;General
 Gameplay;Gameplay
 Rendering;Rendering
 Lighting;Lighting
 Settings;Settings
 Transform;Transform
-plProjectileComponent;Projectile;;https://plasmaengine.github.io/PlasmaDocs/gameplay/projectile-component.html
-plDecalComponent;Decal;;https://plasmaengine.github.io/PlasmaDocs/effects/decals.html
-plSpawnComponent;Spawn;;https://plasmaengine.github.io/PlasmaDocs/gameplay/spawn-component.html
-plTimedDeathComponent;Timed Death;;https://plasmaengine.github.io/PlasmaDocs/gameplay/timed-death-component.html
-plInputComponent;Input;;https://plasmaengine.github.io/PlasmaDocs/input/input-component.html
-plPrefabReferenceComponent;Prefab Reference;;https://plasmaengine.github.io/PlasmaDocs/prefabs/prefabs-overview.html
-plCameraComponent;Camera;;https://plasmaengine.github.io/PlasmaDocs/graphics/camera-component.html
-plMeshComponent;Mesh;;https://plasmaengine.github.io/PlasmaDocs/graphics/meshes/mesh-component.html
-plAmbientLightComponent;Ambient Light;;https://plasmaengine.github.io/PlasmaDocs/graphics/lighting/ambient-light-component.html
-plDirectionalLightComponent;Directional Light;;https://plasmaengine.github.io/PlasmaDocs/graphics/lighting/directional-light-component.html
-plSpotLightComponent;Spot Light;;https://plasmaengine.github.io/PlasmaDocs/graphics/lighting/spot-light-component.html
-plPointLightComponent;Point Light;;https://plasmaengine.github.io/PlasmaDocs/graphics/lighting/point-light-component.html
-plSkyLightComponent;Sky Light;;https://plasmaengine.github.io/PlasmaDocs/graphics/lighting/sky-light-component.html
+plProjectileComponent;Projectile
+plDecalComponent;Decal
+plSpawnComponent;Spawn
+plTimedDeathComponent;Timed Death
+plInputComponent;Input
+plPrefabReferenceComponent;Prefab Reference
+plCameraComponent;Camera
+plMeshComponent;Mesh
+plAmbientLightComponent;Ambient Light
+plDirectionalLightComponent;Directional Light
+plSpotLightComponent;Spot Light
+plPointLightComponent;Point Light
+plSkyLightComponent;Sky Light
 plReflectionProbeMode::Static;Static
 plReflectionProbeMode::Dynamic;Dynamic
-plSkyBoxComponent;Sky Box;;https://plasmaengine.github.io/PlasmaDocs/effects/sky.html
-plFogComponent;Fog;;https://plasmaengine.github.io/PlasmaDocs/effects/fog.html
-plSpriteComponent;Sprite;;https://plasmaengine.github.io/PlasmaDocs/graphics/sprite-component.html
-plRotorComponent;Rotor;;https://plasmaengine.github.io/PlasmaDocs/animation/property-animation/rotor-component.html
-plHeadBoneComponent;Head Bone;;https://plasmaengine.github.io/PlasmaDocs/gameplay/headbone-component.html
-plSliderComponent;Slider;;https://plasmaengine.github.io/PlasmaDocs/animation/property-animation/slider-component.html
-plCollectionComponent;Collection;;https://plasmaengine.github.io/PlasmaDocs/performance/collection-component.html
-plLineToComponent;Draw Line To Object;;https://plasmaengine.github.io/PlasmaDocs/debugging/components/draw-line-component.html
-plDebugTextComponent;Debug Text;;https://plasmaengine.github.io/PlasmaDocs/debugging/components/debug-text-component.html
-plRenderTargetActivatorComponent;Render Target Activator;;https://plasmaengine.github.io/PlasmaDocs/graphics/render-to-texture/render-target-activator-component.html
-plAlwaysVisibleComponent;Always Visible;;https://plasmaengine.github.io/PlasmaDocs/graphics/always-visible-component.html
+plSkyBoxComponent;Sky Box
+plFogComponent;Fog
+plSpriteComponent;Sprite
+plRotorComponent;Rotor
+plHeadBoneComponent;Head Bone
+plSliderComponent;Slider
+plCollectionComponent;Collection
+plLineToComponent;Draw Line To Object
+plDebugTextComponent;Debug Text
+plRenderTargetActivatorComponent;Render Target Activator
+plAlwaysVisibleComponent;Always Visible
 Components;Components
 Materials;Materials
 Surfaces;Surfaces
@@ -157,7 +151,8 @@ plOnComponentFinishedAction2::None;None
 plOnComponentFinishedAction2::DeleteComponent;Delete Component
 plOnComponentFinishedAction2::DeleteGameObject;Delete Object
 plOnComponentFinishedAction2::Restart;Restart
-plAreaDamageComponent;Area Damage;;https://plasmaengine.github.io/PlasmaDocs/gameplay/area-damage-component.html
+plVisualScriptComponent;Visual Script
+plAreaDamageComponent;Area Damage
 plLogicOperator::Equal;=
 plLogicOperator::Unequal;<>
 plLogicOperator::Less;<
@@ -180,7 +175,7 @@ plGreyBoxShape::StairsY;Stairs Y
 plGreyBoxShape::ArchX;Arch X
 plGreyBoxShape::ArchY;Arch Y
 plGreyBoxShape::SpiralStairs;Spiral Stairs
-plGreyBoxComponent;Grey Boxing;;https://plasmaengine.github.io/PlasmaDocs/scenes/greyboxing.html
+plGreyBoxComponent;Grey Boxing
 plSpriteBlendMode::Masked;Masked
 plSpriteBlendMode::Transparent;Transparent
 plSpriteBlendMode::Additive;Additive
@@ -190,8 +185,8 @@ plSrmRenderComponent;Visualize Surface Reconstruction Mesh
 ExposedProperties;Exposed Properties
 plExposedSceneProperty;Exposed Property
 Parameters;Parameters
-plSimpleWindComponent;Simple Wind;;https://plasmaengine.github.io/PlasmaDocs/effects/simple-wind-component.html
-plAnimatedMeshComponent;Animated Mesh;;https://plasmaengine.github.io/PlasmaDocs/animation/skeletal-animation/animated-mesh-component.html
+plSimpleWindComponent;Simple Wind
+plAnimatedMeshComponent;Animated Mesh
 plMotionMatchingComponent;Motion Matching
 Scene.Utils.Menu;Utilities
 Scene.ExportSceneToOBJ;Export Scene Geometry to OBJ...
@@ -242,12 +237,12 @@ EditorShortcut;Editor Shortcut;Press ALT+Number to jump to this camera.
 Scene.CreateThumbnail;Create Scene Thumbnail
 Scene.GameMode.PlayFromHere;Play From Here
 Scene.GameObject.CreateEmptyHere;Create Empty Object Here
-plPlayerStartPointComponent;Player Start Point;;https://plasmaengine.github.io/PlasmaDocs/gameplay/player-start-point.html
-plInstancedMeshComponent;Instanced Mesh;;https://plasmaengine.github.io/PlasmaDocs/graphics/meshes/instanced-mesh-component.html
-plMarkerComponent;Marker;;https://plasmaengine.github.io/PlasmaDocs/gameplay/marker-component.html
-plRaycastComponent;Raycast Placement;;https://plasmaengine.github.io/PlasmaDocs/gameplay/raycast-placement-component.html
-plBeamComponent;Beam;;https://plasmaengine.github.io/PlasmaDocs/effects/beam-component.html
-plMoveToComponent;Move To;;https://plasmaengine.github.io/PlasmaDocs/animation/property-animation/move-to-component.html
+plPlayerStartPointComponent;Player Start Point
+plInstancedMeshComponent;Instanced Mesh
+plMarkerComponent;Marker
+plRaycastComponent;Raycast Placement
+plBeamComponent;Beam
+plMoveToComponent;Move To
 plDeviceTrackingComponent;Device Tracking
 plStageSpaceComponent;Stage Space
 plXRDeviceType::HMD;HMD
@@ -277,21 +272,17 @@ plXRStageSpace::Seated;Seated
 plXRStageSpace::Standing;Standing
 InstanceData;Instance Data
 Scene.Render.PickTransparent;Select Transparent
-plGrabbableItemComponent;Grabbable Item;;https://plasmaengine.github.io/PlasmaDocs/gameplay/grabbable-item-component.html
+plGrabbableItemComponent;Grabbable Item
 plVisualizeHandComponent;Visualize Hand
-plSimpleAnimationComponent;Simple Animation;;https://plasmaengine.github.io/PlasmaDocs/animation/skeletal-animation/simple-animation-component.html
-plAnimationControllerComponent;Animation Controller;;https://plasmaengine.github.io/PlasmaDocs/animation/skeletal-animation/animation-controller/animation-controller-component.html
+plSimpleAnimationComponent;Simple Animation
+plAnimationControllerComponent;Animation Controller
 plWindStrength::Calm;Calm
 plWindStrength::LightBreple;Light Breple
 plWindStrength::GentleBreple;Gentle Breple
 plWindStrength::ModerateBreple;Moderate Breple
 plWindStrength::StrongBreple;Strong Breple
 plWindStrength::Storm;Storm
-plWindStrength::WeakShockwave;Weak Shockwave
-plWindStrength::MediumShockwave;Medium Shockwave
-plWindStrength::StrongShockwave;Strong Shockwave
-plWindStrength::ExtremeShockwave;Extreme Shockwave
-plBlackboardComponent;Blackboard;;https://plasmaengine.github.io/PlasmaDocs/Miscellaneous/blackboard-component.html
+plBlackboardComponent;Blackboard
 plBlackboardEntry;Entry
 plBlackboardEntryFlags::Save;Save
 plBlackboardEntryFlags::OnChangeEvent;OnChangeEvent
@@ -306,8 +297,8 @@ plBlackboardEntryFlags::UserFlag7;UserFlag 7
 plRootMotionMode::Ignore;Ignore
 plRootMotionMode::ApplyToOwner;Apply To Owner
 plRootMotionMode::SendMoveCharacterMsg;Send MoveCharacterMsg
-plJointOverrideComponent;Joint Override;;https://plasmaengine.github.io/PlasmaDocs/animation/skeletal-animation/joint-override-component.html
-plHeightfieldComponent;Heightfield;;https://plasmaengine.github.io/PlasmaDocs/terrain/heightfield-component.html
+plJointOverrideComponent;Joint Override Component
+plHeightfieldComponent;Heightfield Component
 plRenderComponent;Render Component
 plReflectionProbeMode::Static;Static
 plReflectionProbeMode::Dynamic;Dynamic
@@ -330,7 +321,6 @@ VertexWorldPosition;Vertex WorldPosition
 VertexNormal;Vertex Normal
 VertexTangent;Vertex Tangent
 VertexColor;Vertex Color
-VertexColor2;Vertex Color 2
 Camera;Camera
 Lerp;Lerp
 Add;Add
@@ -386,53 +376,3 @@ DepthFade;Depth Fade
 Fresnel;Fresnel
 Refraction;Refraction
 SetColorMode;Set Color Mode
-plBakedProbesComponent;Baked Probes
-plBakedProbesVolumeComponent;Baked Probes Volume
-plRopeRenderComponent;Rope Renderer;;https://plasmaengine.github.io/PlasmaDocs/effects/rope-render-component.html
-plFakeRopeComponent;Fake Rope Simulation;;https://plasmaengine.github.io/PlasmaDocs/effects/fake-rope-component.html
-plClothSheetComponent;Cloth Sheet;;http://plasmaengine.github.io/PlasmaDocs/effects/cloth-sheet-component.html
-plWindVolumeSphereComponent;Sphere Wind Volume;;https://plasmaengine.github.io/PlasmaDocs/effects/wind-volume-components.html
-plWindVolumeCylinderComponent;Cylinder Wind Volume;;https://plasmaengine.github.io/PlasmaDocs/effects/wind-volume-components.html
-plWindVolumeConeComponent;Cone Wind Volume;;https://plasmaengine.github.io/PlasmaDocs/effects/wind-volume-components.html
-plWindVolumeCylinderMode::Directional;Directional
-plWindVolumeCylinderMode::Vortex;Vortex
-plClothSheetFlags::FixedCornerTopLeft;Corner: Top Left
-plClothSheetFlags::FixedCornerTopRight;Corner: Top Right
-plClothSheetFlags::FixedCornerBottomRight;Corner: Bottom Right
-plClothSheetFlags::FixedCornerBottomLeft;Corner: Bottom Left
-plClothSheetFlags::FixedEdgeTop;Edge: Top
-plClothSheetFlags::FixedEdgeRight;Edge: Right
-plClothSheetFlags::FixedEdgeBottom;Edge: Bottom
-plClothSheetFlags::FixedEdgeLeft;Edge: Left
-plClothSheetFlags::FixedEdgeLeft;Edge: Left
-plCustomMeshComponent;Custom Mesh
-plBoxReflectionProbeComponent;Box Reflection Probe;;https://plasmaengine.github.io/PlasmaDocs/graphics/lighting/reflection-probe-components.html
-plSphereReflectionProbeComponent;Sphere Reflection Probe;;https://plasmaengine.github.io/PlasmaDocs/graphics/lighting/reflection-probe-components.html
-plSkeletonPoseComponent;Skeleton Pose;;https://plasmaengine.github.io/PlasmaDocs/animation/skeletal-animation/skeleton-pose-component.html
-plSkeletonPoseMode::CustomPose;Custom Pose
-plSkeletonPoseMode::RestPose;Rest Pose
-plSkeletonPoseMode::Disabled;Disabled
-Bones;Bones
-plSensorConeComponent;Cone Sensor
-plSensorCylinderComponent;Cylinder Sensor
-plSensorSphereComponent;Sphere Sensor
-plUpdateRate::EveryFrame;Every Frame
-plUpdateRate::Max30fps;Max 30 FPS
-plUpdateRate::Max20fps;Max 20 FPS
-plUpdateRate::Max10fps;Max 10 FPS
-plUpdateRate::Max5fps;Max 5 FPS
-plUpdateRate::Max2fps;Max 2 FPS
-plUpdateRate::Max1fps;Max 1 FPS
-plPhysicsShapeType::Static;Static
-plPhysicsShapeType::Dynamic;Dynamic
-plPhysicsShapeType::Query;Query
-plPhysicsShapeType::Trigger;Trigger
-plPhysicsShapeType::Character;Character
-plPhysicsShapeType::Ragdoll;Ragdoll
-plPhysicsShapeType::Rope;Rope
-plStateMachineComponent;State Machine
-plOccluderComponent;Occluder Component
-plLightUnit::Undefined;Undefined
-plLightUnit::Lumen;Lumen
-plAtmosphericScatteringComponent;Atmospheric Scattering Component
-plVolumetricCloudsComponent;Volumetric Cloud Component [Experimental]
