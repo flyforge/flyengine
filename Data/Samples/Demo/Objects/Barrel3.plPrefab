@@ -390,7 +390,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginScene"}
+		s %PluginName{"plasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plExposedSceneProperty"}
 		u3 %TypeVersion{1}
@@ -407,7 +407,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plSceneDocumentSettingsBase"}
-		s %PluginName{"PlasmaEditorPluginScene"}
+		s %PluginName{"plasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plPrefabDocumentSettings"}
 		u3 %TypeVersion{1}
@@ -873,7 +873,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plDocumentRoot"}
-		s %PluginName{"PlasmaEditorPluginScene"}
+		s %PluginName{"plasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plSceneDocumentRoot"}
 		u3 %TypeVersion{2}
@@ -982,7 +982,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginScene"}
+		s %PluginName{"plasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plSceneDocumentSettingsBase"}
 		u3 %TypeVersion{1}

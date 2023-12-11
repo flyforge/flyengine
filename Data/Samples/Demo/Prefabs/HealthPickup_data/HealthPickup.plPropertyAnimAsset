@@ -406,7 +406,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plAlphaControlPoint"}
 		u3 %TypeVersion{2}
@@ -440,7 +440,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plPropertyAnimationTrack"}
 		u3 %TypeVersion{1}
@@ -457,7 +457,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plIntensityControlPoint"}
 		u3 %TypeVersion{2}
@@ -508,7 +508,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plColorGradientAssetData"}
 		u3 %TypeVersion{2}
@@ -525,7 +525,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plPropertyAnimationTrackGroup"}
 		u3 %TypeVersion{1}
@@ -542,7 +542,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plColorControlPoint"}
 		u3 %TypeVersion{2}

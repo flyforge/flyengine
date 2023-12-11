@@ -1684,7 +1684,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautFrondContourMode"}
 		u3 %TypeVersion{1}
@@ -1718,7 +1718,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautTreeAssetProperties"}
 		u3 %TypeVersion{1}
@@ -1735,7 +1735,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{""}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautAssetBranchType"}
 		u3 %TypeVersion{1}
@@ -1820,7 +1820,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{""}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautAssetMaterial"}
 		u3 %TypeVersion{1}
@@ -1837,7 +1837,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautBranchTargetDir2Usage"}
 		u3 %TypeVersion{1}
@@ -1854,7 +1854,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautLeafOrientation"}
 		u3 %TypeVersion{1}
@@ -1871,7 +1871,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautBranchTypeMode"}
 		u3 %TypeVersion{1}
@@ -1888,7 +1888,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautBranchTargetDir"}
 		u3 %TypeVersion{1}

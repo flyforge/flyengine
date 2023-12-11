@@ -136,7 +136,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plProcGenNodeBase"}
-		s %PluginName{"PlasmaEditorPluginProcGen"}
+		s %PluginName{"plasmaEditorPluginProcGen"}
 		VarArray %Properties{}
 		s %TypeName{"plProcGenOutput"}
 		u3 %TypeVersion{1}
@@ -153,7 +153,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"PlasmaEditorPluginProcGen"}
+		s %PluginName{"plasmaEditorPluginProcGen"}
 		VarArray %Properties{}
 		s %TypeName{"plProcPlacementMode"}
 		u3 %TypeVersion{1}
@@ -187,7 +187,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginProcGen"}
+		s %PluginName{"plasmaEditorPluginProcGen"}
 		VarArray %Properties{}
 		s %TypeName{"plProcGenNodeBase"}
 		u3 %TypeVersion{1}
@@ -204,7 +204,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plProcGenOutput"}
-		s %PluginName{"PlasmaEditorPluginProcGen"}
+		s %PluginName{"plasmaEditorPluginProcGen"}
 		VarArray %Properties{}
 		s %TypeName{"plProcGen_PlacementOutput"}
 		u3 %TypeVersion{1}

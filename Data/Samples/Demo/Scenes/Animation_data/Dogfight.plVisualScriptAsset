@@ -349,7 +349,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plVisualScriptConnection"}
 		u3 %TypeVersion{1}
@@ -366,7 +366,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plVisualScriptParameter"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plVisualScriptParameterString"}
 		u3 %TypeVersion{1}
@@ -420,7 +420,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plVisualScriptParameter"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plVisualScriptParameterNumber"}
 		u3 %TypeVersion{1}
@@ -484,7 +484,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plVisualScriptParameter"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plVisualScriptParameterBool"}
 		u3 %TypeVersion{1}
@@ -532,7 +532,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plVisualScriptAssetProperties"}
 		u3 %TypeVersion{1}
@@ -584,7 +584,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plVisualScriptParameter"}
 		u3 %TypeVersion{1}

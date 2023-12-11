@@ -120,7 +120,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plAnimatedMeshAssetProperties"}
 		u3 %TypeVersion{2}
@@ -154,7 +154,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{""}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMaterialResourceSlot"}
 		u3 %TypeVersion{1}

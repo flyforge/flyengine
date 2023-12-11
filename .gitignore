@@ -6,3 +6,8 @@ Output/
 Code/Engine/plBuildInfo.h
 
 Data/Base/AssetCache/
+Data/Content/AssetCache/
+
+Data/Plugins/AssetCache/
+
+Data/Samples/Demo/AssetCache/

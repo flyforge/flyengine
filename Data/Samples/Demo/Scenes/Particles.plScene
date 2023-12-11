@@ -3247,7 +3247,7 @@ o
 		b %Active{1}
 		VarDict %Parameters
 		{
-			s %Label{"Plasma Impacts"}
+			s %Label{"plasma Impacts"}
 		}
 		s %Prefab{"{ c49af1cd-233c-4af2-9edc-5c12d1456e32 }"}
 	}

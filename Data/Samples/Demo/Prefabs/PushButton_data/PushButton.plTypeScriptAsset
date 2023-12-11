@@ -113,7 +113,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plTypeScriptParameter"}
-		s %PluginName{"PlasmaEditorPluginTypeScript"}
+		s %PluginName{"plasmaEditorPluginTypeScript"}
 		VarArray %Properties{}
 		s %TypeName{"plTypeScriptParameterString"}
 		u3 %TypeVersion{1}
@@ -130,7 +130,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginTypeScript"}
+		s %PluginName{"plasmaEditorPluginTypeScript"}
 		VarArray %Properties{}
 		s %TypeName{"plTypeScriptAssetProperties"}
 		u3 %TypeVersion{1}
@@ -147,7 +147,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plTypeScriptParameter"}
-		s %PluginName{"PlasmaEditorPluginTypeScript"}
+		s %PluginName{"plasmaEditorPluginTypeScript"}
 		VarArray %Properties{}
 		s %TypeName{"plTypeScriptParameterColor"}
 		u3 %TypeVersion{1}
@@ -181,7 +181,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginTypeScript"}
+		s %PluginName{"plasmaEditorPluginTypeScript"}
 		VarArray %Properties{}
 		s %TypeName{"plTypeScriptParameter"}
 		u3 %TypeVersion{1}
@@ -198,7 +198,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plTypeScriptParameter"}
-		s %PluginName{"PlasmaEditorPluginTypeScript"}
+		s %PluginName{"plasmaEditorPluginTypeScript"}
 		VarArray %Properties{}
 		s %TypeName{"plTypeScriptParameterVec3"}
 		u3 %TypeVersion{1}
@@ -215,7 +215,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plTypeScriptParameter"}
-		s %PluginName{"PlasmaEditorPluginTypeScript"}
+		s %PluginName{"plasmaEditorPluginTypeScript"}
 		VarArray %Properties{}
 		s %TypeName{"plTypeScriptParameterNumber"}
 		u3 %TypeVersion{1}
@@ -249,7 +249,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plTypeScriptParameter"}
-		s %PluginName{"PlasmaEditorPluginTypeScript"}
+		s %PluginName{"plasmaEditorPluginTypeScript"}
 		VarArray %Properties{}
 		s %TypeName{"plTypeScriptParameterBool"}
 		u3 %TypeVersion{1}

@@ -73,7 +73,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plDecalAssetProperties"}
 		u3 %TypeVersion{3}
@@ -90,7 +90,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plDecalMode"}
 		u3 %TypeVersion{1}

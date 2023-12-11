@@ -38,7 +38,7 @@ plStatus plToolsProject::Create()
     }
     else
     {
-      plStringView szToken = "plEditor Project File";
+      plStringView szToken = "PlasmaEditor Project File";
 
       PLASMA_SUCCEED_OR_RETURN(ProjectFile.Write(szToken.GetStartPointer(), szToken.GetElementCount() + 1));
       ProjectFile.Close();

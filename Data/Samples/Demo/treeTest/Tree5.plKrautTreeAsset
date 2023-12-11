@@ -144,7 +144,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautTreeAssetProperties"}
 		u3 %TypeVersion{1}
@@ -178,7 +178,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{""}
-		s %PluginName{"PlasmaEditorPluginKraut"}
+		s %PluginName{"plasmaEditorPluginKraut"}
 		VarArray %Properties{}
 		s %TypeName{"plKrautAssetMaterial"}
 		u3 %TypeVersion{1}
