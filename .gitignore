@@ -11,3 +11,9 @@ Data/Content/AssetCache/
 Data/Plugins/AssetCache/
 
 Data/Samples/Demo/AssetCache/
+
+cmake-build-dev/
+
+cmake-build-debug/
+
+.idea/
