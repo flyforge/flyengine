@@ -3,7 +3,7 @@
 #include <RendererCore/Meshes/MeshComponentBase.h>
 
 struct plMsgExtractGeometry;
-using plMeshComponentManager = plComponentManager<class plMeshComponent, plBlockStorageType::Compact>;
+typedef plComponentManager<class plMeshComponent, plBlockStorageType::Compact> plMeshComponentManager;
 
 class PLASMA_RENDERERCORE_DLL plMeshComponent : public plMeshComponentBase
 {

@@ -128,6 +128,7 @@ public:
   virtual ~plWindowBase() {}
 
   virtual plSizeU32 GetClientAreaSize() const = 0;
+  virtual plSizeU32 GetRenderAreaSize() const = 0;
   virtual plWindowHandle GetNativeWindowHandle() const = 0;
 
   /// \brief Whether the window is a fullscreen window
@@ -245,6 +246,9 @@ public:
 
   /// \brief Returns the size of the client area / ie. the window resolution.
   virtual plSizeU32 GetClientAreaSize() const override { return m_CreationDescription.m_Resolution; }
+
+  /// \brief Returns the size of the render area.
+  virtual plSizeU32 GetRenderAreaSize() const override { return m_CreationDescription.m_RenderResolution; }
 
   /// \brief Returns the platform specific window handle.
   virtual plWindowHandle GetNativeWindowHandle() const override;

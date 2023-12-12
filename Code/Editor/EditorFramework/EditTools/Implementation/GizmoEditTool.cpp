@@ -76,7 +76,7 @@ void plGameObjectGizmoEditTool::UpdateGizmoTransformation()
 
     /// \todo Pivot point
     const plVec3 vPivotPoint =
-      tGlobal.m_qRotation * plVec3::MakeZero(); // LatestSelection->GetEditorTypeAccessor().GetValue("Pivot").ConvertTo<plVec3>();
+      tGlobal.m_qRotation * plVec3::ZeroVector(); // LatestSelection->GetEditorTypeAccessor().GetValue("Pivot").ConvertTo<plVec3>();
 
     plTransform mt;
     mt.SetIdentity();
@@ -179,13 +179,13 @@ void plGameObjectGizmoEditTool::ManipulatorManagerEventHandler(const plManipulat
   }
 }
 
-void plGameObjectGizmoEditTool::EngineWindowEventHandler(const plEngineWindowEvent& e)
+void plGameObjectGizmoEditTool::EngineWindowEventHandler(const PlasmaEngineWindowEvent& e)
 {
   if (plQtGameObjectViewWidget* pViewWidget = qobject_cast<plQtGameObjectViewWidget*>(e.m_pView))
   {
     switch (e.m_Type)
     {
-      case plEngineWindowEvent::Type::ViewCreated:
+      case PlasmaEngineWindowEvent::Type::ViewCreated:
         pViewWidget->m_pOrthoGizmoContext->m_GizmoEvents.AddEventHandler(
           plMakeDelegate(&plGameObjectGizmoEditTool::TransformationGizmoEventHandler, this));
         break;

@@ -33,7 +33,7 @@ void plTelemetry::UpdateServerPing()
 {
 #ifdef BUILDSYSTEM_ENABLE_ENET_SUPPORT
   enet_peer_ping(g_pConnectionToServer);
-  plTelemetry::s_PingToServer = plTime::MakeFromMilliseconds(g_pConnectionToServer->lastRoundTripTime);
+  plTelemetry::s_PingToServer = plTime::Milliseconds(g_pConnectionToServer->lastRoundTripTime);
 #endif // BUILDSYSTEM_ENABLE_ENET_SUPPORT
 }
 
@@ -106,7 +106,7 @@ void plTelemetry::UpdateNetwork()
           s_bConnectedToServer = false;
 
           // First wait a bit to ensure that the Server could shut down, if this was a legitimate disconnect
-          plThreadUtils::Sleep(plTime::MakeFromSeconds(1));
+          plThreadUtils::Sleep(plTime::Seconds(1));
 
           // Now try to reconnect. If the Server still exists, fine, connect to that.
           // If it does not exist anymore, this will connect to the next best Server that can be found.
@@ -478,7 +478,7 @@ void plTelemetry::CloseConnection()
   PLASMA_LOCK(GetTelemetryMutex());
 
   UpdateNetwork();
-  plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
+  plThreadUtils::Sleep(plTime::Milliseconds(10));
 
   if (g_pHost)
   {
@@ -488,7 +488,7 @@ void plTelemetry::CloseConnection()
 
     // process the network messages (e.g. send the disconnect messages)
     UpdateNetwork();
-    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
+    plThreadUtils::Sleep(plTime::Milliseconds(10));
   }
 
   // finally close the network connection

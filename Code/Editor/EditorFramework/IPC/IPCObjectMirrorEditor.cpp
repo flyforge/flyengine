@@ -8,24 +8,24 @@ plIPCObjectMirrorEditor::plIPCObjectMirrorEditor()
   m_pIPC = nullptr;
 }
 
-plIPCObjectMirrorEditor::~plIPCObjectMirrorEditor() = default;
+plIPCObjectMirrorEditor::~plIPCObjectMirrorEditor() {}
 
-void plIPCObjectMirrorEditor::SetIPC(plEditorEngineConnection* pIPC)
+void plIPCObjectMirrorEditor::SetIPC(PlasmaEditorEngineConnection* pIPC)
 {
   PLASMA_ASSERT_DEBUG(m_pContext == nullptr, "Need to call SetIPC before SetReceiver");
   m_pIPC = pIPC;
 }
 
-plEditorEngineConnection* plIPCObjectMirrorEditor::GetIPC()
+PlasmaEditorEngineConnection* plIPCObjectMirrorEditor::GetIPC()
 {
   return m_pIPC;
 }
 
-void plIPCObjectMirrorEditor::ApplyOp(plObjectChange& ref_change)
+void plIPCObjectMirrorEditor::ApplyOp(plObjectChange& change)
 {
   if (m_pManager)
   {
-    SendOp(ref_change);
+    SendOp(change);
   }
   else
   {

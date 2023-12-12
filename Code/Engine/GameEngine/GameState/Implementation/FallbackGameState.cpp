@@ -370,13 +370,13 @@ void plFallbackGameState::ProcessInput()
       m_MainCamera.MoveGlobally(0, 0, -fInput * fMoveSpeed);
 
     if (plInputManager::GetInputActionState("Game", "TurnLeft", &fInput) != plKeyState::Up)
-      m_MainCamera.RotateGlobally(plAngle(), plAngle(), plAngle::MakeFromDegree(-fRotateSpeed * fInput));
+      m_MainCamera.RotateGlobally(plAngle(), plAngle(), plAngle::Degree(-fRotateSpeed * fInput));
     if (plInputManager::GetInputActionState("Game", "TurnRight", &fInput) != plKeyState::Up)
-      m_MainCamera.RotateGlobally(plAngle(), plAngle(), plAngle::MakeFromDegree(fRotateSpeed * fInput));
+      m_MainCamera.RotateGlobally(plAngle(), plAngle(), plAngle::Degree(fRotateSpeed * fInput));
     if (plInputManager::GetInputActionState("Game", "TurnUp", &fInput) != plKeyState::Up)
-      m_MainCamera.RotateLocally(plAngle(), plAngle::MakeFromDegree(fRotateSpeed * fInput), plAngle());
+      m_MainCamera.RotateLocally(plAngle(), plAngle::Degree(fRotateSpeed * fInput), plAngle());
     if (plInputManager::GetInputActionState("Game", "TurnDown", &fInput) != plKeyState::Up)
-      m_MainCamera.RotateLocally(plAngle(), plAngle::MakeFromDegree(-fRotateSpeed * fInput), plAngle());
+      m_MainCamera.RotateLocally(plAngle(), plAngle::Degree(-fRotateSpeed * fInput), plAngle());
   }
 }
 

@@ -1,7 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
 #include <Core/Graphics/Geometry.h>
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/GPUResourcePool/GPUResourcePool.h>
 #include <RendererCore/Pipeline/Passes/LSAOPass.h>
 #include <RendererCore/Pipeline/View.h>
@@ -35,15 +34,15 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 namespace
 {
-  float HaltonSequence(int iBase, int j)
+  float HaltonSequence(int base, int j)
   {
     static int primes[61] = {
       2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283};
 
-    PLASMA_ASSERT_DEV(iBase < 61, "Don't have prime number for this base.");
+    PLASMA_ASSERT_DEV(base < 61, "Don't have prime number for this base.");
 
     // Halton sequence with reverse permutation
-    const int p = primes[iBase];
+    const int p = primes[base];
     float h = 0.0f;
     float f = 1.0f / static_cast<float>(p);
     float fct = f;
@@ -60,7 +59,10 @@ namespace
 
 plLSAOPass::plLSAOPass()
   : plRenderPipelinePass("LSAOPass", true)
-
+  , m_iLineToLinePixelOffset(2)
+  , m_iLineSamplePixelOffsetFactor(1)
+  , m_bSweepDataDirty(true)
+  , m_bDistributedGathering(true)
 {
   {
     // Load shader.
@@ -74,6 +76,9 @@ plLSAOPass::plLSAOPass()
 
   {
     m_hLineSweepCB = plRenderContext::CreateConstantBufferStorage<plLSAOConstants>();
+    plLSAOConstants* cb = plRenderContext::GetConstantBufferData<plLSAOConstants>(m_hLineSweepCB);
+    cb->DepthCutoffDistance = 8.0f;
+    cb->OcclusionFalloff = 0.25f;
   }
 }
 
@@ -122,13 +127,6 @@ void plLSAOPass::InitRenderPipelinePass(const plArrayPtr<plRenderPipelinePassCon
 
 void plLSAOPass::Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs)
 {
-  if (m_bConstantsDirty)
-  {
-    plLSAOConstants* cb = plRenderContext::GetConstantBufferData<plLSAOConstants>(m_hLineSweepCB);
-    cb->DepthCutoffDistance = m_fDepthCutoffDistance;
-    cb->OcclusionFalloff = m_fOcclusionFalloff;
-  }
-
   if (m_bSweepDataDirty)
   {
     const plGALTextureCreationDescription& desc = inputs[m_PinDepthInput.m_uiInputIndex]->m_Desc;
@@ -256,32 +254,6 @@ void plLSAOPass::ExecuteInactive(const plRenderViewContext& renderViewContext, c
   auto pCommandEncoder = plRenderContext::BeginPassAndRenderingScope(renderViewContext, renderingSetup, "Clear");
 }
 
-plResult plLSAOPass::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  inout_stream << m_iLineToLinePixelOffset;
-  inout_stream << m_iLineSamplePixelOffsetFactor;
-  inout_stream << m_fOcclusionFalloff;
-  inout_stream << m_fDepthCutoffDistance;
-  inout_stream << m_DepthCompareFunction;
-  inout_stream << m_bDistributedGathering;
-  return PLASMA_SUCCESS;
-}
-
-plResult plLSAOPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  inout_stream >> m_iLineToLinePixelOffset;
-  inout_stream >> m_iLineSamplePixelOffsetFactor;
-  inout_stream >> m_fOcclusionFalloff;
-  inout_stream >> m_fDepthCutoffDistance;
-  inout_stream >> m_DepthCompareFunction;
-  inout_stream >> m_bDistributedGathering;
-  return PLASMA_SUCCESS;
-}
-
 void plLSAOPass::SetLineToLinePixelOffset(plUInt32 uiPixelOffset)
 {
   m_iLineToLinePixelOffset = uiPixelOffset;
@@ -296,24 +268,26 @@ void plLSAOPass::SetLineSamplePixelOffset(plUInt32 uiPixelOffset)
 
 float plLSAOPass::GetDepthCutoffDistance() const
 {
-  return m_fDepthCutoffDistance;
+  plLSAOConstants* cb = plRenderContext::GetConstantBufferData<plLSAOConstants>(m_hLineSweepCB);
+  return cb->DepthCutoffDistance;
 }
 
 void plLSAOPass::SetDepthCutoffDistance(float fDepthCutoffDistance)
 {
-  m_fDepthCutoffDistance = fDepthCutoffDistance;
-  m_bConstantsDirty = true;
+  plLSAOConstants* cb = plRenderContext::GetConstantBufferData<plLSAOConstants>(m_hLineSweepCB);
+  cb->DepthCutoffDistance = fDepthCutoffDistance;
 }
 
 float plLSAOPass::GetOcclusionFalloff() const
 {
-  return m_fOcclusionFalloff;
+  plLSAOConstants* cb = plRenderContext::GetConstantBufferData<plLSAOConstants>(m_hLineSweepCB);
+  return cb->OcclusionFalloff;
 }
 
 void plLSAOPass::SetOcclusionFalloff(float fFalloff)
 {
-  m_fOcclusionFalloff = fFalloff;
-  m_bConstantsDirty = true;
+  plLSAOConstants* cb = plRenderContext::GetConstantBufferData<plLSAOConstants>(m_hLineSweepCB);
+  cb->OcclusionFalloff = fFalloff;
 }
 
 void plLSAOPass::DestroyLineSweepData()
@@ -365,10 +339,10 @@ void plLSAOPass::SetupLineSweepData(const plVec3I32& imageResolution)
     {
       // Put opposing directions next to each other, so that a gather pass that doesn't sample all directions, only needs to sample an even
       // number of directions to end up with non-negative occlusion.
-      samplingDir[i * 4 + 0] = plVec2I32(i - halfPerSide, halfPerSide) * m_iLineSamplePixelOffsetFactor; // Top
-      samplingDir[i * 4 + 1] = -samplingDir[i * 4 + 0];                                                  // Bottom
-      samplingDir[i * 4 + 2] = plVec2I32(halfPerSide, halfPerSide - i) * m_iLineSamplePixelOffsetFactor; // Right
-      samplingDir[i * 4 + 3] = -samplingDir[i * 4 + 2];                                                  // Left
+      samplingDir[i * 4 + 0] = plVec2I32(i - halfPerSide, halfPerSide) * m_iLineSamplePixelOffsetFactor;  // Top
+      samplingDir[i * 4 + 1] = -samplingDir[i * 4 + 0];                                                   // Bottom
+      samplingDir[i * 4 + 2] = plVec2I32(halfPerSide, halfPerSide - i) * m_iLineSamplePixelOffsetFactor;  // Right
+      samplingDir[i * 4 + 3] = -samplingDir[i * 4 + 2];                                                   // Left
     }
 
     // todo: Ddd debug test to check whether any direction is duplicated. Mistakes in the equations above can easily happen!
@@ -409,6 +383,7 @@ void plLSAOPass::SetupLineSweepData(const plVec3I32& imageResolution)
       bufferDesc.m_bUseForIndirectArguments = false;
       bufferDesc.m_bUseAsStructuredBuffer = false;
       bufferDesc.m_bAllowRawViews = false;
+      bufferDesc.m_bStreamOutputTarget = false;
       bufferDesc.m_bAllowShaderResourceView = true;
       bufferDesc.m_bAllowUAV = true;
       bufferDesc.m_ResourceAccess.m_bReadBack = false;
@@ -443,6 +418,7 @@ void plLSAOPass::SetupLineSweepData(const plVec3I32& imageResolution)
       bufferDesc.m_bUseForIndirectArguments = false;
       bufferDesc.m_bUseAsStructuredBuffer = true;
       bufferDesc.m_bAllowRawViews = false;
+      bufferDesc.m_bStreamOutputTarget = false;
       bufferDesc.m_bAllowShaderResourceView = true;
       bufferDesc.m_bAllowUAV = false;
       bufferDesc.m_ResourceAccess.m_bReadBack = false;

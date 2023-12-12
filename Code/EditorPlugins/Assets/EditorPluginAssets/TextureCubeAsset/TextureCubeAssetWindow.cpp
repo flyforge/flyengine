@@ -10,6 +10,85 @@
 #include <GuiFoundation/DockPanels/DocumentPanel.moc.h>
 #include <GuiFoundation/PropertyGrid/PropertyGridWidget.moc.h>
 
+////////////////////////////////////////////////////////////////////////
+// plTextureCubeChannelModeAction
+////////////////////////////////////////////////////////////////////////
+
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeChannelModeAction, 1, plRTTINoAllocator)
+PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+
+plTextureCubeChannelModeAction::plTextureCubeChannelModeAction(const plActionContext& context, const char* szName, const char* szIconPath)
+  : plEnumerationMenuAction(context, szName, szIconPath)
+{
+  InitEnumerationType(plGetStaticRTTI<plTextureCubeChannelMode>());
+}
+
+plInt64 plTextureCubeChannelModeAction::GetValue() const
+{
+  return static_cast<const plTextureCubeAssetDocument*>(m_Context.m_pDocument)->m_ChannelMode.GetValue();
+}
+
+void plTextureCubeChannelModeAction::Execute(const plVariant& value)
+{
+  ((plTextureCubeAssetDocument*)m_Context.m_pDocument)->m_ChannelMode.SetValue(value.ConvertTo<plInt32>());
+}
+
+//////////////////////////////////////////////////////////////////////////
+// plTextureCubeLodSliderAction
+//////////////////////////////////////////////////////////////////////////
+
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeLodSliderAction, 1, plRTTINoAllocator)
+  ;
+PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+
+
+plTextureCubeLodSliderAction::plTextureCubeLodSliderAction(const plActionContext& context, const char* szName)
+  : plSliderAction(context, szName)
+{
+  m_pDocument = const_cast<plTextureCubeAssetDocument*>(static_cast<const plTextureCubeAssetDocument*>(context.m_pDocument));
+
+  SetRange(-1, 13);
+  SetValue(m_pDocument->m_iTextureLod);
+}
+
+void plTextureCubeLodSliderAction::Execute(const plVariant& value)
+{
+  const plInt32 iValue = value.Get<plInt32>();
+
+  m_pDocument->m_iTextureLod = value.Get<plInt32>();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// plTextureCubeAssetActions
+//////////////////////////////////////////////////////////////////////////
+
+plActionDescriptorHandle plTextureCubeAssetActions::s_hTextureChannelMode;
+plActionDescriptorHandle plTextureCubeAssetActions::s_hLodSlider;
+
+void plTextureCubeAssetActions::RegisterActions()
+{
+  s_hTextureChannelMode =
+    PLASMA_REGISTER_DYNAMIC_MENU("TextureCubeAsset.ChannelMode", plTextureCubeChannelModeAction, ":/EditorFramework/Icons/RenderMode.svg");
+  s_hLodSlider = PLASMA_REGISTER_ACTION_0("TextureCubeAsset.LodSlider", plActionScope::Document, "CompatibleAsset_Texture_Cube", "", plTextureCubeLodSliderAction);
+}
+
+void plTextureCubeAssetActions::UnregisterActions()
+{
+  plActionManager::UnregisterAction(s_hTextureChannelMode);
+  plActionManager::UnregisterAction(s_hLodSlider);
+}
+
+void plTextureCubeAssetActions::MapActions(const char* szMapping, const char* szPath)
+{
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+
+  pMap->MapAction(s_hLodSlider, szPath, 14.0f);
+  pMap->MapAction(s_hTextureChannelMode, szPath, 15.0f);
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // plQtTextureCubeAssetDocumentWindow
 //////////////////////////////////////////////////////////////////////////
@@ -57,7 +136,7 @@ plQtTextureCubeAssetDocumentWindow::plQtTextureCubeAssetDocumentWindow(plTexture
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("TextureCubeAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Texture Properties");
+    pPropertyPanel->setWindowTitle("TEXTURE PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -73,7 +152,7 @@ plQtTextureCubeAssetDocumentWindow::plQtTextureCubeAssetDocumentWindow(plTexture
 
 void plQtTextureCubeAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -81,7 +160,7 @@ void plQtTextureCubeAssetDocumentWindow::InternalRedraw()
 void plQtTextureCubeAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {

@@ -4,8 +4,8 @@
 #include <GuiFoundation/ActionViews/QtProxy.moc.h>
 #include <GuiFoundation/Models/TreeSearchFilterModel.moc.h>
 
-plQtDocumentTreeView::plQtDocumentTreeView(QWidget* pParent)
-  : plQtItemView<QTreeView>(pParent)
+plQtDocumentTreeView::plQtDocumentTreeView(QWidget* parent)
+  : plQtItemView<QTreeView>(parent)
 {
 }
 
@@ -147,24 +147,20 @@ void plQtDocumentTreeView::SetAllowDeleteObjects(bool bAllow)
   m_bAllowDeleteObjects = bAllow;
 }
 
-bool plQtDocumentTreeView::event(QEvent* pEvent)
+void plQtDocumentTreeView::keyPressEvent(QKeyEvent* e)
 {
-  if (pEvent->type() == QEvent::ShortcutOverride || pEvent->type() == QEvent::KeyPress)
-  {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(pEvent);
-    if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent, pEvent->type() == QEvent::ShortcutOverride))
-      return true;
+  if (plQtProxy::TriggerDocumentAction(m_pDocument, e))
+    return;
 
-    if (pEvent->type() == QEvent::KeyPress && keyEvent == QKeySequence::Delete)
+  if (e == QKeySequence::Delete)
+  {
+    if (m_bAllowDeleteObjects)
     {
-      if (m_bAllowDeleteObjects)
-      {
-        m_pDocument->DeleteSelectedObjects();
-      }
-      pEvent->accept();
-      return true;
+      m_pDocument->DeleteSelectedObjects();
     }
   }
-
-  return QTreeView::event(pEvent);
+  else
+  {
+    QTreeView::keyPressEvent(e);
+  }
 }

@@ -14,7 +14,6 @@ plPropertyAnimAssetDocumentManager::plPropertyAnimAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "PropertyAnim";
   m_DocTypeDesc.m_sFileExtension = "plPropertyAnimAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/PropertyAnim.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Animation";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plPropertyAnimAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Property_Animation");
@@ -38,7 +37,8 @@ void plPropertyAnimAssetDocumentManager::OnDocumentManagerEvent(const plDocument
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plPropertyAnimAssetDocument>())
       {
-        new plQtPropertyAnimAssetDocumentWindow(static_cast<plPropertyAnimAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtPropertyAnimAssetDocumentWindow* pDocWnd =
+          new plQtPropertyAnimAssetDocumentWindow(static_cast<plPropertyAnimAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -49,9 +49,9 @@ void plPropertyAnimAssetDocumentManager::OnDocumentManagerEvent(const plDocument
 }
 
 void plPropertyAnimAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plPropertyAnimAssetDocument(sPath);
+  out_pDocument = new plPropertyAnimAssetDocument(szPath);
 }
 
 void plPropertyAnimAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

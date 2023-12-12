@@ -25,7 +25,7 @@ plDepthOnlyPass::plDepthOnlyPass(const char* szName)
 {
 }
 
-plDepthOnlyPass::~plDepthOnlyPass() = default;
+plDepthOnlyPass::~plDepthOnlyPass() {}
 
 bool plDepthOnlyPass::GetRenderTargetDescriptions(
   const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)

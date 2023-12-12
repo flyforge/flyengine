@@ -12,7 +12,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSwitchPoseAnimNode, 1, plRTTIDefaultAlloca
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("TransitionDuration", m_TransitionDuration)->AddAttributes(new plDefaultValueAttribute(plTime::MakeFromMilliseconds(200))),
+    PLASMA_MEMBER_PROPERTY("TransitionDuration", m_TransitionDuration)->AddAttributes(new plDefaultValueAttribute(plTime::Milliseconds(200))),
     PLASMA_MEMBER_PROPERTY("InIndex", m_InIndex)->AddAttributes(new plHiddenAttribute()),
     PLASMA_MEMBER_PROPERTY("PosesCount", m_uiPosesCount)->AddAttributes(new plNoTemporaryTransactionsAttribute(), new plDynamicPinAttribute(), new plDefaultValueAttribute(2)),
     PLASMA_ARRAY_MEMBER_PROPERTY("InPoses", m_InPoses)->AddAttributes(new plHiddenAttribute(), new plDynamicPinAttribute("PosesCount")),
@@ -65,6 +65,7 @@ plResult plSwitchPoseAnimNode::DeserializeNode(plStreamReader& stream)
 
 void plSwitchPoseAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_SwitchPose");
   if (!m_OutPose.IsConnected() || !m_InIndex.IsConnected())
     return;
 
@@ -108,7 +109,7 @@ void plSwitchPoseAnimNode::Step(plAnimController& ref_controller, plAnimGraphIns
   {
     pInstance->m_iTransitionFromIndex = pInstance->m_iTransitionToIndex;
     pInstance->m_iTransitionToIndex = iDstIdx;
-    pInstance->m_TransitionTime = plTime::MakeZero();
+    pInstance->m_TransitionTime = plTime::Zero();
   }
 
   if (pInstance->m_TransitionTime >= m_TransitionDuration)

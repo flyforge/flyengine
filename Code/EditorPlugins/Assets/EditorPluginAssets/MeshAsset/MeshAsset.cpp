@@ -21,12 +21,12 @@ static plMat3 CalculateTransformationMatrix(const plMeshAssetProperties* pProp)
   return plBasisAxis::CalculateTransformationMatrix(forwardDir, pProp->m_RightDir, pProp->m_UpDir, us);
 }
 
-plMeshAssetDocument::plMeshAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plMeshAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
+plMeshAssetDocument::plMeshAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plMeshAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
 }
 
-plTransformStatus plMeshAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plMeshAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plProgressRange range("Transforming Asset", 2, false);
 
@@ -46,16 +46,6 @@ plTransformStatus plMeshAssetDocument::InternalTransformAsset(plStreamWriter& st
     CreateMeshFromGeom(pProp, desc);
   }
 
-  // if there is no material set for a slot, use the "Pattern" material as a fallback
-  for (plUInt32 matIdx = 0; matIdx < desc.GetMaterials().GetCount(); ++matIdx)
-  {
-    if (desc.GetMaterials()[matIdx].m_sPath.IsEmpty())
-    {
-      // Data/Base/Materials/Common/Pattern.plMaterialAsset
-      desc.SetMaterial(matIdx, "{ 1c47ee4c-0379-4280-85f5-b8cda61941d2 }");
-    }
-  }
-
   range.BeginNextStep("Writing Result");
   desc.Save(stream);
 
@@ -68,10 +58,10 @@ void plMeshAssetDocument::CreateMeshFromGeom(plMeshAssetProperties* pProp, plMes
   const plMat3 mTransformation = CalculateTransformationMatrix(pProp);
 
   plGeometry geom;
-  // const plMat4 mTrans(mTransformation, plVec3::MakeZero());
+  //const plMat4 mTrans(mTransformation, plVec3::ZeroVector());
 
   plGeometry::GeoOptions opt;
-  opt.m_Transform = plMat4(mTransformation, plVec3::MakeZero());
+  opt.m_Transform = plMat4(mTransformation, plVec3::ZeroVector());
 
   auto detail1 = pProp->m_uiDetail;
   auto detail2 = pProp->m_uiDetail2;
@@ -104,7 +94,7 @@ void plMeshAssetDocument::CreateMeshFromGeom(plMeshAssetProperties* pProp, plMes
     if (detail1 == 0)
       detail1 = 32;
 
-    geom.AddCylinder(pProp->m_fRadius, pProp->m_fRadius2, pProp->m_fHeight * 0.5f, pProp->m_fHeight * 0.5f, pProp->m_bCap, pProp->m_bCap2, plMath::Max<plUInt16>(3, detail1), opt, plMath::Clamp(pProp->m_Angle, plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(360.0f)));
+    geom.AddCylinder(pProp->m_fRadius, pProp->m_fRadius2, pProp->m_fHeight * 0.5f, pProp->m_fHeight * 0.5f, pProp->m_bCap, pProp->m_bCap2, plMath::Max<plUInt16>(3, detail1), opt, plMath::Clamp(pProp->m_Angle, plAngle::Degree(0.0f), plAngle::Degree(360.0f)));
   }
   else if (pProp->m_PrimitiveType == plMeshPrimitive::GeodesicSphere)
   {
@@ -190,13 +180,11 @@ void plMeshAssetDocument::CreateMeshFromGeom(plMeshAssetProperties* pProp, plMes
       desc.SetMaterial(0, "");
   }
 
-  // the the procedurally generated geometry we can always use fixed, low precision data, because we know that the geometry isn't detailed enough to run into problems
-  // and then we can unclutter the UI a little by not showing those options at all
   auto& mbd = desc.MeshBufferDesc();
   mbd.AddStream(plGALVertexAttributeSemantic::Position, plGALResourceFormat::XYZFloat);
-  mbd.AddStream(plGALVertexAttributeSemantic::TexCoord0, plMeshTexCoordPrecision::ToResourceFormat(plMeshTexCoordPrecision::_16Bit /*pProp->m_TexCoordPrecision*/));
-  mbd.AddStream(plGALVertexAttributeSemantic::Normal, plMeshNormalPrecision::ToResourceFormatNormal(plMeshNormalPrecision::_10Bit /*pProp->m_NormalPrecision*/));
-  mbd.AddStream(plGALVertexAttributeSemantic::Tangent, plMeshNormalPrecision::ToResourceFormatTangent(plMeshNormalPrecision::_10Bit /*pProp->m_NormalPrecision*/));
+  mbd.AddStream(plGALVertexAttributeSemantic::TexCoord0, plMeshTexCoordPrecision::ToResourceFormat(pProp->m_TexCoordPrecision));
+  mbd.AddStream(plGALVertexAttributeSemantic::Normal, plMeshNormalPrecision::ToResourceFormatNormal(pProp->m_NormalPrecision));
+  mbd.AddStream(plGALVertexAttributeSemantic::Tangent, plMeshNormalPrecision::ToResourceFormatTangent(pProp->m_NormalPrecision));
 
   mbd.AllocateStreamsFromGeometry(geom, plGALPrimitiveTopology::Triangles);
   desc.AddSubMesh(mbd.GetPrimitiveCount(), 0, 0);
@@ -227,6 +215,7 @@ plTransformStatus plMeshAssetDocument::CreateMeshFromFile(plMeshAssetProperties*
   opt.m_MeshNormalsPrecision = pProp->m_NormalPrecision;
   opt.m_MeshTexCoordsPrecision = pProp->m_TexCoordPrecision;
   opt.m_RootTransform = CalculateTransformationMatrix(pProp);
+  opt.m_bOptimize = pProp->m_bOptimize;
 
   if (pImporter->Import(opt).Failed())
     return plStatus("Model importer was unable to read this asset.");
@@ -277,7 +266,7 @@ void plMeshAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) co
   {
     // remove the mesh file dependency, if it is not actually used
     const auto& sMeshFile = GetProperties()->m_sMeshFile;
-    pInfo->m_TransformDependencies.Remove(sMeshFile);
+    pInfo->m_AssetTransformDependencies.Remove(sMeshFile);
   }
 }
 
@@ -295,51 +284,51 @@ plMeshAssetDocumentGenerator::plMeshAssetDocumentGenerator()
   AddSupportedFileType("vox");
 }
 
-plMeshAssetDocumentGenerator::~plMeshAssetDocumentGenerator() = default;
+plMeshAssetDocumentGenerator::~plMeshAssetDocumentGenerator() {}
 
-void plMeshAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
+void plMeshAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const
 {
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
+  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
+
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::DefaultPriority;
     info.m_sName = "MeshImport.WithMaterials";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Mesh.svg";
   }
 
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::LowPriority;
     info.m_sName = "MeshImport.NoMaterials";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Mesh.svg";
   }
 }
 
-plStatus plMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plMeshAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
 
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
   plMeshAssetDocument* pAssetDoc = plDynamicCast<plMeshAssetDocument*>(out_pGeneratedDocument);
+  if (pAssetDoc == nullptr)
+    return plStatus("Target document is not a valid plMeshAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("MeshFile", sInputFileRel.GetView());
+  accessor.SetValue("MeshFile", sDataDirRelativePath);
 
-  if (sMode == "MeshImport.WithMaterials")
+  if (info.m_sName == "MeshImport.WithMaterials")
   {
     accessor.SetValue("ImportMaterials", true);
   }
 
-  if (sMode == "MeshImport.NoMaterials")
+  if (info.m_sName == "MeshImport.NoMaterials")
   {
     accessor.SetValue("ImportMaterials", false);
   }

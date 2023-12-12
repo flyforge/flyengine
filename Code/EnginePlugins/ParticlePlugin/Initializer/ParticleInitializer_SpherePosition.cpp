@@ -24,7 +24,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_SpherePosition,
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plSphereVisualizerAttribute("Radius", plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3(1,1,1), "PositionOffset"),
+    new plSphereVisualizerAttribute("Radius", plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "PositionOffset"),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -167,7 +167,7 @@ void plParticleInitializer_SpherePosition::InitializeElements(plUInt64 uiStartIn
 
   for (plUInt64 i = uiStartIndex; i < uiStartIndex + uiNumElements; ++i)
   {
-    plVec3 pos = plVec3::MakeRandomPointInSphere(rng) * m_fRadius;
+    plVec3 pos = plVec3::CreateRandomPointInSphere(rng) * m_fRadius;
     plVec3 normalPos = pos;
 
     if (m_bSpawnOnSurface || m_bSetVelocity)

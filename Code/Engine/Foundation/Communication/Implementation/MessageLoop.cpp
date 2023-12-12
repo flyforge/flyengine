@@ -180,6 +180,7 @@ void plMessageLoop::AddChannel(plIpcChannel* pChannel)
 
   StartUpdateThread();
   pChannel->m_pOwner = this;
+  pChannel->AddToMessageLoop(this);
 }
 
 void plMessageLoop::RemoveChannel(plIpcChannel* pChannel)

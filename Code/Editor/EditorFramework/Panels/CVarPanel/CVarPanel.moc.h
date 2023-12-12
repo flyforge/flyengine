@@ -31,7 +31,7 @@ private Q_SLOTS:
   void StringChanged(const char* szCVar, const char* newValue);
 
 private:
-  void EngineProcessMsgHandler(const plEditorEngineProcessConnection::Event& e);
+  void EngineProcessMsgHandler(const PlasmaEditorEngineProcessConnection::Event& e);
 
   plQtCVarWidget* m_pCVarWidget = nullptr;
 

@@ -5,15 +5,14 @@
 
 #include <RendererCore/Debug/DebugRenderer.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
-#include <RendererFoundation/RendererReflection.h>
 
 plTextureViewContext::plTextureViewContext(plTextureContext* pContext)
-  : plEngineProcessViewContext(pContext)
+  : PlasmaEngineProcessViewContext(pContext)
 {
   m_pTextureContext = pContext;
 }
 
-plTextureViewContext::~plTextureViewContext() = default;
+plTextureViewContext::~plTextureViewContext() {}
 
 plViewHandle plTextureViewContext::CreateView()
 {
@@ -25,7 +24,7 @@ plViewHandle plTextureViewContext::CreateView()
   pView->SetRenderPassProperty("DepthPrePass", "Active", false);
   pView->SetRenderPassProperty("AOPass", "Active", false);
 
-  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   return pView->GetHandle();
@@ -49,6 +48,17 @@ void plTextureViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
     plUInt32 uiWidth = pResource->GetWidth();
     plUInt32 uiHeight = pResource->GetHeight();
 
+
+    auto memoryUsage = pResource->GetMemoryUsage();
+
+
+
+    const plUInt32 viewHeight = pMsg->m_uiWindowHeight;
+
+    plStringBuilder sGPUMemoryText;
+    sGPUMemoryText.Format("GPU Memory - {0} MB", plMath::RoundUp((float)memoryUsage.m_uiMemoryGPU / 1024.0f / 1024.0f,0.01f));
+    plDebugRenderer::DrawInfoText(m_hView, plDebugTextPlacement::BottomLeft, "AssetStats", sGPUMemoryText);
+
     plStringBuilder sText;
     if (!plReflectionUtils::EnumerationToString(plGetStaticRTTI<plGALResourceFormat>(), format, sText, plReflectionUtils::EnumConversionMode::ValueNameOnly))
     {
@@ -56,7 +66,7 @@ void plTextureViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
     }
 
     sText.PrependFormat("{0}x{1} - ", uiWidth, uiHeight);
-
     plDebugRenderer::DrawInfoText(m_hView, plDebugTextPlacement::BottomLeft, "AssetStats", sText);
+
   }
 }

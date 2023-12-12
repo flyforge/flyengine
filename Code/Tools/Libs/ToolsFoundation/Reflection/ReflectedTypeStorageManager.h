@@ -43,10 +43,10 @@ private:
     /// The functions first adds all parent class properties and then adds its own properties.
     /// POD type properties are added under the current path.
     void AddProperties(const plRTTI* pType);
-    void AddPropertiesRecursive(const plRTTI* pType, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass);
+    void AddPropertiesRecursive(const plRTTI* pType, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass);
 
-    void UpdateInstances(plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass);
-    void AddPropertyToInstances(plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass);
+    void UpdateInstances(plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass);
+    void AddPropertyToInstances(plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass);
 
     plVariantType::Enum GetStorageType(const plAbstractProperty* pProperty);
 

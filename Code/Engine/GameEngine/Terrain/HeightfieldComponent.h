@@ -121,7 +121,7 @@ protected:
   plVec2 m_vHalfExtents = plVec2(100.0f);
   float m_fHeight = 50.0f;
 
-  plVec2 m_vTexCoordOffset = plVec2::MakeZero();
+  plVec2 m_vTexCoordOffset = plVec2::ZeroVector();
   plVec2 m_vTexCoordScale = plVec2(1);
 
   plVec2U32 m_vTesselation = plVec2U32(128);

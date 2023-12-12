@@ -16,6 +16,7 @@ class plDGMLGraph;
 class plFrustum;
 class plRasterizerView;
 
+
 class PLASMA_RENDERERCORE_DLL plRenderPipeline : public plRefCounted
 {
 public:
@@ -31,8 +32,8 @@ public:
 
   void AddPass(plUniquePtr<plRenderPipelinePass>&& pPass);
   void RemovePass(plRenderPipelinePass* pPass);
-  void GetPasses(plDynamicArray<const plRenderPipelinePass*>& ref_passes) const;
-  void GetPasses(plDynamicArray<plRenderPipelinePass*>& ref_passes);
+  void GetPasses(plHybridArray<const plRenderPipelinePass*, 16>& passes) const;
+  void GetPasses(plHybridArray<plRenderPipelinePass*, 16>& passes);
   plRenderPipelinePass* GetPassByName(const plStringView& sPassName);
   plHashedString GetViewName() const;
 
@@ -40,13 +41,13 @@ public:
   bool Connect(plRenderPipelinePass* pOutputNode, plHashedString sOutputPinName, plRenderPipelinePass* pInputNode, plHashedString sInputPinName);
   bool Disconnect(plRenderPipelinePass* pOutputNode, plHashedString sOutputPinName, plRenderPipelinePass* pInputNode, plHashedString sInputPinName);
 
-  const plRenderPipelinePassConnection* GetInputConnection(const plRenderPipelinePass* pPass, plHashedString sInputPinName) const;
-  const plRenderPipelinePassConnection* GetOutputConnection(const plRenderPipelinePass* pPass, plHashedString sOutputPinName) const;
+  const plRenderPipelinePassConnection* GetInputConnection(plRenderPipelinePass* pPass, plHashedString sInputPinName) const;
+  const plRenderPipelinePassConnection* GetOutputConnection(plRenderPipelinePass* pPass, plHashedString sOutputPinName) const;
 
   void AddExtractor(plUniquePtr<plExtractor>&& pExtractor);
   void RemoveExtractor(plExtractor* pExtractor);
-  void GetExtractors(plDynamicArray<const plExtractor*>& ref_extractors) const;
-  void GetExtractors(plDynamicArray<plExtractor*>& ref_extractors);
+  void GetExtractors(plHybridArray<const plExtractor*, 16>& extractors) const;
+  void GetExtractors(plHybridArray<plExtractor*, 16>& extractors);
   plExtractor* GetExtractorByName(const plStringView& sExtractorName);
 
   template <typename T>
@@ -60,7 +61,7 @@ public:
     plRenderData::Category category, plRenderDataBatch::Filter filter = plRenderDataBatch::Filter()) const;
 
   /// \brief Creates a DGML graph of all passes and textures. Can be used to verify that no accidental temp textures are created due to poorly constructed pipelines or errors in code.
-  void CreateDgmlGraph(plDGMLGraph& ref_graph);
+  void CreateDgmlGraph(plDGMLGraph& graph);
 
 #if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
   static plCVarBool cvar_SpatialCullingVis;
@@ -113,9 +114,10 @@ private: // Member data
   plHashedString m_sName;
   plUInt64 m_uiLastExtractionFrame;
   plUInt64 m_uiLastRenderFrame;
+  plVec2 m_LastJitter;
 
   // Render pass graph data
-  PipelineState m_PipelineState = PipelineState::Uninitialized;
+  PipelineState m_PipelineState;
 
   struct ConnectionData
   {

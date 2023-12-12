@@ -3,7 +3,7 @@
 #include <RendererCore/Lights/LightComponent.h>
 #include <RendererCore/Textures/Texture2DResource.h>
 
-using plDirectionalLightComponentManager = plComponentManager<class plDirectionalLightComponent, plBlockStorageType::Compact>;
+typedef plComponentManager<class plDirectionalLightComponent, plBlockStorageType::Compact> plDirectionalLightComponentManager;
 
 /// \brief The render data object for directional lights.
 class PLASMA_RENDERERCORE_DLL plDirectionalLightRenderData : public plLightRenderData

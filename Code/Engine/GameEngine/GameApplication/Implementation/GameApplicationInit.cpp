@@ -27,11 +27,12 @@
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Device/DeviceFactory.h>
 
-#ifdef BUILDSYSTEM_ENABLE_VULKAN_SUPPORT
-constexpr const char* szDefaultRenderer = "Vulkan";
-#else
+// TODO: Enable once vulkan is stable with latest rendering
+//#ifdef BUILDSYSTEM_ENABLE_VULKAN_SUPPORT
+//constexpr const char* szDefaultRenderer = "Vulkan";
+//#else
 constexpr const char* szDefaultRenderer = "DX11";
-#endif
+//#endif
 
 plCommandLineOptionString opt_Renderer("app", "-renderer", "The renderer implementation to use.", szDefaultRenderer);
 
@@ -234,9 +235,9 @@ void plGameApplication::Init_SetupGraphicsDevice()
 {
   plGALDeviceCreationDescription DeviceInit;
 
-//#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
   DeviceInit.m_bDebugDevice = true;
-//#endif
+#endif
 
   {
     plGALDevice* pDevice = nullptr;

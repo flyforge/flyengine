@@ -32,17 +32,18 @@ public:
 
   struct PipelineLayoutDesc
   {
-    plHybridArray<vk::DescriptorSetLayout, 4> m_layout;
+    PLASMA_DECLARE_POD_TYPE();
+    vk::DescriptorSetLayout m_layout;
   };
 
   struct GraphicsPipelineDesc
   {
     PLASMA_DECLARE_POD_TYPE();
-    vk::RenderPass m_renderPass; // Created from plGALRenderingSetup
-    vk::PipelineLayout m_layout; // Created from shader
+    vk::RenderPass m_renderPass;
+    vk::PipelineLayout m_layout;
     plEnum<plGALPrimitiveTopology> m_topology;
     plEnum<plGALMSAASampleCount> m_msaa;
-    plUInt8 m_uiAttachmentCount = 0; // DX12 requires format list for RT and DT
+    plUInt8 m_uiAttachmentCount = 0;
     const plGALRasterizerStateVulkan* m_pCurrentRasterizerState = nullptr;
     const plGALBlendStateVulkan* m_pCurrentBlendState = nullptr;
     const plGALDepthStencilStateVulkan* m_pCurrentDepthStencilState = nullptr;

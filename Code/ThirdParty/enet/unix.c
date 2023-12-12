@@ -53,7 +53,7 @@
 #include <poll.h>
 #endif
 
-// BEGIN PLASMA-SPECIFIC BUGFIX
+// BEGIN EZ-SPECIFIC BUGFIX
 // see https://github.com/lsalzman/enet/issues/90
 #ifdef PLASMA_PLATFORM_ANDROID
 #ifndef HAS_SOCKLEN_T
@@ -62,7 +62,7 @@ typedef int socklen_t;
 #endif
 #endif
 #endif
-// END PLASMA-SPECIFIC BUGFIX
+// END EZ-SPECIFIC BUGFIX
 
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0

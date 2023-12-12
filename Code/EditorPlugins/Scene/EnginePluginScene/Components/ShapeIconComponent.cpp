@@ -45,33 +45,33 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneExportModifier_RemovePathNodeComponen
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-void plSceneExportModifier_RemovePathNodeComponents::ModifyWorld(plWorld& ref_world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport)
+void plSceneExportModifier_RemovePathNodeComponents::ModifyWorld(plWorld& world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport)
 {
-  if (!bForExport)
-    return;
+	if (!bForExport)
+		return;
 
-  PLASMA_LOCK(ref_world.GetWriteMarker());
+	PLASMA_LOCK(world.GetWriteMarker());
 
-  if (plPathComponentManager* pSiMan = ref_world.GetComponentManager<plPathComponentManager>())
-  {
-    for (auto it = pSiMan->GetComponents(); it.IsValid(); it.Next())
-    {
+	if (plPathComponentManager* pSiMan = world.GetComponentManager<plPathComponentManager>())
+	{
+		for (auto it = pSiMan->GetComponents(); it.IsValid(); it.Next())
+		{
       it->EnsureControlPointRepresentationIsUpToDate();
       it->SetDisableControlPointUpdates(true);
-    }
-  }
+		}
+	}
 
-  if (plPathNodeComponentManager* pSiMan = ref_world.GetComponentManager<plPathNodeComponentManager>())
-  {
-    for (auto it = pSiMan->GetComponents(); it.IsValid(); it.Next())
-    {
-      if (it->GetOwner()->GetComponents().GetCount() == 1 && it->GetOwner()->GetChildCount() == 0)
-      {
-        // if this is the only component on the object, clear it's name, so that the entire object may get cleaned up
+	if (plPathNodeComponentManager* pSiMan = world.GetComponentManager<plPathNodeComponentManager>())
+	{
+		for (auto it = pSiMan->GetComponents(); it.IsValid(); it.Next())
+		{
+			if (it->GetOwner()->GetComponents().GetCount() == 1)
+			{
+				// if this is the only component on the object, clear it's name, so that the entire object may get cleaned up
         it->GetOwner()->SetName(plStringView());
-      }
+			}
 
-      pSiMan->DeleteComponent(it->GetHandle());
-    }
-  }
+			pSiMan->DeleteComponent(it->GetHandle());
+		}
+	}
 }

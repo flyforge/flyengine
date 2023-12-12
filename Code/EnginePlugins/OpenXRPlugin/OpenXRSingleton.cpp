@@ -482,7 +482,7 @@ XrResult plOpenXR::InitSession()
     spaceCreateInfo.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_STAGE;
   }
 
-  spaceCreateInfo.poseInReferenceSpace = ConvertTransform(plTransform::MakeIdentity());
+  spaceCreateInfo.poseInReferenceSpace = ConvertTransform(plTransform::IdentityTransform());
   XR_SUCCEED_OR_CLEANUP_LOG(xrCreateReferenceSpace(m_session, &spaceCreateInfo, &m_sceneSpace), DeinitSession);
 
   spaceCreateInfo.referenceSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL;
@@ -738,10 +738,10 @@ void plOpenXR::UpdatePoses()
 
   auto IdentityFov = [](XrFovf& fov)
   {
-    fov.angleLeft = -plAngle::MakeFromDegree(45.0f).GetRadian();
-    fov.angleRight = plAngle::MakeFromDegree(45.0f).GetRadian();
-    fov.angleUp = plAngle::MakeFromDegree(45.0f).GetRadian();
-    fov.angleDown = -plAngle::MakeFromDegree(45.0f).GetRadian();
+    fov.angleLeft = -plAngle::Degree(45.0f).GetRadian();
+    fov.angleRight = plAngle::Degree(45.0f).GetRadian();
+    fov.angleUp = plAngle::Degree(45.0f).GetRadian();
+    fov.angleDown = -plAngle::Degree(45.0f).GetRadian();
   };
 
   if (FovIsNull(m_views[0].fov) || FovIsNull(m_views[1].fov))
@@ -783,8 +783,8 @@ void plOpenXR::UpdateCamera()
     const float fAspectRatio = (float)m_Info.m_vEyeRenderTargetSize.width / (float)m_Info.m_vEyeRenderTargetSize.height;
     auto CreateProjection = [](const XrView& view, plCamera* cam)
     {
-      return plGraphicsUtils::CreatePerspectiveProjectionMatrix(plMath::Tan(plAngle::MakeFromRadian(view.fov.angleLeft)) * cam->GetNearPlane(), plMath::Tan(plAngle::MakeFromRadian(view.fov.angleRight)) * cam->GetNearPlane(), plMath::Tan(plAngle::MakeFromRadian(view.fov.angleDown)) * cam->GetNearPlane(),
-        plMath::Tan(plAngle::MakeFromRadian(view.fov.angleUp)) * cam->GetNearPlane(), cam->GetNearPlane(), cam->GetFarPlane());
+      return plGraphicsUtils::CreatePerspectiveProjectionMatrix(plMath::Tan(plAngle::Radian(view.fov.angleLeft)) * cam->GetNearPlane(), plMath::Tan(plAngle::Radian(view.fov.angleRight)) * cam->GetNearPlane(), plMath::Tan(plAngle::Radian(view.fov.angleDown)) * cam->GetNearPlane(),
+        plMath::Tan(plAngle::Radian(view.fov.angleUp)) * cam->GetNearPlane(), cam->GetNearPlane(), cam->GetFarPlane());
     };
 
     // Update projection with newest near/ far values. If not sync camera is set, just use the last value from XR
@@ -823,7 +823,7 @@ void plOpenXR::UpdateCamera()
       // Update device state (average of both eyes).
       plQuat rot;
       rot.SetIdentity();
-      rot = plQuat::MakeSlerp(ConvertOrientation(m_views[0].pose.orientation), ConvertOrientation(m_views[1].pose.orientation), 0.5f);
+      rot.SetSlerp(ConvertOrientation(m_views[0].pose.orientation), ConvertOrientation(m_views[1].pose.orientation), 0.5f);
       const plVec3 pos = plMath::Lerp(ConvertPosition(m_views[0].pose.position), ConvertPosition(m_views[1].pose.position), 0.5f);
 
       m_Input->m_DeviceState[0].m_vGripPosition = pos;
@@ -844,7 +844,7 @@ void plOpenXR::UpdateCamera()
       const plMat4 poseRight = mStageTransform * ConvertPoseToMatrix(m_views[1].pose);
 
       // PLASMA Forward is +X, need to add this to align the forward projection
-      const plMat4 viewMatrix = plGraphicsUtils::CreateLookAtViewMatrix(plVec3::MakeZero(), plVec3(1, 0, 0), plVec3(0, 0, 1));
+      const plMat4 viewMatrix = plGraphicsUtils::CreateLookAtViewMatrix(plVec3::ZeroVector(), plVec3(1, 0, 0), plVec3(0, 0, 1));
       const plMat4 mViewTransformLeft = viewMatrix * poseLeft.GetInverse();
       const plMat4 mViewTransformRight = viewMatrix * poseRight.GetInverse();
 
@@ -1052,7 +1052,7 @@ XrPosef plOpenXR::ConvertTransform(const plTransform& tr)
 
 XrQuaternionf plOpenXR::ConvertOrientation(const plQuat& q)
 {
-  return {q.y, q.z, -q.x, -q.w};
+  return {q.v.y, q.v.z, -q.v.x, -q.w};
 }
 
 XrVector3f plOpenXR::ConvertPosition(const plVec3& pos)

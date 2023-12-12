@@ -4,7 +4,7 @@
 #include <Core/ResourceManager/Resource.h>
 #include <RendererCore/BakedProbes/BakingUtils.h>
 
-using plProbeTreeSectorResourceHandle = plTypedResourceHandle<class plProbeTreeSectorResource>;
+typedef plTypedResourceHandle<class plProbeTreeSectorResource> plProbeTreeSectorResourceHandle;
 
 struct PLASMA_RENDERERCORE_DLL plProbeTreeSectorResourceDescriptor
 {

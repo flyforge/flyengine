@@ -30,7 +30,7 @@ plThreadSignal::WaitResult plThreadSignal::WaitForSignal(plTime timeout) const
   PLASMA_LOCK(m_ConditionVariable);
 
   const plTime tStart = plTime::Now();
-  plTime tElapsed = plTime::MakeZero();
+  plTime tElapsed = plTime::Zero();
 
   while (!m_bSignalState)
   {

@@ -14,7 +14,7 @@ JPH_NAMESPACE_BEGIN
 class CollideShapeSettings;
 
 /// Collision detection helper that collides a convex object vs one or more triangles
-class JPH_EXPORT CollideConvexVsTriangles
+class CollideConvexVsTriangles
 {
 public:
 	/// Constructor

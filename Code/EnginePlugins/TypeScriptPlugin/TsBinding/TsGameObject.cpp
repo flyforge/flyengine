@@ -616,7 +616,7 @@ static int __CPP_GameObject_SendMessage(duk_context* pDuk)
 
   if (duk.GetFunctionMagicValue() == 0) // SendMessage
   {
-    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::MakeZero());
+    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::Zero());
 
     if (duk.GetBoolValue(3))
       pGameObject->SendMessageRecursive(*pMsg);
@@ -626,7 +626,7 @@ static int __CPP_GameObject_SendMessage(duk_context* pDuk)
     if (duk.GetBoolValue(4)) // expect the message to have result values
     {
       // sync msg back to TS
-      plTypeScriptBinding::SyncPlasmaObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
+      plTypeScriptBinding::SyncEzObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
     }
   }
   else // PostMessage
@@ -655,14 +655,14 @@ static int __CPP_GameObject_SendEventMessage(duk_context* pDuk)
 
   if (duk.GetFunctionMagicValue() == 0) // SendEventMessage
   {
-    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::MakeZero());
+    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::Zero());
 
     pGameObject->SendEventMessage(plStaticCast<plEventMessage&>(*pMsg), pSender);
 
     if (duk.GetBoolValue(4)) // expect the message to have result values
     {
       // sync msg back to TS
-      plTypeScriptBinding::SyncPlasmaObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
+      plTypeScriptBinding::SyncEzObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
     }
   }
   else // PostEventMessage

@@ -10,35 +10,55 @@
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
 
-PLASMA_IMPLEMENT_SINGLETON(plEditorEngineProcessConnection);
+PLASMA_IMPLEMENT_SINGLETON(PlasmaEditorEngineProcessConnection);
 
-plEvent<const plEditorEngineProcessConnection::Event&> plEditorEngineProcessConnection::s_Events;
+plEvent<const PlasmaEditorEngineProcessConnection::Event&> PlasmaEditorEngineProcessConnection::s_Events;
 
-plEditorEngineProcessConnection::plEditorEngineProcessConnection()
+PlasmaEditorEngineProcessConnection::PlasmaEditorEngineProcessConnection()
   : m_SingletonRegistrar(this)
 {
   m_bProcessShouldBeRunning = false;
   m_bProcessCrashed = false;
   m_bClientIsConfigured = false;
 
-  m_IPC.m_Events.AddEventHandler(plMakeDelegate(&plEditorEngineProcessConnection::HandleIPCEvent, this));
+  m_IPC.m_Events.AddEventHandler(plMakeDelegate(&PlasmaEditorEngineProcessConnection::HandleIPCEvent, this));
 }
 
-plEditorEngineProcessConnection::~plEditorEngineProcessConnection()
+PlasmaEditorEngineProcessConnection::~PlasmaEditorEngineProcessConnection()
 {
-  m_IPC.m_Events.RemoveEventHandler(plMakeDelegate(&plEditorEngineProcessConnection::HandleIPCEvent, this));
+  m_IPC.m_Events.RemoveEventHandler(plMakeDelegate(&PlasmaEditorEngineProcessConnection::HandleIPCEvent, this));
 }
 
-void plEditorEngineProcessConnection::HandleIPCEvent(const plProcessCommunicationChannel::Event& e)
+void PlasmaEditorEngineProcessConnection::SendDocumentOpenMessage(const plAssetDocument* pDocument, bool bOpen)
+{
+  PLASMA_PROFILE_SCOPE("SendDocumentOpenMessage");
+
+  if (!pDocument)
+    return;
+
+  // it is important to have up-to-date lookup tables in the engine process, because document contexts might try to
+  // load resources, and if the file redirection does not happen correctly, derived resource types may not be created as they should
+  plAssetCurator::GetSingleton()->WriteAssetTables().IgnoreResult();
+
+  plDocumentOpenMsgToEngine m;
+  m.m_DocumentGuid = pDocument->GetGuid();
+  m.m_bDocumentOpen = bOpen;
+  m.m_sDocumentType = pDocument->GetDocumentTypeDescriptor()->m_sDocumentTypeName;
+  m.m_DocumentMetaData = pDocument->GetCreateEngineMetaData();
+
+  SendMessage(&m);
+}
+
+void PlasmaEditorEngineProcessConnection::HandleIPCEvent(const plProcessCommunicationChannel::Event& e)
 {
   if (e.m_pMessage->GetDynamicRTTI()->IsDerivedFrom<plSyncWithProcessMsgToEditor>())
   {
     const plSyncWithProcessMsgToEditor* msg = static_cast<const plSyncWithProcessMsgToEditor*>(e.m_pMessage);
     m_uiRedrawCountReceived = msg->m_uiRedrawCount;
   }
-  if (e.m_pMessage->GetDynamicRTTI()->IsDerivedFrom<plEditorEngineDocumentMsg>())
+  if (e.m_pMessage->GetDynamicRTTI()->IsDerivedFrom<PlasmaEditorEngineDocumentMsg>())
   {
-    const plEditorEngineDocumentMsg* pMsg = static_cast<const plEditorEngineDocumentMsg*>(e.m_pMessage);
+    const PlasmaEditorEngineDocumentMsg* pMsg = static_cast<const PlasmaEditorEngineDocumentMsg*>(e.m_pMessage);
 
     plAssetDocument* pDocument = m_DocumentByGuid[pMsg->m_DocumentGuid];
 
@@ -47,17 +67,17 @@ void plEditorEngineProcessConnection::HandleIPCEvent(const plProcessCommunicatio
       pDocument->HandleEngineMessage(pMsg);
     }
   }
-  else if (e.m_pMessage->GetDynamicRTTI()->IsDerivedFrom<plEditorEngineMsg>())
+  else if (e.m_pMessage->GetDynamicRTTI()->IsDerivedFrom<PlasmaEditorEngineMsg>())
   {
     Event ee;
-    ee.m_pMsg = static_cast<const plEditorEngineMsg*>(e.m_pMessage);
+    ee.m_pMsg = static_cast<const PlasmaEditorEngineMsg*>(e.m_pMessage);
     ee.m_Type = Event::Type::ProcessMessage;
 
     s_Events.Broadcast(ee);
   }
 }
 
-void plEditorEngineProcessConnection::UIServicesTickEventHandler(const plQtUiServices::TickEvent& e)
+void PlasmaEditorEngineProcessConnection::UIServicesTickEventHandler(const plQtUiServices::TickEvent& e)
 {
   if (e.m_Type == plQtUiServices::TickEvent::Type::EndFrame)
   {
@@ -69,7 +89,7 @@ void plEditorEngineProcessConnection::UIServicesTickEventHandler(const plQtUiSer
 
       if (m_uiRedrawCountSent > m_uiRedrawCountReceived)
       {
-        WaitForMessage(plGetStaticRTTI<plSyncWithProcessMsgToEditor>(), plTime::MakeFromSeconds(2.0)).IgnoreResult();
+        WaitForMessage(plGetStaticRTTI<plSyncWithProcessMsgToEditor>(), plTime::Seconds(2.0)).IgnoreResult();
       }
 
       ++m_uiRedrawCountSent;
@@ -77,27 +97,27 @@ void plEditorEngineProcessConnection::UIServicesTickEventHandler(const plQtUiSer
   }
 }
 
-plEditorEngineConnection* plEditorEngineProcessConnection::CreateEngineConnection(plAssetDocument* pDocument)
+PlasmaEditorEngineConnection* PlasmaEditorEngineProcessConnection::CreateEngineConnection(plAssetDocument* pDocument)
 {
-  plEditorEngineConnection* pConnection = new plEditorEngineConnection(pDocument);
+  PlasmaEditorEngineConnection* pConnection = new PlasmaEditorEngineConnection(pDocument);
 
   m_DocumentByGuid[pDocument->GetGuid()] = pDocument;
 
-  pDocument->SendDocumentOpenMessage(true);
+  SendDocumentOpenMessage(pDocument, true);
 
   return pConnection;
 }
 
-void plEditorEngineProcessConnection::DestroyEngineConnection(plAssetDocument* pDocument)
+void PlasmaEditorEngineProcessConnection::DestroyEngineConnection(plAssetDocument* pDocument)
 {
-  pDocument->SendDocumentOpenMessage(false);
+  SendDocumentOpenMessage(pDocument, false);
 
   m_DocumentByGuid.Remove(pDocument->GetGuid());
 
   delete pDocument->GetEditorEngineConnection();
 }
 
-void plEditorEngineProcessConnection::Initialize(const plRTTI* pFirstAllowedMessageType)
+void PlasmaEditorEngineProcessConnection::Initialize(const plRTTI* pFirstAllowedMessageType)
 {
   PLASMA_PROFILE_SCOPE("Initialize");
   if (m_IPC.IsClientAlive())
@@ -106,16 +126,25 @@ void plEditorEngineProcessConnection::Initialize(const plRTTI* pFirstAllowedMess
   plLog::Dev("Starting Client Engine Process");
 
   PLASMA_ASSERT_DEBUG(m_TickEventSubscriptionID == 0, "A previous subscription is still in place. ShutdownProcess not called?");
-  m_TickEventSubscriptionID = plQtUiServices::s_TickEvent.AddEventHandler(plMakeDelegate(&plEditorEngineProcessConnection::UIServicesTickEventHandler, this));
+  m_TickEventSubscriptionID = plQtUiServices::s_TickEvent.AddEventHandler(plMakeDelegate(&PlasmaEditorEngineProcessConnection::UIServicesTickEventHandler, this));
 
   m_bProcessShouldBeRunning = true;
   m_bProcessCrashed = false;
   m_bClientIsConfigured = false;
 
   plStringBuilder tmp;
+  
+  QStringList args;
+  if (m_bProcessShouldWaitForDebugger)
+  {
+    args << "-debug";
+  }
 
-  QStringList args = QCoreApplication::arguments();
-  args.pop_front(); // Remove first argument which is the name of the path to the editor executable
+  if (!m_sRenderer.IsEmpty())
+  {
+    args << "-renderer";
+    args << m_sRenderer.GetData();
+  }
 
   {
     plStringBuilder sWndCfgPath = plApplicationServices::GetSingleton()->GetProjectPreferencesFolder();
@@ -161,7 +190,7 @@ void plEditorEngineProcessConnection::Initialize(const plRTTI* pFirstAllowedMess
   }
 }
 
-void plEditorEngineProcessConnection::ActivateRemoteProcess(const plAssetDocument* pDocument, plUInt32 uiViewID)
+void PlasmaEditorEngineProcessConnection::ActivateRemoteProcess(const plAssetDocument* pDocument, plUInt32 uiViewID)
 {
   // make sure process is started
   if (!ConnectToRemoteProcess())
@@ -196,7 +225,7 @@ void plEditorEngineProcessConnection::ActivateRemoteProcess(const plAssetDocumen
   }
 }
 
-bool plEditorEngineProcessConnection::ConnectToRemoteProcess()
+bool PlasmaEditorEngineProcessConnection::ConnectToRemoteProcess()
 {
   if (m_pRemoteProcess != nullptr)
   {
@@ -211,7 +240,7 @@ bool plEditorEngineProcessConnection::ConnectToRemoteProcess()
   if (dlg.exec() == QDialog::Rejected)
     return false;
 
-  m_pRemoteProcess = PLASMA_DEFAULT_NEW(plEditorProcessRemoteCommunicationChannel);
+  m_pRemoteProcess = PLASMA_DEFAULT_NEW(PlasmaEditorProcessRemoteCommunicationChannel);
   m_pRemoteProcess->ConnectToServer(dlg.GetResultingAddress().toUtf8().data()).IgnoreResult();
 
   plQtWaitForOperationDlg waitDialog(QApplication::activeWindow());
@@ -242,7 +271,7 @@ bool plEditorEngineProcessConnection::ConnectToRemoteProcess()
 }
 
 
-void plEditorEngineProcessConnection::ShutdownRemoteProcess()
+void PlasmaEditorEngineProcessConnection::ShutdownRemoteProcess()
 {
   if (m_pRemoteProcess != nullptr)
   {
@@ -253,7 +282,7 @@ void plEditorEngineProcessConnection::ShutdownRemoteProcess()
   }
 }
 
-void plEditorEngineProcessConnection::ShutdownProcess()
+void PlasmaEditorEngineProcessConnection::ShutdownProcess()
 {
   if (!m_bProcessShouldBeRunning)
     return;
@@ -274,30 +303,29 @@ void plEditorEngineProcessConnection::ShutdownProcess()
   s_Events.Broadcast(e);
 }
 
-bool plEditorEngineProcessConnection::SendMessage(plProcessMessage* pMessage)
+void PlasmaEditorEngineProcessConnection::SendMessage(plProcessMessage* pMessage)
 {
-  bool res = m_IPC.SendMessage(pMessage);
+  m_IPC.SendMessage(pMessage);
 
   if (m_pRemoteProcess)
   {
     m_pRemoteProcess->SendMessage(pMessage);
   }
-  return res;
 }
 
-plResult plEditorEngineProcessConnection::WaitForMessage(const plRTTI* pMessageType, plTime timeout, plProcessCommunicationChannel::WaitForMessageCallback* pCallback)
+plResult PlasmaEditorEngineProcessConnection::WaitForMessage(const plRTTI* pMessageType, plTime tTimeout, plProcessCommunicationChannel::WaitForMessageCallback* pCallback)
 {
   PLASMA_PROFILE_SCOPE(pMessageType->GetTypeName());
-  return m_IPC.WaitForMessage(pMessageType, timeout, pCallback);
+  return m_IPC.WaitForMessage(pMessageType, tTimeout, pCallback);
 }
 
-plResult plEditorEngineProcessConnection::WaitForDocumentMessage(const plUuid& assetGuid, const plRTTI* pMessageType, plTime timeout, plProcessCommunicationChannel::WaitForMessageCallback* pCallback /*= nullptr*/)
+plResult PlasmaEditorEngineProcessConnection::WaitForDocumentMessage(const plUuid& assetGuid, const plRTTI* pMessageType, plTime tTimeout, plProcessCommunicationChannel::WaitForMessageCallback* pCallback /*= nullptr*/)
 {
   if (!m_bProcessShouldBeRunning)
   {
     return PLASMA_FAILURE; // if the process is not running, we can't wait for a message
   }
-  PLASMA_ASSERT_DEBUG(pMessageType->IsDerivedFrom(plGetStaticRTTI<plEditorEngineDocumentMsg>()), "The type of the message to wait for must be a document message.");
+  PLASMA_ASSERT_DEBUG(pMessageType->IsDerivedFrom(plGetStaticRTTI<PlasmaEditorEngineDocumentMsg>()), "The type of the message to wait for must be a document message.");
   struct WaitData
   {
     plUuid m_AssetGuid;
@@ -309,7 +337,7 @@ plResult plEditorEngineProcessConnection::WaitForDocumentMessage(const plUuid& a
   data.m_pCallback = pCallback;
 
   plProcessCommunicationChannel::WaitForMessageCallback callback = [&data](plProcessMessage* pMsg) -> bool {
-    plEditorEngineDocumentMsg* pMsg2 = plDynamicCast<plEditorEngineDocumentMsg*>(pMsg);
+    PlasmaEditorEngineDocumentMsg* pMsg2 = plDynamicCast<PlasmaEditorEngineDocumentMsg*>(pMsg);
     if (pMsg2 && data.m_AssetGuid == pMsg2->m_DocumentGuid)
     {
       if (data.m_pCallback && data.m_pCallback->IsValid() && !(*data.m_pCallback)(pMsg))
@@ -321,15 +349,15 @@ plResult plEditorEngineProcessConnection::WaitForDocumentMessage(const plUuid& a
     return false;
   };
 
-  return m_IPC.WaitForMessage(pMessageType, timeout, &callback);
+  return m_IPC.WaitForMessage(pMessageType, tTimeout, &callback);
 }
 
-plResult plEditorEngineProcessConnection::RestartProcess()
+plResult PlasmaEditorEngineProcessConnection::RestartProcess()
 {
   PLASMA_PROFILE_SCOPE("RestartProcess");
   PLASMA_LOG_BLOCK("Restarting Engine Process");
 
-  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage("Reloading Engine Process...", plTime::MakeFromSeconds(5));
+  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage("Reloading Engine Process...", plTime::Seconds(5));
 
   ShutdownProcess();
 
@@ -384,11 +412,12 @@ plResult plEditorEngineProcessConnection::RestartProcess()
   docs.Sort([](const plAssetDocument* a, const plAssetDocument* b) {
     if (a->IsMainDocument() != b->IsMainDocument())
       return a->IsMainDocument();
-    return a < b; });
+    return a < b;
+  });
 
   for (plAssetDocument* pDoc : docs)
   {
-    pDoc->SendDocumentOpenMessage(true);
+    SendDocumentOpenMessage(pDoc, true);
   }
 
   plAssetCurator::GetSingleton()->InvalidateAssetsWithTransformState(plAssetInfo::TransformState::TransformError);
@@ -404,7 +433,7 @@ plResult plEditorEngineProcessConnection::RestartProcess()
   return PLASMA_SUCCESS;
 }
 
-void plEditorEngineProcessConnection::Update()
+void PlasmaEditorEngineProcessConnection::Update()
 {
   if (!m_bProcessShouldBeRunning)
     return;
@@ -429,23 +458,17 @@ void plEditorEngineProcessConnection::Update()
   }
 }
 
-bool plEditorEngineConnection::SendMessage(plEditorEngineDocumentMsg* pMessage)
+void PlasmaEditorEngineConnection::SendMessage(PlasmaEditorEngineDocumentMsg* pMessage)
 {
-#ifdef __GNUC__
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
-#endif
   PLASMA_ASSERT_DEV(this != nullptr, "No connection between editor and engine was created. This typically happens when an asset document does "
-                                 "not enable the engine-connection through the constructor of plAssetDocument."); // NOLINT
-#ifdef __GNUC__
-#  pragma GCC diagnostic pop
-#endif
+                                 "not enable the engine-connection through the constructor of plAssetDocument.");
+
   pMessage->m_DocumentGuid = m_pDocument->GetGuid();
 
-  return plEditorEngineProcessConnection::GetSingleton()->SendMessage(pMessage);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(pMessage);
 }
 
-void plEditorEngineConnection::SendHighlightObjectMessage(plViewHighlightMsgToEngine* pMessage)
+void PlasmaEditorEngineConnection::SendHighlightObjectMessage(plViewHighlightMsgToEngine* pMessage)
 {
   // without this check there will be so many messages, that the editor comes to a crawl (< 10 FPS)
   // This happens because Qt sends hundreds of mouse-move events and since each 'SendMessageToEngine'

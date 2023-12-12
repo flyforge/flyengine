@@ -15,9 +15,9 @@ plQtGroupBoxBase::plQtGroupBoxBase(QWidget* pParent, bool bCollapsible)
   m_bCollapsible = bCollapsible;
 }
 
-void plQtGroupBoxBase::SetTitle(plStringView sTitle)
+void plQtGroupBoxBase::SetTitle(const char* szTitle)
 {
-  m_sTitle = plMakeQString(sTitle);
+  m_sTitle = szTitle;
 }
 
 QString plQtGroupBoxBase::GetTitle() const
@@ -85,7 +85,7 @@ void plQtGroupBoxBase::DrawHeader(QPainter& p, const QRect& rect)
   if (!m_Icon.isNull())
   {
     QRect iconRect = remainingRect;
-    iconRect.setWidth(iconRect.height());
+    iconRect.setWidth(iconRect.height() / 1.5);
     m_Icon.paint(&p, iconRect);
     remainingRect.adjust(iconRect.width() + Spacing, 0, 0, 0);
   }

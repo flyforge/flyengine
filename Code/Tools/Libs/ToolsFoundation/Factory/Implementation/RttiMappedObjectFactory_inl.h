@@ -1,10 +1,14 @@
 
 
 template <typename Object>
-plRttiMappedObjectFactory<Object>::plRttiMappedObjectFactory() = default;
+plRttiMappedObjectFactory<Object>::plRttiMappedObjectFactory()
+{
+}
 
 template <typename Object>
-plRttiMappedObjectFactory<Object>::~plRttiMappedObjectFactory() = default;
+plRttiMappedObjectFactory<Object>::~plRttiMappedObjectFactory()
+{
+}
 
 template <typename Object>
 void plRttiMappedObjectFactory<Object>::RegisterCreator(const plRTTI* pType, CreateObjectFunc creator)

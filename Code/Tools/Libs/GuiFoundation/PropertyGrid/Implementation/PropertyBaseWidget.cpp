@@ -17,7 +17,6 @@
 #include <ToolsFoundation/Command/TreeCommands.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-#include <GuiFoundation/GuiFoundationDLL.h>
 #include <QClipboard>
 #include <QDragEnterEvent>
 #include <QLabel>
@@ -43,14 +42,15 @@ PLASMA_END_STATIC_REFLECTED_TYPE;
 /// *** BASE ***
 plQtPropertyWidget::plQtPropertyWidget()
   : QWidget(nullptr)
-
+  , m_pGrid(nullptr)
+  , m_pProp(nullptr)
 {
   m_bUndead = false;
   m_bIsDefault = true;
   setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
 
-plQtPropertyWidget::~plQtPropertyWidget() = default;
+plQtPropertyWidget::~plQtPropertyWidget() {}
 
 void plQtPropertyWidget::Init(
   plQtPropertyGridWidget* pGrid, plObjectAccessorBase* pObjectAccessor, const plRTTI* pType, const plAbstractProperty* pProp)
@@ -153,7 +153,7 @@ void plQtPropertyWidget::ExtendContextMenu(QMenu& m)
       m_pObjectAccessor->FinishTransaction(); });
   }
 
-  const char* szMimeType = "application/plEditor.Property";
+  const char* szMimeType = "application/PlasmaEditor.Property";
   bool bValueType = plReflectionUtils::IsValueType(m_pProp) || m_pProp->GetFlags().IsAnySet(plPropertyFlags::Bitflags | plPropertyFlags::IsEnum);
   // Copy
   {
@@ -217,7 +217,7 @@ void plQtPropertyWidget::ExtendContextMenu(QMenu& m)
     else
     {
       QByteArray ba = mimedata->data(szMimeType);
-      plRawMemoryStreamReader memoryReader(ba.data(), ba.size());
+      plRawMemoryStreamReader memoryReader(ba.data(), ba.count());
 
       plPropertyClipboard content;
       plReflectionSerializer::ReadObjectPropertiesFromDDL(memoryReader, *plGetStaticRTTI<plPropertyClipboard>(), &content);
@@ -298,7 +298,7 @@ void plQtPropertyWidget::ExtendContextMenu(QMenu& m)
       clipboard->setMimeData(mimeData);
 
       plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(
-        plFmt("Copied Property Name: {}", m_pProp->GetPropertyName()), plTime::MakeFromSeconds(5));
+        plFmt("Copied Property Name: {}", m_pProp->GetPropertyName()), plTime::Seconds(5));
     };
 
     QAction* pAction = m.addAction("Copy Internal Property Name:");
@@ -333,7 +333,7 @@ QColor plQtPropertyWidget::SetPaletteBackgroundColor(plColorGammaUB inputColor, 
   QColor qColor = qApp->palette().color(QPalette::Window);
   if (inputColor.a != 0)
   {
-    const plColor paletteColorLinear = qtToPlasmaColor(qColor);
+    const plColor paletteColorLinear = qtToPlColor(qColor);
     const plColor inputColorLinear = inputColor;
 
     plColor blendedColor = plMath::Lerp(paletteColorLinear, inputColorLinear, inputColorLinear.a);
@@ -356,13 +356,13 @@ bool plQtPropertyWidget::GetCommonVariantSubType(
     {
       bFirst = false;
       plVariant value;
-      m_pObjectAccessor->GetValue(item.m_pObject, pProperty, value, item.m_Index).AssertSuccess();
+      m_pObjectAccessor->GetValue(item.m_pObject, pProperty, value, item.m_Index).IgnoreResult();
       out_type = value.GetType();
     }
     else
     {
       plVariant valueNext;
-      m_pObjectAccessor->GetValue(item.m_pObject, pProperty, valueNext, item.m_Index).AssertSuccess();
+      m_pObjectAccessor->GetValue(item.m_pObject, pProperty, valueNext, item.m_Index).IgnoreResult();
       if (valueNext.GetType() != out_type)
       {
         out_type = plVariantType::Invalid;
@@ -384,12 +384,12 @@ plVariant plQtPropertyWidget::GetCommonValue(const plHybridArray<plPropertySelec
       const auto& item = items[i];
       if (i == 0)
       {
-        m_pObjectAccessor->GetValues(item.m_pObject, pProperty, values).AssertSuccess();
+        m_pObjectAccessor->GetValues(item.m_pObject, pProperty, values).IgnoreResult();
       }
       else
       {
         plVariantArray valuesNext;
-        m_pObjectAccessor->GetValues(item.m_pObject, pProperty, valuesNext).AssertSuccess();
+        m_pObjectAccessor->GetValues(item.m_pObject, pProperty, valuesNext).IgnoreResult();
         if (values != valuesNext)
         {
           return plVariant();
@@ -406,12 +406,12 @@ plVariant plQtPropertyWidget::GetCommonValue(const plHybridArray<plPropertySelec
     {
       if (!value.IsValid())
       {
-        m_pObjectAccessor->GetValue(item.m_pObject, pProperty, value, item.m_Index).AssertSuccess();
+        m_pObjectAccessor->GetValue(item.m_pObject, pProperty, value, item.m_Index).IgnoreResult();
       }
       else
       {
         plVariant valueNext;
-        m_pObjectAccessor->GetValue(item.m_pObject, pProperty, valueNext, item.m_Index).AssertSuccess();
+        m_pObjectAccessor->GetValue(item.m_pObject, pProperty, valueNext, item.m_Index).IgnoreResult();
         if (value != valueNext)
         {
           value = plVariant();
@@ -507,15 +507,15 @@ void plQtPropertyWidget::PropertyChangedHandler(const plPropertyEvent& ed)
 
 bool plQtPropertyWidget::eventFilter(QObject* pWatched, QEvent* pEvent)
 {
-  if (pEvent->type() == QEvent::Wheel)
-  {
-    if (pWatched->parent())
-    {
-      pWatched->parent()->event(pEvent);
-    }
+  // if (pEvent->type() == QEvent::Wheel)
+  // {
+  //   if (pWatched->parent())
+  //   {
+  //     pWatched->parent()->event(pEvent);
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
   return false;
 }
@@ -757,7 +757,8 @@ void plQtPropertyPointerWidget::StructureEventHandler(const plDocumentObjectStru
 
 plQtEmbeddedClassPropertyWidget::plQtEmbeddedClassPropertyWidget()
   : plQtPropertyWidget()
-
+  , m_bTemporaryCommand(false)
+  , m_pResolvedType(nullptr)
 {
 }
 
@@ -892,7 +893,7 @@ plQtPropertyTypeWidget::plQtPropertyTypeWidget(bool bAddCollapsibleGroup)
   m_pTypeWidget = nullptr;
 }
 
-plQtPropertyTypeWidget::~plQtPropertyTypeWidget() = default;
+plQtPropertyTypeWidget::~plQtPropertyTypeWidget() {}
 
 void plQtPropertyTypeWidget::OnInit()
 {
@@ -967,7 +968,7 @@ void plQtPropertyTypeWidget::DoPrepareToDie()
 
 plQtPropertyContainerWidget::plQtPropertyContainerWidget()
   : plQtPropertyWidget()
-
+  , m_pAddButton(nullptr)
 {
   m_Pal = palette();
   setAutoFillBackground(true);
@@ -1102,7 +1103,7 @@ bool plQtPropertyContainerWidget::updateDropIndex(QDropEvent* pEvent)
         pEvent->accept();
         plInt32 iNewDropTarget = -1;
         // Find closest drop target.
-        const plInt32 iGlobalYPos = mapToGlobal(pEvent->position().toPoint()).y();
+        const plInt32 iGlobalYPos = mapToGlobal(pEvent->pos()).y();
         for (plUInt32 j = 0; j < m_Elements.GetCount(); j++)
         {
           const QRect rect(m_Elements[j].m_pSubGroup->mapToGlobal(QPoint(0, 0)), m_Elements[j].m_pSubGroup->size());
@@ -1217,6 +1218,7 @@ void plQtPropertyContainerWidget::OnCustomElementContextMenu(const QPoint& pt)
 plQtGroupBoxBase* plQtPropertyContainerWidget::CreateElement(QWidget* pParent)
 {
   auto pBox = new plQtCollapsibleGroupBox(pParent);
+  //pBox->SetFillColor(palette().window().color());
   return pBox;
 }
 
@@ -1386,10 +1388,10 @@ void plQtPropertyContainerWidget::UpdatePropertyMetaState()
       element.m_pSubGroup->setEnabled(!bReadOnly && state != plPropertyUiState::Disabled);
       element.m_pSubGroup->SetBoldTitle(!bIsDefault);
 
-      // If the fill color is invalid that means no border is drawn and we don't want to change the color then.
+      // // If the fill color is invalid that means no border is drawn and we don't want to change the color then.
       if (!element.m_pSubGroup->GetFillColor().isValid())
       {
-        element.m_pSubGroup->SetFillColor(qColor);
+        element.m_pSubGroup->SetFillColor(Qt::transparent);
       }
     }
     if (element.m_pWidget)
@@ -1523,7 +1525,7 @@ plQtPropertyStandardTypeContainerWidget::plQtPropertyStandardTypeContainerWidget
 {
 }
 
-plQtPropertyStandardTypeContainerWidget::~plQtPropertyStandardTypeContainerWidget() = default;
+plQtPropertyStandardTypeContainerWidget::~plQtPropertyStandardTypeContainerWidget() {}
 
 plQtGroupBoxBase* plQtPropertyStandardTypeContainerWidget::CreateElement(QWidget* pParent)
 {
@@ -1578,8 +1580,9 @@ void plQtPropertyStandardTypeContainerWidget::UpdateElement(plUInt32 index)
 /// *** plQtPropertyTypeContainerWidget ***
 
 plQtPropertyTypeContainerWidget::plQtPropertyTypeContainerWidget()
-
-  = default;
+  : m_bNeedsUpdate(false)
+{
+}
 
 plQtPropertyTypeContainerWidget::~plQtPropertyTypeContainerWidget()
 {
@@ -1630,7 +1633,7 @@ void plQtPropertyTypeContainerWidget::UpdateElement(plUInt32 index)
     // Label
     {
       plStringBuilder sTitle, tmp;
-      sTitle.Format("[{0}] - {1}", m_Keys[index].ConvertTo<plString>(), plTranslate(pCommonType->GetTypeName().GetData(tmp)));
+      sTitle.Format("{0}", plTranslate(pCommonType->GetTypeName().GetData(tmp)));
 
       if (auto pInDev = pCommonType->GetAttributeByType<plInDevelopmentAttribute>())
       {
@@ -1640,35 +1643,30 @@ void plQtPropertyTypeContainerWidget::UpdateElement(plUInt32 index)
       elem.m_pSubGroup->SetTitle(sTitle);
     }
 
-    plColor borderIconColor = plColor::MakeZero();
-
-    if (const plColorAttribute* pColorAttrib = pCommonType->GetAttributeByType<plColorAttribute>())
-    {
-      borderIconColor = pColorAttrib->GetColor();
-      elem.m_pSubGroup->SetFillColor(plToQtColor(pColorAttrib->GetColor()));
-    }
-    else if (const plCategoryAttribute* pCatAttrib = pCommonType->GetAttributeByType<plCategoryAttribute>())
-    {
-      borderIconColor = plColorScheme::GetCategoryColor(pCatAttrib->GetCategory(), plColorScheme::CategoryColorUsage::BorderIconColor);
-      elem.m_pSubGroup->SetFillColor(plToQtColor(plColorScheme::GetCategoryColor(pCatAttrib->GetCategory(), plColorScheme::CategoryColorUsage::BorderColor)));
-    }
-    else
-    {
-      const QPalette& pal = palette();
-      elem.m_pSubGroup->SetFillColor(pal.mid().color());
-    }
-
     // Icon
     {
       plStringBuilder sIconName;
       sIconName.Set(":/TypeIcons/", pCommonType->GetTypeName(), ".svg");
-      elem.m_pSubGroup->SetIcon(plQtUiServices::GetCachedIconResource(sIconName.GetData(), borderIconColor));
+      elem.m_pSubGroup->SetIcon(plQtUiServices::GetCachedIconResource(sIconName.GetData()));
+    }
+
+
+    const plColorAttribute* pColorAttrib = pCommonType->GetAttributeByType<plColorAttribute>();
+    if(pColorAttrib)
+    {
+      elem.m_pSubGroup->SetFillColor(plToQtColor(pColorAttrib->GetColor()).darker(200));
+    }
+    else
+    {
+      const QPalette& pal = palette();
+      elem.m_pSubGroup->SetFillColor(pal.alternateBase().color());
     }
 
     // help URL
     {
       plStringBuilder tmp;
-      QString url = plMakeQString(plTranslateHelpURL(pCommonType->GetTypeName().GetData(tmp)));
+      QString url = plTranslateHelpURL(pCommonType->GetTypeName().GetData(tmp));
+
 
       if (!url.isEmpty())
       {
@@ -1764,14 +1762,14 @@ void plQtVariantPropertyWidget::OnInit()
     auto type = static_cast<plVariantType::Enum>(i);
     if (GetVariantTypeDisplayName(type, sName).Succeeded())
     {
-      m_pTypeList->addItem(plMakeQString(plTranslate(sName)), i);
+      m_pTypeList->addItem(plTranslate(sName), i);
     }
   }
 
   connect(m_pTypeList, &QComboBox::currentIndexChanged,
-    [this](int iIndex)
+    [this](int index)
     {
-      ChangeVariantType(static_cast<plVariantType::Enum>(m_pTypeList->itemData(iIndex).toInt()));
+      ChangeVariantType(static_cast<plVariantType::Enum>(m_pTypeList->itemData(index).toInt()));
     });
 }
 

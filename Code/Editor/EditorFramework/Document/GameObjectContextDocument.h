@@ -18,7 +18,7 @@ class PLASMA_EDITORFRAMEWORK_DLL plGameObjectContextDocument : public plGameObje
   PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectContextDocument, plGameObjectDocument);
 
 public:
-  plGameObjectContextDocument(plStringView sDocumentPath, plDocumentObjectManager* pObjectManager,
+  plGameObjectContextDocument(const char* szDocumentPath, plDocumentObjectManager* pObjectManager,
     plAssetDocEngineConnection engineConnectionType = plAssetDocEngineConnection::FullObjectMirroring);
   ~plGameObjectContextDocument();
 

@@ -74,7 +74,7 @@ plUuid plApplyNativePropertyChangesContext::GenerateObjectGuid(const plUuid& par
     }
   }
 
-  return plUuid::MakeUuid();
+  return plUuid::CreateUuid();
 }
 
 

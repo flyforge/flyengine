@@ -90,12 +90,12 @@ class plStaticBitfield
 {
 public:
   using StorageType = T;
-  static constexpr plUInt32 GetStorageTypeBitCount() { return plMath::NumBits<T>(); }
+  static constexpr plUInt32 GetNumBits() { return plMath::NumBits<T>(); }
 
   /// \brief Initializes the bitfield to all zero.
   plStaticBitfield();
 
-  static plStaticBitfield<T> MakeFromMask(StorageType bits);
+  static plStaticBitfield<T> FromMask(StorageType bits);
 
   /// \brief Returns true, if the bitfield is not zero.
   bool IsAnyBitSet() const; // [tested]
@@ -129,15 +129,6 @@ public:
 
   /// \brief Clears the range starting at uiFirstBit up to (and including) uiLastBit to 0.
   void ClearBitRange(plUInt32 uiFirstBit, plUInt32 uiNumBits); // [tested]
-
-  /// \brief Returns the index of the lowest bit that is set. Returns the max index+1 in case no bit is set, at all.
-  plUInt32 GetLowestBitSet() const; // [tested]
-
-  /// \brief Returns the index of the highest bit that is set. Returns the max index+1 in case no bit is set, at all.
-  plUInt32 GetHighestBitSet() const; // [tested]
-
-  /// \brief Returns the count of how many bits are set in total.
-  plUInt32 GetNumBitsSet() const; // [tested]
 
   /// \brief Returns the raw uint that stores all bits.
   T GetValue() const; // [tested]

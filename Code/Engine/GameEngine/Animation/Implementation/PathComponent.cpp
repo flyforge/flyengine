@@ -8,7 +8,7 @@
 #include <RendererCore/Debug/DebugRenderer.h>
 
 // TODO PathComponent:
-// tangent mode for each node (auto, linear, Bezier)
+// tangent mode for each node (auto, linear, Bplier)
 // linked tangents on/off
 // editing tangents (in a plane, needs new manipulator)
 
@@ -539,8 +539,8 @@ static void ComputeCpDirs(const plDynamicArray<plPathComponent::ControlPoint>& p
 
     plVec3 dirP = (posPrev - cpC.m_vPosition);
     plVec3 dirN = (posNext - cpC.m_vPosition);
-    dirP.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
-    dirN.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
+    dirP.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+    dirN.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
 
     plVec3 dirAvg = dirP - dirN;
     dirAvg.NormalizeIfNotZero(cs.m_vForwardDir).IgnoreResult();
@@ -663,7 +663,8 @@ static void ComputeSegmentUpVector(plArrayPtr<plPathComponent::LinearizedElement
 
     const plAngle roll = plMath::Lerp(cp0.m_Roll, cp1.m_Roll, fLerpFactor);
 
-    plQuat qRoll = plQuat::MakeFromAxisAndAngle(tangents[t], roll);
+    plQuat qRoll;
+    qRoll.SetFromAxisAndAngle(tangents[t], roll);
 
     plVec3 vLocalUp = plMath::Lerp(cp0up, cp1up, fLerpFactor);
     vLocalUp.NormalizeIfNotZero(vWorldUp).IgnoreResult();

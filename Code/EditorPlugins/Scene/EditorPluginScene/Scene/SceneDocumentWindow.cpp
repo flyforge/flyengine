@@ -15,7 +15,7 @@
 plQtSceneDocumentWindow::plQtSceneDocumentWindow(plSceneDocument* pDocument)
   : plQtSceneDocumentWindowBase(pDocument)
 {
-  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, plEngineViewConfig* pConfig) -> plQtEngineViewWidget*
+  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, PlasmaEngineViewConfig* pConfig) -> plQtEngineViewWidget*
   {
     plQtSceneViewWidget* pWidget = new plQtSceneViewWidget(nullptr, static_cast<plQtSceneDocumentWindowBase*>(pWindow), pConfig);
     pWindow->AddViewWidget(pWidget);
@@ -251,7 +251,7 @@ void plQtSceneDocumentWindowBase::InternalRedraw()
   if (doc->GetGameMode() == GameMode::Play && !window()->isActiveWindow())
     return;
 
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -259,7 +259,7 @@ void plQtSceneDocumentWindowBase::InternalRedraw()
 void plQtSceneDocumentWindowBase::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {
@@ -358,7 +358,7 @@ void plQtSceneDocumentWindowBase::ExtendPropertyGridContextMenu(
   }
 }
 
-void plQtSceneDocumentWindowBase::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
+void plQtSceneDocumentWindowBase::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   plQtGameObjectDocumentWindow::ProcessMessageEventHandler(pMsg);
 }

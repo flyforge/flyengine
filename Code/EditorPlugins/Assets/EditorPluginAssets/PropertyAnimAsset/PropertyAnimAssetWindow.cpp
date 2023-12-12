@@ -21,7 +21,7 @@
 plQtPropertyAnimAssetDocumentWindow::plQtPropertyAnimAssetDocumentWindow(plPropertyAnimAssetDocument* pDocument)
   : plQtGameObjectDocumentWindow(pDocument)
 {
-  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, plEngineViewConfig* pConfig) -> plQtEngineViewWidget* {
+  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, PlasmaEngineViewConfig* pConfig) -> plQtEngineViewWidget* {
     plQtGameObjectViewWidget* pWidget = new plQtGameObjectViewWidget(nullptr, static_cast<plQtPropertyAnimAssetDocumentWindow*>(pWindow), pConfig);
     pWindow->AddViewWidget(pWidget);
     return pWidget;
@@ -72,7 +72,7 @@ plQtPropertyAnimAssetDocumentWindow::plQtPropertyAnimAssetDocumentWindow(plPrope
   {
     plQtDocumentPanel* pPanel = new plQtDocumentPanel(this, pDocument);
     pPanel->setObjectName("PropertyAnimAssetDockWidget");
-    pPanel->setWindowTitle("Object Properties");
+    pPanel->setWindowTitle("OBJECT PROPERTIES");
     pPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPanel, pDocument);
@@ -85,7 +85,7 @@ plQtPropertyAnimAssetDocumentWindow::plQtPropertyAnimAssetDocumentWindow(plPrope
   {
     plQtDocumentPanel* pPanel = new plQtDocumentPanel(this, pDocument);
     pPanel->setObjectName("PropertyAnimPropertiesDockWidget");
-    pPanel->setWindowTitle("Animated Properties");
+    pPanel->setWindowTitle("ANIMATED PROPERTIES");
     pPanel->show();
 
     m_pPropertyTreeView = new plQtPropertyAnimAssetTreeView(pPanel);
@@ -130,7 +130,7 @@ plQtPropertyAnimAssetDocumentWindow::plQtPropertyAnimAssetDocumentWindow(plPrope
   {
     m_pCurvePanel = new plQtDocumentPanel(this, pDocument);
     m_pCurvePanel->setObjectName("PropertyAnimFloatCurveDockWidget");
-    m_pCurvePanel->setWindowTitle("Curves");
+    m_pCurvePanel->setWindowTitle("CURVES");
     m_pCurvePanel->show();
 
     m_pCurveEditor = new plQtCurve1DEditorWidget(m_pCurvePanel);
@@ -143,7 +143,7 @@ plQtPropertyAnimAssetDocumentWindow::plQtPropertyAnimAssetDocumentWindow(plPrope
   {
     m_pColorGradientPanel = new plQtDocumentPanel(this, pDocument);
     m_pColorGradientPanel->setObjectName("PropertyAnimColorGradientDockWidget");
-    m_pColorGradientPanel->setWindowTitle("Color Gradient");
+    m_pColorGradientPanel->setWindowTitle("COLOR GRADIENT");
     m_pColorGradientPanel->show();
 
     m_pGradientEditor = new plQtColorGradientEditorWidget(m_pColorGradientPanel);
@@ -156,7 +156,7 @@ plQtPropertyAnimAssetDocumentWindow::plQtPropertyAnimAssetDocumentWindow(plPrope
   {
     m_pEventTrackPanel = new plQtDocumentPanel(this, pDocument);
     m_pEventTrackPanel->setObjectName("PropertyAnimEventTrackDockWidget");
-    m_pEventTrackPanel->setWindowTitle("Event Track");
+    m_pEventTrackPanel->setWindowTitle("EVENT TRACK");
     m_pEventTrackPanel->show();
 
     m_pEventTrackEditor = new plQtEventTrackEditorWidget(m_pEventTrackPanel);
@@ -296,10 +296,10 @@ void plQtPropertyAnimAssetDocumentWindow::DuplicateSelection()
 
 void plQtPropertyAnimAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   {
     // do not try to redraw while the process is crashed, it is obviously futile
-    if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+    if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
       return;
 
     {
@@ -385,14 +385,14 @@ void plQtPropertyAnimAssetDocumentWindow::UpdateSelectionData()
 
     plQtPropertyAnimModel* pModel = m_pPropertiesModel;
 
-    auto addRecursive = [&tracks, pModel](auto& ref_self, const plQtPropertyAnimModelTreeEntry* pTreeItem) -> void {
+    auto addRecursive = [&tracks, pModel](auto& self, const plQtPropertyAnimModelTreeEntry* pTreeItem) -> void {
       if (pTreeItem->m_pTrack != nullptr)
         tracks.Insert(pTreeItem->m_iTrackIdx);
 
       for (plInt32 iChild : pTreeItem->m_Children)
       {
         // cannot use 'addRecursive' here, because the name is not yet fully defined
-        ref_self(ref_self, &pModel->GetAllEntries()[iChild]);
+        self(self, &pModel->GetAllEntries()[iChild]);
       }
     };
 
@@ -482,7 +482,7 @@ void plQtPropertyAnimAssetDocumentWindow::onDeleteSelectedItems()
       plRemoveObjectCommand cmd;
       cmd.m_Object = trackGuid.Get<plUuid>();
 
-      pHistory->AddCommand(cmd).AssertSuccess();
+      pHistory->AddCommand(cmd).IgnoreResult();
     }
   }
 
@@ -537,7 +537,7 @@ void plQtPropertyAnimAssetDocumentWindow::onRebindSelectedItems()
 
     cmdSet.m_sProperty = "ObjectPath";
     cmdSet.m_NewValue = varRes;
-    pDoc->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+    pDoc->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
   }
 
   pHistory->FinishTransaction();
@@ -698,6 +698,8 @@ void plQtPropertyAnimAssetDocumentWindow::UpdateCurveEditor()
 
 void plQtPropertyAnimAssetDocumentWindow::UpdateGradientEditor()
 {
+  plPropertyAnimAssetDocument* pDoc = GetPropertyAnimDocument();
+
   if (m_pGradientToDisplay == nullptr || m_iMapGradientToTrack < 0)
   {
     // TODO: clear gradient editor ?
@@ -767,6 +769,8 @@ void plQtPropertyAnimAssetDocumentWindow::onCurveCpMoved(plUInt32 uiCurveIdx, pl
 
   plPropertyAnimAssetDocument* pDoc = GetPropertyAnimDocument();
 
+  auto pProp = pDoc->GetPropertyObject();
+
   const plInt32 iTrackIdx = m_MapSelectionToTrack[uiCurveIdx];
   const plVariant trackGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Tracks", iTrackIdx);
   const plDocumentObject* trackObject = pDoc->GetObjectManager()->GetObject(trackGuid.Get<plUuid>());
@@ -780,11 +784,11 @@ void plQtPropertyAnimAssetDocumentWindow::onCurveCpMoved(plUInt32 uiCurveIdx, pl
 
   cmdSet.m_sProperty = "Tick";
   cmdSet.m_NewValue = iTickX;
-  pDoc->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  pDoc->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Value";
   cmdSet.m_NewValue = newPosY;
-  pDoc->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  pDoc->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtPropertyAnimAssetDocumentWindow::onCurveCpDeleted(plUInt32 uiCurveIdx, plUInt32 cpIdx)
@@ -793,6 +797,8 @@ void plQtPropertyAnimAssetDocumentWindow::onCurveCpDeleted(plUInt32 uiCurveIdx, 
     return;
 
   plPropertyAnimAssetDocument* pDoc = GetPropertyAnimDocument();
+
+  auto pProp = pDoc->GetPropertyObject();
 
   const plInt32 iTrackIdx = m_MapSelectionToTrack[uiCurveIdx];
   const plVariant trackGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Tracks", iTrackIdx);
@@ -807,7 +813,7 @@ void plQtPropertyAnimAssetDocumentWindow::onCurveCpDeleted(plUInt32 uiCurveIdx, 
 
   plRemoveObjectCommand cmdSet;
   cmdSet.m_Object = cpGuid.Get<plUuid>();
-  pDoc->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  pDoc->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtPropertyAnimAssetDocumentWindow::onCurveTangentMoved(plUInt32 uiCurveIdx, plUInt32 cpIdx, float newPosX, float newPosY, bool rightTangent)
@@ -816,6 +822,8 @@ void plQtPropertyAnimAssetDocumentWindow::onCurveTangentMoved(plUInt32 uiCurveId
     return;
 
   plPropertyAnimAssetDocument* pDoc = GetPropertyAnimDocument();
+
+  auto pProp = pDoc->GetPropertyObject();
 
   const plInt32 iTrackIdx = m_MapSelectionToTrack[uiCurveIdx];
   const plVariant trackGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Tracks", iTrackIdx);
@@ -836,7 +844,7 @@ void plQtPropertyAnimAssetDocumentWindow::onCurveTangentMoved(plUInt32 uiCurveId
 
   cmdSet.m_sProperty = rightTangent ? "RightTangent" : "LeftTangent";
   cmdSet.m_NewValue = plVec2(newPosX, newPosY);
-  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtPropertyAnimAssetDocumentWindow::onLinkCurveTangents(plUInt32 uiCurveIdx, plUInt32 cpIdx, bool bLink)
@@ -845,6 +853,8 @@ void plQtPropertyAnimAssetDocumentWindow::onLinkCurveTangents(plUInt32 uiCurveId
     return;
 
   plPropertyAnimAssetDocument* pDoc = GetPropertyAnimDocument();
+
+  auto pProp = pDoc->GetPropertyObject();
 
   const plInt32 iTrackIdx = m_MapSelectionToTrack[uiCurveIdx];
   const plVariant trackGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Tracks", iTrackIdx);
@@ -858,7 +868,7 @@ void plQtPropertyAnimAssetDocumentWindow::onLinkCurveTangents(plUInt32 uiCurveId
   cmdLink.m_Object = cpGuid.Get<plUuid>();
   cmdLink.m_sProperty = "Linked";
   cmdLink.m_NewValue = bLink;
-  GetDocument()->GetCommandHistory()->AddCommand(cmdLink).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmdLink).IgnoreResult();
 
   if (bLink)
   {
@@ -876,6 +886,8 @@ void plQtPropertyAnimAssetDocumentWindow::onCurveTangentModeChanged(plUInt32 uiC
 
   plPropertyAnimAssetDocument* pDoc = GetPropertyAnimDocument();
 
+  auto pProp = pDoc->GetPropertyObject();
+
   const plInt32 iTrackIdx = m_MapSelectionToTrack[uiCurveIdx];
   const plVariant trackGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Tracks", iTrackIdx);
   const plDocumentObject* trackObject = pDoc->GetObjectManager()->GetObject(trackGuid.Get<plUuid>());
@@ -888,7 +900,7 @@ void plQtPropertyAnimAssetDocumentWindow::onCurveTangentModeChanged(plUInt32 uiC
   cmd.m_Object = cpGuid.Get<plUuid>();
   cmd.m_sProperty = rightTangent ? "RightTangentMode" : "LeftTangentMode";
   cmd.m_NewValue = mode;
-  GetDocument()->GetCommandHistory()->AddCommand(cmd).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmd).IgnoreResult();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -905,7 +917,7 @@ void plQtPropertyAnimAssetDocumentWindow::onGradientColorCpAdded(double posX, co
     return;
 
   const plVariant trackGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Tracks", m_iMapGradientToTrack);
-  plInt64 tickX = plColorGradientAssetData::TickFromTime(plTime::MakeFromSeconds(posX));
+  plInt64 tickX = plColorGradientAssetData::TickFromTime(plTime::Seconds(posX));
   pDoc->InsertGradientColorCpAt(trackGuid.Get<plUuid>(), tickX, color);
 }
 
@@ -918,7 +930,7 @@ void plQtPropertyAnimAssetDocumentWindow::onGradientAlphaCpAdded(double posX, pl
     return;
 
   const plVariant trackGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Tracks", m_iMapGradientToTrack);
-  plInt64 tickX = plColorGradientAssetData::TickFromTime(plTime::MakeFromSeconds(posX));
+  plInt64 tickX = plColorGradientAssetData::TickFromTime(plTime::Seconds(posX));
   pDoc->InsertGradientAlphaCpAt(trackGuid.Get<plUuid>(), tickX, alpha);
 }
 
@@ -931,7 +943,7 @@ void plQtPropertyAnimAssetDocumentWindow::onGradientIntensityCpAdded(double posX
     return;
 
   const plVariant trackGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Tracks", m_iMapGradientToTrack);
-  plInt64 tickX = plColorGradientAssetData::TickFromTime(plTime::MakeFromSeconds(posX));
+  plInt64 tickX = plColorGradientAssetData::TickFromTime(plTime::Seconds(posX));
   pDoc->InsertGradientIntensityCpAt(trackGuid.Get<plUuid>(), tickX, intensity);
 }
 
@@ -956,8 +968,8 @@ void plQtPropertyAnimAssetDocumentWindow::MoveGradientCP(plInt32 idx, double new
   cmdSet.m_Object = objGuid.Get<plUuid>();
 
   cmdSet.m_sProperty = "Tick";
-  cmdSet.m_NewValue = pDoc->GetProperties()->m_Tracks[m_iMapGradientToTrack]->m_ColorGradient.TickFromTime(plTime::MakeFromSeconds(newPosX));
-  history->AddCommand(cmdSet).AssertSuccess();
+  cmdSet.m_NewValue = pDoc->GetProperties()->m_Tracks[m_iMapGradientToTrack]->m_ColorGradient.TickFromTime(plTime::Seconds(newPosX));
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -997,7 +1009,7 @@ void plQtPropertyAnimAssetDocumentWindow::RemoveGradientCP(plInt32 idx, const ch
 
   plRemoveObjectCommand cmdSet;
   cmdSet.m_Object = objGuid.Get<plUuid>();
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -1039,15 +1051,15 @@ void plQtPropertyAnimAssetDocumentWindow::onGradientColorCpChanged(plInt32 idx, 
 
   cmdSet.m_sProperty = "Red";
   cmdSet.m_NewValue = color.r;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Green";
   cmdSet.m_NewValue = color.g;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Blue";
   cmdSet.m_NewValue = color.b;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -1075,7 +1087,7 @@ void plQtPropertyAnimAssetDocumentWindow::onGradientAlphaCpChanged(plInt32 idx, 
 
   cmdSet.m_sProperty = "Alpha";
   cmdSet.m_NewValue = alpha;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -1102,7 +1114,7 @@ void plQtPropertyAnimAssetDocumentWindow::onGradientIntensityCpChanged(plInt32 i
 
   cmdSet.m_sProperty = "Intensity";
   cmdSet.m_NewValue = intensity;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -1148,7 +1160,7 @@ void plQtPropertyAnimAssetDocumentWindow::onEventTrackCpMoved(plUInt32 cpIdx, pl
 
   cmdSet.m_sProperty = "Tick";
   cmdSet.m_NewValue = iTickX;
-  pDoc->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  pDoc->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtPropertyAnimAssetDocumentWindow::onEventTrackCpDeleted(plUInt32 cpIdx)
@@ -1168,7 +1180,7 @@ void plQtPropertyAnimAssetDocumentWindow::onEventTrackCpDeleted(plUInt32 cpIdx)
 
   plRemoveObjectCommand cmdSet;
   cmdSet.m_Object = cpGuid.Get<plUuid>();
-  pDoc->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  pDoc->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtPropertyAnimAssetDocumentWindow::onEventTrackBeginOperation(QString name)
@@ -1201,8 +1213,8 @@ void plQtPropertyAnimAssetDocumentWindow::onEventTrackEndCpChanges()
 
 //////////////////////////////////////////////////////////////////////////
 
-plQtPropertyAnimAssetTreeView::plQtPropertyAnimAssetTreeView(QWidget* pParent)
-  : QTreeView(pParent)
+plQtPropertyAnimAssetTreeView::plQtPropertyAnimAssetTreeView(QWidget* parent)
+  : QTreeView(parent)
 {
   setContextMenuPolicy(Qt::ContextMenuPolicy::DefaultContextMenu);
 }
@@ -1284,7 +1296,8 @@ void plQtPropertyAnimAssetTreeView::onAfterModelReset()
     for (const auto& idx : newSelection)
     {
       selectionModel()->select(idx, QItemSelectionModel::SelectionFlag::Select | QItemSelectionModel::SelectionFlag::Rows);
-    } });
+    }
+  });
 }
 
 void plQtPropertyAnimAssetTreeView::keyPressEvent(QKeyEvent* e)

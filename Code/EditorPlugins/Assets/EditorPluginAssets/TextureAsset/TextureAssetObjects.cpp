@@ -229,7 +229,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pMipmaps = pNode->FindProperty("Mipmaps");
     if (pMipmaps && pMipmaps->m_Value.IsA<bool>())
@@ -263,7 +263,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     const char* szAddressModes[] = {"AddressModeU", "AddressModeV", "AddressModeW"};
 
@@ -301,7 +301,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pUsage = pNode->FindProperty("Usage");
     if (pUsage && pUsage->m_Value.IsA<plString>())

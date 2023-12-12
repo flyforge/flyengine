@@ -4,24 +4,24 @@
 
 plMap<plString, plSet<plString>> plAssetFileExtensionWhitelist::s_ExtensionWhitelist;
 
-void plAssetFileExtensionWhitelist::AddAssetFileExtension(plStringView sAssetType, plStringView sAllowedFileExtension)
+void plAssetFileExtensionWhitelist::AddAssetFileExtension(const char* szAssetType, const char* szAllowedFileExtension)
 {
-  plStringBuilder sLowerType = sAssetType;
+  plStringBuilder sLowerType = szAssetType;
   sLowerType.ToLower();
 
-  plStringBuilder sLowerExt = sAllowedFileExtension;
+  plStringBuilder sLowerExt = szAllowedFileExtension;
   sLowerExt.ToLower();
 
   s_ExtensionWhitelist[sLowerType].Insert(sLowerExt);
 }
 
 
-bool plAssetFileExtensionWhitelist::IsFileOnAssetWhitelist(plStringView sAssetType, plStringView sFile)
+bool plAssetFileExtensionWhitelist::IsFileOnAssetWhitelist(const char* szAssetType, const char* szFile)
 {
-  plStringBuilder sLowerExt = plPathUtils::GetFileExtension(sFile);
+  plStringBuilder sLowerExt = plPathUtils::GetFileExtension(szFile);
   sLowerExt.ToLower();
 
-  plStringBuilder sLowerType = sAssetType;
+  plStringBuilder sLowerType = szAssetType;
   sLowerType.ToLower();
 
   plHybridArray<plString, 16> Types;
@@ -36,7 +36,7 @@ bool plAssetFileExtensionWhitelist::IsFileOnAssetWhitelist(plStringView sAssetTy
   return false;
 }
 
-const plSet<plString>& plAssetFileExtensionWhitelist::GetAssetFileExtensions(plStringView sAssetType)
+const plSet<plString>& plAssetFileExtensionWhitelist::GetAssetFileExtensions(const char* szAssetType)
 {
-  return s_ExtensionWhitelist[sAssetType];
+  return s_ExtensionWhitelist[szAssetType];
 }

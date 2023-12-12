@@ -70,8 +70,8 @@ void plAudioProxyComponent::Update()
 
     plAudioSystemTransform transform;
     transform.m_vPosition = GetOwner()->GetGlobalPosition();
-    transform.m_vForward = (rotation * plVec3::MakeAxisX()).GetNormalized();
-    transform.m_vUp = (rotation * plVec3::MakeAxisZ()).GetNormalized();
+    transform.m_vForward = (rotation * plVec3::UnitXAxis()).GetNormalized();
+    transform.m_vUp = (rotation * plVec3::UnitZAxis()).GetNormalized();
     transform.m_vVelocity = GetOwner()->GetLinearVelocity();
 
     if (transform == m_LastTransform)

@@ -26,6 +26,9 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 plPickingRenderPass::plPickingRenderPass()
   : plRenderPipelinePass("EditorPickingRenderPass")
 {
+  m_PickingPosition.Set(-1);
+  m_MarqueePickPosition0.Set(-1);
+  m_MarqueePickPosition1.Set(-1);
 }
 
 plPickingRenderPass::~plPickingRenderPass()
@@ -136,48 +139,109 @@ void plPickingRenderPass::Execute(const plRenderViewContext& renderViewContext, 
   renderViewContext.m_pRenderContext->SetShaderPermutationVariable("RENDER_PASS", "RENDER_PASS_FORWARD");
 
   // download the picking information from the GPU
-  if (m_uiWindowWidth != 0 && m_uiWindowHeight != 0)
   {
-    pCommandEncoder->ReadbackTexture(GetPickingDepthRT());
-    pCommandEncoder->ReadbackTexture(GetPickingIdRT());
-
-    plMat4 mProj;
-    renderViewContext.m_pCamera->GetProjectionMatrix((float)m_uiWindowWidth / m_uiWindowHeight, mProj);
-    plMat4 mView = renderViewContext.m_pCamera->GetViewMatrix();
-
-    if (mProj.IsNaN())
-      return;
-
-    plMat4 inv = mProj * mView;
-    if (inv.Invert(0).Failed())
+    if (m_uiWindowWidth != 0 && m_uiWindowHeight != 0)
     {
-      plLog::Warning("Inversion of View-Projection-Matrix failed. Picking results will be wrong.");
-      return;
-    }
+      pCommandEncoder->ReadbackTexture(GetPickingDepthRT());
 
-    m_mPickingInverseViewProjectionMatrix = inv;
+      plMat4 mProj;
+      renderViewContext.m_pCamera->GetProjectionMatrix((float)m_uiWindowWidth / m_uiWindowHeight, mProj);
+      plMat4 mView = renderViewContext.m_pCamera->GetViewMatrix();
 
-    plGALSystemMemoryDescription MemDesc;
-    MemDesc.m_uiRowPitch = 4 * m_uiWindowWidth;
-    MemDesc.m_uiSlicePitch = 4 * m_uiWindowWidth * m_uiWindowHeight;
-    plArrayPtr<plGALSystemMemoryDescription> SysMemDescs(&MemDesc, 1);
+      if (mProj.IsNaN())
+        return;
 
-    plGALTextureSubresource sourceSubResource;
-    plArrayPtr<plGALTextureSubresource> sourceSubResources(&sourceSubResource, 1);
+      // Double precision version
+      /*
+      {
+        plMat4d dView, dProj, dMVP;
+        CopyMatD(dView, mView);
+        CopyMatD(dProj, mProj);
 
-    {
+        dMVP = dProj * dView;
+        auto res = dMVP.Invert(0.00000001);
+
+        if (res.Failed())
+          plLog::Debug("Inversion of View-Projection-Matrix failed. Picking results will be wrong.");
+
+        m_PickingInverseViewProjectionMatrix = dMVP;
+      }
+      */
+
+      plMat4 inv = mProj * mView;
+      if (inv.Invert(0).Failed())
+      {
+        plLog::Warning("Inversion of View-Projection-Matrix failed. Picking results will be wrong.");
+        return;
+      }
+
+      m_mPickingInverseViewProjectionMatrix = inv;
+
       m_PickingResultsDepth.Clear();
       m_PickingResultsDepth.SetCountUninitialized(m_uiWindowWidth * m_uiWindowHeight);
 
-      MemDesc.m_pData = m_PickingResultsDepth.GetData();
-      pCommandEncoder->CopyTextureReadbackResult(GetPickingDepthRT(), sourceSubResources, SysMemDescs);
-    }
+      plGALSystemMemoryDescription MemDesc;
+      MemDesc.m_uiRowPitch = 4 * m_uiWindowWidth;
+      MemDesc.m_uiSlicePitch = 4 * m_uiWindowWidth * m_uiWindowHeight;
 
+      MemDesc.m_pData = m_PickingResultsDepth.GetData();
+      plArrayPtr<plGALSystemMemoryDescription> SysMemDescsDepth(&MemDesc, 1);
+      plGALTextureSubresource sourceSubResource;
+      plArrayPtr<plGALTextureSubresource> sourceSubResources(&sourceSubResource, 1);
+      pCommandEncoder->CopyTextureReadbackResult(GetPickingDepthRT(), sourceSubResources, SysMemDescsDepth);
+    }
+  }
+
+  {
+    // download the picking information from the GPU
+    if (m_uiWindowWidth != 0 && m_uiWindowHeight != 0)
     {
+      pCommandEncoder->ReadbackTexture(GetPickingIdRT());
+
+      plMat4 mProj;
+      renderViewContext.m_pCamera->GetProjectionMatrix((float)m_uiWindowWidth / m_uiWindowHeight, mProj);
+      plMat4 mView = renderViewContext.m_pCamera->GetViewMatrix();
+
+      if (mProj.IsNaN())
+        return;
+
+      // Double precision version
+      /*
+      {
+        plMat4d dView, dProj, dMVP;
+        CopyMatD(dView, mView);
+        CopyMatD(dProj, mProj);
+
+        dMVP = dProj * dView;
+        auto res = dMVP.Invert(0.00000001);
+
+        if (res.Failed())
+          plLog::Debug("Inversion of View-Projection-Matrix failed. Picking results will be wrong.");
+
+        m_PickingInverseViewProjectionMatrix = dMVP;
+      }
+      */
+
+      plMat4 inv = mProj * mView;
+      if (inv.Invert(0).Failed())
+      {
+        plLog::Warning("Inversion of View-Projection-Matrix failed. Picking results will be wrong.");
+        return;
+      }
+
+      m_mPickingInverseViewProjectionMatrix = inv;
+
       m_PickingResultsID.Clear();
       m_PickingResultsID.SetCountUninitialized(m_uiWindowWidth * m_uiWindowHeight);
 
+      plGALSystemMemoryDescription MemDesc;
+      MemDesc.m_uiRowPitch = 4 * m_uiWindowWidth;
+      MemDesc.m_uiSlicePitch = 4 * m_uiWindowWidth * m_uiWindowHeight;
+
       MemDesc.m_pData = m_PickingResultsID.GetData();
+      plArrayPtr<plGALSystemMemoryDescription> SysMemDescs(&MemDesc, 1);
+      plGALTextureSubresource sourceSubResource;
+      plArrayPtr<plGALTextureSubresource> sourceSubResources(&sourceSubResource, 1);
       pCommandEncoder->CopyTextureReadbackResult(GetPickingIdRT(), sourceSubResources, SysMemDescs);
     }
   }
@@ -274,10 +338,10 @@ void plPickingRenderPass::ReadBackPropertiesSinglePick(plView* pView)
     plGraphicsUtils::ConvertScreenPosToWorldPos(m_mPickingInverseViewProjectionMatrix, 0, 0, m_uiWindowWidth, m_uiWindowHeight, plVec3((float)x, (float)(m_uiWindowHeight - (y + 1)), fOtherDepths[2]), vOtherPos[2]).IgnoreResult();
     plGraphicsUtils::ConvertScreenPosToWorldPos(m_mPickingInverseViewProjectionMatrix, 0, 0, m_uiWindowWidth, m_uiWindowHeight, plVec3((float)x, (float)(m_uiWindowHeight - (y - 1)), fOtherDepths[3]), vOtherPos[3]).IgnoreResult();
 
-    vNormals[0].CalculateNormal(vPickedPosition, vOtherPos[0], vOtherPos[2]).IgnoreResult();
-    vNormals[1].CalculateNormal(vPickedPosition, vOtherPos[2], vOtherPos[1]).IgnoreResult();
-    vNormals[2].CalculateNormal(vPickedPosition, vOtherPos[1], vOtherPos[3]).IgnoreResult();
-    vNormals[3].CalculateNormal(vPickedPosition, vOtherPos[3], vOtherPos[0]).IgnoreResult();
+    vNormals[0] = plPlane(vPickedPosition, vOtherPos[0], vOtherPos[2]).m_vNormal;
+    vNormals[1] = plPlane(vPickedPosition, vOtherPos[2], vOtherPos[1]).m_vNormal;
+    vNormals[2] = plPlane(vPickedPosition, vOtherPos[1], vOtherPos[3]).m_vNormal;
+    vNormals[3] = plPlane(vPickedPosition, vOtherPos[3], vOtherPos[0]).m_vNormal;
 
     vNormal = (vNormals[0] + vNormals[1] + vNormals[2] + vNormals[3]).GetNormalized();
   }
@@ -316,12 +380,12 @@ void plPickingRenderPass::ReadBackPropertiesSinglePick(plView* pView)
   done:;
   }
 
-  pView->SetRenderPassReadBackProperty(GetName(), "PickedMatrix", m_mPickingInverseViewProjectionMatrix);
-  pView->SetRenderPassReadBackProperty(GetName(), "PickedID", uiPickID);
-  pView->SetRenderPassReadBackProperty(GetName(), "PickedDepth", m_PickingResultsDepth[uiIndex]);
-  pView->SetRenderPassReadBackProperty(GetName(), "PickedNormal", vNormal);
-  pView->SetRenderPassReadBackProperty(GetName(), "PickedRayStartPosition", vPickingRayStartPosition);
-  pView->SetRenderPassReadBackProperty(GetName(), "PickedPosition", vPickedPosition);
+  pView->SetRenderPassReadBackProperty(GetName(), "PickingMatrix", m_mPickingInverseViewProjectionMatrix);
+  pView->SetRenderPassReadBackProperty(GetName(), "PickingID", uiPickID);
+  pView->SetRenderPassReadBackProperty(GetName(), "PickingDepth", m_PickingResultsDepth[uiIndex]);
+  pView->SetRenderPassReadBackProperty(GetName(), "PickingNormal", vNormal);
+  pView->SetRenderPassReadBackProperty(GetName(), "PickingRayStartPosition", vPickingRayStartPosition);
+  pView->SetRenderPassReadBackProperty(GetName(), "PickingPosition", vPickedPosition);
 }
 
 void plPickingRenderPass::ReadBackPropertiesMarqueePick(plView* pView)

@@ -24,7 +24,7 @@ protected:
 
   virtual ~plGALVertexDeclarationDX11();
 
-  ID3D11InputLayout* m_pDXInputLayout = nullptr;
+  ID3D11InputLayout* m_pDXInputLayout;
 };
 
 #include <RendererDX11/Shader/Implementation/VertexDeclarationDX11_inl.h>

@@ -137,11 +137,7 @@ class PLASMA_RENDERERCORE_DLL plMeshBufferResource : public plResource
   PLASMA_RESOURCE_DECLARE_CREATEABLE(plMeshBufferResource, plMeshBufferResourceDescriptor);
 
 public:
-  plMeshBufferResource()
-    : plResource(DoUpdate::OnAnyThread, 1)
-
-  {
-  }
+  plMeshBufferResource();
   ~plMeshBufferResource();
 
   PLASMA_ALWAYS_INLINE plUInt32 GetPrimitiveCount() const { return m_uiPrimitiveCount; }
@@ -165,8 +161,8 @@ private:
 
   plBoundingBoxSphere m_Bounds;
   plVertexDeclarationInfo m_VertexDeclaration;
-  plUInt32 m_uiPrimitiveCount = 0;
+  plUInt32 m_uiPrimitiveCount;
   plGALBufferHandle m_hVertexBuffer;
   plGALBufferHandle m_hIndexBuffer;
-  plGALPrimitiveTopology::Enum m_Topology = plGALPrimitiveTopology::Enum::Default;
+  plGALPrimitiveTopology::Enum m_Topology;
 };

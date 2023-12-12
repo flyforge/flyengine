@@ -27,7 +27,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plDebugTextComponent, 1, plComponentMode::Static)
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Utilities/Debug"),
+    new plCategoryAttribute("Debug"),
+    new plColorAttribute(plColorScheme::Utilities),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -36,6 +37,10 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plDebugTextComponent::plDebugTextComponent()
   : m_sText("Value0: {0}, Value1: {1}, Value2: {2}, Value3: {3}")
+  , m_fValue0(0.0f)
+  , m_fValue1(0.0f)
+  , m_fValue2(0.0f)
+  , m_fValue3(0.0f)
   , m_Color(plColor::White)
 {
 }

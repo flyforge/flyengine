@@ -9,8 +9,8 @@
 #include <QRubberBand>
 #include <qevent.h>
 
-plQtCurveEditWidget::plQtCurveEditWidget(QWidget* pParent)
-  : QWidget(pParent)
+plQtCurveEditWidget::plQtCurveEditWidget(QWidget* parent)
+  : QWidget(parent)
 {
   setFocusPolicy(Qt::FocusPolicy::ClickFocus);
   setMouseTracking(true);
@@ -203,10 +203,10 @@ QPointF plQtCurveEditWidget::MapToScene(const QPoint& pos) const
   return QPointF(x, y) + m_SceneTranslation;
 }
 
-plVec2 plQtCurveEditWidget::MapDirFromScene(const plVec2& vPos) const
+plVec2 plQtCurveEditWidget::MapDirFromScene(const plVec2& pos) const
 {
-  const float x = vPos.x * m_SceneToPixelScale.x();
-  const float y = vPos.y * m_SceneToPixelScale.y();
+  const float x = pos.x * m_SceneToPixelScale.x();
+  const float y = pos.y * m_SceneToPixelScale.y();
 
   return plVec2(x, y);
 }
@@ -276,9 +276,9 @@ void plQtCurveEditWidget::ToggleSelected(const plSelectedCurveCP& cp)
   Q_EMIT SelectionChangedEvent();
 }
 
-void plQtCurveEditWidget::SetSelected(const plSelectedCurveCP& cp, bool bSet)
+void plQtCurveEditWidget::SetSelected(const plSelectedCurveCP& cp, bool set)
 {
-  if (!bSet)
+  if (!set)
   {
     for (plUInt32 i = 0; i < m_SelectedCPs.GetCount(); ++i)
     {
@@ -1365,12 +1365,12 @@ plQtCurveEditWidget::ClickTarget plQtCurveEditWidget::DetectClickTarget(const QP
     plVec2d ptLeft;
     plVec2d ptRight;
 
-    // if (cp.m_LeftTangentMode == plCurveTangentMode::Bplier)
+    // if (cp.m_LeftTangentMode == plCurveTangentMode::Bezier)
     ptLeft = ToVec(MapFromScene(point + plVec2d(cp.m_LeftTangent.x, cp.m_LeftTangent.y)));
     // else
     // ptLeft = ToVec(MapFromScene(cp.m_Point)) + MapDirFromScene(cp.m_LeftTangent).GetNormalized() * 50.0f;
 
-    // if (cp.m_RightTangentMode == plCurveTangentMode::Bplier)
+    // if (cp.m_RightTangentMode == plCurveTangentMode::Bezier)
     ptRight = ToVec(MapFromScene(point + plVec2d(cp.m_RightTangent.x, cp.m_RightTangent.y)));
     // else
     // ptRight = ToVec(MapFromScene(cp.m_Point)) + MapDirFromScene(cp.m_RightTangent).GetNormalized() * 50.0f;
@@ -1512,7 +1512,7 @@ void plQtCurveEditWidget::ComputeSelectionRect()
     return;
 
   plBoundingBox bbox;
-  bbox = plBoundingBox::MakeInvalid();
+  bbox.SetInvalid();
 
   for (const auto& cpSel : m_SelectedCPs)
   {

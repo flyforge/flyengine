@@ -14,7 +14,6 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimatedMeshAssetProperties, 2, plRTTIDefa
     PLASMA_ENUM_MEMBER_PROPERTY("NormalPrecision", plMeshNormalPrecision, m_NormalPrecision),
     PLASMA_ENUM_MEMBER_PROPERTY("TexCoordPrecision", plMeshTexCoordPrecision, m_TexCoordPrecision),
     PLASMA_ENUM_MEMBER_PROPERTY("BoneWeightPrecision", plMeshBoneWeigthPrecision, m_BoneWeightPrecision),
-    PLASMA_MEMBER_PROPERTY("NormalizeWeights", m_bNormalizeWeights)->AddAttributes(new plDefaultValueAttribute(true)),
     PLASMA_MEMBER_PROPERTY("ImportMaterials", m_bImportMaterials)->AddAttributes(new plDefaultValueAttribute(true)),
     PLASMA_ARRAY_MEMBER_PROPERTY("Materials", m_Slots)->AddAttributes(new plContainerAttribute(false, true, true)),
   }

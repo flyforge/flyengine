@@ -95,8 +95,6 @@ void plTransparentForwardRenderPass::RenderObjects(const plRenderViewContext& re
 
   renderViewContext.m_pRenderContext->SetShaderPermutationVariable("PREPARE_DEPTH", "FALSE");
   RenderDataWithCategory(renderViewContext, plDefaultRenderDataCategories::LitForeground);
-
-  RenderDataWithCategory(renderViewContext, plDefaultRenderDataCategories::LitScreenFX);
 }
 
 void plTransparentForwardRenderPass::UpdateSceneColorTexture(

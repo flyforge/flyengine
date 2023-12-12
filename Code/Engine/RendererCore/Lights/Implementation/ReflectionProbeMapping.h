@@ -80,7 +80,7 @@ public:
 private:
   struct plProbeMappingFlags
   {
-    using StorageType = plUInt8;
+    typedef plUInt8 StorageType;
 
     enum Enum
     {

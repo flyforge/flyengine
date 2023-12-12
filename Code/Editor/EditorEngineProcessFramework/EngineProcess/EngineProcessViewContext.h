@@ -6,10 +6,10 @@
 #include <EditorEngineProcessFramework/EditorEngineProcessFrameworkDLL.h>
 #include <RendererCore/Pipeline/Declarations.h>
 
-class plEngineProcessDocumentContext;
-class plEditorEngineDocumentMsg;
+class PlasmaEngineProcessDocumentContext;
+class PlasmaEditorEngineDocumentMsg;
 class plViewRedrawMsgToEngine;
-class plEditorEngineViewMsg;
+class PlasmaEditorEngineViewMsg;
 class plGALRenderTargetSetup;
 class plActor;
 struct plGALRenderTargets;
@@ -17,22 +17,23 @@ struct plGALRenderTargets;
 using plRenderPipelineResourceHandle = plTypedResourceHandle<class plRenderPipelineResource>;
 
 /// \brief Represents the window inside the editor process, into which the engine process renders
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEditorProcessViewWindow : public plWindowBase
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEditorProcessViewWindow : public plWindowBase
 {
 public:
-  plEditorProcessViewWindow()
+  PlasmaEditorProcessViewWindow()
   {
     m_hWnd = INVALID_WINDOW_HANDLE_VALUE;
     m_uiWidth = 0;
     m_uiHeight = 0;
   }
 
-  ~plEditorProcessViewWindow();
+  ~PlasmaEditorProcessViewWindow();
 
-  plResult UpdateWindow(plWindowHandle hParentWindow, plUInt16 uiWidth, plUInt16 uiHeight);
+  plResult UpdateWindow(plWindowHandle parentWindow, plUInt16 uiWidth, plUInt16 uiHeight);
 
   // Inherited via plWindowBase
   virtual plSizeU32 GetClientAreaSize() const override { return plSizeU32(m_uiWidth, m_uiHeight); }
+  virtual plSizeU32 GetRenderAreaSize() const override { return GetClientAreaSize(); }
   virtual plWindowHandle GetNativeWindowHandle() const override { return m_hWnd; }
   virtual void ProcessWindowMessages() override {}
   virtual bool IsFullscreenWindow(bool bOnlyProperFullscreenMode = false) const override { return false; }
@@ -49,29 +50,29 @@ private:
 };
 
 /// \brief Represents the view/window on the engine process side, holds all data necessary for rendering
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineProcessViewContext
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineProcessViewContext
 {
 public:
-  plEngineProcessViewContext(plEngineProcessDocumentContext* pContext);
-  virtual ~plEngineProcessViewContext();
+  PlasmaEngineProcessViewContext(PlasmaEngineProcessDocumentContext* pContext);
+  virtual ~PlasmaEngineProcessViewContext();
 
-  void SetViewID(plUInt32 uiId);
+  void SetViewID(plUInt32 id);
 
-  plEngineProcessDocumentContext* GetDocumentContext() const { return m_pDocumentContext; }
+  PlasmaEngineProcessDocumentContext* GetDocumentContext() const { return m_pDocumentContext; }
 
-  virtual void HandleViewMessage(const plEditorEngineViewMsg* pMsg);
-  virtual void SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* pRenderTargets, plUInt16 uiWidth, plUInt16 uiHeight);
+  virtual void HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg);
+  virtual void SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* renderTargets, plUInt16 uiWidth, plUInt16 uiHeight);
   virtual void Redraw(bool bRenderEditorGizmos);
 
   /// \brief Focuses camera on the given object
-  static bool FocusCameraOnObject(plCamera& inout_camera, const plBoundingBoxSphere& objectBounds, float fFov, const plVec3& vViewDir);
+  static bool FocusCameraOnObject(plCamera& camera, const plBoundingBoxSphere& objectBounds, float fFov, const plVec3& vViewDir);
 
   plViewHandle GetViewHandle() const { return m_hView; }
 
   void DrawSimpleGrid() const;
 
 protected:
-  void SendViewMessage(plEditorEngineViewMsg* pViewMsg);
+  void SendViewMessage(PlasmaEditorEngineViewMsg* pViewMsg);
   void HandleWindowUpdate(plWindowHandle hWnd, plUInt16 uiWidth, plUInt16 uiHeight);
   void OnSwapChainChanged(plGALSwapChainHandle hSwapChain, plSizeU32 size);
 
@@ -87,7 +88,7 @@ protected:
   virtual plViewHandle CreateView() = 0;
 
 private:
-  plEngineProcessDocumentContext* m_pDocumentContext;
+  PlasmaEngineProcessDocumentContext* m_pDocumentContext;
   plActor* m_pEditorWndActor = nullptr;
 
 protected:

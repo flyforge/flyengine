@@ -26,6 +26,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plTriggerDelayModifierComponent, 1 /* version */, pl
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"), // Component menu group
+    new plColorAttribute(plColorScheme::Logic),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -139,7 +140,7 @@ void plTriggerDelayModifierComponent::OnMsgComponentInternalTrigger(plMsgCompone
       newMsg.m_sMessage = m_sMessage;
       newMsg.m_TriggerState = plTriggerState::Activated;
 
-      m_TriggerEventSender.PostEventMessage(newMsg, this, GetOwner()->GetParent(), plTime::MakeZero(), plObjectMsgQueueType::PostTransform);
+      m_TriggerEventSender.PostEventMessage(newMsg, this, GetOwner()->GetParent(), plTime::Zero(), plObjectMsgQueueType::PostTransform);
     }
   }
   else if (msg.m_sMessage == plTempHashedString("Deactivate"))
@@ -152,7 +153,7 @@ void plTriggerDelayModifierComponent::OnMsgComponentInternalTrigger(plMsgCompone
       newMsg.m_sMessage = m_sMessage;
       newMsg.m_TriggerState = plTriggerState::Deactivated;
 
-      m_TriggerEventSender.PostEventMessage(newMsg, this, GetOwner()->GetParent(), plTime::MakeZero(), plObjectMsgQueueType::PostTransform);
+      m_TriggerEventSender.PostEventMessage(newMsg, this, GetOwner()->GetParent(), plTime::Zero(), plObjectMsgQueueType::PostTransform);
     }
   }
 }

@@ -9,7 +9,7 @@
 class plAssetProfilesObjectManager : public plDocumentObjectManager
 {
 public:
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const override { ref_types.PushBack(plGetStaticRTTI<plPlatformProfile>()); }
+  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const override { Types.PushBack(plGetStaticRTTI<plPlatformProfile>()); }
 };
 
 class plAssetProfilesDocument : public plDocument
@@ -17,8 +17,8 @@ class plAssetProfilesDocument : public plDocument
   PLASMA_ADD_DYNAMIC_REFLECTION(plAssetProfilesDocument, plDocument);
 
 public:
-  plAssetProfilesDocument(plStringView sDocumentPath)
-    : plDocument(sDocumentPath, PLASMA_DEFAULT_NEW(plAssetProfilesObjectManager))
+  plAssetProfilesDocument(const char* szDocumentPath)
+    : plDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plAssetProfilesObjectManager))
   {
   }
 
@@ -38,11 +38,11 @@ public:
     m_pDialog = pDialog;
   }
 
-  virtual QVariant data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const override
+  virtual QVariant data(const plDocumentObject* pObject, int row, int column, int role) const override
   {
-    if (iColumn == 0)
+    if (column == 0)
     {
-      if (iRole == Qt::DecorationRole)
+      if (role == Qt::DecorationRole)
       {
         const plInt32 iPlatform = pObject->GetTypeAccessor().GetValue("Platform").ConvertTo<plInt32>();
 
@@ -59,15 +59,15 @@ public:
         }
       }
 
-      if (iRole == Qt::DisplayRole)
+      if (role == Qt::DisplayRole)
       {
-        QString name = plQtNameableAdapter::data(pObject, iRow, iColumn, iRole).toString();
+        QString name = plQtNameableAdapter::data(pObject, row, column, role).toString();
 
-        if (iRow == plAssetCurator::GetSingleton()->GetActiveAssetProfileIndex())
+        if (row == plAssetCurator::GetSingleton()->GetActiveAssetProfileIndex())
         {
           name += " (active)";
         }
-        else if (iRow == m_pDialog->m_uiActiveConfig)
+        else if (row == m_pDialog->m_uiActiveConfig)
         {
           name += " (switch to)";
         }
@@ -76,15 +76,15 @@ public:
       }
     }
 
-    return plQtNameableAdapter::data(pObject, iRow, iColumn, iRole);
+    return plQtNameableAdapter::data(pObject, row, column, role);
   }
 
 private:
   const plQtAssetProfilesDlg* m_pDialog = nullptr;
 };
 
-plQtAssetProfilesDlg::plQtAssetProfilesDlg(QWidget* pParent)
-  : QDialog(pParent)
+plQtAssetProfilesDlg::plQtAssetProfilesDlg(QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 
@@ -141,7 +141,8 @@ plUuid plQtAssetProfilesDlg::NativeToObject(plPlatformProfile* pProfile)
   plRttiConverterContext context;
   plRttiConverterWriter conv(&graph, &context, true, true);
 
-  const plUuid guid = plUuid::MakeUuid();
+  plUuid guid;
+  guid.CreateNewUuid();
   context.RegisterObject(guid, pType, pProfile);
   plAbstractObjectNode* pNode = conv.AddObjectToGraph(pType, pProfile, "root");
 
@@ -311,7 +312,7 @@ void plQtAssetProfilesDlg::on_DeleteButton_clicked()
   plRemoveObjectCommand cmd;
   cmd.m_Object = sel[0]->GetGuid();
 
-  m_pDocument->GetCommandHistory()->AddCommand(cmd).AssertSuccess();
+  m_pDocument->GetCommandHistory()->AddCommand(cmd).IgnoreResult();
 
   m_pDocument->GetCommandHistory()->FinishTransaction();
 }
@@ -337,7 +338,7 @@ void plQtAssetProfilesDlg::on_RenameButton_clicked()
   cmd.m_sProperty = "Name";
   cmd.m_NewValue = sProfileName;
 
-  m_pDocument->GetCommandHistory()->AddCommand(cmd).AssertSuccess();
+  m_pDocument->GetCommandHistory()->AddCommand(cmd).IgnoreResult();
 
   m_pDocument->GetCommandHistory()->FinishTransaction();
 }

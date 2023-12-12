@@ -10,14 +10,18 @@
 #  include <Foundation/IO/CompressedStreamZstd.h>
 #endif
 
+#ifdef BUILDSYSTEM_ENABLE_BROTLIG_SUPPORT
+#  include <Foundation/IO/CompressedStreamBrotliG.h>
+#endif
+
 plMeshResourceDescriptor::plMeshResourceDescriptor()
 {
-  m_Bounds = plBoundingBoxSphere::MakeInvalid();
+  m_Bounds.SetInvalid();
 }
 
 void plMeshResourceDescriptor::Clear()
 {
-  m_Bounds = plBoundingBoxSphere::MakeInvalid();
+  m_Bounds.SetInvalid();
   m_hMeshBuffer.Invalidate();
   m_Materials.Clear();
   m_MeshBufferDescriptor.Clear();
@@ -84,7 +88,7 @@ void plMeshResourceDescriptor::AddSubMesh(plUInt32 uiPrimitiveCount, plUInt32 ui
   p.m_uiFirstPrimitive = uiFirstPrimitive;
   p.m_uiPrimitiveCount = uiPrimitiveCount;
   p.m_uiMaterialIndex = uiMaterialIndex;
-  p.m_Bounds = plBoundingBoxSphere::MakeInvalid();
+  p.m_Bounds.SetInvalid();
 
   m_SubMeshes.PushBack(p);
 }
@@ -118,9 +122,13 @@ void plMeshResourceDescriptor::Save(plStreamWriter& inout_stream)
 
   plUInt8 uiCompressionMode = 0;
 
-#ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
+#ifdef BUILDSYSTEM_ENABLE_BROTLIG_SUPPORT
+  uiCompressionMode = 2;
+  plCompressedStreamWriterBrotliG compressor(&inout_stream);
+  plChunkStreamWriter chunk(compressor);
+#elif BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
   uiCompressionMode = 1;
-  plCompressedStreamWriterZstd compressor(&inout_stream, 0, plCompressedStreamWriterZstd::Compression::Average);
+  plCompressedStreamWriterZstd compressor(&inout_stream, plCompressedStreamWriterZstd::Compression::Average);
   plChunkStreamWriter chunk(compressor);
 #else
   plChunkStreamWriter chunk(stream);
@@ -306,6 +314,10 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
   plCompressedStreamReaderZstd decompressorZstd;
 #endif
 
+#ifdef BUILDSYSTEM_ENABLE_BROTLIG_SUPPORT
+  plCompressedStreamReaderBrotliG decompressorBrotliG;
+#endif
+
   switch (uiCompressionMode)
   {
     case 0:
@@ -321,6 +333,15 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
       return PLASMA_FAILURE;
 #endif
 
+    case 2:
+#ifdef BUILDSYSTEM_ENABLE_BROTLIG_SUPPORT
+      decompressorBrotliG.SetInputStream(&inout_stream);
+      pCompressor = &decompressorBrotliG;
+      break;
+#else
+      plLog::Error("Mesh is compressed with BrotliG, but support for this compressor is not compiled in.");
+      return PLASMA_FAILURE;
+#endif
     default:
       plLog::Error("Mesh is compressed with an unknown algorithm.");
       return PLASMA_FAILURE;
@@ -381,7 +402,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
         chunk >> m_SubMeshes[idx].m_uiPrimitiveCount;
 
         /// \todo load from file
-        m_SubMeshes[idx].m_Bounds = plBoundingBoxSphere::MakeInvalid();
+        m_SubMeshes[idx].m_Bounds.SetInvalid();
       }
     }
 

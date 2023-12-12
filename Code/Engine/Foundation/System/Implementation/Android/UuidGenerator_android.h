@@ -5,7 +5,7 @@ PLASMA_FOUNDATION_INTERNAL_HEADER
 #include <Foundation/Basics/Platform/Android/AndroidUtils.h>
 #include <android_native_app_glue.h>
 
-plUuid plUuid::MakeUuid()
+void plUuid::CreateNewUuid()
 {
   plJniAttachment attachment;
 
@@ -15,7 +15,8 @@ plUuid plUuid::MakeUuid()
   jlong mostSignificant = javaUuid.Call<jlong>("getMostSignificantBits");
   jlong leastSignificant = javaUuid.Call<jlong>("getLeastSignificantBits");
 
-  return plUuid(leastSignificant, mostSignificant);
+  m_uiHigh = mostSignificant;
+  m_uiLow = leastSignificant;
 
   //#TODO maybe faster to read /proc/sys/kernel/random/uuid, but that can't be done via plOSFile
   // see https://stackoverflow.com/questions/11888055/include-uuid-h-into-android-ndk-project

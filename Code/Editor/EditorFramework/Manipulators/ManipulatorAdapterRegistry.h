@@ -18,7 +18,7 @@ public:
 
   plRttiMappedObjectFactory<plManipulatorAdapter> m_Factory;
 
-  void QueryGridSettings(const plDocument* pDocument, plGridSettingsMsgToEngine& out_gridSettings);
+  void QueryGridSettings(const plDocument* pDocument, plGridSettingsMsgToEngine& outGridSettings);
 
 private:
   void ManipulatorManagerEventHandler(const plManipulatorManagerEvent& e);

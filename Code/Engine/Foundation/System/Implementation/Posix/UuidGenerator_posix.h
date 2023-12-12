@@ -6,12 +6,13 @@ PLASMA_FOUNDATION_INTERNAL_HEADER
 
 PLASMA_CHECK_AT_COMPILETIME(sizeof(plUInt64) * 2 == sizeof(uuid_t));
 
-plUuid plUuid::MakeUuid()
+void plUuid::CreateNewUuid()
 {
   uuid_t uuid;
   uuid_generate(uuid);
 
   plUInt64* uiUuidData = reinterpret_cast<plUInt64*>(uuid);
 
-  return plUuid(uiUuidData[1], uiUuidData[0]);
+  m_uiHigh = uiUuidData[0];
+  m_uiLow = uiUuidData[1];
 }

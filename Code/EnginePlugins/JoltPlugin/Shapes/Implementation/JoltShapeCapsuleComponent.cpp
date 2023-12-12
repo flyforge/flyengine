@@ -48,7 +48,7 @@ void plJoltShapeCapsuleComponent::SerializeComponent(plWorldWriter& inout_stream
 void plJoltShapeCapsuleComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
 
   auto& s = inout_stream.GetStream();
@@ -58,8 +58,8 @@ void plJoltShapeCapsuleComponent::DeserializeComponent(plWorldReader& inout_stre
 
 void plJoltShapeCapsuleComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3(0, 0, -m_fHeight * 0.5f), m_fRadius), plInvalidSpatialDataCategory);
-  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3(0, 0, +m_fHeight * 0.5f), m_fRadius), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingSphere(plVec3(0, 0, -m_fHeight * 0.5f), m_fRadius), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingSphere(plVec3(0, 0, +m_fHeight * 0.5f), m_fRadius), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeCapsuleComponent::SetRadius(float f)
@@ -89,7 +89,7 @@ void plJoltShapeCapsuleComponent::CreateShapes(plDynamicArray<plJoltSubShape>& o
   pNewShape->SetUserData(reinterpret_cast<plUInt64>(GetUserData()));
   pNewShape->SetMaterial(pMaterial);
 
-  JPH::Ref<JPH::RotatedTranslatedShapeSettings> pRotShapeSet = new JPH::RotatedTranslatedShapeSettings(JPH::Vec3::sZero(), JPH::Quat::sRotation(JPH::Vec3::sAxisX(), plAngle::MakeFromDegree(90).GetRadian()), pNewShape);
+  JPH::Ref<JPH::RotatedTranslatedShapeSettings> pRotShapeSet = new JPH::RotatedTranslatedShapeSettings(JPH::Vec3::sZero(), JPH::Quat::sRotation(JPH::Vec3::sAxisX(), plAngle::Degree(90).GetRadian()), pNewShape);
 
   JPH::Shape* pRotShape = pRotShapeSet->Create().Get().GetPtr();
   pRotShape->SetUserData(reinterpret_cast<plUInt64>(GetUserData()));
@@ -97,7 +97,7 @@ void plJoltShapeCapsuleComponent::CreateShapes(plDynamicArray<plJoltSubShape>& o
   plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
   sub.m_pShape = pRotShape;
   sub.m_pShape->AddRef();
-  sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+  sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
 }
 
 

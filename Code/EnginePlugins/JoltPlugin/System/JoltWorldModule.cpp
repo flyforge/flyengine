@@ -1,6 +1,5 @@
 #include <JoltPlugin/JoltPluginPCH.h>
 
-#include <GameEngine/Physics/CollisionFilter.h>
 #include <JoltPlugin/Actors/JoltDynamicActorComponent.h>
 #include <JoltPlugin/Actors/JoltQueryShapeActorComponent.h>
 #include <JoltPlugin/Actors/JoltStaticActorComponent.h>
@@ -14,7 +13,6 @@
 #include <JoltPlugin/System/JoltCore.h>
 #include <JoltPlugin/System/JoltDebugRenderer.h>
 #include <JoltPlugin/System/JoltWorldModule.h>
-#include <Physics/Collision/Shape/Shape.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
@@ -37,7 +35,7 @@ plJoltWorldModule::plJoltWorldModule(plWorld* pWorld)
   : plPhysicsWorldModuleInterface(pWorld)
 //, m_FreeObjectFilterIDs(plJolt::GetSingleton()->GetAllocator()) // could use a proxy allocator to bin those
 {
-  m_pSimulateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "Jolt::Simulate", plTaskNesting::Never, plMakeDelegate(&plJoltWorldModule::Simulate, this));
+  m_pSimulateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "", plMakeDelegate(&plJoltWorldModule::Simulate, this));
   m_pSimulateTask->ConfigureTask("Jolt Simulate", plTaskNesting::Maybe);
 }
 
@@ -311,7 +309,7 @@ void plJoltWorldModule::OnSimulationStarted()
   UpdateSettingsCfg();
   ApplySettingsCfg();
 
-  m_AccumulatedTimeSinceUpdate = plTime::MakeZero();
+  m_AccumulatedTimeSinceUpdate.SetZero();
 }
 
 plUInt32 plJoltWorldModule::CreateObjectFilterID()
@@ -380,11 +378,6 @@ void plJoltWorldModule::SetGravity(const plVec3& vObjectGravity, const plVec3& v
   {
     m_pSystem->SetGravity(plJoltConversionUtils::ToVec3(m_Settings.m_vObjectGravity));
   }
-}
-
-plUInt32 plJoltWorldModule::GetCollisionLayerByName(plStringView sName) const
-{
-  return plJoltCollisionFiltering::GetCollisionFilterConfig().GetFilterGroupByName(sName);
 }
 
 void plJoltWorldModule::AddStaticCollisionBox(plGameObject* pObject, plVec3 vBoxSize)
@@ -631,7 +624,7 @@ void plJoltWorldModule::FetchResults(const plWorldModule::UpdateContext& context
 
 plTime plJoltWorldModule::CalculateUpdateSteps()
 {
-  plTime tSimulatedTimeStep = plTime::MakeZero();
+  plTime tSimulatedTimeStep = plTime::Zero();
   m_AccumulatedTimeSinceUpdate += GetWorld()->GetClock().GetTimeDiff();
   m_UpdateSteps.Clear();
 
@@ -641,11 +634,11 @@ plTime plJoltWorldModule::CalculateUpdateSteps()
     m_UpdateSteps.PushBack(m_AccumulatedTimeSinceUpdate);
 
     tSimulatedTimeStep = m_AccumulatedTimeSinceUpdate;
-    m_AccumulatedTimeSinceUpdate = plTime::MakeZero();
+    m_AccumulatedTimeSinceUpdate.SetZero();
   }
   else if (m_Settings.m_SteppingMode == plJoltSteppingMode::Fixed)
   {
-    const plTime tFixedStep = plTime::MakeFromSeconds(1.0 / m_Settings.m_fFixedFrameRate);
+    const plTime tFixedStep = plTime::Seconds(1.0 / m_Settings.m_fFixedFrameRate);
 
     plUInt32 uiNumSubSteps = 0;
 
@@ -660,7 +653,7 @@ plTime plJoltWorldModule::CalculateUpdateSteps()
   }
   else if (m_Settings.m_SteppingMode == plJoltSteppingMode::SemiFixed)
   {
-    plTime tFixedStep = plTime::MakeFromSeconds(1.0 / m_Settings.m_fFixedFrameRate);
+    plTime tFixedStep = plTime::Seconds(1.0 / m_Settings.m_fFixedFrameRate);
     const plTime tMinStep = tFixedStep * 0.25;
 
     if (tFixedStep * m_Settings.m_uiMaxSubSteps < m_AccumulatedTimeSinceUpdate) // in case too much time has passed
@@ -710,14 +703,14 @@ void plJoltWorldModule::Simulate()
       // do a single Update call with multiple sub-steps, if possible
       // this saves a bit of time compared to just doing multiple Update calls
 
-      m_pSystem->Update((uiSteps * tDelta).AsFloatInSeconds(), uiSteps, m_pTempAllocator.get(), plJoltCore::GetJoltJobSystem());
+      m_pSystem->Update((uiSteps * tDelta).AsFloatInSeconds(), uiSteps, 1, m_pTempAllocator.get(), plJoltCore::GetJoltJobSystem());
 
       tDelta = m_UpdateSteps[i];
       uiSteps = 1;
     }
   }
 
-  m_pSystem->Update((uiSteps * tDelta).AsFloatInSeconds(), uiSteps, m_pTempAllocator.get(), plJoltCore::GetJoltJobSystem());
+  m_pSystem->Update((uiSteps * tDelta).AsFloatInSeconds(), uiSteps, 1, m_pTempAllocator.get(), plJoltCore::GetJoltJobSystem());
 }
 
 void plJoltWorldModule::UpdateSettingsCfg()

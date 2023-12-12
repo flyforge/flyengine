@@ -12,8 +12,8 @@ class PLASMA_FOUNDATION_DLL plUuid
 public:
   PLASMA_DECLARE_POD_TYPE();
 
-  /// \brief Default constructor. Constructed Uuid will be invalid.
-  PLASMA_ALWAYS_INLINE plUuid(); // [tested]
+  /// \brief Default constructor. Constructed Uuid will be invalid. [tested]
+  PLASMA_ALWAYS_INLINE plUuid();
 
   /// \brief Constructs the Uuid from existing values
   PLASMA_ALWAYS_INLINE plUuid(plUInt64 uiLow, plUInt64 uiHigh)
@@ -34,11 +34,14 @@ public:
   /// \brief Returns true if this is a valid Uuid.
   PLASMA_ALWAYS_INLINE bool IsValid() const;
 
-  /// \brief Returns an invalid UUID.
-  [[nodiscard]] PLASMA_ALWAYS_INLINE static plUuid MakeInvalid() { return plUuid(0, 0); }
+  /// \brief Sets the Uuid to be invalid
+  PLASMA_ALWAYS_INLINE void SetInvalid();
+
+  /// \brief Creates a new Uuid and stores is it in this object.
+  void CreateNewUuid();
 
   /// \brief Returns a new Uuid.
-  [[nodiscard]] static plUuid MakeUuid();
+  PLASMA_ALWAYS_INLINE static plUuid CreateUuid();
 
   /// \brief Returns the internal 128 Bit of data
   void GetValues(plUInt64& ref_uiLow, plUInt64& ref_uiHigh) const
@@ -48,10 +51,10 @@ public:
   }
 
   /// \brief Creates a uuid from a string. The result is always the same for the same string.
-  [[nodiscard]] static plUuid MakeStableUuidFromString(plStringView sString);
+  static plUuid StableUuidForString(plStringView sString);
 
   /// \brief Creates a uuid from an integer. The result is always the same for the same input.
-  [[nodiscard]] static plUuid MakeStableUuidFromInt(plInt64 iInt);
+  static plUuid StableUuidForInt(plInt64 iInt);
 
   /// \brief Adds the given seed value to this guid, creating a new guid. The process is reversible.
   PLASMA_ALWAYS_INLINE void CombineWithSeed(const plUuid& seed);

@@ -1,0 +1,12 @@
+{ 009efe5f-1b03-4ec4-862e-990bd04922ed };Common/Pete/Pete.plSkeleton
+{ 2f1036df-8bac-4a29-8c91-1e5ea908e98e };Common/Pete/Step Left.plAnimationClip
+{ 3ed5f194-77c1-4889-be18-3548a1044db2 };Common/Scenes/AnimController.plObjectGraph
+{ 503916c1-92e8-4f0d-844d-3120fbfa4937 };Common/Pete/Run.plAnimationClip
+{ 75fc3a46-9e7d-443c-8620-3cf850cfcad6 };Common/Pete/Walk.plAnimationClip
+{ 7715bf64-f2b1-4446-96a7-1fdaa5f296d9 };Common/Pete/Shoot.plVisualScriptBin
+{ 83b78284-22ab-43f2-b971-d44a838147f6 };Common/Pete/Pete.plAnimatedMesh
+{ ProjectDecalAtlas };PC/Decals.plTextureAtlas
+{ a0c98d59-b1d7-4e93-847e-0ca7b7d11e7c };Common/Pete/Wave.plAnimationClip
+{ a20f6b10-d33d-4dd6-acd3-6aea199011fb };Common/Pete/Gun Shoot.plAnimationClip
+{ a82992bf-8c9e-4e3b-b10d-552fed1f83b9 };Common/Pete/StepRight.plAnimationClip
+{ b1fb4b26-5516-4e43-bd96-570d9fa92c47 };Common/Pete/Gun Point.plAnimationClip

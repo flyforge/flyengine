@@ -14,12 +14,12 @@ plCapsuleGizmo::plCapsuleGizmo()
 
   m_ManipulateMode = ManipulateMode::None;
 
-  m_hRadius.ConfigureHandle(this, plEngineGizmoHandleType::CylinderZ, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
-  m_hLengthTop.ConfigureHandle(this, plEngineGizmoHandleType::HalfSphereZ, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
-  m_hLengthBottom.ConfigureHandle(this, plEngineGizmoHandleType::HalfSphereZ, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+  m_hRadius.ConfigureHandle(this, PlasmaEngineGizmoHandleType::CylinderZ, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+  m_hLengthTop.ConfigureHandle(this, PlasmaEngineGizmoHandleType::HalfSphereZ, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+  m_hLengthBottom.ConfigureHandle(this, PlasmaEngineGizmoHandleType::HalfSphereZ, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
 
   SetVisible(false);
-  SetTransformation(plTransform::MakeIdentity());
+  SetTransformation(plTransform::IdentityTransform());
 }
 
 void plCapsuleGizmo::OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
@@ -80,15 +80,15 @@ void plCapsuleGizmo::DoFocusLost(bool bCancel)
   m_ManipulateMode = ManipulateMode::None;
 }
 
-plEditorInput plCapsuleGizmo::DoMousePressEvent(QMouseEvent* e)
+PlasmaEditorInput plCapsuleGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
   if (e->modifiers() != 0)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (m_pInteractionGizmoHandle == &m_hRadius)
   {
@@ -99,7 +99,7 @@ plEditorInput plCapsuleGizmo::DoMousePressEvent(QMouseEvent* e)
     m_ManipulateMode = ManipulateMode::Length;
   }
   else
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -107,7 +107,7 @@ plEditorInput plCapsuleGizmo::DoMousePressEvent(QMouseEvent* e)
 
   m_LastInteraction = plTime::Now();
 
-  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
 
   SetActiveInputContext(this);
 
@@ -116,38 +116,36 @@ plEditorInput plCapsuleGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plCapsuleGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+PlasmaEditorInput plCapsuleGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plCapsuleGizmo::DoMouseMoveEvent(QMouseEvent* e)
+PlasmaEditorInput plCapsuleGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
-    return plEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
 
-  QPoint mousePosition = e->globalPosition().toPoint();
-
-  const plVec2I32 vNewMousePos = plVec2I32(mousePosition.x(), mousePosition.y());
+  const plVec2I32 vNewMousePos = plVec2I32(e->globalPos().x(), e->globalPos().y());
   const plVec2I32 vDiff = vNewMousePos - m_vLastMousePos;
 
   m_vLastMousePos = UpdateMouseMode(e);
@@ -177,7 +175,7 @@ plEditorInput plCapsuleGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
 void plCapsuleGizmo::SetLength(float fRadius)

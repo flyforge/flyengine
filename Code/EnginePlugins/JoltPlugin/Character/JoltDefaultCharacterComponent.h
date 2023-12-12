@@ -36,7 +36,7 @@ public:
     InAir,    ///< Character isn't touching any ground surface (may still touch a wall or ceiling)
   };
 
-  plAngle m_RotateSpeed = plAngle::MakeFromDegree(90.0f); ///< [ property ] How many degrees per second the character turns
+  plAngle m_RotateSpeed = plAngle::Degree(90.0f); ///< [ property ] How many degrees per second the character turns
   float m_fShapeRadius = 0.25f;
   float m_fCylinderHeightCrouch = 0.9f;
   float m_fCylinderHeightStand = 1.7f;
@@ -91,7 +91,7 @@ public:
     bool m_bAllowJump = true;
     bool m_bAllowCrouch = true;
     bool m_bApplyGroundVelocity = true;
-    plVec3 m_vVelocity = plVec3::MakeZero();
+    plVec3 m_vVelocity = plVec3::ZeroVector();
     float m_fPushDownForce = 0;
     plHashedString m_sGroundInteraction;
     float m_fGroundInteractionDistanceThreshold = 1.0f;
@@ -133,11 +133,11 @@ protected:
   plUInt8 m_uiInputRunBit : 1;
   plUInt8 m_uiIsCrouchingBit : 1;
   plAngle m_InputRotateZ;
-  plVec2 m_vInputDirection = plVec2::MakeZero();
+  plVec2 m_vInputDirection = plVec2::ZeroVector();
   float m_fVelocityUp = 0.0f;
   float m_fNextCylinderHeight = 0;
   float m_fAccumulatedWalkDistance = 0.0f;
-  plVec2 m_vVelocityLateral = plVec2::MakeZero();
+  plVec2 m_vVelocityLateral = plVec2::ZeroVector();
   plTransform m_PreviousTransform;
   bool m_bFeetOnSolidGround = false;
 
@@ -147,7 +147,7 @@ protected:
   float m_fHeadTargetHeight = 0.0f;
   plGameObjectHandle m_hHeadObject;
 
-  plVec3 m_vAbsoluteRootMotion = plVec3::MakeZero();
+  plVec3 m_vAbsoluteRootMotion = plVec3::ZeroVector();
 
   plUInt32 m_uiUserDataIndex = plInvalidIndex;
   plUInt32 m_uiJoltBodyID = plInvalidIndex;

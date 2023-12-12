@@ -37,7 +37,7 @@ void plJoltDebugRenderer::DrawLine(JPH::RVec3Arg inFrom, JPH::RVec3Arg inTo, JPH
 }
 
 
-void plJoltDebugRenderer::DrawTriangle(JPH::Vec3Arg inV1, JPH::Vec3Arg inV2, JPH::Vec3Arg inV3, JPH::ColorArg inColor, ECastShadow inCastShadow)
+void plJoltDebugRenderer::DrawTriangle(JPH::Vec3Arg inV1, JPH::Vec3Arg inV2, JPH::Vec3Arg inV3, JPH::ColorArg inColor)
 {
   auto& t = m_Triangles.ExpandAndGetRef();
   t.m_position[0] = plJoltConversionUtils::ToVec3(inV1);
@@ -157,3 +157,4 @@ void plJoltDebugRenderer::DrawGeometry(JPH::Mat44Arg modelMatrix, const JPH::AAB
 
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltDebugRenderer);
+

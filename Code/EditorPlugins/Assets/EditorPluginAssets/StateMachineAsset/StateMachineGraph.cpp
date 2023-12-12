@@ -15,7 +15,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, StateMachine)
   ON_CORESYSTEMS_STARTUP
   {
     plQtNodeScene::GetPinFactory().RegisterCreator(plGetStaticRTTI<plStateMachinePin>(), [](const plRTTI* pRtti)->plQtPin* { return new plQtStateMachinePin(); });
-    plQtNodeScene::GetConnectionFactory().RegisterCreator(plGetStaticRTTI<plStateMachineConnection>(), [](const plRTTI* pRtti)->plQtConnection* { return new plQtStateMachineConnection(); });
+    plQtNodeScene::GetConnectionFactory().RegisterCreator(plGetStaticRTTI<plStateMachineConnection>(), [](const plRTTI* pRtti)->plQtConnection* { return new plQtStateMachineConnection(); });    
     plQtNodeScene::GetNodeFactory().RegisterCreator(plGetStaticRTTI<plStateMachineNodeBase>(), [](const plRTTI* pRtti)->plQtNode* { return new plQtStateMachineNode(); });
   }
 

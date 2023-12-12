@@ -1,27 +1,30 @@
+# Asset Types
+
+ProcGen Graph;ProcGen Graph
+
+# Component Types
+
+plProcPlacementComponent;Procedural Placement;;https://plasmaengine.github.io/PlasmaDocs/#terrain/procedural/procgen-placement-component/
+plProcVertexColorComponent;Procedural Vertex Color;;https://plasmaengine.github.io/PlasmaDocs/#terrain/procedural/procgen-vertex-color-component/
+plProcVolumeSphereComponent;Procedural Volume Sphere;;https://plasmaengine.github.io/PlasmaDocs/#terrain/procedural/procgen-volume-sphere-component/
+plProcVolumeBoxComponent;Procedural Volume Box;;https://plasmaengine.github.io/PlasmaDocs/#terrain/procedural/procgen-volume-box-component/
+plProcVolumeImageComponent;Procedural Volume Image;;https://plasmaengine.github.io/PlasmaDocs/#terrain/procedural/procgen-volume-image-component/
+
+# Enums
+
+plProcVertexColorChannelMapping;Vertex Color Channel Mapping
+
+plProcVolumeImageMode::ChannelR;Red Channel
+plProcVolumeImageMode::ChannelG;Green Channel
+plProcVolumeImageMode::ChannelB;Blue Channel
+plProcVolumeImageMode::ChannelA;Alpha Channel
+
+# UI
+
 ProcGen.DumpAST;Dump AST
 ProcGen.DumpDisassembly;Dump Disassembly
-Objects;Objects
-ProcGen;Procedural Generation
-plProcPlacementComponent;Procedural Placement
-plProcGenBoxExtents;Box Extents
-BoxExtents;Extents
-plProcVertexColorComponent;Procedural Vertex Color
-plProcVolumeSphereComponent;Procedural Volume Sphere
-plProcVolumeBoxComponent;Procedural Volume Box
-plProcGenBlendMode::Add;Add
-plProcGenBlendMode::Subtract;Subtract
-plProcGenBlendMode::Multiply;Multiply
-plProcGenBlendMode::Divide;Divide
-plProcGenBlendMode::Max;Max
-plProcGenBlendMode::Min;Min
-plProcGenBlendMode::Set;Set
-OutputDescs;Output Descriptions
-plProcVertexColorOutputDesc;Output Description
-Mapping;Mapping
-plProcVertexColorChannelMapping;Vertex Color Channel Mapping
-plProcVertexColorChannelMapping::R;R
-plProcVertexColorChannelMapping::G;G
-plProcVertexColorChannelMapping::B;B
-plProcVertexColorChannelMapping::A;A
-plProcVertexColorChannelMapping::Black;Black
-plProcVertexColorChannelMapping::White;White
+
+# Nodes
+
+plProcGen_ApplyVolumes::ImageVolumeMode;Mode
+plProcGen_ApplyVolumes::RefColor;Reference Color

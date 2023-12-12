@@ -16,7 +16,6 @@ struct PLASMA_CORE_DLL plUpdateRate
     Max5fps,
     Max2fps,
     Max1fps,
-    Never,
 
     Default = Max30fps
   };

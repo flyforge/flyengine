@@ -322,8 +322,13 @@ void plGPUResourcePool::CheckAndPotentiallyRunGC()
 void plGPUResourcePool::UpdateMemoryStats() const
 {
 #if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+
   float fMegaBytes = float(m_uiCurrentlyAllocatedMemory) / (1024.0f * 1024.0f);
-  plStats::SetStat("GPU Resource Pool/Memory Consumption (MB)", fMegaBytes);
+
+  plStringBuilder sOut;
+  sOut.Format("{0} (Mb)", plArgF(fMegaBytes, 4));
+  plStats::SetStat("GPU Resource Pool/Memory Consumption", sOut.GetData());
+
 #endif
 }
 

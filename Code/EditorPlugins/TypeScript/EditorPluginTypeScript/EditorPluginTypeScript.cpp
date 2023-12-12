@@ -24,20 +24,19 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("TypeScriptAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("TypeScriptAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+      plStandardMenus::MapActions("TypeScriptAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
       plProjectActions::MapActions("TypeScriptAssetMenuBar");
-      plDocumentActions::MapMenuActions("TypeScriptAssetMenuBar");
-      plAssetActions::MapMenuActions("TypeScriptAssetMenuBar");
-      plCommandHistoryActions::MapActions("TypeScriptAssetMenuBar");
+      plDocumentActions::MapActions("TypeScriptAssetMenuBar", "Menu.File", false);
+      plCommandHistoryActions::MapActions("TypeScriptAssetMenuBar", "Menu.Edit");
     }
-    
+
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("TypeScriptAssetToolBar").IgnoreResult();
-      plDocumentActions::MapToolbarActions("TypeScriptAssetToolBar");
+      plDocumentActions::MapActions("TypeScriptAssetToolBar", "", true);
       plCommandHistoryActions::MapActions("TypeScriptAssetToolBar", "");
       plAssetActions::MapToolBarActions("TypeScriptAssetToolBar", true);
-      plTypeScriptActions::MapActions("TypeScriptAssetToolBar");
+      plTypeScriptActions::MapActions("TypeScriptAssetToolBar", "");
     }
   }
 }

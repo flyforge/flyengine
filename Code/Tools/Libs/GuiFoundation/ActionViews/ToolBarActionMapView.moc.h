@@ -18,12 +18,12 @@ class PLASMA_GUIFOUNDATION_DLL plQtToolBarActionMapView : public QToolBar
   PLASMA_DISALLOW_COPY_AND_ASSIGN(plQtToolBarActionMapView);
 
 public:
-  explicit plQtToolBarActionMapView(QString sTitle, QWidget* pParent);
+  explicit plQtToolBarActionMapView(QString title, QWidget* parent);
   ~plQtToolBarActionMapView();
 
   void SetActionContext(const plActionContext& context);
 
-  virtual void setVisible(bool bVisible) override;
+  virtual void setVisible(bool visible) override;
 
 private:
   void TreeEventHandler(const plDocumentObjectStructureEvent& e);

@@ -27,7 +27,7 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11BlendState* m_pDXBlendState = nullptr;
+  ID3D11BlendState* m_pDXBlendState;
 };
 
 class PLASMA_RENDERERDX11_DLL plGALDepthStencilStateDX11 : public plGALDepthStencilState
@@ -47,7 +47,7 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11DepthStencilState* m_pDXDepthStencilState = nullptr;
+  ID3D11DepthStencilState* m_pDXDepthStencilState;
 };
 
 class PLASMA_RENDERERDX11_DLL plGALRasterizerStateDX11 : public plGALRasterizerState
@@ -67,7 +67,7 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11RasterizerState* m_pDXRasterizerState = nullptr;
+  ID3D11RasterizerState* m_pDXRasterizerState;
 };
 
 class PLASMA_RENDERERDX11_DLL plGALSamplerStateDX11 : public plGALSamplerState
@@ -87,7 +87,7 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11SamplerState* m_pDXSamplerState = nullptr;
+  ID3D11SamplerState* m_pDXSamplerState;
 };
 
 

@@ -79,7 +79,7 @@ plProcGenGraphAssetDocument* plProcGenGraphAssetDocumentWindow::GetProcGenGraphD
 
 void plProcGenGraphAssetDocumentWindow::UpdatePreview()
 {
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   plResourceUpdateMsgToEngine msg;
@@ -105,7 +105,7 @@ void plProcGenGraphAssetDocumentWindow::UpdatePreview()
   {
     msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
 
-    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 }
 
@@ -117,7 +117,7 @@ void plProcGenGraphAssetDocumentWindow::RestoreResource()
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plProcGenGraphAssetDocumentWindow::PropertyEventHandler(const plDocumentObjectPropertyEvent& e)

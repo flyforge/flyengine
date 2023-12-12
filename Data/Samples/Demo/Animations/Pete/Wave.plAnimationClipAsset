@@ -183,7 +183,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plRootMotionSource"}
 		u3 %TypeVersion{1}
@@ -234,7 +234,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plAnimationClipAssetProperties"}
 		u3 %TypeVersion{3}

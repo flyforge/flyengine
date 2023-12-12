@@ -21,14 +21,14 @@ void plRttiConverterContext::OnUnknownTypeError(plStringView sTypeName)
 plUuid plRttiConverterContext::GenerateObjectGuid(const plUuid& parentGuid, const plAbstractProperty* pProp, plVariant index, void* pObject) const
 {
   plUuid guid = parentGuid;
-  guid.HashCombine(plUuid::MakeStableUuidFromString(pProp->GetPropertyName()));
+  guid.HashCombine(plUuid::StableUuidForString(pProp->GetPropertyName()));
   if (index.IsA<plString>())
   {
-    guid.HashCombine(plUuid::MakeStableUuidFromString(index.Get<plString>()));
+    guid.HashCombine(plUuid::StableUuidForString(index.Get<plString>()));
   }
   else if (index.CanConvertTo<plUInt32>())
   {
-    guid.HashCombine(plUuid::MakeStableUuidFromInt(index.ConvertTo<plUInt32>()));
+    guid.HashCombine(plUuid::StableUuidForInt(index.ConvertTo<plUInt32>()));
   }
   else if (index.IsValid())
   {

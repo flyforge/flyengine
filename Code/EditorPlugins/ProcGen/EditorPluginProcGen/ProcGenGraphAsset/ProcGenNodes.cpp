@@ -127,14 +127,13 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_PlacementOutput, 1, plRTTIDefaultA
     PLASMA_MEMBER_PROPERTY("Footprint", m_fFootprint)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_MEMBER_PROPERTY("MinOffset", m_vMinOffset),
     PLASMA_MEMBER_PROPERTY("MaxOffset", m_vMaxOffset),
-    PLASMA_MEMBER_PROPERTY("YawRotationSnap", m_YawRotationSnap)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromRadian(0.0f), plVariant())),
+    PLASMA_MEMBER_PROPERTY("YawRotationSnap", m_YawRotationSnap)->AddAttributes(new plClampValueAttribute(plAngle::Radian(0.0f), plVariant())),
     PLASMA_MEMBER_PROPERTY("AlignToNormal", m_fAlignToNormal)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
     PLASMA_MEMBER_PROPERTY("MinScale", m_vMinScale)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f)), new plClampValueAttribute(plVec3(0.0f), plVariant())),
     PLASMA_MEMBER_PROPERTY("MaxScale", m_vMaxScale)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f)), new plClampValueAttribute(plVec3(0.0f), plVariant())),
     PLASMA_MEMBER_PROPERTY("ColorGradient", m_sColorGradient)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
     PLASMA_MEMBER_PROPERTY("CullDistance", m_fCullDistance)->AddAttributes(new plDefaultValueAttribute(30.0f), new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_ENUM_MEMBER_PROPERTY("PlacementMode", plProcPlacementMode, m_PlacementMode),
-    PLASMA_ENUM_MEMBER_PROPERTY("PlacementPattern", plProcPlacementPattern, m_PlacementPattern),
     PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
     PLASMA_MEMBER_PROPERTY("Surface", m_sSurface)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface")),
 
@@ -245,9 +244,6 @@ void plProcGen_PlacementOutput::Save(plStreamWriter& stream)
 
   // chunk version 5
   stream << m_PlacementMode;
-
-  // chunk version 7
-  stream << m_PlacementPattern;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -490,8 +486,8 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Slope, 1, plRTTIDefaultAllocator<p
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MinSlope", m_MinSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(0.0f))),
-    PLASMA_MEMBER_PROPERTY("MaxSlope", m_MaxSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(60.0f))),
+    PLASMA_MEMBER_PROPERTY("MinSlope", m_MinSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(0.0f))),
+    PLASMA_MEMBER_PROPERTY("MaxSlope", m_MaxSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(60.0f))),
     PLASMA_MEMBER_PROPERTY("LowerFade", m_fLowerFade)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, 1.0f)),
     PLASMA_MEMBER_PROPERTY("UpperFade", m_fUpperFade)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1.0f)),
 

@@ -28,21 +28,21 @@ void plViewActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hLinkDeviceCamera);
 }
 
-void plViewActions::MapToolbarActions(plStringView sMapping, plUInt32 uiFlags)
+void plViewActions::MapActions(const char* szMapping, const char* szPath, plUInt32 flags)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  if (uiFlags & Flags::PerspectiveMode)
-    pMap->MapAction(s_hPerspective, "", 1.0f);
+  if (flags & Flags::PerspectiveMode)
+    pMap->MapAction(s_hPerspective, szPath, 1.0f);
 
-  if (uiFlags & Flags::RenderMode)
-    pMap->MapAction(s_hRenderMode, "", 2.0f);
+  if (flags & Flags::RenderMode)
+    pMap->MapAction(s_hRenderMode, szPath, 2.0f);
 
-  if (uiFlags & Flags::ActivateRemoteProcess)
+  if (flags & Flags::ActivateRemoteProcess)
   {
-    pMap->MapAction(s_hActivateRemoteProcess, "", 4.0f);
-    pMap->MapAction(s_hLinkDeviceCamera, "", 5.0f);
+    pMap->MapAction(s_hActivateRemoteProcess, szPath, 4.0f);
+    pMap->MapAction(s_hLinkDeviceCamera, szPath, 5.0f);
   }
 }
 
@@ -134,7 +134,7 @@ plViewAction::plViewAction(const plActionContext& context, const char* szName, B
   }
 }
 
-plViewAction::~plViewAction() = default;
+plViewAction::~plViewAction() {}
 
 void plViewAction::Execute(const plVariant& value)
 {
@@ -144,7 +144,7 @@ void plViewAction::Execute(const plVariant& value)
   {
     case plViewAction::ButtonType::ActivateRemoteProcess:
     {
-      plEditorEngineProcessConnection::GetSingleton()->ActivateRemoteProcess(plDynamicCast<plAssetDocument*>(m_Context.m_pDocument), pView->GetViewID());
+      PlasmaEditorEngineProcessConnection::GetSingleton()->ActivateRemoteProcess(plDynamicCast<plAssetDocument*>(m_Context.m_pDocument), pView->GetViewID());
     }
     break;
 
@@ -152,7 +152,7 @@ void plViewAction::Execute(const plVariant& value)
     {
       pView->m_pViewConfig->m_bUseCameraTransformOnDevice = !pView->m_pViewConfig->m_bUseCameraTransformOnDevice;
       SetChecked(pView->m_pViewConfig->m_bUseCameraTransformOnDevice);
-      plEditorEngineProcessConnection::GetSingleton()->ActivateRemoteProcess(plDynamicCast<plAssetDocument*>(m_Context.m_pDocument), pView->GetViewID());
+      PlasmaEditorEngineProcessConnection::GetSingleton()->ActivateRemoteProcess(plDynamicCast<plAssetDocument*>(m_Context.m_pDocument), pView->GetViewID());
     }
     break;
   }

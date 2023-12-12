@@ -415,19 +415,6 @@ void plStateMachineInstance::SetBlackboard(const plSharedPtr<plBlackboard>& blac
   m_pBlackboard = blackboard;
 }
 
-void plStateMachineInstance::FireTransitionEvent(plStringView sEvent)
-{
-  m_sCurrentTransitionEvent = sEvent;
-
-  plUInt32 uiNewStateIndex = FindNewStateToTransitionTo();
-  if (uiNewStateIndex != plInvalidIndex)
-  {
-    SetState(uiNewStateIndex).IgnoreResult();
-  }
-
-  m_sCurrentTransitionEvent = {};
-}
-
 bool plStateMachineInstance::Reflection_SetState(const plHashedString& sStateName)
 {
   return SetState(sStateName).Succeeded();
@@ -463,7 +450,7 @@ void plStateMachineInstance::EnterCurrentState(const plStateMachineState* pFromS
     void* pInstanceData = GetCurrentStateInstanceData();
     m_pCurrentState->OnEnter(*this, pInstanceData, pFromState);
 
-    m_TimeInCurrentState = plTime::MakeZero();
+    m_TimeInCurrentState.SetZero();
   }
 }
 

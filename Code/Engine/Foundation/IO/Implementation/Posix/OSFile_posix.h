@@ -76,7 +76,7 @@ plResult plOSFile::InternalOpen(plStringView sFile, plFileOpenMode::Enum OpenMod
   }
 
   const int iSharedMode = (FileShareMode == plFileShareMode::Exclusive) ? LOCK_EX : LOCK_SH;
-  const plTime sleepTime = plTime::MakeFromMilliseconds(20);
+  const plTime sleepTime = plTime::Milliseconds(20);
   plInt32 iRetries = m_bRetryOnSharingViolation ? 20 : 1;
 
   while (flock(fd, iSharedMode | LOCK_NB /* do not block */) != 0)
@@ -357,7 +357,7 @@ plResult plOSFile::InternalGetFileStats(plStringView sFileOrFolder, plFileStats&
   out_Stats.m_sParentPath = sFileOrFolder;
   out_Stats.m_sParentPath.PathParentDirectory();
   out_Stats.m_sName = plPathUtils::GetFileNameAndExtension(sFileOrFolder); // no OS support, so just pass it through
-  out_Stats.m_LastModificationTime = plTimestamp::MakeFromInt(tempStat.st_mtime, plSIUnitOfTime::Second);
+  out_Stats.m_LastModificationTime.SetInt64(tempStat.st_mtime, plSIUnitOfTime::Second);
 
   return PLASMA_SUCCESS;
 }
@@ -459,28 +459,6 @@ plString plOSFile::GetTempDataFolder(plStringView sSubFolder)
   return s;
 }
 
-plString plOSFile::GetUserDocumentsFolder(plStringView sSubFolder)
-{
-  if (s_sUserDocumentsPath.IsEmpty())
-  {
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
-    android_app* app = plAndroidUtils::GetAndroidApp();
-    // s_sUserDataPath = app->activity->internalDataPath;
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
-#  else
-    s_sUserDataPath = getenv("HOME");
-
-    if (s_sUserDataPath.IsEmpty())
-      s_sUserDataPath = getpwuid(getuid())->pw_dir;
-#  endif
-  }
-
-  plStringBuilder s = s_sUserDocumentsPath;
-  s.AppendPath(sSubFolder);
-  s.MakeCleanPath();
-  return s;
-}
-
 const plString plOSFile::GetCurrentWorkingDirectory()
 {
   char tmp[PATH_MAX];
@@ -537,7 +515,7 @@ namespace
     curFile.m_bIsDirectory = hCurrentFile->d_type == DT_DIR;
     curFile.m_sParentPath = curPath;
     curFile.m_sName = hCurrentFile->d_name;
-    curFile.m_LastModificationTime = plTimestamp::MakeFromInt(fileStat.st_mtime, plSIUnitOfTime::Second);
+    curFile.m_LastModificationTime.SetInt64(fileStat.st_mtime, plSIUnitOfTime::Second);
 
     return PLASMA_SUCCESS;
   }

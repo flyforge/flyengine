@@ -15,7 +15,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtPreferencesDlg(QWidget* pParent);
+  plQtPreferencesDlg(QWidget* parent);
   ~plQtPreferencesDlg();
 
   plUuid NativeToObject(plPreferences* pPreferences);

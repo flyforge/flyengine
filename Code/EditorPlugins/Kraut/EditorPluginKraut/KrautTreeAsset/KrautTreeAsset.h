@@ -17,10 +17,10 @@ class plKrautTreeAssetDocument : public plSimpleAssetDocument<plKrautTreeAssetPr
   PLASMA_ADD_DYNAMIC_REFLECTION(plKrautTreeAssetDocument, plSimpleAssetDocument<plKrautTreeAssetProperties>);
 
 public:
-  plKrautTreeAssetDocument(plStringView sDocumentPath);
+  plKrautTreeAssetDocument(const char* szDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   void SyncBackAssetProperties(plKrautTreeAssetProperties*& pProp, const plKrautGeneratorResourceDescriptor& desc);
 
@@ -38,8 +38,9 @@ public:
   plKrautTreeAssetDocumentGenerator();
   ~plKrautTreeAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
+  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const override;
+  virtual plStatus Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
   virtual plStringView GetDocumentExtension() const override { return "plKrautTreeAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "KrautTrees"; }
-  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
+  virtual plStringView GetNameSuffix() const override { return "kraut"; }
 };

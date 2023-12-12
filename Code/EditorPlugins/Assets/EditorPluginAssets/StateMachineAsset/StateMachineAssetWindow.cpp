@@ -46,7 +46,7 @@ plQtStateMachineAssetDocumentWindow::plQtStateMachineAssetDocumentWindow(plDocum
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("StateMachineAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Properties");
+    pPropertyPanel->setWindowTitle("PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -58,4 +58,4 @@ plQtStateMachineAssetDocumentWindow::plQtStateMachineAssetDocumentWindow(plDocum
   FinishWindowCreation();
 }
 
-plQtStateMachineAssetDocumentWindow::~plQtStateMachineAssetDocumentWindow() = default;
+plQtStateMachineAssetDocumentWindow::~plQtStateMachineAssetDocumentWindow() {}

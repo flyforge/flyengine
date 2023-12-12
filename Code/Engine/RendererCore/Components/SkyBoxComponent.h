@@ -3,7 +3,7 @@
 #include <Core/World/World.h>
 #include <RendererCore/Meshes/MeshComponent.h>
 
-using plSkyBoxComponentManager = plComponentManager<class plSkyBoxComponent, plBlockStorageType::Compact>;
+typedef plComponentManager<class plSkyBoxComponent, plBlockStorageType::Compact> plSkyBoxComponentManager;
 using plTextureCubeResourceHandle = plTypedResourceHandle<class plTextureCubeResource>;
 
 class PLASMA_RENDERERCORE_DLL plSkyBoxComponent : public plRenderComponent
@@ -58,7 +58,7 @@ private:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
   void UpdateMaterials();
 
-  float m_fExposureBias = 0.0f;
+  float m_fExposureBias = 64000.0f;
   float m_fVirtualDistance = 1000.0f;
   bool m_bInverseTonemap = false;
   bool m_bUseFog = true;

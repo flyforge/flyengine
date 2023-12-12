@@ -8,54 +8,25 @@ PLASMA_ALWAYS_INLINE plBoundingBoxTemplate<Type>::plBoundingBoxTemplate() = defa
 template <typename Type>
 PLASMA_FORCE_INLINE plBoundingBoxTemplate<Type>::plBoundingBoxTemplate(const plVec3Template<Type>& vMin, const plVec3Template<Type>& vMax)
 {
-  *this = MakeFromMinMax(vMin, vMax);
+  SetElements(vMin, vMax);
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE plBoundingBoxTemplate<Type> plBoundingBoxTemplate<Type>::MakeZero()
+PLASMA_FORCE_INLINE void plBoundingBoxTemplate<Type>::SetElements(const plVec3Template<Type>& vMin, const plVec3Template<Type>& vMax)
 {
-  plBoundingBoxTemplate<Type> res;
-  res.m_vMin = plVec3Template<Type>::MakeZero();
-  res.m_vMax = plVec3Template<Type>::MakeZero();
-  return res;
+  m_vMin = vMin;
+  m_vMax = vMax;
+
+  PLASMA_ASSERT_DEBUG(IsValid(), "The given values did not create a valid bounding box ({0} | {1} | {2} - {3} | {4} | {5})", plArgF(vMin.x, 2),
+    plArgF(vMin.y, 2), plArgF(vMin.z, 2), plArgF(vMax.x, 2), plArgF(vMax.y, 2), plArgF(vMax.z, 2));
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE plBoundingBoxTemplate<Type> plBoundingBoxTemplate<Type>::MakeInvalid()
+void plBoundingBoxTemplate<Type>::SetFromPoints(
+  const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template<Type>) */)
 {
-  plBoundingBoxTemplate<Type> res;
-  res.m_vMin.Set(plMath::MaxValue<Type>());
-  res.m_vMax.Set(-plMath::MaxValue<Type>());
-  return res;
-}
-
-template <typename Type>
-PLASMA_FORCE_INLINE plBoundingBoxTemplate<Type> plBoundingBoxTemplate<Type>::MakeFromCenterAndHalfExtents(const plVec3Template<Type>& vCenter, const plVec3Template<Type>& vHalfExtents)
-{
-  plBoundingBoxTemplate<Type> res;
-  res.m_vMin = vCenter - vHalfExtents;
-  res.m_vMax = vCenter + vHalfExtents;
-  return res;
-}
-
-template <typename Type>
-PLASMA_FORCE_INLINE plBoundingBoxTemplate<Type> plBoundingBoxTemplate<Type>::MakeFromMinMax(const plVec3Template<Type>& vMin, const plVec3Template<Type>& vMax)
-{
-  plBoundingBoxTemplate<Type> res;
-  res.m_vMin = vMin;
-  res.m_vMax = vMax;
-
-  PLASMA_ASSERT_DEBUG(res.IsValid(), "The given values don't create a valid bounding box ({0} | {1} | {2} - {3} | {4} | {5})", plArgF(vMin.x, 2), plArgF(vMin.y, 2), plArgF(vMin.z, 2), plArgF(vMax.x, 2), plArgF(vMax.y, 2), plArgF(vMax.z, 2));
-
-  return res;
-}
-
-template <typename Type>
-PLASMA_FORCE_INLINE plBoundingBoxTemplate<Type> plBoundingBoxTemplate<Type>::MakeFromPoints(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /*= sizeof(plVec3Template<Type>)*/)
-{
-  plBoundingBoxTemplate<Type> res = MakeInvalid();
-  res.ExpandToInclude(pPoints, uiNumPoints, uiStride);
-  return res;
+  SetInvalid();
+  ExpandToInclude(pPoints, uiNumPoints, uiStride);
 }
 
 template <typename Type>
@@ -87,9 +58,23 @@ PLASMA_ALWAYS_INLINE const plVec3Template<Type> plBoundingBoxTemplate<Type>::Get
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE const plVec3Template<Type> plBoundingBoxTemplate<Type>::GetHalfExtents() const
+const plVec3Template<Type> plBoundingBoxTemplate<Type>::GetHalfExtents() const
 {
   return (m_vMax - m_vMin) / (Type)2;
+}
+
+template <typename Type>
+void plBoundingBoxTemplate<Type>::SetCenterAndHalfExtents(const plVec3Template<Type>& vCenter, const plVec3Template<Type>& vHalfExtents)
+{
+  m_vMin = vCenter - vHalfExtents;
+  m_vMax = vCenter + vHalfExtents;
+}
+
+template <typename Type>
+void plBoundingBoxTemplate<Type>::SetInvalid()
+{
+  m_vMin.Set(plMath::MaxValue<Type>());
+  m_vMax.Set(-plMath::MaxValue<Type>());
 }
 
 template <typename Type>
@@ -175,7 +160,8 @@ PLASMA_FORCE_INLINE bool plBoundingBoxTemplate<Type>::Contains(const plBoundingB
 }
 
 template <typename Type>
-bool plBoundingBoxTemplate<Type>::Contains(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template<Type>) */) const
+bool plBoundingBoxTemplate<Type>::Contains(
+  const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template<Type>) */) const
 {
   PLASMA_ASSERT_DEBUG(pPoints != nullptr, "Array must not be NuLL.");
   PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Data must not overlap.");
@@ -217,7 +203,8 @@ bool plBoundingBoxTemplate<Type>::Overlaps(const plBoundingBoxTemplate<Type>& rh
 }
 
 template <typename Type>
-bool plBoundingBoxTemplate<Type>::Overlaps(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template<Type>) */) const
+bool plBoundingBoxTemplate<Type>::Overlaps(
+  const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template<Type>) */) const
 {
   PLASMA_ASSERT_DEBUG(pPoints != nullptr, "Array must not be NuLL.");
   PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Data must not overlap.");
@@ -296,7 +283,7 @@ void plBoundingBoxTemplate<Type>::TransformFromCenter(const plMat4Template<Type>
   GetCorners(vCorners);
 
   const plVec3Template<Type> vCenter = GetCenter();
-  *this = MakeInvalid();
+  SetInvalid();
 
   for (plUInt32 i = 0; i < 8; ++i)
     ExpandToInclude(vCenter + mTransform.TransformPosition(vCorners[i] - vCenter));
@@ -310,7 +297,7 @@ void plBoundingBoxTemplate<Type>::TransformFromOrigin(const plMat4Template<Type>
 
   mTransform.TransformPosition(vCorners, 8);
 
-  *this = MakeInvalid();
+  SetInvalid();
   ExpandToInclude(vCorners, 8);
 }
 
@@ -389,7 +376,8 @@ Type plBoundingBoxTemplate<Type>::GetDistanceTo(const plBoundingBoxTemplate<Type
 }
 
 template <typename Type>
-bool plBoundingBoxTemplate<Type>::GetRayIntersection(const plVec3Template<Type>& vStartPos, const plVec3Template<Type>& vRayDir, Type* out_pIntersectionDistance, plVec3Template<Type>* out_pIntersection) const
+bool plBoundingBoxTemplate<Type>::GetRayIntersection(
+  const plVec3Template<Type>& vStartPos, const plVec3Template<Type>& vRayDir, Type* out_pIntersectionDistance, plVec3Template<Type>* out_pIntersection) const
 {
   // This code was taken from: http://people.csail.mit.edu/amy/papers/box-jgt.pdf
   // "An Efficient and Robust Ray-Box Intersection Algorithm"
@@ -482,7 +470,8 @@ bool plBoundingBoxTemplate<Type>::GetRayIntersection(const plVec3Template<Type>&
 }
 
 template <typename Type>
-bool plBoundingBoxTemplate<Type>::GetLineSegmentIntersection(const plVec3Template<Type>& vStartPos, const plVec3Template<Type>& vEndPos, Type* out_pLineFraction, plVec3Template<Type>* out_pIntersection) const
+bool plBoundingBoxTemplate<Type>::GetLineSegmentIntersection(
+  const plVec3Template<Type>& vStartPos, const plVec3Template<Type>& vEndPos, Type* out_pLineFraction, plVec3Template<Type>* out_pIntersection) const
 {
   const plVec3Template<Type> vRayDir = vEndPos - vStartPos;
 

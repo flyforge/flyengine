@@ -64,7 +64,7 @@ static plSimdFloat sinc(const plSimdFloat& x)
   }
   else
   {
-    return plMath::Sin(plAngle::MakeFromRadian(x)) / x;
+    return plMath::Sin(plAngle::Radian(x)) / x;
   }
 }
 

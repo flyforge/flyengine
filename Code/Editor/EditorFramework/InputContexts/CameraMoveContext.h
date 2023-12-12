@@ -6,7 +6,7 @@
 
 class plCamera;
 
-class PLASMA_EDITORFRAMEWORK_DLL plCameraMoveContext : public plEditorInputContext
+class PLASMA_EDITORFRAMEWORK_DLL plCameraMoveContext : public PlasmaEditorInputContext
 {
 public:
   plCameraMoveContext(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView);
@@ -23,12 +23,12 @@ public:
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual plEditorInput DoKeyPressEvent(QKeyEvent* e) override;
-  virtual plEditorInput DoKeyReleaseEvent(QKeyEvent* e) override;
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoWheelEvent(QWheelEvent* e) override;
+  virtual PlasmaEditorInput DoKeyPressEvent(QKeyEvent* e) override;
+  virtual PlasmaEditorInput DoKeyReleaseEvent(QKeyEvent* e) override;
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoWheelEvent(QWheelEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override {}
 

@@ -93,6 +93,9 @@ static plQtPropertyWidget* StandardTypeCreator(const plRTTI* pRtti)
     case plVariant::Type::String:
       return new plQtPropertyEditorLineEditWidget();
 
+    case plVariant::Type::StringView:
+      return new plQtPropertyEditorLineEditWidget();
+
     case plVariant::Type::Color:
     case plVariant::Type::ColorGamma:
       return new plQtPropertyEditorColorWidget();
@@ -166,6 +169,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, PropertyGrid)
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plUInt64>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plConstCharPtr>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plString>(), StandardTypeCreator);
+    plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plStringView>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plTime>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plColor>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plColorGammaUB>(), StandardTypeCreator);
@@ -214,7 +218,6 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, PropertyGrid)
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plColorGammaUB>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plAngle>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plVariant>());
-    plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plHashedString>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plEnumBase>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plBitflagsBase>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plTagSetWidgetAttribute>());

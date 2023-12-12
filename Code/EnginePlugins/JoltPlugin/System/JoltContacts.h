@@ -44,7 +44,7 @@ public:
 
   plMutex m_Mutex;
   plWorld* m_pWorld = nullptr;
-  plVec3 m_vMainCameraPosition = plVec3::MakeZero();
+  plVec3 m_vMainCameraPosition = plVec3::ZeroVector();
   plHybridArray<InteractionContact, 8> m_InteractionContacts; // these are spawned PER FRAME, so only a low number is necessary
   plHybridArray<SlideAndRollInfo, 4> m_SlidingOrRollingActors;
 

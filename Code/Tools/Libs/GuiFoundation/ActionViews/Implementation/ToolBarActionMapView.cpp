@@ -10,8 +10,8 @@
 #include <QMenu>
 #include <QToolButton>
 
-plQtToolBarActionMapView::plQtToolBarActionMapView(QString sTitle, QWidget* pParent)
-  : QToolBar(sTitle, pParent)
+plQtToolBarActionMapView::plQtToolBarActionMapView(QString title, QWidget* parent)
+  : QToolBar(title, parent)
 {
   setIconSize(QSize(16, 16));
   setFloatable(false);
@@ -36,7 +36,7 @@ void plQtToolBarActionMapView::SetActionContext(const plActionContext& context)
   CreateView();
 }
 
-void plQtToolBarActionMapView::setVisible(bool bVisible)
+void plQtToolBarActionMapView::setVisible(bool visible)
 {
   QToolBar::setVisible(true);
 }
@@ -114,6 +114,8 @@ void plQtToolBarActionMapView::CreateView(const plActionMap::TreeNode* pObject)
 
       case plActionType::ActionAndMenu:
       {
+        plNamedAction* pNamed = static_cast<plNamedAction*>(pProxy->GetAction());
+
         QMenu* pQtMenu = static_cast<plQtDynamicActionAndMenuProxy*>(pProxy.data())->GetQMenu();
         QAction* pQtAction = static_cast<plQtDynamicActionAndMenuProxy*>(pProxy.data())->GetQAction();
         // TODO pButton leaks!

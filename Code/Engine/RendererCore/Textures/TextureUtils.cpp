@@ -166,9 +166,9 @@ plImageFormat::Enum plTextureUtils::GalFormatToImageFormat(plGALResourceFormat::
     case plGALResourceFormat::RGBAFloat:
       return plImageFormat::R32G32B32A32_FLOAT;
     case plGALResourceFormat::RGBAUInt:
-      return plImageFormat::R32G32B32A32_UINT;
+      return plImageFormat::R8G8B8A8_UINT;
     case plGALResourceFormat::RGBAInt:
-      return plImageFormat::R32G32B32A32_SINT;
+      return plImageFormat::R8G8B8A8_SINT;
     case plGALResourceFormat::RGBFloat:
       return plImageFormat::R32G32B32_FLOAT;
     case plGALResourceFormat::RGBUInt:
@@ -256,7 +256,7 @@ plImageFormat::Enum plTextureUtils::GalFormatToImageFormat(plGALResourceFormat::
     case plGALResourceFormat::AUByteNormalized:
       return plImageFormat::R8_UNORM;
     case plGALResourceFormat::D16:
-      return plImageFormat::R16_UINT;
+      return plImageFormat::R16_FLOAT;
     case plGALResourceFormat::BC1:
       return plImageFormat::BC1_UNORM;
     case plGALResourceFormat::BC1sRGB:

@@ -13,30 +13,15 @@ public:
   /// \brief Constructs the box with the given minimum and maximum values.
   plSimdBBox(const plSimdVec4f& vMin, const plSimdVec4f& vMax); // [tested]
 
-  /// \brief Creates a box that is located at the origin and has zero size. This is a 'valid' box.
-  [[nodiscard]] static plSimdBBox MakeZero();
-
-  /// \brief Creates a box that is in an invalid state. ExpandToInclude can then be used to make it into a bounding box for objects.
-  [[nodiscard]] static plSimdBBox MakeInvalid(); // [tested]
-
-  /// \brief Creates a box from a center point and half-extents for each axis.
-  [[nodiscard]] static plSimdBBox MakeFromCenterAndHalfExtents(const plSimdVec4f& vCenter, const plSimdVec4f& vHalfExtents); // [tested]
-
-  /// \brief Creates a box with the given minimum and maximum values.
-  [[nodiscard]] static plSimdBBox MakeFromMinMax(const plSimdVec4f& vMin, const plSimdVec4f& vMax); // [tested]
-
-  /// \brief Creates a box around the given set of points. If uiNumPoints is zero, the returned box is invalid (same as MakeInvalid() returns).
-  [[nodiscard]] static plSimdBBox MakeFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plSimdVec4f)); // [tested]
-
 public:
   /// \brief Resets the box to an invalid state. ExpandToInclude can then be used to make it into a bounding box for objects.
-  [[deprecated("Use MakeInvalid() instead.")]] void SetInvalid(); // [tested]
+  void SetInvalid(); // [tested]
 
   /// \brief Sets the box from a center point and half-extents for each axis.
-  [[deprecated("Use MakeFromCenterAndHalfExtents() instead.")]] void SetCenterAndHalfExtents(const plSimdVec4f& vCenter, const plSimdVec4f& vHalfExtents); // [tested]
+  void SetCenterAndHalfExtents(const plSimdVec4f& vCenter, const plSimdVec4f& vHalfExtents); // [tested]
 
   /// \brief Creates a new bounding-box around the given set of points.
-  [[deprecated("Use MakeFromPoints() instead.")]] void SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plSimdVec4f)); // [tested]
+  void SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plSimdVec4f)); // [tested]
 
   /// \brief Checks whether the box is in an invalid state.
   bool IsValid() const; // [tested]

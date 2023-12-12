@@ -5,10 +5,10 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 #include <ToolsFoundation/Serialization/ToolsSerializationUtils.h>
 
-void plToolsSerializationUtils::SerializeTypes(const plSet<const plRTTI*>& types, plAbstractObjectGraph& ref_typesGraph)
+void plToolsSerializationUtils::SerializeTypes(const plSet<const plRTTI*>& types, plAbstractObjectGraph& typesGraph)
 {
   plRttiConverterContext context;
-  plRttiConverterWriter rttiConverter(&ref_typesGraph, &context, true, true);
+  plRttiConverterWriter rttiConverter(&typesGraph, &context, true, true);
   for (const plRTTI* pType : types)
   {
     plReflectedTypeDescriptor desc;
@@ -21,12 +21,12 @@ void plToolsSerializationUtils::SerializeTypes(const plSet<const plRTTI*>& types
       plToolsReflectionUtils::GetMinimalReflectedTypeDescriptorFromRtti(pType, desc);
     }
 
-    context.RegisterObject(plUuid::MakeStableUuidFromString(pType->GetTypeName()), plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
+    context.RegisterObject(plUuid::StableUuidForString(pType->GetTypeName()), plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
     rttiConverter.AddObjectToGraph(plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
   }
 }
 
-void plToolsSerializationUtils::CopyProperties(const plDocumentObject* pSource, const plDocumentObjectManager* pSourceManager, void* pTarget, const plRTTI* pTargetType, FilterFunction propertFilter)
+void plToolsSerializationUtils::CopyProperties(const plDocumentObject* pSource, const plDocumentObjectManager* pSourceManager, void* pTarget, const plRTTI* pTargetType, FilterFunction PropertFilter)
 {
   plAbstractObjectGraph graph;
   plDocumentObjectConverterWriter writer(&graph, pSourceManager, [](const plDocumentObject*, const plAbstractProperty* p) { return p->GetAttributeByType<plHiddenAttribute>() == nullptr; });

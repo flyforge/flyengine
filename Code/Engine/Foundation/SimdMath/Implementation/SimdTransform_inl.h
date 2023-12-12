@@ -16,39 +16,19 @@ PLASMA_ALWAYS_INLINE plSimdTransform::plSimdTransform(const plSimdQuat& qRotatio
   m_Scale.Set(1.0f);
 }
 
-inline plSimdTransform plSimdTransform::Make(const plSimdVec4f& vPosition, const plSimdQuat& qRotation /*= plSimdQuat::IdentityQuaternion()*/, const plSimdVec4f& vScale /*= plSimdVec4f(1.0f)*/)
+PLASMA_ALWAYS_INLINE void plSimdTransform::SetIdentity()
 {
-  plSimdTransform res;
-  res.m_Position = vPosition;
-  res.m_Rotation = qRotation;
-  res.m_Scale = vScale;
-  return res;
+  m_Position.SetZero();
+  m_Rotation.SetIdentity();
+  m_Scale.Set(1.0f);
 }
 
-PLASMA_ALWAYS_INLINE plSimdTransform plSimdTransform::MakeIdentity()
+// static
+PLASMA_ALWAYS_INLINE plSimdTransform plSimdTransform::IdentityTransform()
 {
-  plSimdTransform res;
-  res.m_Position.SetZero();
-  res.m_Rotation = plSimdQuat::MakeIdentity();
-  res.m_Scale.Set(1.0f);
-  return res;
-}
-
-inline plSimdTransform plSimdTransform::MakeLocalTransform(const plSimdTransform& globalTransformParent, const plSimdTransform& globalTransformChild)
-{
-  const plSimdQuat invRot = -globalTransformParent.m_Rotation;
-  const plSimdVec4f invScale = globalTransformParent.m_Scale.GetReciprocal();
-
-  plSimdTransform res;
-  res.m_Position = (invRot * (globalTransformChild.m_Position - globalTransformParent.m_Position)).CompMul(invScale);
-  res.m_Rotation = invRot * globalTransformChild.m_Rotation;
-  res.m_Scale = invScale.CompMul(globalTransformChild.m_Scale);
-  return res;
-}
-
-PLASMA_ALWAYS_INLINE plSimdTransform plSimdTransform::MakeGlobalTransform(const plSimdTransform& globalTransformParent, const plSimdTransform& localTransformChild)
-{
-  return globalTransformParent * localTransformChild;
+  plSimdTransform result;
+  result.SetIdentity();
+  return result;
 }
 
 PLASMA_ALWAYS_INLINE plSimdFloat plSimdTransform::GetMaxScale() const
@@ -58,7 +38,7 @@ PLASMA_ALWAYS_INLINE plSimdFloat plSimdTransform::GetMaxScale() const
 
 PLASMA_ALWAYS_INLINE bool plSimdTransform::ContainsNegativeScale() const
 {
-  return (m_Scale.x() * m_Scale.y() * m_Scale.z()) < plSimdFloat::MakeZero();
+  return (m_Scale.x() * m_Scale.y() * m_Scale.z()) < plSimdFloat::Zero();
 }
 
 PLASMA_ALWAYS_INLINE bool plSimdTransform::ContainsUniformScale() const
@@ -85,6 +65,21 @@ PLASMA_ALWAYS_INLINE plSimdTransform plSimdTransform::GetInverse() const
   plSimdVec4f invPos = invRot * (invScale.CompMul(-m_Position));
 
   return plSimdTransform(invPos, invRot, invScale);
+}
+
+inline void plSimdTransform::SetLocalTransform(const plSimdTransform& globalTransformParent, const plSimdTransform& globalTransformChild)
+{
+  plSimdQuat invRot = -globalTransformParent.m_Rotation;
+  plSimdVec4f invScale = globalTransformParent.m_Scale.GetReciprocal();
+
+  m_Position = (invRot * (globalTransformChild.m_Position - globalTransformParent.m_Position)).CompMul(invScale);
+  m_Rotation = invRot * globalTransformChild.m_Rotation;
+  m_Scale = invScale.CompMul(globalTransformChild.m_Scale);
+}
+
+PLASMA_ALWAYS_INLINE void plSimdTransform::SetGlobalTransform(const plSimdTransform& globalTransformParent, const plSimdTransform& localTransformChild)
+{
+  *this = globalTransformParent * localTransformChild;
 }
 
 PLASMA_FORCE_INLINE plSimdMat4f plSimdTransform::GetAsMat4() const

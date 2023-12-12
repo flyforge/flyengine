@@ -8,60 +8,6 @@ PLASMA_ALWAYS_INLINE plSimdBSphere::plSimdBSphere(const plSimdVec4f& vCenter, co
   m_CenterAndRadius.SetW(fRadius);
 }
 
-PLASMA_ALWAYS_INLINE plSimdBSphere plSimdBSphere::MakeZero()
-{
-  plSimdBSphere res;
-  res.m_CenterAndRadius = plSimdVec4f::MakeZero();
-  return res;
-}
-
-PLASMA_ALWAYS_INLINE plSimdBSphere plSimdBSphere::MakeInvalid(const plSimdVec4f& vCenter /*= plSimdVec4f::MakeZero()*/)
-{
-  plSimdBSphere res;
-  res.m_CenterAndRadius.Set(0.0f, 0.0f, 0.0f, -plMath::SmallEpsilon<float>());
-  return res;
-}
-
-PLASMA_ALWAYS_INLINE plSimdBSphere plSimdBSphere::MakeFromCenterAndRadius(const plSimdVec4f& vCenter, const plSimdFloat& fRadius)
-{
-  return plSimdBSphere(vCenter, fRadius);
-}
-
-inline plSimdBSphere plSimdBSphere::MakeFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /*= sizeof(plSimdVec4f)*/)
-{
-  PLASMA_ASSERT_DEBUG(pPoints != nullptr, "The array must not be empty.");
-  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plSimdVec4f), "The data must not overlap.");
-  PLASMA_ASSERT_DEBUG(uiNumPoints > 0, "The array must contain at least one point.");
-
-  plSimdBSphere res;
-
-  const plSimdVec4f* pCur = pPoints;
-
-  plSimdVec4f vCenter = plSimdVec4f::MakeZero();
-  for (plUInt32 i = 0; i < uiNumPoints; ++i)
-  {
-    vCenter += *pCur;
-    pCur = plMemoryUtils::AddByteOffset(pCur, uiStride);
-  }
-
-  res.m_CenterAndRadius = vCenter / plSimdFloat(uiNumPoints);
-
-  pCur = pPoints;
-
-  plSimdFloat fMaxDistSquare = plSimdFloat::MakeZero();
-  for (plUInt32 i = 0; i < uiNumPoints; ++i)
-  {
-    const plSimdFloat fDistSQR = (*pCur - res.m_CenterAndRadius).GetLengthSquared<3>();
-    fMaxDistSquare = fMaxDistSquare.Max(fDistSQR);
-
-    pCur = plMemoryUtils::AddByteOffset(pCur, uiStride);
-  }
-
-  res.m_CenterAndRadius.SetW(fMaxDistSquare.GetSqrt());
-
-  return res;
-}
-
 PLASMA_ALWAYS_INLINE void plSimdBSphere::SetInvalid()
 {
   m_CenterAndRadius.Set(0.0f, 0.0f, 0.0f, -plMath::SmallEpsilon<float>());
@@ -69,7 +15,7 @@ PLASMA_ALWAYS_INLINE void plSimdBSphere::SetInvalid()
 
 PLASMA_ALWAYS_INLINE bool plSimdBSphere::IsValid() const
 {
-  return m_CenterAndRadius.IsValid<4>() && GetRadius() >= plSimdFloat::MakeZero();
+  return m_CenterAndRadius.IsValid<4>() && GetRadius() >= plSimdFloat::Zero();
 }
 
 PLASMA_ALWAYS_INLINE bool plSimdBSphere::IsNaN() const
@@ -87,12 +33,38 @@ PLASMA_ALWAYS_INLINE plSimdFloat plSimdBSphere::GetRadius() const
   return m_CenterAndRadius.w();
 }
 
-PLASMA_ALWAYS_INLINE void plSimdBSphere::SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride)
+inline void plSimdBSphere::SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride)
 {
-  *this = MakeFromPoints(pPoints, uiNumPoints, uiStride);
+  PLASMA_ASSERT_DEBUG(pPoints != nullptr, "The array must not be empty.");
+  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plSimdVec4f), "The data must not overlap.");
+  PLASMA_ASSERT_DEBUG(uiNumPoints > 0, "The array must contain at least one point.");
+
+  const plSimdVec4f* pCur = pPoints;
+
+  plSimdVec4f vCenter = plSimdVec4f::ZeroVector();
+  for (plUInt32 i = 0; i < uiNumPoints; ++i)
+  {
+    vCenter += *pCur;
+    pCur = plMemoryUtils::AddByteOffset(pCur, uiStride);
+  }
+
+  m_CenterAndRadius = vCenter / plSimdFloat(uiNumPoints);
+
+  pCur = pPoints;
+
+  plSimdFloat fMaxDistSquare = plSimdFloat::Zero();
+  for (plUInt32 i = 0; i < uiNumPoints; ++i)
+  {
+    const plSimdFloat fDistSQR = (*pCur - m_CenterAndRadius).GetLengthSquared<3>();
+    fMaxDistSquare = fMaxDistSquare.Max(fDistSQR);
+
+    pCur = plMemoryUtils::AddByteOffset(pCur, uiStride);
+  }
+
+  m_CenterAndRadius.SetW(fMaxDistSquare.GetSqrt());
 }
 
-PLASMA_ALWAYS_INLINE void plSimdBSphere::ExpandToInclude(const plSimdVec4f& vPoint)
+inline void plSimdBSphere::ExpandToInclude(const plSimdVec4f& vPoint)
 {
   const plSimdFloat fDist = (vPoint - m_CenterAndRadius).GetLength<3>();
 
@@ -106,7 +78,7 @@ inline void plSimdBSphere::ExpandToInclude(const plSimdVec4f* pPoints, plUInt32 
 
   const plSimdVec4f* pCur = pPoints;
 
-  plSimdFloat fMaxDistSquare = plSimdFloat::MakeZero();
+  plSimdFloat fMaxDistSquare = plSimdFloat::Zero();
 
   for (plUInt32 i = 0; i < uiNumPoints; ++i)
   {
@@ -119,7 +91,7 @@ inline void plSimdBSphere::ExpandToInclude(const plSimdVec4f* pPoints, plUInt32 
   m_CenterAndRadius.SetW(fMaxDistSquare.GetSqrt().Max(GetRadius()));
 }
 
-PLASMA_ALWAYS_INLINE void plSimdBSphere::ExpandToInclude(const plSimdBSphere& rhs)
+inline void plSimdBSphere::ExpandToInclude(const plSimdBSphere& rhs)
 {
   const plSimdFloat fReqRadius = (rhs.m_CenterAndRadius - m_CenterAndRadius).GetLength<3>() + rhs.GetRadius();
 

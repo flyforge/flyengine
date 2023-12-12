@@ -19,7 +19,7 @@ plApplicationServices::plApplicationServices()
 plString plApplicationServices::GetApplicationUserDataFolder() const
 {
   plStringBuilder path = plOSFile::GetUserDataFolder();
-  path.AppendPath("plEngine Project", plApplication::GetApplicationInstance()->GetApplicationName());
+  path.AppendPath("PlasmaEngine Project", plApplication::GetApplicationInstance()->GetApplicationName());
   path.MakeCleanPath();
 
   return path;
@@ -43,18 +43,9 @@ plString plApplicationServices::GetApplicationPreferencesFolder() const
 
 plString plApplicationServices::GetProjectPreferencesFolder() const
 {
-  return GetProjectPreferencesFolder(plToolsProject::GetSingleton()->GetProjectDirectory());
-}
-
-plString plApplicationServices::GetProjectPreferencesFolder(plStringView sProjectFilePath) const
-{
   plStringBuilder path = GetApplicationUserDataFolder();
 
-  sProjectFilePath.TrimWordEnd("plProject");
-  sProjectFilePath.TrimWordEnd("plRemoteProject");
-  sProjectFilePath.Trim("/\\");
-
-  plStringBuilder ProjectName = sProjectFilePath;
+  plStringBuilder ProjectName = plToolsProject::GetSingleton()->GetProjectDirectory();
 
   plStringBuilder ProjectPath = ProjectName;
   ProjectPath.PathParentDirectory();

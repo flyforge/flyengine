@@ -111,7 +111,7 @@ namespace
     return plSubstanceUsage::Unknown;
   }
 
-  plResult ParseGraphOutput(QXmlStreamReader& inout_reader, plUInt32 uiGraphUid, plSubstanceGraphOutput& out_graphOutput)
+  plResult ParseGraphOutput(QXmlStreamReader& inout_reader, plUInt32 graphUid, plSubstanceGraphOutput& out_graphOutput)
   {
     PLASMA_ASSERT_DEBUG(inout_reader.name() == QLatin1StringView("graphoutput"), "");
 
@@ -124,8 +124,8 @@ namespace
       else if (inout_reader.name() == QLatin1StringView("uid"))
       {
         plUInt32 outputUid = GetValueAttribute<plUInt32>(inout_reader);
-        plUInt64 seed = plUInt64(uiGraphUid) << 32ull | outputUid;
-        out_graphOutput.m_Uuid = plUuid::MakeStableUuidFromInt(seed);
+        plUInt64 seed = plUInt64(graphUid) << 32ull | outputUid;
+        out_graphOutput.m_Uuid = plUuid::StableUuidForInt(seed);
       }
       else if (inout_reader.name() == QLatin1StringView("attributes"))
       {
@@ -155,7 +155,7 @@ namespace
   {
     PLASMA_ASSERT_DEBUG(inout_reader.name() == QLatin1StringView("graph"), "");
 
-    plUInt32 uiGraphUid = 0;
+    plUInt32 graphUid = 0;
     while (inout_reader.readNextStartElement())
     {
       if (inout_reader.name() == QLatin1StringView("identifier"))
@@ -166,7 +166,7 @@ namespace
       }
       else if (inout_reader.name() == QLatin1StringView("uid"))
       {
-        uiGraphUid = GetValueAttribute<plUInt32>(inout_reader);
+        graphUid = GetValueAttribute<plUInt32>(inout_reader);
         inout_reader.skipCurrentElement();
       }
       else if (inout_reader.name() == QLatin1StringView("graphOutputs"))
@@ -176,7 +176,7 @@ namespace
           if (inout_reader.name() == QLatin1StringView("graphoutput"))
           {
             auto& graphOutput = out_graph.m_Outputs.ExpandAndGetRef();
-            PLASMA_SUCCEED_OR_RETURN(ParseGraphOutput(inout_reader, uiGraphUid, graphOutput));
+            PLASMA_SUCCEED_OR_RETURN(ParseGraphOutput(inout_reader, graphUid, graphOutput));
           }
         }
       }
@@ -200,7 +200,7 @@ namespace
     plStringBuilder sFileContent;
     PLASMA_SUCCEED_OR_RETURN(GetSbsContent(sAbsolutePath, sFileContent));
 
-    QXmlStreamReader reader(sFileContent.GetData());
+    QXmlStreamReader reader(sFileContent);
     PLASMA_SUCCEED_OR_RETURN(ReadUntilStartElement(reader, "dependencies"));
 
     while (reader.readNextStartElement())
@@ -253,7 +253,8 @@ namespace
       return PLASMA_SUCCESS;
     }
 
-    auto CheckPath = [&](plStringView sPath) {
+    auto CheckPath = [&](plStringView sPath)
+    {
       plStringBuilder path = sPath;
       path.AppendPath("sbscooker.exe");
 
@@ -267,7 +268,7 @@ namespace
       return false;
     };
 
-    plStringBuilder sPath = "C:/Program Files/Allegorithmic/Substance Designer";
+    plStringBuilder sPath = "C:/Program Files/Adobe/Adobe Substance 3D Designer";
     if (CheckPath(sPath))
     {
       return PLASMA_SUCCESS;
@@ -372,8 +373,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plSubstanceGraphOutput, plNoBase, 1, plRTTIDe
     PLASMA_MEMBER_PROPERTY("Label", m_sLabel),
     PLASMA_ENUM_MEMBER_PROPERTY("Usage", plSubstanceUsage, m_Usage),
     PLASMA_MEMBER_PROPERTY("NumChannels", m_uiNumChannels)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(1, 4)),
-    PLASMA_ENUM_MEMBER_PROPERTY("CompressionMode", plTexConvCompressionMode, m_CompressionMode)->AddAttributes(new plDefaultValueAttribute(plTexConvCompressionMode::High)),
-    PLASMA_MEMBER_PROPERTY("PreserveAlphaCoverage", m_bPreserveAlphaCoverage),
+    PLASMA_MEMBER_PROPERTY("UseHighCompression", m_bUseHighCompression)->AddAttributes(new plDefaultValueAttribute(true)),
     PLASMA_MEMBER_PROPERTY("Uuid", m_Uuid)->AddAttributes(new plHiddenAttribute()),
   }
   PLASMA_END_PROPERTIES;
@@ -419,8 +419,8 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSubstancePackageAssetDocument, 1, plRTTINo
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plSubstancePackageAssetDocument::plSubstancePackageAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument(sDocumentPath, plAssetDocEngineConnection::None)
+plSubstancePackageAssetDocument::plSubstancePackageAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument(szDocumentPath, plAssetDocEngineConnection::None)
 {
   GetObjectManager()->m_PropertyEvents.AddEventHandler(plMakeDelegate(&plSubstancePackageAssetDocument::OnPropertyChanged, this));
 }
@@ -438,9 +438,7 @@ void plSubstancePackageAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInf
 
   // Dependencies
   {
-    pInfo->m_TransformDependencies.Insert(pProp->m_sSubstancePackage);
-
-    ReadDependencies(pProp->m_sSubstancePackage, pInfo->m_TransformDependencies).IgnoreResult();
+    pInfo->m_AssetTransformDependencies.Insert(pProp->m_sSubstancePackage);
   }
 
   // Outputs
@@ -474,7 +472,7 @@ void plSubstancePackageAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInf
   }
 }
 
-plTransformStatus plSubstancePackageAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& assetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plSubstancePackageAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& assetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plSubstancePackageAssetProperties* pProp = GetProperties();
   plStringBuilder sAbsolutePackagePath = pProp->m_sSubstancePackage;
@@ -528,7 +526,7 @@ plTransformStatus plSubstancePackageAssetDocument::InternalTransformAsset(const 
     }
   }
 
-  return SUPER::InternalTransformAsset(szTargetFile, sOutputTag, pAssetProfile, assetHeader, transformFlags);
+  return SUPER::InternalTransformAsset(szTargetFile, szOutputTag, pAssetProfile, assetHeader, transformFlags);
 }
 
 void plSubstancePackageAssetDocument::OnPropertyChanged(const plDocumentObjectPropertyEvent& e)
@@ -580,7 +578,7 @@ plTransformStatus plSubstancePackageAssetDocument::UpdateGraphOutputs(plStringVi
 
   plHybridArray<plSubstanceGraph, 2> graphs;
 
-  QXmlStreamReader reader(sFileContent.GetData());
+  QXmlStreamReader reader(sFileContent);
   PLASMA_SUCCEED_OR_RETURN(ReadUntilStartElement(reader, "content"));
 
   while (reader.atEnd() == false)
@@ -621,9 +619,7 @@ plTransformStatus plSubstancePackageAssetDocument::UpdateGraphOutputs(plStringVi
         if (newOutput.m_sName == existingOutput.m_sName)
         {
           newOutput.m_bEnabled = existingOutput.m_bEnabled;
-          newOutput.m_CompressionMode = existingOutput.m_CompressionMode;
-          newOutput.m_uiNumChannels = existingOutput.m_uiNumChannels;
-          newOutput.m_bPreserveAlphaCoverage = existingOutput.m_bPreserveAlphaCoverage;
+          newOutput.m_bUseHighCompression = existingOutput.m_bUseHighCompression;
           newOutput.m_Usage = existingOutput.m_Usage;
           newOutput.m_sLabel = existingOutput.m_sLabel;
           break;
@@ -665,14 +661,6 @@ static const char* s_szTexConvUsageMapping[] = {
 };
 
 static_assert(PLASMA_ARRAY_SIZE(s_szTexConvUsageMapping) == plSubstanceUsage::Count);
-
-static const char* s_szTexConvCompressionMapping[] = {
-  "None",
-  "Medium",
-  "High",
-};
-
-static_assert(PLASMA_ARRAY_SIZE(s_szTexConvCompressionMapping) == plTexConvCompressionMode::High + 1);
 
 plStatus plSubstancePackageAssetDocument::RunTexConv(const char* szInputFile, const char* szTargetFile, const plAssetFileHeader& assetHeader, const plSubstanceGraphOutput& graphOutput, plStringView sThumbnailFile, const plTextureAssetProfileConfig* pAssetConfig)
 {
@@ -720,7 +708,7 @@ plStatus plSubstancePackageAssetDocument::RunTexConv(const char* szInputFile, co
   }
 
   arguments << "-compression";
-  arguments << s_szTexConvCompressionMapping[graphOutput.m_CompressionMode];
+  arguments << (graphOutput.m_bUseHighCompression ? "High" : "Medium");
 
   arguments << "-maxRes" << QString::number(pAssetConfig->m_uiMaxResolution);
 
@@ -748,13 +736,6 @@ plStatus plSubstancePackageAssetDocument::RunTexConv(const char* szInputFile, co
       arguments << "-rgba";
       arguments << "in0.rgba";
       break;
-  }
-
-  if (graphOutput.m_bPreserveAlphaCoverage)
-  {
-    arguments << "-mipsPreserveCoverage";
-    arguments << "-mipsAlphaThreshold";
-    arguments << "0.5";
   }
 
   PLASMA_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));

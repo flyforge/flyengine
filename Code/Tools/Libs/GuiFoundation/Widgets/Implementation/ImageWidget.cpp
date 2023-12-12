@@ -25,8 +25,8 @@ void plQtImageScene::SetImage(QPixmap pixmap)
 
 
 
-plQtImageWidget::plQtImageWidget(QWidget* pParent, bool bShowButtons)
-  : QWidget(pParent)
+plQtImageWidget::plQtImageWidget(QWidget* parent, bool bShowButtons)
+  : QWidget(parent)
 {
   setupUi(this);
   m_pScene = new plQtImageScene(GraphicsView);
@@ -38,7 +38,7 @@ plQtImageWidget::plQtImageWidget(QWidget* pParent, bool bShowButtons)
     ButtonBar->setVisible(false);
 }
 
-plQtImageWidget::~plQtImageWidget() = default;
+plQtImageWidget::~plQtImageWidget() {}
 
 void plQtImageWidget::SetImageSize(float fScale)
 {
@@ -54,6 +54,7 @@ void plQtImageWidget::ScaleImage(float fFactor)
   float fPrevScale = m_fCurrentScale;
   m_fCurrentScale = plMath::Clamp(m_fCurrentScale * fFactor, 0.2f, 5.0f);
 
+  fFactor = m_fCurrentScale / fPrevScale;
   ImageApplyScale();
 }
 

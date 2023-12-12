@@ -102,6 +102,9 @@ public:
   float GetISO() const { return m_fISO; } // [ property ]
   void SetISO(float fISO);                // [ property ]
 
+  float GetFocusDistance() const { return m_fFocusDistance; } // [ property ]
+  void SetFocusDistance(float fFocusDistance);                // [ property ]
+
   float GetExposureCompensation() const { return m_fExposureCompensation; } // [ property ]
   void SetExposureCompensation(float fEC);                                  // [ property ]
 
@@ -129,8 +132,9 @@ private:
   plRenderPipelineResourceHandle m_hCachedRenderPipeline;
 
   float m_fAperture = 1.0f;
-  plTime m_ShutterTime = plTime::MakeFromSeconds(1.0f);
+  plTime m_ShutterTime = plTime::Seconds(1.0f);
   float m_fISO = 100.0f;
+  float m_fFocusDistance = 100.0f;
   float m_fExposureCompensation = 0.0f;
 
   void MarkAsModified();

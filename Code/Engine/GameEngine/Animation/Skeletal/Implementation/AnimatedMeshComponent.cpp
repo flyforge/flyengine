@@ -31,6 +31,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAnimatedMeshComponent, 13, plComponentMode::Dynami
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
+    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
 
@@ -82,7 +83,7 @@ void plAnimatedMeshComponent::OnDeactivated()
 
 void plAnimatedMeshComponent::InitializeAnimationPose()
 {
-  m_MaxBounds = plBoundingBox::MakeInvalid();
+  m_MaxBounds.SetInvalid();
 
   if (!m_hMesh.IsValid())
     return;
@@ -181,7 +182,7 @@ void plAnimatedMeshComponent::RetrievePose(plDynamicArray<plMat4>& out_modelTran
 
   const plHashTable<plHashedString, plMeshResourceDescriptor::BoneData>& bones = pMesh->m_Bones;
 
-  out_modelTransforms.SetCount(skeleton.GetJointCount(), plMat4::MakeIdentity());
+  out_modelTransforms.SetCount(skeleton.GetJointCount(), plMat4::IdentityMatrix());
 
   for (auto itBone : bones)
   {
@@ -203,7 +204,8 @@ void plAnimatedMeshComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& 
 
   plResourceLock<plMeshResource> pMesh(m_hMesh, plResourceAcquireMode::BlockTillLoaded);
 
-  plBoundingBox poseBounds = plBoundingBox::MakeInvalid();
+  plBoundingBox poseBounds;
+  poseBounds.SetInvalid();
   MapModelSpacePoseToSkinningSpace(pMesh->m_Bones, *msg.m_pSkeleton, msg.m_ModelTransforms, &poseBounds);
 
   if (poseBounds.IsValid() && (!m_MaxBounds.IsValid() || !m_MaxBounds.Contains(poseBounds)))
@@ -264,7 +266,8 @@ void plRootMotionMode::Apply(plRootMotionMode::Enum mode, plGameObject* pObject,
       pObject->SetLocalPosition(vNewPos);
 
       // not tested whether this is actually correct
-      plQuat rotation = plQuat::MakeFromEulerAngles(rotationX, rotationY, rotationZ);
+      plQuat rotation;
+      rotation.SetFromEulerAngles(rotationX, rotationY, rotationZ);
 
       pObject->SetLocalRotation(rotation * pObject->GetLocalRotation());
 

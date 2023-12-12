@@ -19,8 +19,8 @@ public:
   {
     /// Whether this node can swing freely or will remain fixed in place.
     bool m_bFixed = false;
-    plSimdVec4f m_vPosition = plSimdVec4f::MakeZero();
-    plSimdVec4f m_vPreviousPosition = plSimdVec4f::MakeZero();
+    plSimdVec4f m_vPosition = plSimdVec4f::ZeroVector();
+    plSimdVec4f m_vPreviousPosition = plSimdVec4f::ZeroVector();
   };
 
   /// Resolution of the cloth along X

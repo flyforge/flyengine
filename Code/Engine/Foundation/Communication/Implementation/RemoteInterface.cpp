@@ -55,7 +55,7 @@ plResult plRemoteInterface::ConnectToServer(plUInt32 uiConnectionToken, plString
   return CreateConnection(uiConnectionToken, plRemoteMode::Client, sAddress, bStartUpdateThread);
 }
 
-plResult plRemoteInterface::WaitForConnectionToServer(plTime timeout /*= plTime::MakeFromSeconds(10)*/)
+plResult plRemoteInterface::WaitForConnectionToServer(plTime timeout /*= plTime::Seconds(10)*/)
 {
   if (m_RemoteMode != plRemoteMode::Client)
     return PLASMA_FAILURE;
@@ -75,7 +75,7 @@ plResult plRemoteInterface::WaitForConnectionToServer(plTime timeout /*= plTime:
         return PLASMA_FAILURE;
     }
 
-    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
+    plThreadUtils::Sleep(plTime::Milliseconds(10));
   }
 }
 
@@ -401,7 +401,7 @@ plUInt32 plRemoteThread::Run()
     {
       plTime tNow = plTime::Now();
 
-      if (tNow - lastPing > plTime::MakeFromMilliseconds(500))
+      if (tNow - lastPing > plTime::Milliseconds(500))
       {
         lastPing = tNow;
 
@@ -409,7 +409,7 @@ plUInt32 plRemoteThread::Run()
       }
     }
 
-    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
+    plThreadUtils::Sleep(plTime::Milliseconds(10));
   }
 
   return 0;

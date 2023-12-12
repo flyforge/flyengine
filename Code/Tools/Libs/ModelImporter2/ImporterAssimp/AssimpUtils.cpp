@@ -27,7 +27,8 @@ namespace plModelImporter2
   {
     PLASMA_ASSERT_DEBUG(!dummy, "not implemented");
 
-    plMat4 mTransformation = plMat4::MakeFromRowMajorArray(&value.a1);
+    plMat4 mTransformation;
+    mTransformation.SetFromArray(&value.a1, plMatrixLayout::RowMajor);
     return mTransformation;
   }
 

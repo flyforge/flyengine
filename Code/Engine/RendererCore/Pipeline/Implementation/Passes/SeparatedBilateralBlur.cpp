@@ -1,6 +1,5 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/GPUResourcePool/GPUResourcePool.h>
 #include <RendererCore/Pipeline/Passes/SeparatedBilateralBlur.h>
 #include <RendererCore/Pipeline/View.h>
@@ -30,7 +29,9 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plSeparatedBilateralBlurPass::plSeparatedBilateralBlurPass()
   : plRenderPipelinePass("SeparatedBilateral")
-
+  , m_uiRadius(7)
+  , m_fGaussianSigma(3.5f)
+  , m_fSharpness(120.0f)
 {
   {
     // Load shader.
@@ -145,26 +146,6 @@ void plSeparatedBilateralBlurPass::Execute(const plRenderViewContext& renderView
   }
 }
 
-plResult plSeparatedBilateralBlurPass::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  inout_stream << m_uiRadius;
-  inout_stream << m_fGaussianSigma;
-  inout_stream << m_fSharpness;
-  return PLASMA_SUCCESS;
-}
-
-plResult plSeparatedBilateralBlurPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  inout_stream >> m_uiRadius;
-  inout_stream >> m_fGaussianSigma;
-  inout_stream >> m_fSharpness;
-  return PLASMA_SUCCESS;
-}
-
 void plSeparatedBilateralBlurPass::SetRadius(plUInt32 uiRadius)
 {
   m_uiRadius = uiRadius;
@@ -178,9 +159,9 @@ plUInt32 plSeparatedBilateralBlurPass::GetRadius() const
   return m_uiRadius;
 }
 
-void plSeparatedBilateralBlurPass::SetGaussianSigma(const float fSigma)
+void plSeparatedBilateralBlurPass::SetGaussianSigma(const float sigma)
 {
-  m_fGaussianSigma = fSigma;
+  m_fGaussianSigma = sigma;
 
   plBilateralBlurConstants* cb = plRenderContext::GetConstantBufferData<plBilateralBlurConstants>(m_hBilateralBlurCB);
   cb->GaussianFalloff = 1.0f / (2.0f * m_fGaussianSigma * m_fGaussianSigma);
@@ -210,8 +191,8 @@ float plSeparatedBilateralBlurPass::GetSharpness() const
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-#include <Foundation/Serialization/AbstractObjectGraph.h>
 #include <Foundation/Serialization/GraphPatch.h>
+#include <Foundation/Serialization/AbstractObjectGraph.h>
 
 class plSeparatedBilateralBlurPassPatch_1_2 : public plGraphPatch
 {
@@ -221,7 +202,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Blur Radius", "BlurRadius");
     pNode->RenameProperty("Gaussian Standard Deviation", "GaussianSigma");

@@ -42,7 +42,6 @@ plResult plProbeTreeSectorResourceDescriptor::Deserialize(plStreamReader& inout_
   Clear();
 
   const plTypeVersion version = inout_stream.ReadVersion(s_ProbeTreeResourceDescriptorVersion);
-  PLASMA_IGNORE_UNUSED(version);
 
   inout_stream >> m_vGridOrigin;
   inout_stream >> m_vProbeSpacing;

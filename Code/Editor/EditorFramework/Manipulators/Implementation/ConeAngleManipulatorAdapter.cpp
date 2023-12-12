@@ -4,9 +4,9 @@
 #include <EditorFramework/Manipulators/ConeAngleManipulatorAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plConeAngleManipulatorAdapter::plConeAngleManipulatorAdapter() = default;
+plConeAngleManipulatorAdapter::plConeAngleManipulatorAdapter() {}
 
-plConeAngleManipulatorAdapter::~plConeAngleManipulatorAdapter() = default;
+plConeAngleManipulatorAdapter::~plConeAngleManipulatorAdapter() {}
 
 void plConeAngleManipulatorAdapter::Finalize()
 {
@@ -31,10 +31,10 @@ void plConeAngleManipulatorAdapter::Update()
   plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
   const plConeAngleManipulatorAttribute* pAttr = static_cast<const plConeAngleManipulatorAttribute*>(m_pManipulatorAttr);
 
-  /* if (!pAttr->GetRadiusProperty().IsEmpty())
+  if (!pAttr->GetRadiusProperty().IsEmpty())
   {
     float fValue = pObjectAccessor->Get<float>(m_pObject, GetProperty(pAttr->GetRadiusProperty()));
-  } */
+  }
 
   m_Gizmo.SetRadius(pAttr->m_fScale);
 

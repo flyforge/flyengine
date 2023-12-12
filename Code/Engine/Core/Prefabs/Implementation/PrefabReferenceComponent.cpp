@@ -14,7 +14,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plPrefabReferenceComponent, 4, plComponentMode::Stat
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Prefabs"),
+    new plCategoryAttribute("General"),
+    new plColorAttribute(plColorScheme::Prefab),
   }
   PLASMA_END_ATTRIBUTES;
 }

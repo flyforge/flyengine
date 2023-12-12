@@ -23,7 +23,7 @@ public:
     Connection
   };
 
-  explicit plQtNodeScene(QObject* pParent = nullptr);
+  explicit plQtNodeScene(QObject* parent = nullptr);
   ~plQtNodeScene();
 
   virtual void InitScene(const plDocumentNodeManager* pManager);
@@ -123,7 +123,7 @@ private:
   plQtConnection* m_pTempConnection = nullptr;
   plQtNode* m_pTempNode = nullptr;
   plDeque<const plDocumentObject*> m_Selection;
-  plVec2 m_vMousePos = plVec2::MakeZero();
+  plVec2 m_vMousePos = plVec2::ZeroVector();
   QString m_sContextMenuSearchText;
   plDynamicArray<const plQtPin*> m_ConnectablePins;
   plEnum<ConnectionStyle> m_ConnectionStyle;

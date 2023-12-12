@@ -64,23 +64,23 @@ plWindWorldModuleInterface::plWindWorldModuleInterface(plWorld* pWorld)
 plVec3 plWindWorldModuleInterface::ComputeWindFlutter(const plVec3& vWind, const plVec3& vObjectDir, float fFlutterSpeed, plUInt32 uiFlutterRandomOffset) const
 {
   if (vWind.IsZero(0.001f))
-    return plVec3::MakeZero();
+    return plVec3::ZeroVector();
 
   plVec3 windDir = vWind;
   const float fWindStrength = windDir.GetLengthAndNormalize();
 
   if (fWindStrength <= 0.01f)
-    return plVec3::MakeZero();
+    return plVec3::ZeroVector();
 
   plVec3 mainDir = vObjectDir;
-  mainDir.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
+  mainDir.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
 
   plVec3 flutterDir = windDir.CrossRH(mainDir);
-  flutterDir.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
+  flutterDir.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
 
   const float fFlutterOffset = (uiFlutterRandomOffset & 1023u) / 256.0f;
 
-  const float fFlutter = plMath::Sin(plAngle::MakeFromRadian(fFlutterOffset + fFlutterSpeed * fWindStrength * GetWorld()->GetClock().GetAccumulatedTime().AsFloatInSeconds())) * fWindStrength;
+  const float fFlutter = plMath::Sin(plAngle::Radian(fFlutterOffset + fFlutterSpeed * fWindStrength * GetWorld()->GetClock().GetAccumulatedTime().AsFloatInSeconds())) * fWindStrength;
 
   return flutterDir * fFlutter;
 }

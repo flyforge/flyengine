@@ -19,11 +19,11 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMaterialContext::plMaterialContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plMaterialContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
+void plMaterialContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plCreateThumbnailMsgToEngine>())
   {
@@ -68,7 +68,7 @@ void plMaterialContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
     }
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
 }
 
 void plMaterialContext::OnInitialize()
@@ -90,7 +90,7 @@ void plMaterialContext::OnInitialize()
 
         plGeometry::GeoOptions opt;
         opt.m_Color = plColor::Red;
-        opt.m_Transform = plMat4::MakeRotationZ(plAngle::MakeFromDegree(90));
+        opt.m_Transform.SetRotationMatrixZ(plAngle::Degree(90));
         geom.AddSphere(0.1f, 64, 64, opt);
         geom.ComputeTangents();
 
@@ -180,7 +180,7 @@ void plMaterialContext::OnInitialize()
 
         plGeometry::GeoOptions opt;
         opt.m_Color = plColor::Red;
-        opt.m_Transform = plMat4::MakeRotationZ(plAngle::MakeFromDegree(-90));
+        opt.m_Transform.SetRotationMatrixZ(plAngle::Degree(-90));
         geom.AddRectXY(plVec2(0.2f), 64, 64, opt);
         geom.ComputeTangents();
 
@@ -238,17 +238,17 @@ void plMaterialContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plMaterialContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plMaterialContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plMaterialViewContext, this);
 }
 
-void plMaterialContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plMaterialContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
-bool plMaterialContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plMaterialContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   plMaterialViewContext* pMaterialViewContext = static_cast<plMaterialViewContext*>(pThumbnailViewContext);
   pMaterialViewContext->PositionThumbnailCamera();

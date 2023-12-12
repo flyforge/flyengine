@@ -35,7 +35,7 @@ void operator>>(plStreamReader& inout_stream, plTime& ref_value)
   double d = 0;
   inout_stream.ReadQWordValue(&d).IgnoreResult();
 
-  ref_value = plTime::MakeFromSeconds(d);
+  ref_value = plTime::Seconds(d);
 }
 
 // plUuid
@@ -271,7 +271,7 @@ void operator>>(plStreamReader& inout_stream, plVariant& ref_value)
   inout_stream >> typeStorage;
   plVariant::Type::Enum type = (plVariant::Type::Enum)typeStorage;
 
-  if (type != plVariant::Type::Invalid && type < (int)plVariant::Type::LastExtendedType)
+  if (type != plVariant::Type::Invalid)
   {
     ReadValueFunc func;
     func.m_pStream = &inout_stream;
@@ -297,7 +297,7 @@ void operator>>(plStreamReader& inout_stream, plTimestamp& ref_value)
   plInt64 value;
   inout_stream >> value;
 
-  ref_value = plTimestamp::MakeFromInt(value, plSIUnitOfTime::Microsecond);
+  ref_value.SetInt64(value, plSIUnitOfTime::Microsecond);
 }
 
 // plVarianceTypeFloat

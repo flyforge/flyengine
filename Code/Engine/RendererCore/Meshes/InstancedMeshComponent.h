@@ -49,7 +49,7 @@ public:
 class PLASMA_RENDERERCORE_DLL plInstancedMeshComponentManager : public plComponentManager<class plInstancedMeshComponent, plBlockStorageType::Compact>
 {
 public:
-  using SUPER = plComponentManager<plInstancedMeshComponent, plBlockStorageType::Compact>;
+  typedef plComponentManager<plInstancedMeshComponent, plBlockStorageType::Compact> SUPER;
 
   plInstancedMeshComponentManager(plWorld* pWorld);
 

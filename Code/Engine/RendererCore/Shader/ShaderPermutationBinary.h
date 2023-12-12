@@ -18,7 +18,6 @@ struct PLASMA_RENDERERCORE_DLL plShaderStateResourceDescriptor
   plUInt32 CalculateHash() const;
 };
 
-/// \brief Serialized state of a shader permutation used by plShaderPermutationResourceLoader to convert into a plShaderPermutationResource.
 class PLASMA_RENDERERCORE_DLL plShaderPermutationBinary
 {
 public:
@@ -27,7 +26,6 @@ public:
   plResult Write(plStreamWriter& inout_stream);
   plResult Read(plStreamReader& inout_stream, bool& out_bOldVersion);
 
-  // Actual binary will be loaded from the hash via plShaderStageBinary::LoadStageBinary to produce plShaderStageBinary
   plUInt32 m_uiShaderStageHashes[plGALShaderStage::ENUM_COUNT];
 
   plDependencyFile m_DependencyFile;

@@ -1,6 +1,5 @@
 #include <Foundation/FoundationPCH.h>
 
-#include <Foundation/Logging/Log.h>
 #include <Foundation/Math/Color8UNorm.h>
 #include <Foundation/Math/ColorScheme.h>
 
@@ -246,112 +245,69 @@ plColor plColorScheme::GetColor(float fIndex, plUInt8 uiBrightness, float fSatur
   return plMath::Lerp(plColor(l, l, l), c, fSaturation).WithAlpha(fAlpha);
 }
 
-plColorScheme::CategoryColorFunc plColorScheme::s_CategoryColorFunc = nullptr;
-
-plColor plColorScheme::GetCategoryColor(plStringView sCategory, CategoryColorUsage usage)
+plColor plColorScheme::GetGroupColor(ColorGroup group, plInt8 iBrightnessOffset, plUInt8 uiSaturationStep)
 {
-  if (s_CategoryColorFunc != nullptr)
-  {
-    return s_CategoryColorFunc(sCategory, usage);
-  }
-
-  plInt8 iBrightnessOffset = -3;
-  plUInt8 uiSaturationStep = 0;
-
-  if (usage == plColorScheme::CategoryColorUsage::BorderIconColor)
-  {
-    // don't color these icons at all
-    return plColor::MakeZero();
-  }
-
-  if (usage == plColorScheme::CategoryColorUsage::MenuEntryIcon || usage == plColorScheme::CategoryColorUsage::AssetMenuIcon)
-  {
-    iBrightnessOffset = 2;
-    uiSaturationStep = 0;
-  }
-  else if (usage == plColorScheme::CategoryColorUsage::ViewportIcon)
-  {
-    iBrightnessOffset = 2;
-    uiSaturationStep = 2;
-  }
-  else if (usage == plColorScheme::CategoryColorUsage::OverlayIcon)
-  {
-    iBrightnessOffset = 2;
-    uiSaturationStep = 0;
-  }
-  else if (usage == plColorScheme::CategoryColorUsage::SceneTreeIcon)
-  {
-    iBrightnessOffset = 2;
-    uiSaturationStep = 0;
-  }
-  else if (usage == plColorScheme::CategoryColorUsage::BorderColor)
-  {
-    iBrightnessOffset = -3;
-    uiSaturationStep = 0;
-  }
-
   const plUInt8 uiBrightness = (plUInt8)plMath::Clamp<plInt32>(DarkUIBrightness + iBrightnessOffset, 0, 9);
   const float fSaturation = DarkUISaturation - (uiSaturationStep * 0.2f);
 
-  if (const char* sep = sCategory.FindSubString("/"))
+  // Red,
+  // Pink,
+  // Grape,
+  // Violet,
+  // Indigo,
+  // Blue,
+  // Cyan,
+  // Teal,
+  // Green,
+  // Lime,
+  // Yellow,
+  // Orange,
+  // Gray,
+
+  switch (group)
   {
-    // chop off everything behind the first separator
-    sCategory = plStringView(sCategory.GetStartPointer(), sep);
+    case None:
+      return plColor::ZeroColor();
+    case Ai:
+      return plColorScheme::GetColor(plColorScheme::Cyan, uiBrightness, fSaturation) * DarkUIFactor;
+    case Animation:
+      return plColorScheme::GetColor(plColorScheme::Pink, uiBrightness, fSaturation) * DarkUIFactor;
+    case Construction:
+      return plColorScheme::GetColor(plColorScheme::Orange, uiBrightness, fSaturation) * DarkUIFactor;
+    case Custom:
+      return plColorScheme::GetColor(plColorScheme::Red, uiBrightness, fSaturation) * DarkUIFactor;
+    case Effects:
+      return plColorScheme::GetColor(plColorScheme::Grape, uiBrightness, fSaturation) * DarkUIFactor;
+    case Gameplay:
+      return plColorScheme::GetColor(plColorScheme::Indigo, uiBrightness, fSaturation) * DarkUIFactor;
+    case Input:
+      return plColorScheme::GetColor(plColorScheme::Red, uiBrightness, fSaturation) * DarkUIFactor;
+    case Lighting:
+      return plColorScheme::GetColor(plColorScheme::Violet, uiBrightness, fSaturation) * DarkUIFactor;
+    case Logic:
+      return plColorScheme::GetColor(plColorScheme::Teal, uiBrightness, fSaturation) * DarkUIFactor;
+    case Physics:
+      return plColorScheme::GetColor(plColorScheme::Blue, uiBrightness, fSaturation) * DarkUIFactor;
+    case Prefab:
+      return plColorScheme::GetColor(plColorScheme::Orange, uiBrightness, fSaturation) * DarkUIFactor;
+    case Rendering:
+      return plColorScheme::GetColor(plColorScheme::Lime, uiBrightness, fSaturation) * DarkUIFactor;
+    case Scripting:
+      return plColorScheme::GetColor(plColorScheme::Green, uiBrightness, fSaturation) * DarkUIFactor;
+    case Sound:
+      return plColorScheme::GetColor(plColorScheme::Blue, uiBrightness, fSaturation) * DarkUIFactor;
+    case Utilities:
+      return plColorScheme::GetColor(plColorScheme::Gray, uiBrightness, fSaturation) * DarkUIFactor;
+    case XR:
+      return plColorScheme::GetColor(plColorScheme::Cyan, uiBrightness, fSaturation) * DarkUIFactor;
+    case UI:
+      return plColorScheme::GetColor(plColorScheme::Yellow, uiBrightness, fSaturation) * DarkUIFactor;
+
+    PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
-  if (sCategory.IsEqual_NoCase("AI"))
-    return plColorScheme::GetColor(plColorScheme::Cyan, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Animation"))
-    return plColorScheme::GetColor(plColorScheme::Pink, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Construction"))
-    return plColorScheme::GetColor(plColorScheme::Orange, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Custom"))
-    return plColorScheme::GetColor(plColorScheme::PlasmaBranding, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Effects"))
-    return plColorScheme::GetColor(plColorScheme::Grape, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Gameplay"))
-    return plColorScheme::GetColor(plColorScheme::Indigo, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Input"))
-    return plColorScheme::GetColor(plColorScheme::Red, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Lighting"))
-    return plColorScheme::GetColor(plColorScheme::Violet, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Logic"))
-    return plColorScheme::GetColor(plColorScheme::Teal, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Physics"))
-    return plColorScheme::GetColor(plColorScheme::Blue, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Prefabs"))
-    return plColorScheme::GetColor(plColorScheme::Orange, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Rendering"))
-    return plColorScheme::GetColor(plColorScheme::Lime, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Terrain"))
-    return plColorScheme::GetColor(plColorScheme::Lime, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Scripting"))
-    return plColorScheme::GetColor(plColorScheme::Green, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Sound"))
-    return plColorScheme::GetColor(plColorScheme::Blue, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("Utilities") || sCategory.IsEqual_NoCase("Editing"))
-    return plColorScheme::GetColor(plColorScheme::Gray, uiBrightness, fSaturation) * DarkUIFactor;
-
-  if (sCategory.IsEqual_NoCase("XR"))
-    return plColorScheme::GetColor(plColorScheme::Cyan, uiBrightness, fSaturation) * DarkUIFactor;
-
-  plLog::Warning("Color for category '{}' is undefined.", sCategory);
-  return plColor::MakeZero();
+  return plColor::ZeroColor();
 }
+
 
 PLASMA_STATICLINK_FILE(Foundation, Foundation_Math_Implementation_ColorScheme);

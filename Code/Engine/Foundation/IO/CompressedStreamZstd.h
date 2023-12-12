@@ -62,7 +62,7 @@ class PLASMA_FOUNDATION_DLL plCompressedStreamWriterZstd final : public plStream
 {
 public:
   /// \brief Specifies the compression level of the stream.
-  enum class Compression
+  enum Compression
   {
     Fastest = 1,
     Fast = 5,
@@ -76,7 +76,7 @@ public:
   plCompressedStreamWriterZstd();
 
   /// \brief The constructor takes another stream writer to pass the output into, and a compression level.
-  plCompressedStreamWriterZstd(plStreamWriter* pOutputStream, plUInt32 uiMaxNumWorkerThreads, Compression ratio = Compression::Default, plUInt32 uiCompressionCacheSizeKB = 4); // [tested]
+  plCompressedStreamWriterZstd(plStreamWriter* pOutputStream, Compression ratio = Compression::Default); // [tested]
 
   /// \brief Calls FinishCompressedStream() internally.
   ~plCompressedStreamWriterZstd(); // [tested]
@@ -92,7 +92,7 @@ public:
   /// another stream. This can prevent internal allocations, if one wants to use compression on multiple streams consecutively. It also
   /// allows to create a compressor stream early, but decide at a later pointer whether or with which stream to use it, and it will only
   /// allocate internal structures once that final decision is made.
-  void SetOutputStream(plStreamWriter* pOutputStream, plUInt32 uiMaxNumWorkerThreads, Compression ratio = Compression::Default, plUInt32 uiCompressionCacheSizeKB = 4); // [tested]
+  void SetOutputStream(plStreamWriter* pOutputStream, Compression ratio = Compression::Default, plUInt32 uiCompressionCacheSizeKB = 4); // [tested]
 
   /// \brief Compresses \a uiBytesToWrite from \a pWriteBuffer.
   ///

@@ -1,6 +1,5 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Pipeline/Passes/BlurPass.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderContext/RenderContext.h>
@@ -24,7 +23,7 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plBlurPass::plBlurPass()
   : plRenderPipelinePass("BlurPass")
-
+  , m_iRadius(15)
 {
   {
     // Load shader.
@@ -93,22 +92,6 @@ void plBlurPass::Execute(const plRenderViewContext& renderViewContext, const plA
 
     renderViewContext.m_pRenderContext->DrawMeshBuffer().IgnoreResult();
   }
-}
-
-plResult plBlurPass::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  inout_stream << m_iRadius;
-  return PLASMA_SUCCESS;
-}
-
-plResult plBlurPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  inout_stream >> m_iRadius;
-  return PLASMA_SUCCESS;
 }
 
 void plBlurPass::SetRadius(plInt32 iRadius)

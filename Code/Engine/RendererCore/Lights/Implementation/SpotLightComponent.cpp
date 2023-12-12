@@ -20,9 +20,13 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSpotLightComponent, 2, plComponentMode::Static)
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Range", GetRange, SetRange)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f), new plSuffixAttribute(" m"), new plMinValueTextAttribute("Auto")),
-    PLASMA_ACCESSOR_PROPERTY("InnerSpotAngle", GetInnerSpotAngle, SetInnerSpotAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(179.0f)), new plDefaultValueAttribute(plAngle::MakeFromDegree(15.0f))),
-    PLASMA_ACCESSOR_PROPERTY("OuterSpotAngle", GetOuterSpotAngle, SetOuterSpotAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(179.0f)), new plDefaultValueAttribute(plAngle::MakeFromDegree(30.0f))),
+
+    PLASMA_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f)),
+    PLASMA_ACCESSOR_PROPERTY("Length", GetLength, SetLength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f)),
+    PLASMA_ACCESSOR_PROPERTY("Range", GetRange, SetRange)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(3.0f), new plSuffixAttribute(" m")),
+    PLASMA_ACCESSOR_PROPERTY("Falloff", GetFalloff, SetFalloff)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PLASMA_ACCESSOR_PROPERTY("InnerSpotAngle", GetInnerSpotAngle, SetInnerSpotAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(179.0f)), new plDefaultValueAttribute(plAngle::Degree(15.0f))),
+    PLASMA_ACCESSOR_PROPERTY("OuterSpotAngle", GetOuterSpotAngle, SetOuterSpotAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(179.0f)), new plDefaultValueAttribute(plAngle::Degree(30.0f))),
     //PLASMA_ACCESSOR_PROPERTY("ProjectedTexture", GetProjectedTextureFile, SetProjectedTextureFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D")),
   }
   PLASMA_END_PROPERTIES;
@@ -45,22 +49,19 @@ PLASMA_END_COMPONENT_TYPE
 
 plSpotLightComponent::plSpotLightComponent()
 {
-  m_fEffectiveRange = CalculateEffectiveRange(m_fRange, m_fIntensity);
 }
 
 plSpotLightComponent::~plSpotLightComponent() = default;
 
 plResult plSpotLightComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
-  m_fEffectiveRange = CalculateEffectiveRange(m_fRange, m_fIntensity);
-
-  ref_bounds = CalculateBoundingSphere(plTransform::MakeIdentity(), m_fEffectiveRange);
+  ref_bounds = CalculateBoundingSphere(plTransform::IdentityTransform(), m_fRange);
   return PLASMA_SUCCESS;
 }
 
 void plSpotLightComponent::SetRange(float fRange)
 {
-  m_fRange = fRange;
+  m_fRange = fRange * 4;
 
   TriggerLocalBoundsUpdate();
 }
@@ -70,14 +71,45 @@ float plSpotLightComponent::GetRange() const
   return m_fRange;
 }
 
-float plSpotLightComponent::GetEffectiveRange() const
+void plSpotLightComponent::SetFalloff(float fFalloff)
 {
-  return m_fEffectiveRange;
+  m_fFalloff = fFalloff;
+
+  InvalidateCachedRenderData();
+}
+
+float plSpotLightComponent::GetFalloff() const
+{
+  return m_fFalloff;
+}
+
+void plSpotLightComponent::SetSize(float fSize)
+{
+  m_fSize = fSize;
+
+  InvalidateCachedRenderData();
+}
+
+float plSpotLightComponent::GetSize() const
+{
+  return m_fSize;
+}
+
+void plSpotLightComponent::SetLength(float fLength)
+{
+  m_fLength = fLength;
+
+  InvalidateCachedRenderData();
+}
+
+float plSpotLightComponent::GetLength() const
+{
+  return m_fLength;
 }
 
 void plSpotLightComponent::SetInnerSpotAngle(plAngle spotAngle)
 {
-  m_InnerSpotAngle = plMath::Clamp(spotAngle, plAngle::MakeFromDegree(0.0f), m_OuterSpotAngle);
+  m_InnerSpotAngle = plMath::Clamp(spotAngle, plAngle::Degree(0.0f), m_OuterSpotAngle);
 
   InvalidateCachedRenderData();
 }
@@ -89,7 +121,7 @@ plAngle plSpotLightComponent::GetInnerSpotAngle() const
 
 void plSpotLightComponent::SetOuterSpotAngle(plAngle spotAngle)
 {
-  m_OuterSpotAngle = plMath::Clamp(spotAngle, m_InnerSpotAngle, plAngle::MakeFromDegree(179.0f));
+  m_OuterSpotAngle = plMath::Clamp(spotAngle, m_InnerSpotAngle, plAngle::Degree(179.0f));
 
   TriggerLocalBoundsUpdate();
 }
@@ -137,11 +169,11 @@ void plSpotLightComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) c
   if (msg.m_OverrideCategory != plInvalidRenderDataCategory || msg.m_pView->GetCameraUsageHint() == plCameraUsageHint::Shadow)
     return;
 
-  if (m_fIntensity <= 0.0f || m_fEffectiveRange <= 0.0f || m_OuterSpotAngle.GetRadian() <= 0.0f)
+  if (m_fIntensity <= 0.0f || m_fRange <= 0.0f || m_OuterSpotAngle.GetRadian() <= 0.0f)
     return;
 
   plTransform t = GetOwner()->GetGlobalTransform();
-  plBoundingSphere bs = CalculateBoundingSphere(t, m_fEffectiveRange * 0.5f);
+  plBoundingSphere bs = CalculateBoundingSphere(t, m_fRange * 0.5f);
 
   float fScreenSpaceSize = CalculateScreenSpaceSize(bs, *msg.m_pView->GetCullingCamera());
 
@@ -159,8 +191,15 @@ void plSpotLightComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) c
 
   pRenderData->m_GlobalTransform = t;
   pRenderData->m_LightColor = m_LightColor;
-  pRenderData->m_fIntensity = m_fIntensity;
-  pRenderData->m_fRange = m_fEffectiveRange;
+  if (m_LightUnit == plLightUnit::Candela)
+    pRenderData->m_fIntensity = m_fIntensity * (2.0f * (1.0f - plMath::Cos(m_OuterSpotAngle / 2.0f)) * plMath::Pi<float>());
+  else
+    pRenderData->m_fIntensity = m_fIntensity;
+  pRenderData->m_fSpecularMultiplier = m_fSpecularMultiplier;
+  pRenderData->m_fVolumetricIntensity = m_fVolumetricIntensity;
+  pRenderData->m_fTemperature = m_fTemperature;
+  pRenderData->m_fRange = m_fRange / 4;
+  pRenderData->m_fFalloff = m_fFalloff;
   pRenderData->m_InnerSpotAngle = m_InnerSpotAngle;
   pRenderData->m_OuterSpotAngle = m_OuterSpotAngle;
   pRenderData->m_hProjectedTexture = m_hProjectedTexture;
@@ -206,7 +245,7 @@ plBoundingSphere plSpotLightComponent::CalculateBoundingSphere(const plTransform
   plVec3 position = t.m_vPosition;
   plVec3 forwardDir = t.m_qRotation * plVec3(1.0f, 0.0f, 0.0f);
 
-  if (halfAngle > plAngle::MakeFromDegree(45.0f))
+  if (halfAngle > plAngle::Degree(45.0f))
   {
     res.m_vCenter = position + plMath::Cos(halfAngle) * fRange * forwardDir;
     res.m_fRadius = plMath::Sin(halfAngle) * fRange;

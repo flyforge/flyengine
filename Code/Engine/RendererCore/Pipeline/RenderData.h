@@ -36,7 +36,7 @@ public:
   };
 
   /// \brief This function generates a 64bit sorting key for the given render data. Data with lower sorting key is rendered first.
-  using SortingKeyFunc = plUInt64 (*)(const plRenderData*, const plCamera&);
+  using SortingKeyFunc = plUInt64 (*)(const plRenderData*, plUInt32, const plCamera&);
 
   static Category RegisterCategory(const char* szCategoryName, SortingKeyFunc sortingKeyFunc);
   static Category FindCategory(plTempHashedString sCategoryName);
@@ -47,14 +47,15 @@ public:
 
   static plHashedString GetCategoryName(Category category);
 
-  plUInt64 GetCategorySortingKey(Category category, const plCamera& camera) const;
 
-  plTransform m_GlobalTransform = plTransform::MakeIdentity();
-  plBoundingBoxSphere m_GlobalBounds;
+  plUInt64 GetCategorySortingKey(Category category, const plCamera& camera) const;
 
   plUInt32 m_uiBatchId = 0; ///< BatchId is used to group render data in batches.
   plUInt32 m_uiSortingKey = 0;
-  float m_fSortingDepthOffset = 0.0f;
+
+  plTransform m_LastGlobalTransform = plTransform::IdentityTransform();
+  plTransform m_GlobalTransform = plTransform::IdentityTransform();
+  plBoundingBoxSphere m_GlobalBounds;
 
   plGameObjectHandle m_hOwner;
 
@@ -96,11 +97,11 @@ struct PLASMA_RENDERERCORE_DLL plDefaultRenderDataCategories
   static plRenderData::Category Decal;
   static plRenderData::Category ReflectionProbe;
   static plRenderData::Category Sky;
+  static plRenderData::Category PostSky;
   static plRenderData::Category LitOpaque;
   static plRenderData::Category LitMasked;
   static plRenderData::Category LitTransparent;
   static plRenderData::Category LitForeground;
-  static plRenderData::Category LitScreenFX;
   static plRenderData::Category SimpleOpaque;
   static plRenderData::Category SimpleTransparent;
   static plRenderData::Category SimpleForeground;

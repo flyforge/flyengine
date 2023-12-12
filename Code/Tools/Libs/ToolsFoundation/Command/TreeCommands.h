@@ -19,7 +19,7 @@ public: // Properties
   void SetType(plStringView sType);
   plStringView GetType() const;
 
-  const plRTTI* m_pType = nullptr;
+  const plRTTI* m_pType;
   plUuid m_Parent;
   plString m_sParentProperty;
   plVariant m_Index;
@@ -32,7 +32,7 @@ private:
   virtual void CleanupInternal(CommandState state) override;
 
 private:
-  plDocumentObject* m_pObject = nullptr;
+  plDocumentObject* m_pObject;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ class PLASMA_TOOLSFOUNDATION_DLL plUnlinkPrefabCommand : public plCommand
   PLASMA_ADD_DYNAMIC_REFLECTION(plUnlinkPrefabCommand, plCommand);
 
 public:
-  plUnlinkPrefabCommand() = default;
+  plUnlinkPrefabCommand() {}
 
   plUuid m_Object;
 
@@ -155,10 +155,10 @@ private:
   virtual void CleanupInternal(CommandState state) override;
 
 private:
-  plDocumentObject* m_pParent = nullptr;
+  plDocumentObject* m_pParent;
   plString m_sParentProperty;
   plVariant m_Index;
-  plDocumentObject* m_pObject = nullptr;
+  plDocumentObject* m_pObject;
 };
 
 //////////////////////////////////////////////////////////////////////////

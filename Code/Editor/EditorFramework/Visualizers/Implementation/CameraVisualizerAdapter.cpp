@@ -5,9 +5,9 @@
 #include <EditorFramework/Visualizers/CameraVisualizerAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plCameraVisualizerAdapter::plCameraVisualizerAdapter() = default;
+plCameraVisualizerAdapter::plCameraVisualizerAdapter() {}
 
-plCameraVisualizerAdapter::~plCameraVisualizerAdapter() = default;
+plCameraVisualizerAdapter::~plCameraVisualizerAdapter() {}
 
 void plCameraVisualizerAdapter::Finalize()
 {
@@ -15,10 +15,12 @@ void plCameraVisualizerAdapter::Finalize()
   const plAssetDocument* pAssetDocument = plDynamicCast<const plAssetDocument*>(pDoc);
   PLASMA_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
 
-  m_hBoxGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::LineBox, plColor::DodgerBlue, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
-  m_hFrustumGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::Frustum, plColor::DodgerBlue, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
-  m_hNearPlaneGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::LineRect, plColor::LightBlue, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
-  m_hFarPlaneGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::LineRect, plColor::PaleVioletRed, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
+  const plCameraVisualizerAttribute* pAttr = static_cast<const plCameraVisualizerAttribute*>(m_pVisualizerAttr);
+
+  m_hBoxGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::LineBox, plColor::DodgerBlue, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
+  m_hFrustumGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::Frustum, plColor::DodgerBlue, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
+  m_hNearPlaneGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::LineRect, plColor::LightBlue, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
+  m_hFarPlaneGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::LineRect, plColor::PaleVioletRed, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
 
   pAssetDocument->AddSyncObject(&m_hBoxGizmo);
   pAssetDocument->AddSyncObject(&m_hFrustumGizmo);
@@ -44,7 +46,7 @@ void plCameraVisualizerAdapter::Update()
   if (!pAttr->GetModeProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetModeProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetModeProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plInt32>(), "Invalid property bound to plCameraVisualizerAttribute 'mode'");
     iMode = value.ConvertTo<plInt32>();
@@ -53,7 +55,7 @@ void plCameraVisualizerAdapter::Update()
   if (!pAttr->GetNearPlaneProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetNearPlaneProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetNearPlaneProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plCameraVisualizerAttribute 'near plane'");
     fNearPlane = value.ConvertTo<float>();
@@ -62,7 +64,7 @@ void plCameraVisualizerAdapter::Update()
   if (!pAttr->GetFarPlaneProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetFarPlaneProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetFarPlaneProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plCameraVisualizerAttribute 'far plane'");
     fFarPlane = value.ConvertTo<float>();
@@ -75,7 +77,7 @@ void plCameraVisualizerAdapter::Update()
     if (!pAttr->GetOrthoDimProperty().IsEmpty())
     {
       plVariant value;
-      pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetOrthoDimProperty()), value).AssertSuccess();
+      pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetOrthoDimProperty()), value).IgnoreResult();
 
       PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plCameraVisualizerAttribute 'ortho dim'");
       fDimensions = value.ConvertTo<float>();
@@ -104,14 +106,14 @@ void plCameraVisualizerAdapter::Update()
     if (!pAttr->GetFovProperty().IsEmpty())
     {
       plVariant value;
-      pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetFovProperty()), value).AssertSuccess();
+      pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetFovProperty()), value).IgnoreResult();
 
       PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plCameraVisualizerAttribute 'fov'");
       fFOV = value.ConvertTo<float>();
     }
 
     {
-      const float fAngleScale = plMath::Tan(plAngle::MakeFromDegree(fFOV) * 0.5f);
+      const float fAngleScale = plMath::Tan(plAngle::Degree(fFOV) * 0.5f);
       const float fFrustumScale = plMath::Min(fFarPlane, 10.0f);
       const float fFarPlaneScale = plMath::Min(fFarPlane, 9.0f);
       ;
@@ -123,11 +125,11 @@ void plCameraVisualizerAdapter::Update()
       m_LocalTransformFrustum.m_vScale.Set(fFrustumScale, fAngleScale * fFrustumScale, fAngleScale * fFrustumScale);
       m_LocalTransformFrustum.m_vPosition.Set(0, 0, 0);
 
-      m_LocalTransformNearPlane.m_qRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
+      m_LocalTransformNearPlane.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
       m_LocalTransformNearPlane.m_vScale.Set(fAngleScale * fNearPlane, fAngleScale * fNearPlane, 1);
       m_LocalTransformNearPlane.m_vPosition.Set(fNearPlane, 0, 0);
 
-      m_LocalTransformFarPlane.m_qRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
+      m_LocalTransformFarPlane.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
       m_LocalTransformFarPlane.m_vScale.Set(fAngleScale * fFarPlaneScale, fAngleScale * fFarPlaneScale, 1);
       m_LocalTransformFarPlane.m_vPosition.Set(fFarPlaneScale, 0, 0);
     }

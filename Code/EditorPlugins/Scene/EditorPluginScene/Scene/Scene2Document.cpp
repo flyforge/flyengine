@@ -80,8 +80,8 @@ plSceneDocumentSettings::~plSceneDocumentSettings()
   }
 }
 
-plScene2Document::plScene2Document(plStringView sDocumentPath)
-  : plSceneDocument(sDocumentPath, plSceneDocument::DocumentType::Scene)
+plScene2Document::plScene2Document(const char* szDocumentPath)
+  : plSceneDocument(szDocumentPath, plSceneDocument::DocumentType::Scene)
 {
   // Separate selection for the layer panel.
   m_pLayerSelection = PLASMA_DEFAULT_NEW(plSelectionManager, m_pObjectManager.Borrow());
@@ -208,7 +208,7 @@ const plDocumentObject* plScene2Document::GetSettingsObject() const
   return GetSceneObjectManager()->GetObject(id);
 }
 
-void plScene2Document::HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg)
+void plScene2Document::HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (const plPushObjectStateMsgToEditor* msg = plDynamicCast<const plPushObjectStateMsgToEditor*>(pMsg))
   {
@@ -234,7 +234,7 @@ void plScene2Document::SendGameWorldToEngine()
     plSceneDocument* pLayer = layer.Value().m_pLayer;
     if (pLayer != this && pLayer != nullptr)
     {
-      pLayer->SendDocumentOpenMessage(true);
+      PlasmaEditorEngineProcessConnection::GetSingleton()->SendDocumentOpenMessage(pLayer, true);
     }
   }
 }
@@ -597,7 +597,7 @@ plStatus plScene2Document::DeleteLayer(const plUuid& layerGuid)
     auto assetInfo = plAssetCurator::GetSingleton()->GetSubAsset(layerGuid);
     if (assetInfo.isValid())
     {
-      sName = plPathUtils::GetFileName(assetInfo->m_pAssetInfo->m_Path.GetDataDirParentRelativePath());
+      sName = plPathUtils::GetFileName(assetInfo->m_pAssetInfo->m_sDataDirParentRelativePath);
     }
     else
     {
@@ -763,7 +763,7 @@ plStatus plScene2Document::SetLayerLoaded(const plUuid& layerGuid, bool bLoaded)
       auto assetInfo = plAssetCurator::GetSingleton()->GetSubAsset(layerGuid);
       if (assetInfo.isValid())
       {
-        sAbsPath = assetInfo->m_pAssetInfo->m_Path;
+        sAbsPath = assetInfo->m_pAssetInfo->m_sAbsolutePath;
       }
       else
       {

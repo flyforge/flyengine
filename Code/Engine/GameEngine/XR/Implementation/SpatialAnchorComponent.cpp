@@ -14,6 +14,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSpatialAnchorComponent, 2, plComponentMode::Dynami
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("XR"),
+    new plColorAttribute(plColorScheme::XR),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
   }
   PLASMA_END_ATTRIBUTES;

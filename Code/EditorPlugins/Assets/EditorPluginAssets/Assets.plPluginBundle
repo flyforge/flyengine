@@ -10,7 +10,7 @@ PluginInfo
 	string %EditorPlugins{"plasmaEditorPluginAssets"}
 
 	// List of plugins (without path or extension) to load into the editor engine process.
-	string %EditorEnginePlugins{"plasmaEnginePluginAssets"}
+	string %EditorEnginePlugins{"PlasmaEnginePluginAssets"}
 
 	// List of plugins (without path or extension) to load into the engine process (e.g. also Player.exe and stand-alone apps).
 	string %RuntimePlugins{}

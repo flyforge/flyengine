@@ -55,6 +55,8 @@ plResult plSemaphore::Open(plStringView sSharedName)
 {
   PLASMA_ASSERT_DEV(m_hSemaphore == nullptr, "Semaphore can't be recreated.");
 
+  LPSECURITY_ATTRIBUTES secAttr = nullptr; // default
+  const DWORD flags = 0;                   // reserved but unused
   const DWORD access = SYNCHRONIZE /* needed for WaitForSingleObject */ | SEMAPHORE_MODIFY_STATE /* needed for ReleaseSemaphore */;
   const BOOL inheriteHandle = FALSE;
 

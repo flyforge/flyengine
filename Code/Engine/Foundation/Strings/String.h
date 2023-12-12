@@ -51,12 +51,6 @@ protected:
   /// \brief Moves the data from \a rhs.
   plHybridStringBase(plStringBuilder&& rhs, plAllocatorBase* pAllocator); // [tested]
 
-  /// \brief Copies the data from \a rhs.
-  plHybridStringBase(const std::string_view& rhs, plAllocatorBase* pAllocator); // [tested]
-
-  /// \brief Copies the data from \a rhs.
-  plHybridStringBase(const std::string& rhs, plAllocatorBase* pAllocator); // [tested]
-
   /// \brief Destructor.
   ~plHybridStringBase(); // [tested]
 
@@ -81,13 +75,8 @@ protected:
   /// \brief Moves the data from \a rhs.
   void operator=(plStringBuilder&& rhs); // [tested]
 
-  /// \brief Copies the data from \a rhs.
-  void operator=(const std::string_view& rhs); // [tested]
-
-  /// \brief Copies the data from \a rhs.
-  void operator=(const std::string& rhs); // [tested]
-
 public:
+
   /// \brief Resets this string to an empty string.
   ///
   /// This will not deallocate any previously allocated data, but reuse that memory.
@@ -150,8 +139,6 @@ public:
   plHybridString(const plStringView& rhs);
   plHybridString(const plStringBuilder& rhs);
   plHybridString(plStringBuilder&& rhs);
-  plHybridString(const std::string_view& rhs);
-  plHybridString(const std::string& rhs);
 
   plHybridString(plHybridString<Size, AllocatorWrapper>&& other);
   plHybridString(plHybridStringBase<Size>&& other);
@@ -164,8 +151,6 @@ public:
   void operator=(const plStringView& rhs);
   void operator=(const plStringBuilder& rhs);
   void operator=(plStringBuilder&& rhs);
-  void operator=(const std::string_view& rhs);
-  void operator=(const std::string& rhs);
 
   void operator=(plHybridString<Size, AllocatorWrapper>&& rhs);
   void operator=(plHybridStringBase<Size>&& rhs);
@@ -188,12 +173,12 @@ static_assert(plGetTypeClass<plString>::value == plTypeIsClass::value);
 template <plUInt16 Size>
 struct plCompareHelper<plHybridString<Size>>
 {
-  static PLASMA_ALWAYS_INLINE bool Less(plStringView lhs, plStringView rhs)
+  PLASMA_ALWAYS_INLINE bool Less(plStringView lhs, plStringView rhs) const
   {
     return lhs.Compare(rhs) < 0;
   }
 
-  static PLASMA_ALWAYS_INLINE bool Equal(plStringView lhs, plStringView rhs)
+  PLASMA_ALWAYS_INLINE bool Equal(plStringView lhs, plStringView rhs) const
   {
     return lhs.IsEqual(rhs);
   }
@@ -201,12 +186,12 @@ struct plCompareHelper<plHybridString<Size>>
 
 struct plCompareString_NoCase
 {
-  static PLASMA_ALWAYS_INLINE bool Less(plStringView lhs, plStringView rhs)
+  PLASMA_ALWAYS_INLINE bool Less(plStringView lhs, plStringView rhs) const
   {
     return lhs.Compare_NoCase(rhs) < 0;
   }
 
-  static PLASMA_ALWAYS_INLINE bool Equal(plStringView lhs, plStringView rhs)
+  PLASMA_ALWAYS_INLINE bool Equal(plStringView lhs, plStringView rhs) const
   {
     return lhs.IsEqual_NoCase(rhs);
   }
@@ -215,10 +200,10 @@ struct plCompareString_NoCase
 struct CompareConstChar
 {
   /// \brief Returns true if a is less than b
-  static PLASMA_ALWAYS_INLINE bool Less(const char* a, const char* b) { return plStringUtils::Compare(a, b) < 0; }
+  PLASMA_ALWAYS_INLINE bool Less(const char* a, const char* b) const { return plStringUtils::Compare(a, b) < 0; }
 
   /// \brief Returns true if a is equal to b
-  static PLASMA_ALWAYS_INLINE bool Equal(const char* a, const char* b) { return plStringUtils::IsEqual(a, b); }
+  PLASMA_ALWAYS_INLINE bool Equal(const char* a, const char* b) const { return plStringUtils::IsEqual(a, b); }
 };
 
 // For plFormatString

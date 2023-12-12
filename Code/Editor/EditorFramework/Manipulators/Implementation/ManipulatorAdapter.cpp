@@ -81,7 +81,7 @@ void plManipulatorAdapter::DocumentObjectMetaDataEventHandler(const plObjectMeta
 
 plTransform plManipulatorAdapter::GetOffsetTransform() const
 {
-  return plTransform::MakeIdentity();
+  return plTransform::IdentityTransform();
 }
 
 plTransform plManipulatorAdapter::GetObjectTransform() const
@@ -91,7 +91,8 @@ plTransform plManipulatorAdapter::GetObjectTransform() const
 
   const plTransform offset = GetOffsetTransform();
 
-  plTransform tGlobal = plTransform::MakeGlobalTransform(tObj, offset);
+  plTransform tGlobal;
+  tGlobal.SetGlobalTransform(tObj, offset);
 
   return tGlobal;
 }
@@ -164,37 +165,37 @@ void plManipulatorAdapter::ChangeProperties(const char* szProperty1, plVariant v
   if (!plStringUtils::IsNullOrEmpty(szProperty1))
   {
     ClampProperty(szProperty1, value1);
-    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty1), value1).AssertSuccess();
+    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty1), value1).IgnoreResult();
   }
 
   if (!plStringUtils::IsNullOrEmpty(szProperty2))
   {
     ClampProperty(szProperty2, value2);
-    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty2), value2).AssertSuccess();
+    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty2), value2).IgnoreResult();
   }
 
   if (!plStringUtils::IsNullOrEmpty(szProperty3))
   {
     ClampProperty(szProperty3, value3);
-    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty3), value3).AssertSuccess();
+    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty3), value3).IgnoreResult();
   }
 
   if (!plStringUtils::IsNullOrEmpty(szProperty4))
   {
     ClampProperty(szProperty4, value4);
-    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty4), value4).AssertSuccess();
+    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty4), value4).IgnoreResult();
   }
 
   if (!plStringUtils::IsNullOrEmpty(szProperty5))
   {
     ClampProperty(szProperty5, value5);
-    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty5), value5).AssertSuccess();
+    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty5), value5).IgnoreResult();
   }
 
   if (!plStringUtils::IsNullOrEmpty(szProperty6))
   {
     ClampProperty(szProperty6, value6);
-    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty6), value6).AssertSuccess();
+    pObjectAccessor->SetValue(m_pObject, GetProperty(szProperty6), value6).IgnoreResult();
   }
 
   pObjectAccessor->FinishTransaction();

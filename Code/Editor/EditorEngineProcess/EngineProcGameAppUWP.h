@@ -4,23 +4,23 @@
 
 #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
 
-class plEditorEngineProcessAppUWP;
+class PlasmaEditorEngineProcessAppUWP;
 
-class plEngineProcessGameApplicationUWP : public plEngineProcessGameApplication
+class PlasmaEngineProcessGameApplicationUWP : public PlasmaEngineProcessGameApplication
 {
-  using SUPER = plEngineProcessGameApplication;
+  typedef PlasmaEngineProcessGameApplication SUPER;
 
 public:
-  plEngineProcessGameApplicationUWP();
-  ~plEngineProcessGameApplicationUWP();
+  PlasmaEngineProcessGameApplicationUWP();
+  ~PlasmaEngineProcessGameApplicationUWP();
 
 protected:
   virtual bool Run_ProcessApplicationInput() override;
   virtual void Init_ConfigureInput() override;
-  virtual plUniquePtr<plEditorEngineProcessApp> CreateEngineProcessApp() override;
+  virtual plUniquePtr<PlasmaEditorEngineProcessApp> CreateEngineProcessApp() override;
 
 private:
-  plEditorEngineProcessAppUWP* m_pEngineProcessApp;
+  PlasmaEditorEngineProcessAppUWP* m_pEngineProcessApp;
   plTime m_HandPressTime;
   plVec3 m_vHandStartPosition;
 };

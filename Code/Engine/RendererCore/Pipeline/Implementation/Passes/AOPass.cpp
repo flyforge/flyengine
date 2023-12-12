@@ -1,6 +1,5 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/GPUResourcePool/GPUResourcePool.h>
 #include <RendererCore/Pipeline/Passes/AOPass.h>
 #include <RendererCore/Pipeline/View.h>
@@ -35,7 +34,15 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plAOPass::plAOPass()
   : plRenderPipelinePass("AOPass", true)
-
+  , m_fRadius(1.0f)
+  , m_fMaxScreenSpaceRadius(1.0f)
+  , m_fContrast(2.0f)
+  , m_fIntensity(0.7f)
+  , m_fFadeOutStart(80.0f)
+  , m_fFadeOutEnd(100.0f)
+  , m_fPositionBias(5.0f)
+  , m_fMipLevelScale(10.0f)
+  , m_fDepthBlurThreshold(2.0f)
 {
   m_hNoiseTexture = plResourceManager::LoadResource<plTexture2DResource>("Textures/SSAONoise.dds");
 
@@ -299,38 +306,6 @@ void plAOPass::ExecuteInactive(const plRenderViewContext& renderViewContext, con
   renderingSetup.m_ClearColor = plColor::White;
 
   auto pCommandEncoder = plRenderContext::BeginPassAndRenderingScope(renderViewContext, renderingSetup, GetName());
-}
-
-plResult plAOPass::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  inout_stream << m_fRadius;
-  inout_stream << m_fMaxScreenSpaceRadius;
-  inout_stream << m_fContrast;
-  inout_stream << m_fIntensity;
-  inout_stream << m_fFadeOutStart;
-  inout_stream << m_fFadeOutEnd;
-  inout_stream << m_fPositionBias;
-  inout_stream << m_fMipLevelScale;
-  inout_stream << m_fDepthBlurThreshold;
-  return PLASMA_SUCCESS;
-}
-
-plResult plAOPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  inout_stream >> m_fRadius;
-  inout_stream >> m_fMaxScreenSpaceRadius;
-  inout_stream >> m_fContrast;
-  inout_stream >> m_fIntensity;
-  inout_stream >> m_fFadeOutStart;
-  inout_stream >> m_fFadeOutEnd;
-  inout_stream >> m_fPositionBias;
-  inout_stream >> m_fMipLevelScale;
-  inout_stream >> m_fDepthBlurThreshold;
-  return PLASMA_SUCCESS;
 }
 
 void plAOPass::SetFadeOutStart(float fStart)

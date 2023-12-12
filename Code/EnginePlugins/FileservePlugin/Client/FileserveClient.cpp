@@ -199,7 +199,8 @@ void plFileserveClient::UploadFile(plUInt16 uiDataDirID, const char* szFile, con
 
   const plUInt32 uiFileSize = fileContent.GetCount();
 
-  plUuid uploadGuid = plUuid::MakeUuid();
+  plUuid uploadGuid;
+  uploadGuid.CreateNewUuid();
 
   {
     plRemoteMessage msg;
@@ -257,7 +258,7 @@ void plFileserveClient::InvalidateFileCache(plUInt16 uiDataDirID, plStringView s
   auto& cache = m_MountedDataDirs[uiDataDirID].m_CacheStatus[sFile];
   cache.m_FileHash = uiHash;
   cache.m_TimeStamp = 0;
-  cache.m_LastCheck = plTime::MakeZero(); // will trigger a server request and that in turn will update the file timestamp
+  cache.m_LastCheck.SetZero(); // will trigger a server request and that in turn will update the file timestamp
 
   // redirect the next access to this cache entry
   // together with the zero LastCheck that will make sure the best match gets updated as well
@@ -280,7 +281,7 @@ void plFileserveClient::FillFileStatusCache(const char* szFile)
     auto& cache = m_MountedDataDirs[dd].m_CacheStatus[szFile];
 
     DetermineCacheStatus(dd, szFile, cache);
-    cache.m_LastCheck = plTime::MakeZero();
+    cache.m_LastCheck.SetZero();
 
     if (cache.m_TimeStamp != 0 && cache.m_FileHash != 0) // file exists
     {
@@ -627,7 +628,7 @@ plResult plFileserveClient::DownloadFile(plUInt16 uiDataDirID, const char* szFil
 
   m_Download.Clear();
   m_sCurFileRequest = szFile;
-  m_CurFileRequestGuid = plUuid::MakeUuid();
+  m_CurFileRequestGuid.CreateNewUuid();
   m_bDownloading = true;
 
   plRemoteMessage msg('FSRV', 'READ');

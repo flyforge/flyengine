@@ -122,7 +122,7 @@ o
 		f %ImpulseScale{0x0000803F}
 		f %ImpulseThreshold{0}
 		s %Prefab{"{ a0e40c49-9113-4bdf-ba33-3e603732813e }"}
-		s %Type{"plasma_Impact"}
+		s %Type{"Plasma_Impact"}
 	}
 }
 o

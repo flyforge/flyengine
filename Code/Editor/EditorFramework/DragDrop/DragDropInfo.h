@@ -66,3 +66,12 @@ public:
   /// Whether the currently selected objects (ie the dragged objects) should be considered for picking or not. Default is disabled.
   bool m_bPickSelectedObjects;
 };
+
+/// \brief Helper operator to retrieve the "application/PlasmaEditor.ObjectSelection" mime data from a plDragDropInfo::m_pMimeData.
+/// \code{.cpp}
+///   plHybridArray<const plDocumentObject*, 32> Dragged;
+///   QByteArray encodedData = m_pMimeData->data("application/PlasmaEditor.ObjectSelection");
+///   QDataStream stream(&encodedData, QIODevice::ReadOnly);
+///   stream >> Dragged;
+/// \endcode
+PLASMA_EDITORFRAMEWORK_DLL void operator>>(QDataStream& stream, plDynamicArray<plDocumentObject*>& rhs);

@@ -135,8 +135,8 @@ protected:
   float m_fSizeVariance = 0;
   plColorGammaUB m_Color = plColor::White;
   plColor m_EmissiveColor = plColor::Black;
-  plAngle m_InnerFadeAngle = plAngle::MakeFromDegree(50.0f);
-  plAngle m_OuterFadeAngle = plAngle::MakeFromDegree(80.0f);
+  plAngle m_InnerFadeAngle = plAngle::Degree(50.0f);
+  plAngle m_OuterFadeAngle = plAngle::Degree(80.0f);
   float m_fSortOrder = 0;
   bool m_bWrapAround = false;
   bool m_bMapNormalToGeometry = false;

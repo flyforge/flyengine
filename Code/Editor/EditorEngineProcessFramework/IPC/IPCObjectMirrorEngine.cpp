@@ -7,13 +7,13 @@ plIPCObjectMirrorEngine::plIPCObjectMirrorEngine()
 {
 }
 
-plIPCObjectMirrorEngine::~plIPCObjectMirrorEngine() = default;
+plIPCObjectMirrorEngine::~plIPCObjectMirrorEngine() {}
 
-void plIPCObjectMirrorEngine::ApplyOp(plObjectChange& inout_change)
+void plIPCObjectMirrorEngine::ApplyOp(plObjectChange& change)
 {
   if (m_pContext)
   {
-    plDocumentObjectMirror::ApplyOp(inout_change);
+    plDocumentObjectMirror::ApplyOp(change);
   }
   else
   {

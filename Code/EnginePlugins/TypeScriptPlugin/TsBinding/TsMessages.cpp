@@ -206,7 +206,7 @@ plUniquePtr<plMessage> plTypeScriptBinding::MessageFromParameter(duk_context* pD
 
   if (pMsg != nullptr)
   {
-    SyncTsObjectPlasmaTsObject(pDuk, pRtti, pMsg.Borrow(), iObjIdx + 1);
+    SyncTsObjectEzTsObject(pDuk, pRtti, pMsg.Borrow(), iObjIdx + 1);
   }
   else
   {
@@ -264,7 +264,7 @@ void plTypeScriptBinding::DukPutMessage(duk_context* pDuk, const plMessage& msg)
   duk_remove(duk, -2);                                 // [ global msg ]
   duk_remove(duk, -2);                                 // [ msg ]
 
-  SyncPlasmaObjectToTsObject(pDuk, pRtti, &msg, -1);
+  SyncEzObjectToTsObject(pDuk, pRtti, &msg, -1);
 
   PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, +1);
 }
@@ -296,7 +296,7 @@ void plTypeScriptBinding::RegisterMessageHandlersForComponentType(const char* sz
 
   duk.PopStack(); // [ ]
 
-  m_CurrentTsMsgHandlerRegistrator = plUuid::MakeInvalid();
+  m_CurrentTsMsgHandlerRegistrator.SetInvalid();
 
   PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
@@ -394,7 +394,7 @@ bool plTypeScriptBinding::DeliverMessage(const TsComponentTypeInfo& typeInfo, pl
         {
           duk.PushGlobalStash();                                                    // [ ... stash ]
           duk_get_prop_string(duk, -1, sStashMsgName);                              // [ ... stash msg ]
-          plTypeScriptBinding::SyncTsObjectPlasmaTsObject(duk, pMsgRtti, &msg, -1); // [ ... stash msg ]
+          plTypeScriptBinding::SyncTsObjectEzTsObject(duk, pMsgRtti, &msg, -1); // [ ... stash msg ]
           duk_pop_2(duk);                                                    // [ ... ]
         }
 

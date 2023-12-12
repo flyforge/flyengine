@@ -170,6 +170,7 @@ plStatus plVisualShaderCodeGenerator::GenerateVisualShader(const plDocumentNodeM
   m_sFinalShaderCode.Set("[PLATFORMS]\nALL\n\n");
   m_sFinalShaderCode.Append("[PERMUTATIONS]\n\n", m_sShaderPermutations, "\n");
   m_sFinalShaderCode.Append("[MATERIALPARAMETER]\n\n", m_sShaderMaterialParam, "\n");
+  m_sFinalShaderCode.Append("[MATERIALCONFIG]\n\n", m_sShaderRenderConfig, "\n");
   m_sFinalShaderCode.Append("[RENDERSTATE]\n\n", m_sShaderRenderState, "\n");
   m_sFinalShaderCode.Append("[VERTEXSHADER]\n\n", sMaterialCBDefine, "\n\n");
   m_sFinalShaderCode.Append(m_sShaderVertexDefines, "\n", m_sShaderVertex, "\n");
@@ -208,7 +209,7 @@ plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode
   PLASMA_SUCCEED_OR_RETURN(GenerateInputPinCode(m_pNodeManager->GetInputPins(pNode)));
 
   plStringBuilder sConstantsCode, sPsBodyCode, sMaterialParamCode, sPixelSamplersCode, sVsBodyCode, sGsBodyCode, sMaterialCB, sPermutations,
-    sRenderStates, sPixelDefines, sPixelIncludes, sVertexDefines, sGeometryDefines;
+    sRenderConfig, sRenderStates, sPixelDefines, sPixelIncludes, sVertexDefines, sGeometryDefines;
 
   sConstantsCode = pDesc->m_sShaderCodePixelConstants;
   sPsBodyCode = pDesc->m_sShaderCodePixelBody;
@@ -218,6 +219,7 @@ plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode
   sGsBodyCode = pDesc->m_sShaderCodeGeometryShader;
   sMaterialCB = pDesc->m_sShaderCodeMaterialCB;
   sPermutations = pDesc->m_sShaderCodePermutations;
+  sRenderConfig = pDesc->m_sShaderCodeRenderConfig;
   sRenderStates = pDesc->m_sShaderCodeRenderState;
   sPixelDefines = pDesc->m_sShaderCodePixelDefines;
   sPixelIncludes = pDesc->m_sShaderCodePixelIncludes;
@@ -237,6 +239,7 @@ plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode
   PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sPixelSamplersCode));
 
   SetPinDefines(pNode, sPermutations);
+  SetPinDefines(pNode, sRenderConfig);
   SetPinDefines(pNode, sRenderStates);
   SetPinDefines(pNode, sVsBodyCode);
   SetPinDefines(pNode, sGsBodyCode);
@@ -250,6 +253,7 @@ plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode
 
   {
     AppendStringIfUnique(m_sShaderPermutations, sPermutations);
+    AppendStringIfUnique(m_sShaderRenderConfig, sRenderConfig);
     AppendStringIfUnique(m_sShaderRenderState, sRenderStates);
     AppendStringIfUnique(m_sShaderVertexDefines, sVertexDefines);
     AppendStringIfUnique(m_sShaderVertex, sVsBodyCode);
@@ -307,7 +311,7 @@ plStatus plVisualShaderCodeGenerator::GenerateOutputPinCode(const plDocumentObje
   plStringBuilder sInlineCode = pDesc->m_OutputPins[uiPinID].m_sShaderCodeInline;
   plStringBuilder ignore; // DefineWhenUsingDefaultValue not used for output pins
 
-  PLASMA_SUCCEED_OR_RETURN(ReplaceInputPinsByCode(pOwnerNode, pDesc, sInlineCode, ignore));
+  ReplaceInputPinsByCode(pOwnerNode, pDesc, sInlineCode, ignore).IgnoreResult();
 
   PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pOwnerNode, pDesc, sInlineCode));
 

@@ -12,7 +12,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtGroupBoxBase : public QWidget
 public:
   plQtGroupBoxBase(QWidget* pParent, bool bCollapsible);
 
-  virtual void SetTitle(plStringView sTitle);
+  virtual void SetTitle(const char* szTitle);
   QString GetTitle() const;
 
   virtual void SetBoldTitle(bool bBold);
@@ -35,13 +35,13 @@ public:
 
 Q_SIGNALS:
   void CollapseStateChanged(bool bCollapsed);
-  void DragStarted(QMimeData& ref_mimeData);
+  void DragStarted(QMimeData& mimeData);
 
 protected:
   enum Constants
   {
-    Rounding = 4,
-    Spacing = 1,
+    Rounding = 8,
+    Spacing = 8,
   };
 
   void DrawHeader(QPainter& p, const QRect& rect);

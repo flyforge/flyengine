@@ -119,7 +119,7 @@ plAbstractObjectNode* plAbstractObjectGraph::GetNodeByName(plStringView sName)
 
 plAbstractObjectNode* plAbstractObjectGraph::AddNode(const plUuid& guid, plStringView sType, plUInt32 uiTypeVersion, plStringView sNodeName)
 {
-  //PLASMA_ASSERT_DEV(!m_Nodes.Contains(guid), "object {0} must not yet exist", guid);
+  PLASMA_ASSERT_DEV(!m_Nodes.Contains(guid), "object {0} must not yet exist", guid);
   if (!sNodeName.IsEmpty())
   {
     sNodeName = RegisterString(sNodeName);

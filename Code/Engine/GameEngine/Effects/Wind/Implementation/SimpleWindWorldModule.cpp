@@ -29,10 +29,10 @@ plVec3 plSimpleWindWorldModule::GetWindAt(const plVec3& vPosition) const
     plSpatialSystem::QueryParams queryParams;
     queryParams.m_uiCategoryBitmask = plWindVolumeComponent::SpatialDataCategory.GetBitmask();
 
-    pSpatial->FindObjectsInSphere(plBoundingSphere::MakeFromCenterAndRadius(vPosition, 0.5f), queryParams, volumes);
+    pSpatial->FindObjectsInSphere(plBoundingSphere(vPosition, 0.5f), queryParams, volumes);
 
     const plSimdVec4f pos = plSimdConversion::ToVec3(vPosition);
-    plSimdVec4f force = plSimdVec4f::MakeZero();
+    plSimdVec4f force = plSimdVec4f::ZeroVector();
 
     for (plGameObject* pObj : volumes)
     {

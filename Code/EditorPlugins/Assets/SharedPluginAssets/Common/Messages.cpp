@@ -3,10 +3,10 @@
 #include <SharedPluginAssets/Common/Messages.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineRestartSimulationMsg, 1, plRTTIDefaultAllocator<plEditorEngineRestartSimulationMsg>)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorEngineRestartSimulationMsg, 1, plRTTIDefaultAllocator<PlasmaEditorEngineRestartSimulationMsg>)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineLoopAnimationMsg, 1, plRTTIDefaultAllocator<plEditorEngineLoopAnimationMsg>)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorEngineLoopAnimationMsg, 1, plRTTIDefaultAllocator<PlasmaEditorEngineLoopAnimationMsg>)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -16,7 +16,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineLoopAnimationMsg, 1, plRTTIDef
 }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineSetMaterialsMsg, 1, plRTTIDefaultAllocator<plEditorEngineSetMaterialsMsg>)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorEngineSetMaterialsMsg, 1, plRTTIDefaultAllocator<PlasmaEditorEngineSetMaterialsMsg>)
 {
   PLASMA_BEGIN_PROPERTIES
   {

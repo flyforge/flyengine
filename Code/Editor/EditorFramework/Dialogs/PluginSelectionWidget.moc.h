@@ -15,7 +15,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtPluginSelectionWidget(QWidget* pParent);
+  plQtPluginSelectionWidget(QWidget* parent);
   ~plQtPluginSelectionWidget();
 
   void SetPluginSet(plPluginBundleSet* pPluginSet);

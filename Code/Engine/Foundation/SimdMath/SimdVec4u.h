@@ -16,9 +16,6 @@ public:
 
   plSimdVec4u(plInternal::QuadUInt v); // [tested]
 
-  /// \brief Creates an plSimdVec4u that is initialized to zero.
-  [[nodiscard]] static plSimdVec4u MakeZero(); // [tested]
-
   void Set(plUInt32 uiXyzw); // [tested]
 
   void Set(plUInt32 x, plUInt32 y, plUInt32 z, plUInt32 w); // [tested]
@@ -31,7 +28,7 @@ public:
 public:
   plSimdVec4f ToFloat() const; // [tested]
 
-  [[nodiscard]] static plSimdVec4u Truncate(const plSimdVec4f& f); // [tested]
+  static plSimdVec4u Truncate(const plSimdVec4f& f); // [tested]
 
 public:
   template <int N>
@@ -46,18 +43,18 @@ public:
   plSimdVec4u Get() const; // [tested]
 
 public:
-  [[nodiscard]] plSimdVec4u operator+(const plSimdVec4u& v) const; // [tested]
-  [[nodiscard]] plSimdVec4u operator-(const plSimdVec4u& v) const; // [tested]
+  plSimdVec4u operator+(const plSimdVec4u& v) const; // [tested]
+  plSimdVec4u operator-(const plSimdVec4u& v) const; // [tested]
 
-  [[nodiscard]] plSimdVec4u CompMul(const plSimdVec4u& v) const; // [tested]
+  plSimdVec4u CompMul(const plSimdVec4u& v) const; // [tested]
 
-  [[nodiscard]] plSimdVec4u operator|(const plSimdVec4u& v) const; // [tested]
-  [[nodiscard]] plSimdVec4u operator&(const plSimdVec4u& v) const; // [tested]
-  [[nodiscard]] plSimdVec4u operator^(const plSimdVec4u& v) const; // [tested]
-  [[nodiscard]] plSimdVec4u operator~() const;                     // [tested]
+  plSimdVec4u operator|(const plSimdVec4u& v) const; // [tested]
+  plSimdVec4u operator&(const plSimdVec4u& v) const; // [tested]
+  plSimdVec4u operator^(const plSimdVec4u& v) const; // [tested]
+  plSimdVec4u operator~() const;                     // [tested]
 
-  [[nodiscard]] plSimdVec4u operator<<(plUInt32 uiShift) const; // [tested]
-  [[nodiscard]] plSimdVec4u operator>>(plUInt32 uiShift) const; // [tested]
+  plSimdVec4u operator<<(plUInt32 uiShift) const; // [tested]
+  plSimdVec4u operator>>(plUInt32 uiShift) const; // [tested]
 
   plSimdVec4u& operator+=(const plSimdVec4u& v); // [tested]
   plSimdVec4u& operator-=(const plSimdVec4u& v); // [tested]
@@ -69,8 +66,8 @@ public:
   plSimdVec4u& operator<<=(plUInt32 uiShift); // [tested]
   plSimdVec4u& operator>>=(plUInt32 uiShift); // [tested]
 
-  [[nodiscard]] plSimdVec4u CompMin(const plSimdVec4u& v) const; // [tested]
-  [[nodiscard]] plSimdVec4u CompMax(const plSimdVec4u& v) const; // [tested]
+  plSimdVec4u CompMin(const plSimdVec4u& v) const; // [tested]
+  plSimdVec4u CompMax(const plSimdVec4u& v) const; // [tested]
 
   plSimdVec4b operator==(const plSimdVec4u& v) const; // [tested]
   plSimdVec4b operator!=(const plSimdVec4u& v) const; // [tested]
@@ -78,6 +75,8 @@ public:
   plSimdVec4b operator<(const plSimdVec4u& v) const;  // [tested]
   plSimdVec4b operator>=(const plSimdVec4u& v) const; // [tested]
   plSimdVec4b operator>(const plSimdVec4u& v) const;  // [tested]
+
+  static plSimdVec4u ZeroVector(); // [tested]
 
 public:
   plInternal::QuadUInt m_v;

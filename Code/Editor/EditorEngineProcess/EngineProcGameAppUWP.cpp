@@ -6,20 +6,20 @@
 
 #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
 
-plEngineProcessGameApplicationUWP::plEngineProcessGameApplicationUWP() {}
+PlasmaEngineProcessGameApplicationUWP::PlasmaEngineProcessGameApplicationUWP() {}
 
-plEngineProcessGameApplicationUWP::~plEngineProcessGameApplicationUWP() {}
+PlasmaEngineProcessGameApplicationUWP::~PlasmaEngineProcessGameApplicationUWP() {}
 
-plUniquePtr<plEditorEngineProcessApp> plEngineProcessGameApplicationUWP::CreateEngineProcessApp()
+plUniquePtr<PlasmaEditorEngineProcessApp> PlasmaEngineProcessGameApplicationUWP::CreateEngineProcessApp()
 {
-  plUniquePtr<plEditorEngineProcessApp> ptr = PLASMA_DEFAULT_NEW(plEditorEngineProcessAppUWP);
-  m_pEngineProcessApp = static_cast<plEditorEngineProcessAppUWP*>(ptr.Borrow());
+  plUniquePtr<PlasmaEditorEngineProcessApp> ptr = PLASMA_DEFAULT_NEW(PlasmaEditorEngineProcessAppUWP);
+  m_pEngineProcessApp = static_cast<PlasmaEditorEngineProcessAppUWP*>(ptr.Borrow());
   return ptr;
 }
 
-void plEngineProcessGameApplicationUWP::Init_ConfigureInput()
+void PlasmaEngineProcessGameApplicationUWP::Init_ConfigureInput()
 {
-  plEngineProcessGameApplication::Init_ConfigureInput();
+  PlasmaEngineProcessGameApplication::Init_ConfigureInput();
 
   // Set Anchor
   {
@@ -30,7 +30,7 @@ void plEngineProcessGameApplicationUWP::Init_ConfigureInput()
   }
 }
 
-bool plEngineProcessGameApplicationUWP::Run_ProcessApplicationInput()
+bool PlasmaEngineProcessGameApplicationUWP::Run_ProcessApplicationInput()
 {
   return SUPER::Run_ProcessApplicationInput();
 }

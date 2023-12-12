@@ -11,7 +11,7 @@ o
 		s %AssetType{"ProcGen Graph"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{981310233886598055,4858695034691347977}}
-		u4 %Hash{3872788517684378624}
+		u4 %Hash{8093347070119538512}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -116,7 +116,7 @@ o
 	u3 %v{1}
 	p
 	{
-		b %Active{1}
+		b %Active{0}
 		f %AlignToNormal{0x9A99193F}
 		u3 %CollisionLayer{0}
 		s %ColorGradient{"{ 3834b7d0-5a3f-140d-31d8-3a2bf48b09bd }"}
@@ -139,7 +139,6 @@ o
 			s{"{ ffba4e7c-2acf-45a1-bf78-1d7bf95cc15e }"}
 		}
 		s %PlacementMode{"plProcPlacementMode::Raycast"}
-		s %PlacementPattern{"plProcPlacementPattern::Natural"}
 		Uuid %Scale{u4{33123001161142769,11200021596351852653}}
 		s %Surface{"{ 2987eede-0d7c-4750-9043-0215249e52c0 }"}
 		Angle %YawRotationSnap{f{0}}
@@ -489,7 +488,6 @@ o
 			s{"{ 9b098b2a-53cf-4b4e-8bbf-b2bd11092362 }"}
 		}
 		s %PlacementMode{"plProcPlacementMode::Raycast"}
-		s %PlacementPattern{"plProcPlacementPattern::Natural"}
 		Uuid %Scale{u4{12607850159536126480,10808416320009248582}}
 		s %Surface{"{ 2987eede-0d7c-4750-9043-0215249e52c0 }"}
 		Angle %YawRotationSnap{f{0}}
@@ -963,7 +961,7 @@ o
 	u3 %v{1}
 	p
 	{
-		b %Active{1}
+		b %Active{0}
 		f %AlignToNormal{0xCDCC4C3F}
 		u3 %CollisionLayer{0}
 		s %ColorGradient{"{ 6082de35-c174-4c40-a5a5-17fd67b11ce5 }"}
@@ -985,7 +983,6 @@ o
 			s{"{ 0485ad21-f29c-429e-a61f-f28da08ecea6 }"}
 		}
 		s %PlacementMode{"plProcPlacementMode::Raycast"}
-		s %PlacementPattern{"plProcPlacementPattern::Natural"}
 		Uuid %Scale{u4{9764830544944795344,12066804901998654980}}
 		s %Surface{"{ 2987eede-0d7c-4750-9043-0215249e52c0 }"}
 		Angle %YawRotationSnap{f{0}}
@@ -1114,7 +1111,7 @@ o
 	u3 %v{1}
 	p
 	{
-		b %Active{1}
+		b %Active{0}
 		f %AlignToNormal{0x0000803F}
 		u3 %CollisionLayer{0}
 		s %ColorGradient{""}
@@ -1127,7 +1124,7 @@ o
 		Vec3 %MinOffset{f{0x0000A0C0,0x0000A0C0,0}}
 		Vec3 %MinScale{f{0x0000003F,0x0000003F,0x0000003F}}
 		s %Name{"Big Rocks"}
-		Vec2 %Node::Pos{f{0x7028D844,0x1D342244}}
+		Vec2 %Node::Pos{f{0x8E72D844,0x1D342244}}
 		Uuid %ObjectIndex{u4{3878258049618966317,6419593839993390770}}
 		VarArray %Objects
 		{
@@ -1136,7 +1133,6 @@ o
 			s{"{ e207fd9e-794e-4b79-9eeb-908c865e73e5 }"}
 		}
 		s %PlacementMode{"plProcPlacementMode::Raycast"}
-		s %PlacementPattern{"plProcPlacementPattern::Natural"}
 		Uuid %Scale{u4{9953861084860125787,847663724014550230}}
 		s %Surface{"{ 2987eede-0d7c-4750-9043-0215249e52c0 }"}
 		Angle %YawRotationSnap{f{0}}
@@ -1407,7 +1403,7 @@ o
 	u3 %v{1}
 	p
 	{
-		b %Active{1}
+		b %Active{0}
 		f %AlignToNormal{0x0000803F}
 		u3 %CollisionLayer{0}
 		s %ColorGradient{""}
@@ -1420,7 +1416,7 @@ o
 		Vec3 %MinOffset{f{0x000080BF,0x000080BF,0}}
 		Vec3 %MinScale{f{0xCDCCCC3D,0xCDCCCC3D,0xCDCCCC3D}}
 		s %Name{"Small Rocks"}
-		Vec2 %Node::Pos{f{0xA1FAEE44,0x1F3C5044}}
+		Vec2 %Node::Pos{f{0x92D5EE44,0x1F3C5044}}
 		Uuid %ObjectIndex{u4{7198840391181854490,3303915681089357328}}
 		VarArray %Objects
 		{
@@ -1429,7 +1425,6 @@ o
 			s{"{ e207fd9e-794e-4b79-9eeb-908c865e73e5 }"}
 		}
 		s %PlacementMode{"plProcPlacementMode::Raycast"}
-		s %PlacementPattern{"plProcPlacementPattern::Natural"}
 		Uuid %Scale{u4{8466303560495301357,1694987596653693922}}
 		s %Surface{"{ 2987eede-0d7c-4750-9043-0215249e52c0 }"}
 		Angle %YawRotationSnap{f{0}}
@@ -1568,23 +1563,6 @@ Types
 {
 o
 {
-	Uuid %id{u4{11328927983653446892,144568098297487475}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plPropertyAttribute"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plTitleAttribute"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
 	Uuid %id{u4{14749633442492691202,593399381445037268}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -1665,40 +1643,6 @@ o
 		s %PluginName{"plasmaEditorPluginProcGen"}
 		VarArray %Properties{}
 		s %TypeName{"plProcGen_Slope"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{8132462614681439308,3287167598379242619}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginProcGen"}
-		VarArray %Properties{}
-		s %TypeName{"plProcPlacementPattern"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{9173583534334495496,4413498156702784611}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{""}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plAbstractObjectNode"}
 		u3 %TypeVersion{1}
 	}
 }
@@ -1857,40 +1801,6 @@ o
 }
 o
 {
-	Uuid %id{u4{14209585135339028478,11308263336862562356}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plPropertyAttribute"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{10117293284305109392,11544913933193635751}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plPropertyAttribute"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plHiddenAttribute"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
 	Uuid %id{u4{13757272417693924605,15313730912403440498}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -1903,23 +1813,6 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderPipelineNodeOutputPin"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{6853598190348858983,16453551367257532047}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plPropertyAttribute"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plCategoryAttribute"}
 		u3 %TypeVersion{1}
 	}
 }

@@ -12,15 +12,15 @@ class PLASMA_EDITORFRAMEWORK_DLL plConeLengthGizmo : public plGizmo
 public:
   plConeLengthGizmo();
 
-  void SetRadius(float fRadius);
+  void SetRadius(float radius);
   float GetRadius() const { return m_fRadius; }
 
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
@@ -32,7 +32,7 @@ private:
 
   plVec2I32 m_vLastMousePos;
 
-  plEngineGizmoHandle m_hConeRadius;
+  PlasmaEngineGizmoHandle m_hConeRadius;
 
   enum class ManipulateMode
   {

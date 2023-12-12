@@ -19,7 +19,7 @@ plQtPropertyAnimModel::~plQtPropertyAnimModel()
   m_pAssetDoc->GetObjectManager()->m_StructureEvents.RemoveEventHandler(plMakeDelegate(&plQtPropertyAnimModel::DocumentStructureEventHandler, this));
 }
 
-QVariant plQtPropertyAnimModel::data(const QModelIndex& index, int iRole) const
+QVariant plQtPropertyAnimModel::data(const QModelIndex& index, int role) const
 {
   if (!index.isValid() || index.column() != 0)
     return QVariant();
@@ -27,7 +27,7 @@ QVariant plQtPropertyAnimModel::data(const QModelIndex& index, int iRole) const
   plQtPropertyAnimModelTreeEntry* pItem = static_cast<plQtPropertyAnimModelTreeEntry*>(index.internalPointer());
   PLASMA_ASSERT_DEBUG(pItem != nullptr, "Invalid model index");
 
-  switch (iRole)
+  switch (role)
   {
     case Qt::DisplayRole:
       return QString(pItem->m_sDisplay.GetData());
@@ -59,22 +59,22 @@ Qt::ItemFlags plQtPropertyAnimModel::flags(const QModelIndex& index) const
   return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QModelIndex plQtPropertyAnimModel::index(int iRow, int iColumn, const QModelIndex& parent /*= QModelIndex()*/) const
+QModelIndex plQtPropertyAnimModel::index(int row, int column, const QModelIndex& parent /*= QModelIndex()*/) const
 {
-  if (iColumn != 0)
+  if (column != 0)
     return QModelIndex();
 
   plQtPropertyAnimModelTreeEntry* pParentItem = static_cast<plQtPropertyAnimModelTreeEntry*>(parent.internalPointer());
   if (pParentItem != nullptr)
   {
-    return createIndex(iRow, iColumn, (void*)&m_AllEntries[m_iInUse][pParentItem->m_Children[iRow]]);
+    return createIndex(row, column, (void*)&m_AllEntries[m_iInUse][pParentItem->m_Children[row]]);
   }
   else
   {
-    if (iRow >= (int)m_TopLevelEntries[m_iInUse].GetCount())
+    if (row >= (int)m_TopLevelEntries[m_iInUse].GetCount())
       return QModelIndex();
 
-    return createIndex(iRow, iColumn, (void*)&m_AllEntries[m_iInUse][m_TopLevelEntries[m_iInUse][iRow]]);
+    return createIndex(row, column, (void*)&m_AllEntries[m_iInUse][m_TopLevelEntries[m_iInUse][row]]);
   }
 }
 

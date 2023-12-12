@@ -47,7 +47,7 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plDocumentInfo::plDocumentInfo()
 {
-  m_DocumentID = plUuid::MakeUuid();
+  m_DocumentID.CreateNewUuid();
 }
 
 
@@ -56,17 +56,17 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plEvent<const plDocumentEvent&> plDocument::s_EventsAny;
 
-plDocument::plDocument(plStringView sPath, plDocumentObjectManager* pDocumentObjectManagerImpl)
+plDocument::plDocument(const char* szPath, plDocumentObjectManager* pDocumentObjectManagerImpl)
 {
   using ObjectMetaData = plObjectMetaData<plUuid, plDocumentObjectMetaData>;
   m_DocumentObjectMetaData = PLASMA_DEFAULT_NEW(ObjectMetaData);
   m_pDocumentInfo = nullptr;
-  m_sDocumentPath = sPath;
+  m_sDocumentPath = szPath;
   m_pObjectManager = plUniquePtr<plDocumentObjectManager>(pDocumentObjectManagerImpl, plFoundation::GetDefaultAllocator());
   m_pObjectManager->SetDocument(this);
   m_pCommandHistory = PLASMA_DEFAULT_NEW(plCommandHistory, this);
   m_pSelectionManager = PLASMA_DEFAULT_NEW(plSelectionManager, m_pObjectManager.Borrow());
-
+  
   if (m_pObjectAccessor == nullptr)
   {
     m_pObjectAccessor = PLASMA_DEFAULT_NEW(plObjectCommandAccessor, m_pCommandHistory.Borrow());
@@ -147,7 +147,7 @@ plStatus plDocument::SaveDocument(bool bForce)
     m_ActiveSaveTask.Invalidate();
   }
   plStatus result;
-  m_ActiveSaveTask = InternalSaveDocument([&result](plDocument* pDoc, plStatus res) { result = res; });
+  m_ActiveSaveTask = InternalSaveDocument([&result](plDocument* doc, plStatus res) { result = res; });
   plTaskSystem::WaitForGroup(m_ActiveSaveTask);
   m_ActiveSaveTask.Invalidate();
   return result;
@@ -161,18 +161,6 @@ plTaskGroupID plDocument::SaveDocumentAsync(AfterSaveCallback callback, bool bFo
 
   m_ActiveSaveTask = InternalSaveDocument(callback);
   return m_ActiveSaveTask;
-}
-
-void plDocument::DocumentRenamed(plStringView sNewDocumentPath)
-{
-  m_sDocumentPath = sNewDocumentPath;
-
-  plDocumentEvent e;
-  e.m_pDocument = this;
-  e.m_Type = plDocumentEvent::Type::DocumentRenamed;
-
-  m_EventsOne.Broadcast(e);
-  s_EventsAny.Broadcast(e);
 }
 
 void plDocument::EnsureVisible()
@@ -240,8 +228,8 @@ plTaskGroupID plDocument::InternalSaveDocument(AfterSaveCallback callback)
   return afterSaveID;
 }
 
-plStatus plDocument::ReadDocument(plStringView sDocumentPath, plUniquePtr<plAbstractObjectGraph>& ref_pHeader, plUniquePtr<plAbstractObjectGraph>& ref_pObjects,
-  plUniquePtr<plAbstractObjectGraph>& ref_pTypes)
+plStatus plDocument::ReadDocument(const char* sDocumentPath, plUniquePtr<plAbstractObjectGraph>& header, plUniquePtr<plAbstractObjectGraph>& objects,
+  plUniquePtr<plAbstractObjectGraph>& types)
 {
   plDefaultMemoryStreamStorage storage;
   plMemoryStreamReader memreader(&storage);
@@ -261,7 +249,7 @@ plStatus plDocument::ReadDocument(plStringView sDocumentPath, plUniquePtr<plAbst
     {
       PLASMA_PROFILE_SCOPE("parse DDL graph");
       plStopwatch sw;
-      if (plAbstractGraphDdlSerializer::ReadDocument(memreader, ref_pHeader, ref_pObjects, ref_pTypes, true).Failed())
+      if (plAbstractGraphDdlSerializer::ReadDocument(memreader, header, objects, types, true).Failed())
         return plStatus("Failed to parse DDL graph");
 
       plTime t = sw.GetRunningTotal();
@@ -431,16 +419,16 @@ void plDocument::ShowDocumentStatus(const plFormatString& msg) const
 
   plDocumentEvent e;
   e.m_pDocument = this;
-  e.m_sStatusMsg = msg.GetText(tmp);
+  e.m_szStatusMsg = msg.GetTextCStr(tmp);
   e.m_Type = plDocumentEvent::Type::DocumentStatusMsg;
 
   m_EventsOne.Broadcast(e);
 }
 
 
-plResult plDocument::ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_result) const
+plResult plDocument::ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_Result) const
 {
-  out_result.SetIdentity();
+  out_Result.SetIdentity();
   return PLASMA_FAILURE;
 }
 

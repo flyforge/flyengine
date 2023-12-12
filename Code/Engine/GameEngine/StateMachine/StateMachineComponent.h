@@ -147,12 +147,6 @@ public:
   /// \brief Sets the current state with the given name.
   bool SetState(plStringView sName); // [ scriptable ]
 
-  /// \brief Returns the name of the currently active state.
-  plStringView GetCurrentState() const; // [ scriptable ]
-
-  /// \brief Sends a named event that state transitions can react to.
-  void FireTransitionEvent(plStringView sEvent);
-
   void SetBlackboardName(const char* szName);                         // [ property ]
   const char* GetBlackboardName() const { return m_sBlackboardName; } // [ property ]
 

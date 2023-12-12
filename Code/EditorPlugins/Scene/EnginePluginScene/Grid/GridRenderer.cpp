@@ -8,7 +8,7 @@
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGridRenderData, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorGridExtractor, 1, plRTTIDefaultAllocator<plEditorGridExtractor>)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorGridExtractor, 1, plRTTIDefaultAllocator<PlasmaEditorGridExtractor>)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -22,7 +22,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGridRenderer, 1, plRTTIDefaultAllocator<pl
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plEditorGridExtractor::plEditorGridExtractor(const char* szName)
+PlasmaEditorGridExtractor::PlasmaEditorGridExtractor(const char* szName)
   : plExtractor(szName)
 {
   m_pSceneContext = nullptr;
@@ -221,7 +221,7 @@ float AdjustGridDensity(float fDensity, plUInt32 uiWindowWidth, float fOrthoDimX
   return fNewDensity;
 }
 
-void plEditorGridExtractor::Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData)
+void PlasmaEditorGridExtractor::Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData)
 {
   if (m_pSceneContext == nullptr || m_pSceneContext->GetGridDensity() == 0.0f)
     return;
@@ -230,7 +230,7 @@ void plEditorGridExtractor::Extract(const plView& view, const plDynamicArray<con
   float fDensity = m_pSceneContext->GetGridDensity();
 
   plGridRenderData* pRenderData = plCreateRenderDataForThisFrame<plGridRenderData>(nullptr);
-  pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
+  pRenderData->m_GlobalBounds.SetInvalid();
   pRenderData->m_bOrthoMode = cam->IsOrthographic();
   pRenderData->m_bGlobal = m_pSceneContext->IsGridInGlobalSpace();
 
@@ -250,14 +250,14 @@ void plEditorGridExtractor::Extract(const plView& view, const plDynamicArray<con
     mRot.SetColumn(0, cam->GetCenterDirRight());
     mRot.SetColumn(1, cam->GetCenterDirUp());
     mRot.SetColumn(2, cam->GetCenterDirForwards());
-    pRenderData->m_GlobalTransform.m_qRotation = plQuat::MakeFromMat3(mRot);
+    pRenderData->m_GlobalTransform.m_qRotation.SetFromMat3(mRot);
 
     const plVec3 vBottomLeft = cam->GetCenterPosition() - cam->GetCenterDirRight() * fDimX - cam->GetCenterDirUp() * fDimY;
     const plVec3 vTopRight = cam->GetCenterPosition() + cam->GetCenterDirRight() * fDimX + cam->GetCenterDirUp() * fDimY;
 
     plPlane plane1, plane2;
-    plane1 = plPlane::MakeFromNormalAndPoint(cam->GetCenterDirRight(), plVec3(0));
-    plane2 = plPlane::MakeFromNormalAndPoint(cam->GetCenterDirUp(), plVec3(0));
+    plane1.SetFromNormalAndPoint(cam->GetCenterDirRight(), plVec3(0));
+    plane2.SetFromNormalAndPoint(cam->GetCenterDirUp(), plVec3(0));
 
     const float fFirstDist1 = plane1.GetDistanceTo(vBottomLeft) - fDensity;
     const float fLastDist1 = plane1.GetDistanceTo(vTopRight) + fDensity;

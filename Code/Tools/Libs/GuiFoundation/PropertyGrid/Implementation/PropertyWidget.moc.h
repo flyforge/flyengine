@@ -73,6 +73,9 @@ protected:
   plEnum<plVariantType> m_OriginalType;
   QHBoxLayout* m_pLayout = nullptr;
   plQtDoubleSpinBox* m_pWidget[4] = {};
+  QLabel* m_pWidgetLabel[4] = {};
+  const char m_cAxisNames[4] = {'X', 'Y', 'Z', 'W'};
+  const char* m_pWidgetLabelColors[4] = {"#63000D", "#006317", "#000863", "transparent"};
 };
 
 /// *** TIME SPINBOX ***
@@ -168,6 +171,9 @@ protected:
   bool m_bTemporaryCommand;
   QHBoxLayout* m_pLayout;
   plQtDoubleSpinBox* m_pWidget[3];
+  QLabel* m_pWidgetLabel[3];
+  const char m_cAxisNames[3] = {'X', 'Y', 'Z'};
+  const char* m_pWidgetLabelColors[3] = {"#63000D", "#006317", "#000863"};
 };
 
 
@@ -284,16 +290,13 @@ private Q_SLOTS:
 protected:
   virtual void OnInit() override;
   virtual void InternalSetValue(const plVariant& value) override;
-  void SetAllChecked(bool bChecked);
 
 protected:
   plMap<plInt64, QCheckBox*> m_Constants;
-  QHBoxLayout* m_pLayout = nullptr;
-  QPushButton* m_pWidget = nullptr;
-  QPushButton* m_pAllButton = nullptr;
-  QPushButton* m_pClearButton = nullptr;
-  QMenu* m_pMenu = nullptr;
-  plInt64 m_iCurrentBitflags = 0;
+  QHBoxLayout* m_pLayout;
+  QPushButton* m_pWidget;
+  QMenu* m_pMenu;
+  plInt64 m_iCurrentBitflags;
 };
 
 

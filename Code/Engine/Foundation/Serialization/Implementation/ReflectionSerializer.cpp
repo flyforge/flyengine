@@ -20,7 +20,7 @@ void plReflectionSerializer::WriteObjectToDDL(plStreamWriter& inout_stream, cons
   plRttiConverterContext context;
   plRttiConverterWriter conv(&graph, &context, false, true);
 
-  context.RegisterObject(plUuid::MakeUuid(), pRtti, const_cast<void*>(pObject));
+  context.RegisterObject(plUuid::CreateUuid(), pRtti, const_cast<void*>(pObject));
   conv.AddObjectToGraph(pRtti, const_cast<void*>(pObject), "root");
 
   plAbstractGraphDdlSerializer::Write(inout_stream, &graph, nullptr, bCompactMmode, typeMode);
@@ -34,7 +34,7 @@ void plReflectionSerializer::WriteObjectToDDL(plOpenDdlWriter& ref_ddl, const pl
 
   if (!guid.IsValid())
   {
-    guid = plUuid::MakeUuid();
+    guid = plUuid::CreateUuid();
   }
 
   context.RegisterObject(guid, pRtti, const_cast<void*>(pObject));
@@ -49,7 +49,7 @@ void plReflectionSerializer::WriteObjectToBinary(plStreamWriter& inout_stream, c
   plRttiConverterContext context;
   plRttiConverterWriter conv(&graph, &context, false, true);
 
-  context.RegisterObject(plUuid::MakeUuid(), pRtti, const_cast<void*>(pObject));
+  context.RegisterObject(plUuid::CreateUuid(), pRtti, const_cast<void*>(pObject));
   conv.AddObjectToGraph(pRtti, const_cast<void*>(pObject), "root");
 
   plAbstractGraphBinarySerializer::Write(inout_stream, &graph);
@@ -98,9 +98,7 @@ void* plReflectionSerializer::ReadObjectFromBinary(plStreamReader& inout_stream,
   plRttiConverterReader convRead(&graph, &context);
   auto* pRootNode = graph.GetNodeByName("root");
 
-  //PLASMA_ASSERT_DEV(pRootNode != nullptr, "invalid document");
-  if (pRootNode == nullptr)
-    return nullptr;
+  PLASMA_ASSERT_DEV(pRootNode != nullptr, "invalid document");
 
   ref_pRtti = plRTTI::FindTypeByName(pRootNode->GetType());
 

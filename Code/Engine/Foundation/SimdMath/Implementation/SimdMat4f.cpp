@@ -13,7 +13,7 @@ plResult plSimdMat4f::Invert(const plSimdFloat& fEpsilon)
   if (tmp.Invert(fEpsilon).Failed())
     return PLASMA_FAILURE;
 
-  *this = plSimdMat4f::MakeFromColumnMajorArray(tmp.m_fElementsCM);
+  SetFromArray(tmp.m_fElementsCM, plMatrixLayout::ColumnMajor);
 
   return PLASMA_SUCCESS;
 }

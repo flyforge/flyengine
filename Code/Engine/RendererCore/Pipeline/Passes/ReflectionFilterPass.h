@@ -16,8 +16,6 @@ public:
   virtual bool GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs) override;
 
   virtual void Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
-  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
-  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   plUInt32 GetInputCubemap() const;
   void SetInputCubemap(plUInt32 uiCubemapHandle);
@@ -30,10 +28,10 @@ protected:
   plRenderPipelineNodeOutputPin m_PinAvgLuminance;
   plRenderPipelineNodeOutputPin m_PinIrradianceData;
 
-  float m_fIntensity = 1.0f;
-  float m_fSaturation = 1.0f;
-  plUInt32 m_uiSpecularOutputIndex = 0;
-  plUInt32 m_uiIrradianceOutputIndex = 0;
+  float m_fIntensity;
+  float m_fSaturation;
+  plUInt32 m_uiSpecularOutputIndex;
+  plUInt32 m_uiIrradianceOutputIndex;
 
   plGALTextureHandle m_hInputCubemap;
 

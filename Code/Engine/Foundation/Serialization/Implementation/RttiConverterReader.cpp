@@ -191,7 +191,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
         }
         else if (pProp->GetFlags().IsAnySet(plPropertyFlags::Class))
         {
-          const plUuid temp = plUuid::MakeUuid();
+          const plUuid temp = plUuid::CreateUuid();
 
           void* pValuePtr = m_pContext->CreateObject(temp, pPropType);
 
@@ -275,7 +275,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
         }
         else if (pProp->GetFlags().IsAnySet(plPropertyFlags::Class))
         {
-          const plUuid temp = plUuid::MakeUuid();
+          const plUuid temp = plUuid::CreateUuid();
 
           void* pValuePtr = m_pContext->CreateObject(temp, pPropType);
 
@@ -363,7 +363,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
         }
         else if (pProp->GetFlags().IsAnySet(plPropertyFlags::Class))
         {
-          const plUuid temp = plUuid::MakeUuid();
+          const plUuid temp = plUuid::CreateUuid();
 
           void* pValuePtr = m_pContext->CreateObject(temp, pPropType);
 

@@ -73,7 +73,7 @@ plQtColorGradientAssetDocumentWindow::plQtColorGradientAssetDocumentWindow(plDoc
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("ColorGradientAssetDockWidget");
-    pPropertyPanel->setWindowTitle("ColorGradient Properties");
+    pPropertyPanel->setWindowTitle("COLORGRADIENT PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -106,31 +106,31 @@ void plQtColorGradientAssetDocumentWindow::onGradientColorCpAdded(double posX, c
 
   plAddObjectCommand cmdAdd;
   cmdAdd.m_Parent = pDoc->GetPropertyObject()->GetGuid();
-  cmdAdd.m_NewObjectGuid = plUuid::MakeUuid();
+  cmdAdd.m_NewObjectGuid.CreateNewUuid();
   cmdAdd.m_sParentProperty = "ColorCPs";
   cmdAdd.m_pType = plGetStaticRTTI<plColorControlPoint>();
   cmdAdd.m_Index = -1;
 
-  history->AddCommand(cmdAdd).AssertSuccess();
+  history->AddCommand(cmdAdd).IgnoreResult();
 
   plSetObjectPropertyCommand cmdSet;
   cmdSet.m_Object = cmdAdd.m_NewObjectGuid;
 
   cmdSet.m_sProperty = "Tick";
-  cmdSet.m_NewValue = pDoc->GetProperties()->TickFromTime(plTime::MakeFromSeconds(posX));
-  history->AddCommand(cmdSet).AssertSuccess();
+  cmdSet.m_NewValue = pDoc->GetProperties()->TickFromTime(plTime::Seconds(posX));
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Red";
   cmdSet.m_NewValue = color.r;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Green";
   cmdSet.m_NewValue = color.g;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Blue";
   cmdSet.m_NewValue = color.b;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -145,23 +145,23 @@ void plQtColorGradientAssetDocumentWindow::onGradientAlphaCpAdded(double posX, p
 
   plAddObjectCommand cmdAdd;
   cmdAdd.m_Parent = pDoc->GetPropertyObject()->GetGuid();
-  cmdAdd.m_NewObjectGuid = plUuid::MakeUuid();
+  cmdAdd.m_NewObjectGuid.CreateNewUuid();
   cmdAdd.m_sParentProperty = "AlphaCPs";
   cmdAdd.m_pType = plGetStaticRTTI<plAlphaControlPoint>();
   cmdAdd.m_Index = -1;
 
-  history->AddCommand(cmdAdd).AssertSuccess();
+  history->AddCommand(cmdAdd).IgnoreResult();
 
   plSetObjectPropertyCommand cmdSet;
   cmdSet.m_Object = cmdAdd.m_NewObjectGuid;
 
   cmdSet.m_sProperty = "Tick";
-  cmdSet.m_NewValue = pDoc->GetProperties()->TickFromTime(plTime::MakeFromSeconds(posX));
-  history->AddCommand(cmdSet).AssertSuccess();
+  cmdSet.m_NewValue = pDoc->GetProperties()->TickFromTime(plTime::Seconds(posX));
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Alpha";
   cmdSet.m_NewValue = alpha;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -176,23 +176,23 @@ void plQtColorGradientAssetDocumentWindow::onGradientIntensityCpAdded(double pos
 
   plAddObjectCommand cmdAdd;
   cmdAdd.m_Parent = pDoc->GetPropertyObject()->GetGuid();
-  cmdAdd.m_NewObjectGuid = plUuid::MakeUuid();
+  cmdAdd.m_NewObjectGuid.CreateNewUuid();
   cmdAdd.m_sParentProperty = "IntensityCPs";
   cmdAdd.m_pType = plGetStaticRTTI<plIntensityControlPoint>();
   cmdAdd.m_Index = -1;
 
-  history->AddCommand(cmdAdd).AssertSuccess();
+  history->AddCommand(cmdAdd).IgnoreResult();
 
   plSetObjectPropertyCommand cmdSet;
   cmdSet.m_Object = cmdAdd.m_NewObjectGuid;
 
   cmdSet.m_sProperty = "Tick";
-  cmdSet.m_NewValue = pDoc->GetProperties()->TickFromTime(plTime::MakeFromSeconds(posX));
-  history->AddCommand(cmdSet).AssertSuccess();
+  cmdSet.m_NewValue = pDoc->GetProperties()->TickFromTime(plTime::Seconds(posX));
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Intensity";
   cmdSet.m_NewValue = intensity;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -212,8 +212,8 @@ void plQtColorGradientAssetDocumentWindow::MoveCP(plInt32 idx, double newPosX, c
   cmdSet.m_Object = objGuid.Get<plUuid>();
 
   cmdSet.m_sProperty = "Tick";
-  cmdSet.m_NewValue = pDoc->GetProperties()->TickFromTime(plTime::MakeFromSeconds(newPosX));
-  history->AddCommand(cmdSet).AssertSuccess();
+  cmdSet.m_NewValue = pDoc->GetProperties()->TickFromTime(plTime::Seconds(newPosX));
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -247,7 +247,7 @@ void plQtColorGradientAssetDocumentWindow::RemoveCP(plInt32 idx, const char* szA
 
   plRemoveObjectCommand cmdSet;
   cmdSet.m_Object = objGuid.Get<plUuid>();
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -285,15 +285,15 @@ void plQtColorGradientAssetDocumentWindow::onGradientColorCpChanged(plInt32 idx,
 
   cmdSet.m_sProperty = "Red";
   cmdSet.m_NewValue = color.r;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Green";
   cmdSet.m_NewValue = color.g;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Blue";
   cmdSet.m_NewValue = color.b;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -314,7 +314,7 @@ void plQtColorGradientAssetDocumentWindow::onGradientAlphaCpChanged(plInt32 idx,
 
   cmdSet.m_sProperty = "Alpha";
   cmdSet.m_NewValue = alpha;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -334,7 +334,7 @@ void plQtColorGradientAssetDocumentWindow::onGradientIntensityCpChanged(plInt32 
 
   cmdSet.m_sProperty = "Intensity";
   cmdSet.m_NewValue = intensity;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   history->FinishTransaction();
 }
@@ -447,11 +447,11 @@ void plQtColorGradientAssetDocumentWindow::StructureEventHandler(const plDocumen
 
 void plQtColorGradientAssetDocumentWindow::SendLiveResourcePreview()
 {
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   plResourceUpdateMsgToEngine msg;
-  msg.m_sResourceType = "ColorGradient";
+  msg.m_sResourceType = "Color Gradient";
 
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
@@ -476,16 +476,16 @@ void plQtColorGradientAssetDocumentWindow::SendLiveResourcePreview()
   pDoc->WriteResource(memoryWriter);
   msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtColorGradientAssetDocumentWindow::RestoreResource()
 {
   plRestoreResourceMsgToEngine msg;
-  msg.m_sResourceType = "ColorGradient";
+  msg.m_sResourceType = "Color Gradient";
 
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }

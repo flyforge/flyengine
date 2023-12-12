@@ -77,12 +77,9 @@ bool plQtEditorApp::CheckForEnginePluginModifications()
 
 void plQtEditorApp::RestartEngineProcessIfPluginsChanged(bool bForce)
 {
-  if (!plToolsProject::IsProjectOpen())
-    return;
-
   if (!bForce)
   {
-    if (m_LastPluginModificationCheck + plTime::MakeFromSeconds(2) > plTime::Now())
+    if (m_LastPluginModificationCheck + plTime::Seconds(2) > plTime::Now())
       return;
   }
 
@@ -106,6 +103,6 @@ void plQtEditorApp::RestartEngineProcessIfPluginsChanged(bool bForce)
   plLog::Info("Engine plugins have changed, restarting engine process.");
 
   StoreEnginePluginModificationTimes();
-  plEditorEngineProcessConnection::GetSingleton()->SetPluginConfig(GetRuntimePluginConfig(true));
-  plEditorEngineProcessConnection::GetSingleton()->RestartProcess().IgnoreResult();
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SetPluginConfig(GetRuntimePluginConfig(true));
+  PlasmaEditorEngineProcessConnection::GetSingleton()->RestartProcess().IgnoreResult();
 }

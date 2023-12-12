@@ -1,18 +1,18 @@
 #include <RecastPlugin/RecastPluginPCH.h>
 
 #include <Foundation/Containers/StaticArray.h>
-#include <Recast.h>
+#include <Recast/Recast.h>
 #include <RecastPlugin/NavMeshBuilder/NavMeshPointsOfInterest.h>
 
 plNavMeshPointOfInterestGraph::plNavMeshPointOfInterestGraph() = default;
 plNavMeshPointOfInterestGraph::~plNavMeshPointOfInterestGraph() = default;
 
-void plNavMeshPointOfInterestGraph::IncreaseCheckVisibiblityTimeStamp(plTime now)
+void plNavMeshPointOfInterestGraph::IncreaseCheckVisibiblityTimeStamp(plTime tNow)
 {
-  if (now - m_LastTimeStampStep < plTime::Seconds(0.5f))
+  if (tNow - m_LastTimeStampStep < plTime::Seconds(0.5f))
     return;
 
-  m_LastTimeStampStep = now;
+  m_LastTimeStampStep = tNow;
   m_uiCheckVisibilityTimeStamp += 4;
 }
 
@@ -37,30 +37,30 @@ struct PotentialPoI
   plVec3 m_vLineDir;
 };
 
-PLASMA_ALWAYS_INLINE static void AddToInterestPoints(plDeque<PotentialPoI>& ref_interestPoints, plInt32 iVertexIdx, const plVec3& vPos, const plVec3& vPolyCenter, plVec3 vLineDir)
+PLASMA_ALWAYS_INLINE static void AddToInterestPoints(plDeque<PotentialPoI>& interestPoints, plInt32 iVertexIdx, const plVec3& pos, const plVec3& vPolyCenter, plVec3 vLineDir)
 {
-  plVec3 toCenter = vPolyCenter - vPos;
+  plVec3 toCenter = vPolyCenter - pos;
   toCenter.SetLength(toCenterOffset).IgnoreResult();
 
-  const plVec3 posWithOffset = vPos + toCenter + vLineDir * alongLineOffset;
+  const plVec3 posWithOffset = pos + toCenter + vLineDir * alongLineOffset;
 
   if (iVertexIdx < 0)
   {
-    auto& poi = ref_interestPoints.ExpandAndGetRef();
+    auto& poi = interestPoints.ExpandAndGetRef();
     poi.m_bUsed = true;
     poi.m_vPosition = posWithOffset;
     poi.m_vLineDir = vLineDir;
   }
-  else if (!ref_interestPoints[iVertexIdx].m_bUsed)
+  else if (!interestPoints[iVertexIdx].m_bUsed)
   {
-    auto& poi = ref_interestPoints[iVertexIdx];
+    auto& poi = interestPoints[iVertexIdx];
     poi.m_bUsed = true;
     poi.m_vPosition = posWithOffset;
     poi.m_vLineDir = vLineDir;
   }
   else
   {
-    auto& poi = ref_interestPoints[iVertexIdx];
+    auto& poi = interestPoints[iVertexIdx];
 
     plPlane plane;
     plane.SetFromPoints(poi.m_vVertexPos, poi.m_vVertexPos + poi.m_vLineDir, poi.m_vVertexPos + plVec3(0, 0, 1.0f)).IgnoreResult();
@@ -78,7 +78,7 @@ PLASMA_ALWAYS_INLINE static void AddToInterestPoints(plDeque<PotentialPoI>& ref_
     {
       // different sides, keep both points
 
-      auto& poi2 = ref_interestPoints.ExpandAndGetRef();
+      auto& poi2 = interestPoints.ExpandAndGetRef();
       poi2.m_bUsed = true;
       poi2.m_vPosition = posWithOffset;
       poi2.m_vLineDir = vLineDir;
@@ -146,6 +146,7 @@ void plNavMeshPointOfInterestGraph::ExtractInterestPointsFromMesh(const rcPolyMe
 
     // filter out too short edges
     {
+      plUInt32 uiPrevEdgeIdx = isContourEdge.GetCount() - 2;
       plUInt32 uiCurEdgeIdx = isContourEdge.GetCount() - 1;
 
       for (plUInt32 uiNextEdgeIdx = 0; uiNextEdgeIdx < isContourEdge.GetCount(); ++uiNextEdgeIdx)
@@ -163,6 +164,7 @@ void plNavMeshPointOfInterestGraph::ExtractInterestPointsFromMesh(const rcPolyMe
           }
         }
 
+        uiPrevEdgeIdx = uiCurEdgeIdx;
         uiCurEdgeIdx = uiNextEdgeIdx;
       }
     }
@@ -216,7 +218,7 @@ void plNavMeshPointOfInterestGraph::ExtractInterestPointsFromMesh(const rcPolyMe
 
           if (distSqr < plMath::Square(2.0f))
           {
-            AddToInterestPoints(interestPoints, -1, plMath::Lerp(start, end, 0.5f), vPolyCenter, plVec3::MakeZero());
+            AddToInterestPoints(interestPoints, -1, plMath::Lerp(start, end, 0.5f), vPolyCenter, plVec3::ZeroVector());
           }
           else
           {
@@ -228,7 +230,7 @@ void plNavMeshPointOfInterestGraph::ExtractInterestPointsFromMesh(const rcPolyMe
             {
               if (uiCurEdgeIdx > uiPrevEdgeIdx)
               {
-                AddToInterestPoints(interestPoints, startIdx, start, vPolyCenter, plVec3::MakeZero());
+                AddToInterestPoints(interestPoints, startIdx, start, vPolyCenter, plVec3::ZeroVector());
               }
             }
             else
@@ -240,7 +242,7 @@ void plNavMeshPointOfInterestGraph::ExtractInterestPointsFromMesh(const rcPolyMe
             {
               if (uiCurEdgeIdx > uiNextEdgeIdx)
               {
-                AddToInterestPoints(interestPoints, endIdx, end, vPolyCenter, plVec3::MakeZero());
+                AddToInterestPoints(interestPoints, endIdx, end, vPolyCenter, plVec3::ZeroVector());
               }
             }
             else
@@ -258,7 +260,8 @@ void plNavMeshPointOfInterestGraph::ExtractInterestPointsFromMesh(const rcPolyMe
 
   if (bReinitialize)
   {
-    plBoundingBox box = plBoundingBox ::MakeInvalid();
+    plBoundingBox box;
+    box.SetInvalid();
 
     // compute bounding box
     {

@@ -10,7 +10,6 @@
 #include <EditorFramework/Actions/TransformGizmoActions.h>
 #include <EditorFramework/Actions/ViewActions.h>
 #include <EditorFramework/Actions/ViewLightActions.h>
-#include <EditorFramework/EditorApp/CheckVersion.moc.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <EditorFramework/GUI/DynamicDefaultStateProvider.h>
 #include <EditorFramework/GUI/ExposedParametersDefaultStateProvider.h>
@@ -24,7 +23,6 @@
 #include <EditorFramework/Manipulators/SphereManipulatorAdapter.h>
 #include <EditorFramework/Manipulators/TransformManipulatorAdapter.h>
 #include <EditorFramework/Panels/AssetBrowserPanel/AssetBrowserPanel.moc.h>
-#include <EditorFramework/Panels/AssetCuratorPanel/AssetCuratorPanel.moc.h>
 #include <EditorFramework/Panels/CVarPanel/CVarPanel.moc.h>
 #include <EditorFramework/Panels/LogPanel/LogPanel.moc.h>
 #include <EditorFramework/Panels/LongOpsPanel/LongOpsPanel.moc.h>
@@ -90,7 +88,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plCommonAssetActions::RegisterActions();
 
     plActionMapManager::RegisterActionMap("SettingsTabMenuBar").IgnoreResult();
-    plStandardMenus::MapActions("SettingsTabMenuBar", plStandardMenuTypes::Default);
+    plStandardMenus::MapActions("SettingsTabMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("SettingsTabMenuBar");
 
     plActionMapManager::RegisterActionMap("AssetBrowserToolBar").IgnoreResult();
@@ -170,12 +168,13 @@ PLASMA_END_SUBSYSTEM_DECLARATION;
 
 plCommandLineOptionBool opt_Safe("_Editor", "-safe", "In safe-mode the editor minimizes the risk of crashing, for instance by not loading previous projects and scenes.", false);
 plCommandLineOptionBool opt_NoRecent("_Editor", "-noRecent", "Disables automatic loading of recent projects and documents.", false);
+plCommandLineOptionBool opt_Debug("_Editor", "-debug", "Enables debug-mode, which makes the editor wait for a debugger to attach, and disables risky features, such as recent file loading.", false);
 
 void plQtEditorApp::StartupEditor()
 {
   {
-    plStringBuilder sTemp = plOSFile::GetTempDataFolder("plEditor");
-    sTemp.AppendPath("plEditorCrashIndicator");
+    plStringBuilder sTemp = plOSFile::GetTempDataFolder("PlasmaEditor");
+    sTemp.AppendPath("PlasmaEditorCrashIndicator");
 
     if (plOSFile::ExistsFile(sTemp))
     {
@@ -193,6 +192,7 @@ void plQtEditorApp::StartupEditor()
 
   startupFlags.AddOrRemove(StartupFlags::SafeMode, opt_Safe.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
   startupFlags.AddOrRemove(StartupFlags::NoRecent, opt_NoRecent.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
+  startupFlags.AddOrRemove(StartupFlags::Debug, opt_Debug.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
 
   StartupEditor(startupFlags);
 }
@@ -202,7 +202,7 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   PLASMA_PROFILE_SCOPE("StartupEditor");
 
   QCoreApplication::setOrganizationDomain("www.plengine.net");
-  QCoreApplication::setOrganizationName("plEngine Project");
+  QCoreApplication::setOrganizationName("PlasmaEngine Project");
   QCoreApplication::setApplicationName(plApplication::GetApplicationInstance()->GetApplicationName().GetData());
   QCoreApplication::setApplicationVersion("1.0.0");
 
@@ -234,7 +234,12 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
 
   QLocale::setDefault(QLocale(QLocale::English));
 
-  m_pEngineViewProcess = new plEditorEngineProcessConnection;
+  plStringBuilder tmp;
+
+  m_pEngineViewProcess = new PlasmaEditorEngineProcessConnection;
+
+  m_pEngineViewProcess->SetWaitForDebugger(m_StartupFlags.IsSet(StartupFlags::Debug));
+  m_pEngineViewProcess->SetRenderer(pCmd->GetStringOption("-renderer", 0, "").GetData(tmp));
 
   m_LongOpControllerManager.Startup(&m_pEngineViewProcess->GetCommunicationChannel());
 
@@ -252,7 +257,7 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   plDocument::s_EventsAny.AddEventHandler(plMakeDelegate(&plQtEditorApp::DocumentEventHandler, this));
   plToolsProject::s_Requests.AddEventHandler(plMakeDelegate(&plQtEditorApp::ProjectRequestHandler, this));
   plToolsProject::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::ProjectEventHandler, this));
-  plEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::EngineProcessMsgHandler, this));
+  PlasmaEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::EngineProcessMsgHandler, this));
   plQtDocumentWindow::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::DocumentWindowEventHandler, this));
   plQtUiServices::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::UiServicesEvents, this));
 
@@ -309,7 +314,6 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   // pTranslatorDe->LoadTranslationFilesFromFolder(":app/Localization/de");
 
   plTranslationLookup::AddTranslator(PLASMA_DEFAULT_NEW(plTranslatorMakeMoreReadable));
-  // plTranslationLookup::AddTranslator(PLASMA_DEFAULT_NEW(plTranslatorLogMissing));
   plTranslationLookup::AddTranslator(std::move(pTranslatorEn));
   // plTranslationLookup::AddTranslator(std::move(pTranslatorDe));
 
@@ -327,25 +331,22 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
 
     ShowSettingsDocument();
 
-    if (!IsInUnitTestMode())
-    {
-      connect(m_pVersionChecker.Borrow(), &plQtVersionChecker::VersionCheckCompleted, this, &plQtEditorApp::SlotVersionCheckCompleted, Qt::QueuedConnection);
+    connect(&m_VersionChecker, &plQtVersionChecker::VersionCheckCompleted, this, &plQtEditorApp::SlotVersionCheckCompleted, Qt::QueuedConnection);
 
-      m_pVersionChecker->Initialize();
-      m_pVersionChecker->Check(false);
-    }
+    m_VersionChecker.Initialize();
+    m_VersionChecker.Check(false);
   }
 
   LoadEditorPlugins();
   CloseSplashScreen();
 
   {
-    plEditorAppEvent e;
-    e.m_Type = plEditorAppEvent::Type::EditorStarted;
+    PlasmaEditorAppEvent e;
+    e.m_Type = PlasmaEditorAppEvent::Type::EditorStarted;
     m_Events.Broadcast(e);
   }
 
-  plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
 
   if (pCmd->GetStringOptionArguments("-newproject") > 0)
   {
@@ -360,7 +361,7 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
 
     CreateOrOpenProject(false, pCmd->GetAbsolutePathOption("-project")).IgnoreResult();
   }
-  else if (!bNoRecent && pPreferences->m_bLoadLastProjectAtStartup)
+  else if (!bNoRecent && !m_StartupFlags.IsSet(StartupFlags::Debug) && pPreferences->m_bLoadLastProjectAtStartup)
   {
     if (!m_RecentProjects.GetFileList().IsEmpty())
     {
@@ -378,17 +379,6 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   connect(m_pTimer, SIGNAL(timeout()), this, SLOT(SlotTimedUpdate()), Qt::QueuedConnection);
   m_pTimer->start(1);
 
-  if (m_bWroteCrashIndicatorFile)
-  {
-    QTimer::singleShot(1000, [this]() {
-      plStringBuilder sTemp = plOSFile::GetTempDataFolder("plEditor");
-      sTemp.AppendPath("plEditorCrashIndicator");
-      plOSFile::DeleteFile(sTemp).IgnoreResult();
-      m_bWroteCrashIndicatorFile = false;
-      //
-    });
-  }
-
   if (m_StartupFlags.AreNoneSet(StartupFlags::Headless | StartupFlags::UnitTest) && !plToolsProject::GetSingleton()->IsProjectOpen())
   {
     GuiOpenDashboard();
@@ -405,7 +395,7 @@ void plQtEditorApp::ShutdownEditor()
 
   m_LongOpControllerManager.Shutdown();
 
-  plEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::EngineProcessMsgHandler, this));
+  PlasmaEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::EngineProcessMsgHandler, this));
   plToolsProject::s_Requests.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::ProjectRequestHandler, this));
   plToolsProject::s_Events.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::ProjectEventHandler, this));
   plDocument::s_EventsAny.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::DocumentEventHandler, this));
@@ -439,6 +429,7 @@ void plQtEditorApp::ShutdownEditor()
     for (plUInt32 i = 0; i < uiNumPanels; ++i)
     {
       plQtApplicationPanel* pPanel = Panels[i];
+      QObject* pParent = pPanel->parent();
       delete pPanel;
     }
   }
@@ -452,15 +443,6 @@ void plQtEditorApp::ShutdownEditor()
   // Unload potential plugin referenced clipboard data to prevent crash on shutdown.
   QApplication::clipboard()->clear();
   plPlugin::UnloadAllPlugins();
-
-  if (m_bWroteCrashIndicatorFile)
-  {
-    // orderly shutdown -> make sure the crash indicator file is gone
-    plStringBuilder sTemp = plOSFile::GetTempDataFolder("plEditor");
-    sTemp.AppendPath("plEditorCrashIndicator");
-    plOSFile::DeleteFile(sTemp).IgnoreResult();
-    m_bWroteCrashIndicatorFile = false;
-  }
 
   // make sure no one tries to load any further images in parallel
   plQtImageCache::GetSingleton()->StopRequestProcessing(true);
@@ -485,15 +467,13 @@ void plQtEditorApp::CreatePanels()
   plQtApplicationPanel* pLogPanel = new plQtLogPanel();
   plQtApplicationPanel* pLongOpsPanel = new plQtLongOpsPanel();
   plQtApplicationPanel* pCVarPanel = new plQtCVarPanel();
-  plQtApplicationPanel* pAssetCuratorPanel = new plQtAssetCuratorPanel();
 
   plQtContainerWindow* pMainWnd = plQtContainerWindow::GetContainerWindow();
   ads::CDockManager* pDockManager = pMainWnd->GetDockManager();
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pAssetBrowserPanel);
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pLogPanel);
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pAssetCuratorPanel);
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pCVarPanel);
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pLongOpsPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pAssetBrowserPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pLogPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pCVarPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pLongOpsPanel);
 
   pAssetBrowserPanel->raise();
 }

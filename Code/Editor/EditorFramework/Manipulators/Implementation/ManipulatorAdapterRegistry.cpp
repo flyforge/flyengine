@@ -43,11 +43,11 @@ plManipulatorAdapterRegistry::~plManipulatorAdapterRegistry()
   }
 }
 
-void plManipulatorAdapterRegistry::QueryGridSettings(const plDocument* pDocument, plGridSettingsMsgToEngine& out_gridSettings)
+void plManipulatorAdapterRegistry::QueryGridSettings(const plDocument* pDocument, plGridSettingsMsgToEngine& outGridSettings)
 {
   for (auto& adapt : m_DocumentAdapters[pDocument].m_Adapters)
   {
-    adapt->QueryGridSettings(out_gridSettings);
+    adapt->QueryGridSettings(outGridSettings);
   }
 }
 

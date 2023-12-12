@@ -16,7 +16,8 @@ QScreen& plWidgetUtils::GetClosestScreen(const QPoint& point)
     for (QScreen* pScreen : screens)
     {
       const QRect geom = pScreen->geometry();
-      plBoundingBox plGeom = plBoundingBox::MakeFromCenterAndHalfExtents(plVec3(geom.center().x(), geom.center().y(), 0), plVec3(geom.width() / 2.0f, geom.height() / 2.0f, 0));
+      plBoundingBox plGeom;
+      plGeom.SetCenterAndHalfExtents(plVec3(geom.center().x(), geom.center().y(), 0), plVec3(geom.width() / 2.0f, geom.height() / 2.0f, 0));
       const plVec3 plPoint(point.x(), point.y(), 0);
       if (plGeom.Contains(plPoint))
       {
@@ -35,14 +36,14 @@ QScreen& plWidgetUtils::GetClosestScreen(const QPoint& point)
 }
 
 void plWidgetUtils::AdjustGridDensity(
-  double& ref_fFinestDensity, double& ref_fRoughDensity, plUInt32 uiWindowWidth, double fViewportSceneWidth, plUInt32 uiMinPixelsForStep)
+  double& fFinestDensity, double& fRoughDensity, plUInt32 uiWindowWidth, double fViewportSceneWidth, plUInt32 uiMinPixelsForStep)
 {
   const double fMaxStepsFitInWindow = (double)uiWindowWidth / (double)uiMinPixelsForStep;
 
-  const double fStartDensity = ref_fFinestDensity;
+  const double fStartDensity = fFinestDensity;
 
   plInt32 iFactor = 1;
-  double fNewDensity = ref_fFinestDensity;
+  double fNewDensity = fFinestDensity;
   plInt32 iFactors[2] = {5, 2};
   plInt32 iLastFactor = 0;
 
@@ -59,10 +60,10 @@ void plWidgetUtils::AdjustGridDensity(
     iLastFactor = (iLastFactor + 1) % 2;
   }
 
-  ref_fFinestDensity = fStartDensity * iFactor;
+  fFinestDensity = fStartDensity * iFactor;
 
   iFactor *= iFactors[iLastFactor];
-  ref_fRoughDensity = fStartDensity * iFactor;
+  fRoughDensity = fStartDensity * iFactor;
 }
 
 void plWidgetUtils::ComputeGridExtentsX(const QRectF& viewportSceneRect, double fGridStops, double& out_fMinX, double& out_fMaxX)

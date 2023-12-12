@@ -15,7 +15,6 @@ plProcGenGraphAssetDocumentManager::plProcGenGraphAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "ProcGen Graph";
   m_DocTypeDesc.m_sFileExtension = "plProcGenGraphAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/ProcGen_Graph.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Construction";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plProcGenGraphAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_ProcGen_Graph");
@@ -39,7 +38,7 @@ void plProcGenGraphAssetDocumentManager::OnDocumentManagerEvent(const plDocument
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plProcGenGraphAssetDocument>())
       {
-        new plProcGenGraphAssetDocumentWindow(static_cast<plProcGenGraphAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        auto pDocWnd = new plProcGenGraphAssetDocumentWindow(static_cast<plProcGenGraphAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -50,9 +49,9 @@ void plProcGenGraphAssetDocumentManager::OnDocumentManagerEvent(const plDocument
 }
 
 void plProcGenGraphAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plProcGenGraphAssetDocument(sPath);
+  out_pDocument = new plProcGenGraphAssetDocument(szPath);
 }
 
 void plProcGenGraphAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

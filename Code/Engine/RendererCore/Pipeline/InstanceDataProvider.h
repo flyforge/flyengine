@@ -32,8 +32,8 @@ private:
   void CreateBuffer(plUInt32 uiSize);
   void Reset();
 
-  plUInt32 m_uiBufferSize = 0;
-  plUInt32 m_uiBufferOffset = 0;
+  plUInt32 m_uiBufferSize;
+  plUInt32 m_uiBufferOffset;
   plDynamicArray<plPerInstanceData, plAlignedAllocatorWrapper> m_PerInstanceData;
 };
 

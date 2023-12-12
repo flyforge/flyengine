@@ -15,7 +15,7 @@ void plPointLightVisualizerAdapter::Finalize()
   const plAssetDocument* pAssetDocument = plDynamicCast<const plAssetDocument*>(pDoc);
   PLASMA_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
 
-  m_hGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::Sphere, plColor::White, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
+  m_hGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::Sphere, plColor::White, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
 
   pAssetDocument->AddSyncObject(&m_hGizmo);
   m_hGizmo.SetVisible(m_bVisualizerIsVisible);

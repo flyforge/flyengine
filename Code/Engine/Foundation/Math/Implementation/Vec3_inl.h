@@ -59,7 +59,7 @@ PLASMA_ALWAYS_INLINE Type plVec3Template<Type>::GetLength() const
 template <typename Type>
 plResult plVec3Template<Type>::SetLength(Type fNewLength, Type fEpsilon /* = plMath::DefaultEpsilon<Type>() */)
 {
-  if (NormalizeIfNotZero(plVec3Template<Type>::MakeZero(), fEpsilon) == PLASMA_FAILURE)
+  if (NormalizeIfNotZero(plVec3Template<Type>::ZeroVector(), fEpsilon) == PLASMA_FAILURE)
     return PLASMA_FAILURE;
 
   *this *= fNewLength;

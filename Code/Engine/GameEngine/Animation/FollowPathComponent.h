@@ -73,7 +73,7 @@ public:
   float m_fLookAhead = 1.0f;                            ///< [ property ] How far along the path to 'look ahead' to smooth the rotation. A small distance means rotations are very abrupt.
   float m_fSmoothing = 0.5f;                            ///< [ property ] How much to combine the current position with the new position. 0 to 1. At zero, the position follows the path perfectly, but therefore also has very abrupt changes. With a lot of smoothing, the path becomes very sluggish.
   float m_fTiltAmount = 5.0f;                           ///< [ property ] How much to tilt when turning.
-  plAngle m_MaxTilt = plAngle::MakeFromDegree(30.0f);   ///< [ property ] The max tilt angle of the object.
+  plAngle m_MaxTilt = plAngle::Degree(30.0f);   ///< [ property ] The max tilt angle of the object.
 
   /// \brief Distance along the path at which the plFollowPathComponent should start off.
   void SetDistanceAlongPath(float fDistance); // [ property ]

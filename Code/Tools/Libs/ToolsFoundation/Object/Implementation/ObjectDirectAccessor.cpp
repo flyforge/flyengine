@@ -74,7 +74,7 @@ plStatus plObjectDirectAccessor::AddObject(
   PLASMA_ASSERT_DEBUG(pPar, "Parent is not part of this document manager.");
 
   if (!inout_objectGuid.IsValid())
-    inout_objectGuid = plUuid::MakeUuid();
+    inout_objectGuid.CreateNewUuid();
   plDocumentObject* pObj = m_pManager->CreateObject(pType, inout_objectGuid);
   m_pManager->AddObject(pObj, pPar, pParentProp->GetPropertyName(), index);
   return plStatus(PLASMA_SUCCESS);

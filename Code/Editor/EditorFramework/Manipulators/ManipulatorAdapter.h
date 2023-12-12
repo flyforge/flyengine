@@ -20,7 +20,7 @@ public:
 
   void SetManipulator(const plManipulatorAttribute* pAttribute, const plDocumentObject* pObject);
 
-  virtual void QueryGridSettings(plGridSettingsMsgToEngine& out_gridSettings) {}
+  virtual void QueryGridSettings(plGridSettingsMsgToEngine& outGridSettings) {}
 
 private:
   void DocumentObjectPropertyEventHandler(const plDocumentObjectPropertyEvent& e);

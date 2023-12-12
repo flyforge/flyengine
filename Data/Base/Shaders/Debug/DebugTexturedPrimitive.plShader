@@ -7,6 +7,10 @@ PRE_TRANSFORMED_VERTICES
 CAMERA_MODE
 TOPOLOGY
 
+[MATERIALCONFIG]
+
+RenderDataCategory = SimpleOpaque
+
 [RENDERSTATE]
 
 BlendingEnabled0 = false

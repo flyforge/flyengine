@@ -7,7 +7,8 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSettingsComponent, 1, plRTTINoAllocator)
 {
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Utilities"),
+    new plCategoryAttribute("Settings"),
+    new plColorAttribute(plColorScheme::Utilities),
   }
   PLASMA_END_ATTRIBUTES;
 }

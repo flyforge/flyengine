@@ -21,8 +21,8 @@ struct ID3D11Resource;
 struct ID3D11Query;
 struct IDXGIAdapter;
 
-using plGALFormatLookupEntryDX11 = plGALFormatLookupEntry<DXGI_FORMAT, (DXGI_FORMAT)0>;
-using plGALFormatLookupTableDX11 = plGALFormatLookupTable<plGALFormatLookupEntryDX11>;
+typedef plGALFormatLookupEntry<DXGI_FORMAT, (DXGI_FORMAT)0> plGALFormatLookupEntryDX11;
+typedef plGALFormatLookupTable<plGALFormatLookupEntryDX11> plGALFormatLookupTableDX11;
 
 class plGALPassDX11;
 
@@ -30,7 +30,7 @@ class plGALPassDX11;
 class PLASMA_RENDERERDX11_DLL plGALDeviceDX11 : public plGALDevice
 {
 private:
-  friend plInternal::NewInstance<plGALDevice> CreateDX11Device(plAllocatorBase* pAllocator, const plGALDeviceCreationDescription& description);
+  friend plInternal::NewInstance<plGALDevice> CreateDX11Device(plAllocatorBase* pAllocator, const plGALDeviceCreationDescription& Description);
   plGALDeviceDX11(const plGALDeviceCreationDescription& Description);
 
 public:
@@ -70,8 +70,6 @@ protected:
   virtual plGALPass* BeginPassPlatform(const char* szName) override;
   virtual void EndPassPlatform(plGALPass* pPass) override;
 
-  virtual void FlushPlatform() override;
-
 
   // State creation functions
 
@@ -98,9 +96,6 @@ protected:
 
   virtual plGALTexture* CreateTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData) override;
   virtual void DestroyTexturePlatform(plGALTexture* pTexture) override;
-
-  virtual plGALTexture* CreateSharedTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, plEnum<plGALSharedTextureType> sharedType, plGALPlatformSharedHandle handle) override;
-  virtual void DestroySharedTexturePlatform(plGALTexture* pTexture) override;
 
   virtual plGALResourceView* CreateResourceViewPlatform(plGALResourceBase* pResource, const plGALResourceViewCreationDescription& Description) override;
   virtual void DestroyResourceViewPlatform(plGALResourceView* pResourceView) override;
@@ -137,8 +132,6 @@ protected:
 
   virtual void WaitIdlePlatform() override;
 
-  virtual const plGALSharedTexture* GetSharedTexture(plGALTextureHandle hTexture) const override;
-
   /// \endcond
 
 private:
@@ -170,21 +163,20 @@ private:
 
   void WaitForFencePlatform(ID3D11DeviceContext* pContext, ID3D11Query* pFence);
 
-  ID3D11Device* m_pDevice = nullptr;
-  ID3D11Device3* m_pDevice3 = nullptr;
+  ID3D11Device* m_pDevice;
+  ID3D11Device3* m_pDevice3;
   ID3D11DeviceContext* m_pImmediateContext;
 
-  ID3D11Debug* m_pDebug = nullptr;
+  ID3D11Debug* m_pDebug;
 
-  IDXGIFactory1* m_pDXGIFactory = nullptr;
+  IDXGIFactory1* m_pDXGIFactory;
 
-  IDXGIAdapter1* m_pDXGIAdapter = nullptr;
+  IDXGIAdapter1* m_pDXGIAdapter;
 
-  IDXGIDevice1* m_pDXGIDevice = nullptr;
+  IDXGIDevice1* m_pDXGIDevice;
 
   plGALFormatLookupTableDX11 m_FormatLookupTable;
 
-  // NOLINTNEXTLINE
   plUInt32 m_uiFeatureLevel; // D3D_FEATURE_LEVEL can't be forward declared
 
   plUniquePtr<plGALPassDX11> m_pDefaultPass;

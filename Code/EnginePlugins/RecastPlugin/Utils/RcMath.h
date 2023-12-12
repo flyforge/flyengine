@@ -11,11 +11,11 @@ struct PLASMA_RECASTPLUGIN_DLL plRcPos
   float m_Pos[3];
 
   plRcPos();
-  plRcPos(const float* pPos);
+  plRcPos(const float* pos);
   plRcPos(const plVec3& v);
 
   void operator=(const plVec3& v);
-  void operator=(const float* pPos);
+  void operator=(const float* pos);
 
   operator const float *() const;
   operator float*();

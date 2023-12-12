@@ -64,8 +64,8 @@ PLASMA_FORCE_INLINE plSimdVec4f plSimdMath::Sin(const plSimdVec4f& f)
 #if PLASMA_ENABLED(PLASMA_COMPILER_MSVC) && PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
   return _mm_sin_ps(f.m_v);
 #else
-  return plSimdVec4f(plMath::Sin(plAngle::MakeFromRadian(f.x())), plMath::Sin(plAngle::MakeFromRadian(f.y())), plMath::Sin(plAngle::MakeFromRadian(f.z())),
-    plMath::Sin(plAngle::MakeFromRadian(f.w())));
+  return plSimdVec4f(plMath::Sin(plAngle::Radian(f.x())), plMath::Sin(plAngle::Radian(f.y())), plMath::Sin(plAngle::Radian(f.z())),
+    plMath::Sin(plAngle::Radian(f.w())));
 #endif
 }
 
@@ -75,8 +75,8 @@ PLASMA_FORCE_INLINE plSimdVec4f plSimdMath::Cos(const plSimdVec4f& f)
 #if PLASMA_ENABLED(PLASMA_COMPILER_MSVC) && PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
   return _mm_cos_ps(f.m_v);
 #else
-  return plSimdVec4f(plMath::Cos(plAngle::MakeFromRadian(f.x())), plMath::Cos(plAngle::MakeFromRadian(f.y())), plMath::Cos(plAngle::MakeFromRadian(f.z())),
-    plMath::Cos(plAngle::MakeFromRadian(f.w())));
+  return plSimdVec4f(plMath::Cos(plAngle::Radian(f.x())), plMath::Cos(plAngle::Radian(f.y())), plMath::Cos(plAngle::Radian(f.z())),
+    plMath::Cos(plAngle::Radian(f.w())));
 #endif
 }
 
@@ -86,8 +86,8 @@ PLASMA_FORCE_INLINE plSimdVec4f plSimdMath::Tan(const plSimdVec4f& f)
 #if PLASMA_ENABLED(PLASMA_COMPILER_MSVC) && PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
   return _mm_tan_ps(f.m_v);
 #else
-  return plSimdVec4f(plMath::Tan(plAngle::MakeFromRadian(f.x())), plMath::Tan(plAngle::MakeFromRadian(f.y())), plMath::Tan(plAngle::MakeFromRadian(f.z())),
-    plMath::Tan(plAngle::MakeFromRadian(f.w())));
+  return plSimdVec4f(plMath::Tan(plAngle::Radian(f.x())), plMath::Tan(plAngle::Radian(f.y())), plMath::Tan(plAngle::Radian(f.z())),
+    plMath::Tan(plAngle::Radian(f.w())));
 #endif
 }
 
@@ -112,7 +112,7 @@ PLASMA_FORCE_INLINE plSimdVec4f plSimdMath::ACos(const plSimdVec4f& f)
   s += x3 * -0.0187293f;
   s = s.CompMul((plSimdVec4f(1.0f) - x1).GetSqrt());
 
-  return plSimdVec4f::Select(f >= plSimdVec4f::MakeZero(), s, plSimdVec4f(plMath::Pi<float>()) - s);
+  return plSimdVec4f::Select(f >= plSimdVec4f::ZeroVector(), s, plSimdVec4f(plMath::Pi<float>()) - s);
 }
 
 // Reference: https://seblagarde.wordpress.com/2014/12/01/inverse-trigonometric-functions-gpu-optimization-for-amd-gcn-architecture/
@@ -128,5 +128,5 @@ PLASMA_FORCE_INLINE plSimdVec4f plSimdMath::ATan(const plSimdVec4f& f)
   poly = poly.CompMul(t0);
   t0 = plSimdVec4f::Select(x < plSimdVec4f(1.0f), poly, plSimdVec4f(plMath::Pi<float>() * 0.5f) - poly);
 
-  return plSimdVec4f::Select(f < plSimdVec4f::MakeZero(), -t0, t0);
+  return plSimdVec4f::Select(f < plSimdVec4f::ZeroVector(), -t0, t0);
 }

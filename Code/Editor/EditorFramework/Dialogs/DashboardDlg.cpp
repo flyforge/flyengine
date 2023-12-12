@@ -6,8 +6,8 @@
 #include <Foundation/IO/OSFile.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
-plQtDashboardDlg::plQtDashboardDlg(QWidget* pParent, DashboardTab activeTab)
-  : QDialog(pParent)
+plQtDashboardDlg::plQtDashboardDlg(QWidget* parent, DashboardTab activeTab)
+  : QDialog(parent)
 {
   setupUi(this);
 
@@ -17,7 +17,7 @@ plQtDashboardDlg::plQtDashboardDlg(QWidget* pParent, DashboardTab activeTab)
   SamplesTab->setFlat(true);
   DocumentationTab->setFlat(true);
 
-  if (plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>())
+  if (PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>())
   {
     LoadLastProject->setChecked(pPreferences->m_bLoadLastProjectAtStartup);
   }
@@ -115,8 +115,7 @@ void plQtDashboardDlg::FillSampleProjectsList()
   for (const plString& path : samples)
   {
     tmp = path;
-    const bool bIsLocal = tmp.TrimWordEnd("/plProject");
-    const bool bIsRemote = tmp.TrimWordEnd("/plRemoteProject");
+    tmp.TrimWordEnd("/plProject");
 
     QIcon projectIcon;
 
@@ -167,20 +166,7 @@ void plQtDashboardDlg::FindSampleProjects(plDynamicArray<plString>& out_Projects
     }
     else
     {
-      fsIt.GetStats().GetFullPath(path);
-      path.AppendPath("plRemoteProject");
-
-      if (plOSFile::ExistsFile(path))
-      {
-        out_Projects.PushBack(path);
-
-        // no need to go deeper
-        fsIt.SkipFolder();
-      }
-      else
-      {
-        fsIt.Next();
-      }
+      fsIt.Next();
     }
   }
 }
@@ -243,7 +229,7 @@ void plQtDashboardDlg::on_OpenSample_clicked()
 
 void plQtDashboardDlg::on_LoadLastProject_stateChanged(int)
 {
-  if (plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>())
+  if (PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>())
   {
     pPreferences->m_bLoadLastProjectAtStartup = LoadLastProject->isChecked();
   }
@@ -274,12 +260,12 @@ void plQtDashboardDlg::on_OpenApiDocs_clicked()
 
 void plQtDashboardDlg::on_GitHubDiscussions_clicked()
 {
-  QDesktopServices::openUrl(QUrl("https://github.com/plEngine/plEngine/discussions"));
+  QDesktopServices::openUrl(QUrl("https://github.com/PlasmaEngine/PlasmaEngine/discussions"));
 }
 
 void plQtDashboardDlg::on_ReportProblem_clicked()
 {
-  QDesktopServices::openUrl(QUrl("https://github.com/plEngine/plEngine/issues"));
+  QDesktopServices::openUrl(QUrl("https://github.com/PlasmaEngine/PlasmaEngine/issues"));
 }
 
 void plQtDashboardDlg::on_OpenDiscord_clicked()
@@ -289,7 +275,7 @@ void plQtDashboardDlg::on_OpenDiscord_clicked()
 
 void plQtDashboardDlg::on_OpenTwitter_clicked()
 {
-  QDesktopServices::openUrl(QUrl("https://twitter.com/plEngineProject"));
+  QDesktopServices::openUrl(QUrl("https://twitter.com/PlasmaEngineProject"));
 }
 
 bool plQtDashboardDlg::eventFilter(QObject* obj, QEvent* e)

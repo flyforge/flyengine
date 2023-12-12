@@ -14,39 +14,42 @@ PLASMA_FORCE_INLINE plPlaneTemplate<Type>::plPlaneTemplate()
 }
 
 template <typename Type>
-plPlaneTemplate<Type> plPlaneTemplate<Type>::MakeInvalid()
+plPlaneTemplate<Type>::plPlaneTemplate(const plVec3Template<Type>& vNormal, const plVec3Template<Type>& vPointOnPlane)
 {
-  plPlaneTemplate<Type> res;
-  res.m_vNormal.Set(0);
-  res.m_fNegDistance = 0;
-  return res;
+  SetFromNormalAndPoint(vNormal, vPointOnPlane);
 }
 
 template <typename Type>
-plPlaneTemplate<Type> plPlaneTemplate<Type>::MakeFromNormalAndPoint(const plVec3Template<Type>& vNormal, const plVec3Template<Type>& vPointOnPlane)
+plPlaneTemplate<Type>::plPlaneTemplate(const plVec3Template<Type>& v1, const plVec3Template<Type>& v2, const plVec3Template<Type>& v3)
 {
-  PLASMA_ASSERT_DEV(vNormal.IsNormalized(), "Normal must be normalized.");
-
-  plPlaneTemplate<Type> res;
-  res.m_vNormal = vNormal;
-  res.m_fNegDistance = -vNormal.Dot(vPointOnPlane);
-  return res;
+  SetFromPoints(v1, v2, v3).IgnoreResult();
 }
 
 template <typename Type>
-plPlaneTemplate<Type> plPlaneTemplate<Type>::MakeFromPoints(const plVec3Template<Type>& v1, const plVec3Template<Type>& v2, const plVec3Template<Type>& v3)
+plPlaneTemplate<Type>::plPlaneTemplate(const plVec3Template<Type>* const pVertices)
 {
-  plPlaneTemplate<Type> res;
-  PLASMA_VERIFY(res.m_vNormal.CalculateNormal(v1, v2, v3).Succeeded(), "The 3 provided points do not form a plane");
+  SetFromPoints(pVertices).IgnoreResult();
+}
 
-  res.m_fNegDistance = -res.m_vNormal.Dot(v1);
-  return res;
+template <typename Type>
+plPlaneTemplate<Type>::plPlaneTemplate(const plVec3Template<Type>* const pVertices, plUInt32 uiMaxVertices)
+{
+  SetFromPoints(pVertices, uiMaxVertices).IgnoreResult();
 }
 
 template <typename Type>
 plVec4Template<Type> plPlaneTemplate<Type>::GetAsVec4() const
 {
   return plVec4(m_vNormal.x, m_vNormal.y, m_vNormal.z, m_fNegDistance);
+}
+
+template <typename Type>
+void plPlaneTemplate<Type>::SetFromNormalAndPoint(const plVec3Template<Type>& vNormal, const plVec3Template<Type>& vPointOnPlane)
+{
+  PLASMA_ASSERT_DEBUG(vNormal.IsNormalized(), "Normal must be normalized.");
+
+  m_vNormal = vNormal;
+  m_fNegDistance = -m_vNormal.Dot(vPointOnPlane);
 }
 
 template <typename Type>
@@ -96,8 +99,8 @@ void plPlaneTemplate<Type>::Transform(const plMat3Template<Type>& m)
   }
   else
   {
-    *this = plPlane::MakeFromNormalAndPoint(vTransformedNormal, m * vPointOnPlane);
-  }
+    SetFromNormalAndPoint(vTransformedNormal, m * vPointOnPlane);
+  } 
 }
 
 template <typename Type>
@@ -116,7 +119,7 @@ void plPlaneTemplate<Type>::Transform(const plMat4Template<Type>& m)
   }
   else
   {
-    *this = plPlane::MakeFromNormalAndPoint(vTransformedNormal, m * vPointOnPlane);
+    SetFromNormalAndPoint(vTransformedNormal, m * vPointOnPlane);
   }
 }
 
@@ -207,6 +210,13 @@ bool plPlaneTemplate<Type>::FlipIfNecessary(const plVec3Template<Type>& vPoint, 
   }
 
   return false;
+}
+
+template <typename Type>
+void plPlaneTemplate<Type>::SetInvalid()
+{
+  m_vNormal.Set(0);
+  m_fNegDistance = 0;
 }
 
 template <typename Type>

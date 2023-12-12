@@ -48,5 +48,5 @@ protected:
   plAnimController m_AnimController;
   plAnimPoseGenerator m_PoseGenerator;
 
-  plTime m_ElapsedTimeSinceUpdate = plTime::MakeZero();
+  plTime m_ElapsedTimeSinceUpdate = plTime::Zero();
 };

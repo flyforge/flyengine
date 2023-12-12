@@ -147,11 +147,6 @@ plStringView BuildString(char* szTmp, plUInt32 uiLength, const char* szArg)
   return szArg;
 }
 
-plStringView BuildString(char* szTmp, plUInt32 uiLength, const char8_t* szArg)
-{
-  return plStringView(szArg);
-}
-
 plStringView BuildString(char* szTmp, plUInt32 uiLength, const wchar_t* pArg)
 {
   const char* start = szTmp;
@@ -236,8 +231,8 @@ plStringView BuildString(char* szTmp, plUInt32 uiLength, const plAngle& arg)
   plStringUtils::OutputFormattedFloat(szTmp, uiLength - 2, writepos, arg.GetDegree(), 1, false, 1, false);
 
   // Utf-8 representation of the degree sign
-  szTmp[writepos + 0] = /*(char)0xC2;*/ -62;
-  szTmp[writepos + 1] = /*(char)0xB0;*/ -80;
+  szTmp[writepos + 0] = (char)0xC2;
+  szTmp[writepos + 1] = (char)0xB0;
   szTmp[writepos + 2] = '\0';
 
   return plStringView(szTmp, szTmp + writepos + 2);
@@ -280,8 +275,8 @@ plStringView BuildString(char* pTmp, plUInt32 uiLength, const plTime& arg)
 
     // szTmp[writepos++] = ' ';
     // Utf-8 representation of the microsecond (us) sign
-    pTmp[writepos++] = /*(char)0xC2;*/ -62;
-    pTmp[writepos++] = /*(char)0xB5;*/ -75;
+    pTmp[writepos++] = (char)0xC2;
+    pTmp[writepos++] = (char)0xB5;
     pTmp[writepos++] = 's';
   }
   else if (fAbsSec < 1.0)
@@ -417,17 +412,6 @@ plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrorCode& a
   plStringUtils::snprintf(FullMessage, PLASMA_ARRAY_SIZE(FullMessage), "%i (\"%s\")", arg.m_ErrorCode, plStringUtf8((LPWSTR)lpMsgBuf).GetData());
   LocalFree(lpMsgBuf);
   return plStringView(FullMessage);
-}
-#endif
-
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-#  include <string.h>
-
-plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrno& arg)
-{
-  const char* szErrorMsg = std::strerror(arg.m_iErrno);
-  plStringUtils::snprintf(szTmp, uiLength, "%i (\"%s\")", arg.m_iErrno, szErrorMsg);
-  return plStringView(szTmp);
 }
 #endif
 

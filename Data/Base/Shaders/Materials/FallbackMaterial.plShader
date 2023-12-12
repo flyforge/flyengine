@@ -12,6 +12,7 @@ FLIP_WINDING
 SHADING_QUALITY
 CAMERA_MODE
 MSAA = FALSE
+GAMEOBJECT_VELOCITY
 
 [RENDERSTATE]
 
@@ -115,6 +116,11 @@ float3 GetSpecularColor()
 float GetRoughness()
 {
   return 1.0f;
+}
+
+float GetMetallic()
+{
+  return 0.0f;
 }
 
 float GetOpacity()

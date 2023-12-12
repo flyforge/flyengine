@@ -19,8 +19,8 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptAssetDocument, 2, plRTTINoAlloca
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plTypeScriptAssetDocument::plTypeScriptAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plTypeScriptAssetProperties>(sDocumentPath, plAssetDocEngineConnection::None)
+plTypeScriptAssetDocument::plTypeScriptAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plTypeScriptAssetProperties>(szDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
@@ -234,7 +234,7 @@ void plTypeScriptAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pIn
   pInfo->m_MetaInfo.PushBack(pExposedParams);
 }
 
-plTransformStatus plTypeScriptAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plTypeScriptAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   PLASMA_SUCCEED_OR_RETURN(ValidateScriptCode());
   PLASMA_SUCCEED_OR_RETURN(AutoGenerateVariablesCode());

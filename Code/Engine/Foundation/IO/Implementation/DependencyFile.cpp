@@ -149,7 +149,7 @@ plResult plDependencyFile::RetrieveFileTimeStamp(plStringView sFile, plTimestamp
   bool bExisted = false;
   auto it = s_FileTimestamps.FindOrAdd(sFile, &bExisted);
 
-  if (!bExisted || it.Value().m_LastCheck + plTime::MakeFromSeconds(2.0) < plTime::Now())
+  if (!bExisted || it.Value().m_LastCheck + plTime::Seconds(2.0) < plTime::Now())
   {
     it.Value().m_LastCheck = plTime::Now();
 
@@ -167,8 +167,8 @@ plResult plDependencyFile::RetrieveFileTimeStamp(plStringView sFile, plTimestamp
 
 #else
 
-  out_Result = plTimestamp::MakeFromInt(0, plSIUnitOfTime::Second);
-  plLog::Warning("Trying to retrieve a file time stamp on a platform that does not support it (file: '{0}')", plArgSensitive(sFile, "File"));
+  out_Result.SetInt64(0, plSIUnitOfTime::Second);
+  plLog::Warning("Trying to retrieve a file time stamp on a platform that does not support it (file: '{0}')", plArgSensitive(szFile, "File"));
 
 #endif
 

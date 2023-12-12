@@ -9,32 +9,31 @@ public:
 
   plSimdQuat(); // [tested]
 
-  explicit plSimdQuat(const plSimdVec4f& v); // [tested]
+  plSimdQuat(const plSimdVec4f& v); // [tested]
 
   /// \brief Static function that returns a quaternion that represents the identity rotation (none).
-  [[nodiscard]] static const plSimdQuat MakeIdentity(); // [tested]
+  static plSimdQuat IdentityQuaternion(); // [tested]
 
-  /// \brief Sets the individual elements of the quaternion directly. Note that x,y,z do NOT represent a rotation axis, and w does NOT represent an
-  /// angle.
-  ///
-  /// Use this function only if you have good understanding of quaternion math and know exactly what you are doing.
-  [[nodiscard]] static plSimdQuat MakeFromElements(plSimdFloat x, plSimdFloat y, plSimdFloat z, plSimdFloat w); // [tested]
+public:
+  /// \brief Sets the Quaternion to the identity.
+  void SetIdentity(); // [tested]
 
   /// \brief Creates a quaternion from a rotation-axis and an angle (angle is given in Radians or as an plAngle)
-  [[nodiscard]] static plSimdQuat MakeFromAxisAndAngle(const plSimdVec4f& vRotationAxis, const plSimdFloat& fAngle); // [tested]
+  void SetFromAxisAndAngle(const plSimdVec4f& vRotationAxis, const plSimdFloat& fAngle); // [tested]
 
   /// \brief Creates a quaternion, that rotates through the shortest arc from "vDirFrom" to "vDirTo".
-  [[nodiscard]] static plSimdQuat MakeShortestRotation(const plSimdVec4f& vDirFrom, const plSimdVec4f& vDirTo); // [tested]
+  void SetShortestRotation(const plSimdVec4f& vDirFrom, const plSimdVec4f& vDirTo); // [tested]
 
-  /// \brief Returns a quaternion that is the spherical linear interpolation of the other two.
-  [[nodiscard]] static plSimdQuat MakeSlerp(const plSimdQuat& qFrom, const plSimdQuat& qTo, const plSimdFloat& t); // [tested]
+  /// \brief Sets this quaternion to be the spherical linear interpolation of the other two.
+  void SetSlerp(const plSimdQuat& qFrom, const plSimdQuat& qTo, const plSimdFloat& t); // [tested]
 
 public:
   /// \brief Normalizes the quaternion to unit length. ALL rotation-quaternions should be normalized at all times (automatically).
   void Normalize(); // [tested]
 
   /// \brief Returns the rotation-axis and angle (in Radians), that this quaternion rotates around.
-  plResult GetRotationAxisAndAngle(plSimdVec4f& ref_vAxis, plSimdFloat& ref_fAngle, const plSimdFloat& fEpsilon = plMath::DefaultEpsilon<float>()) const; // [tested]
+  plResult GetRotationAxisAndAngle(
+    plSimdVec4f& ref_vAxis, plSimdFloat& ref_fAngle, const plSimdFloat& fEpsilon = plMath::DefaultEpsilon<float>()) const; // [tested]
 
   /// \brief Returns the Quaternion as a matrix.
   plSimdMat4f GetAsMat4() const; // [tested]
@@ -54,13 +53,13 @@ public:
 
 public:
   /// \brief Returns a Quaternion that represents the negative / inverted rotation.
-  [[nodiscard]] plSimdQuat operator-() const; // [tested]
+  plSimdQuat operator-() const; // [tested]
 
   /// \brief Rotates v by q
-  [[nodiscard]] plSimdVec4f operator*(const plSimdVec4f& v) const; // [tested]
+  plSimdVec4f operator*(const plSimdVec4f& v) const; // [tested]
 
   /// \brief Concatenates the rotations of q1 and q2
-  [[nodiscard]] plSimdQuat operator*(const plSimdQuat& q2) const; // [tested]
+  plSimdQuat operator*(const plSimdQuat& q2) const; // [tested]
 
   bool operator==(const plSimdQuat& q2) const; // [tested]
   bool operator!=(const plSimdQuat& q2) const; // [tested]

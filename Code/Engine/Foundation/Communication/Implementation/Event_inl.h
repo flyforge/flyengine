@@ -28,7 +28,7 @@ plEventSubscriptionID plEventBase<EventData, MutexType, EventType>::AddEventHand
 
   if constexpr (std::is_same_v<MutexType, plNoMutex>)
   {
-    if constexpr (EventType == plEventType::Default)
+    if (EventType == plEventType::Default)
     {
       PLASMA_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
     }

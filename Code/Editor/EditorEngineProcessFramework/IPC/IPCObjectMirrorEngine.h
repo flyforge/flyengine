@@ -13,5 +13,5 @@ public:
   plIPCObjectMirrorEngine();
   ~plIPCObjectMirrorEngine();
 
-  virtual void ApplyOp(plObjectChange& inout_change) override;
+  virtual void ApplyOp(plObjectChange& change) override;
 };

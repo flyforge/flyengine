@@ -1,0 +1,167 @@
+[PLATFORMS]
+ALL
+
+[PERMUTATIONS]
+
+BLEND_MODE
+RENDER_PASS
+TWO_SIDED = TRUE
+SHADING_MODE = SHADING_MODE_FULLBRIGHT
+CAMERA_MODE
+SHADING_QUALITY
+VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
+GAMEOBJECT_VELOCITY
+
+[MATERIALPARAMETER]
+
+Permutation BLEND_MODE;
+
+float3 SunDir @Default(float3(1.0f, 0.0f, 0.0f));
+float PlanetRadius @Default(6371e3);
+float AtmosphereRadius @Default(6371e3);
+float3 RayleighScattering @Default(float3(5.5e-6, 13.0e-6, 22.4e-6));
+float3 MieScattering @Default(float3(21e-6, 21e-6, 21e-6));
+float3 Absorption @Default(float3(0.0f, 0.0f, 0.0f));
+float3 AmbientScattering @Default(float3(2.04e-5, 4.97e-5, 1.95e-6));
+float MieScatterDirection @Default(0.7);
+float RayleighHeight @Default(8e3);
+float MieHeight @Default(1.2e3);
+float AbsorptionHeight @Default(30e3);
+float AbsorptionFalloff @Default(4e3);
+float RaySteps @Default(32.0f);
+float LightSteps @Default(8.0f);
+
+[MATERIALCONFIG]
+
+RenderDataCategory = Sky
+
+[RENDERSTATE]
+
+#include <Shaders/Materials/MaterialState.h>
+
+DepthWrite = false
+
+[SHADER]
+
+#include <Shaders/Common/GlobalConstants.h>
+
+CONSTANT_BUFFER(plMaterialConstants, 1)
+{
+  FLOAT3(SunDir);
+  FLOAT1(PlanetRadius);
+  FLOAT1(AtmosphereRadius);
+  FLOAT3(RayleighScattering);
+  FLOAT3(MieScattering);
+  FLOAT3(Absorption);
+  FLOAT3(AmbientScattering);
+  FLOAT1(MieScatterDirection);
+  FLOAT1(RayleighHeight);
+  FLOAT1(MieHeight);
+  FLOAT1(AbsorptionHeight);
+  FLOAT1(AbsorptionFalloff);
+  FLOAT1(RaySteps);
+  FLOAT1(LightSteps);
+};
+
+[VERTEXSHADER]
+
+#define CUSTOM_INTERPOLATOR float3 ViewDirection : TEXCOORD0;
+
+#include <Shaders/Materials/MaterialVertexShader.h>
+
+VS_OUT main(VS_IN Input)
+{
+  VS_OUT Output = FillVertexData(Input);
+
+  float2 ScreenPos = sign(Input.Position.xy);
+  float4 dir = mul(GetScreenToCameraMatrix(), float4(ScreenPos.xy,1.0,1.0));
+  dir.w = 0.0;
+
+  plPerInstanceData data = GetInstanceData();
+  float4x4 objectToWorld = TransformToMatrix(data.ObjectToWorld);
+
+  Output.Position = float4(ScreenPos.xy, 1.0, 1.0);
+  Output.ViewDirection = mul(GetCameraToWorldMatrix(), dir).xyz;
+
+  return Output;
+}
+
+[GEOMETRYSHADER]
+
+#define CUSTOM_INTERPOLATOR float3 ViewDirection : TEXCOORD0;
+
+void CopyCustomInterpolators(GS_OUT output, VS_OUT input)
+{
+  output.ViewDirection = input.ViewDirection;
+}
+
+#include <Shaders/Materials/MaterialStereoGeometryShader.h>
+
+[PIXELSHADER]
+
+#include <Shaders/Materials/AtmosphericScattering.h>
+
+#define CUSTOM_INTERPOLATOR float3 ViewDirection : TEXCOORD0;
+
+#include <Shaders/Materials/MaterialPixelShader.h>
+#include <Shaders/Materials/AtmosphericScattering.h>
+
+
+float3 GetNormal()
+{
+  return float3(0.0f, 0.0f, 1.0f);
+}
+
+float3 GetDiffuseColor()
+{
+  float3 camera_position = float3(0.0, 0.0, PlanetRadius + 300.0);
+
+  float3 viewDir = normalize(G.Input.ViewDirection);
+
+  float4 scene = render_scene(camera_position, viewDir, SunDir);
+
+  float3 color = calculate_scattering(
+    camera_position,				// the position of the camera
+    float3(viewDir.x, viewDir.y, viewDir.z), 			            // the camera vector (ray direction of this pixel)
+    scene.w, 						// max dist, essentially the scene depth
+    scene.xyz,						// scene color, the color of the current pixel being rendered
+    SunDir,						    // light direction
+    (40.0).xxx,						// light intensity, 40 looks nice
+    PLANET_POS,						// position of the planet
+    PlanetRadius,                  // radius of the planet in meters
+    AtmosphereRadius,                   // radius of the atmosphere in meters
+    RayleighScattering / 100000,						// Rayleigh scattering coefficient
+    MieScattering / 100000,                       // Mie scattering coefficient
+    Absorption / 100,                // Absorbtion coefficient
+    AmbientScattering / 1000000,					// ambient scattering, turned off for now. This causes the air to glow a bit when no light reaches it
+    MieScatterDirection,                        // Mie preferred scattering direction
+    RayleighHeight,                     // Rayleigh scale height
+    MieHeight,                     // Mie scale height
+    AbsorptionHeight,				// the height at which the most absorption happens
+    AbsorptionFalloff,				// how fast the absorption falls off from the absorption height
+    RaySteps, 					// steps in the ray direction
+    LightSteps 					// steps in the light direction
+  );
+
+  return color;
+}
+
+float3 GetSpecularColor()
+{
+  return 0.0f;
+}
+
+float GetRoughness()
+{
+  return 1.0f;
+}
+
+float GetMetallic()
+{
+  return 0.0f;
+}
+
+float GetOpacity()
+{
+  return 1.0f;
+}

@@ -9,7 +9,7 @@ class plPin;
 class PLASMA_GUIFOUNDATION_DLL plQtConnection : public QGraphicsPathItem
 {
 public:
-  explicit plQtConnection(QGraphicsItem* pParent = 0);
+  explicit plQtConnection(QGraphicsItem* parent = 0);
   ~plQtConnection();
   virtual int type() const override { return plQtNodeScene::Connection; }
 
@@ -30,7 +30,7 @@ public:
 
   bool m_bAdjacentNodeSelected = false;
 
-  virtual void ExtendContextMenu(QMenu& ref_menu) {}
+  virtual void ExtendContextMenu(QMenu& menu) {}
 
 protected:
   virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

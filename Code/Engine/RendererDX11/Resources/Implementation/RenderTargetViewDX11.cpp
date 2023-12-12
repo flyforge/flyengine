@@ -13,11 +13,13 @@ bool IsArrayView(const plGALTextureCreationDescription& texDesc, const plGALRend
 
 plGALRenderTargetViewDX11::plGALRenderTargetViewDX11(plGALTexture* pTexture, const plGALRenderTargetViewCreationDescription& Description)
   : plGALRenderTargetView(pTexture, Description)
-
+  , m_pRenderTargetView(nullptr)
+  , m_pDepthStencilView(nullptr)
+  , m_pUnorderedAccessView(nullptr)
 {
 }
 
-plGALRenderTargetViewDX11::~plGALRenderTargetViewDX11() = default;
+plGALRenderTargetViewDX11::~plGALRenderTargetViewDX11() {}
 
 plResult plGALRenderTargetViewDX11::InitPlatform(plGALDevice* pDevice)
 {

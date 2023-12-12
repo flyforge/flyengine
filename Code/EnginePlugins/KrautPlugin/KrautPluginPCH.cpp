@@ -25,7 +25,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Kraut, KrautPlugin)
 
     {
       plKrautTreeResourceDescriptor desc;
-      desc.m_Details.m_Bounds = plBoundingBoxSphere::MakeInvalid();
+      desc.m_Details.m_Bounds.SetInvalid();
 
         plKrautTreeResourceHandle hResource = plResourceManager::CreateResource<plKrautTreeResource>("Missing Kraut Tree Mesh", std::move(desc), "Empty Kraut Tree Mesh");
       plResourceManager::SetResourceTypeMissingFallback<plKrautTreeResource>(hResource);

@@ -15,31 +15,31 @@ template <typename ObjectProperties>
 class plSimpleDocumentObjectManager : public plDocumentObjectManager
 {
 public:
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const override { ref_types.PushBack(plGetStaticRTTI<ObjectProperties>()); }
+  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const override { Types.PushBack(plGetStaticRTTI<ObjectProperties>()); }
 };
 
 template <typename PropertyType, typename BaseClass = plAssetDocument>
 class plSimpleAssetDocument : public BaseClass
 {
 public:
-  plSimpleAssetDocument(plStringView sDocumentPath, plAssetDocEngineConnection engineConnectionType, bool bEnableDefaultLighting = false)
-    : BaseClass(sDocumentPath, PLASMA_DEFAULT_NEW(plSimpleDocumentObjectManager<PropertyType>), engineConnectionType)
+  plSimpleAssetDocument(const char* szDocumentPath, plAssetDocEngineConnection engineConnectionType, bool bEnableDefaultLighting = false)
+    : BaseClass(szDocumentPath, PLASMA_DEFAULT_NEW(plSimpleDocumentObjectManager<PropertyType>), engineConnectionType)
     , m_LightSettings(bEnableDefaultLighting)
   {
     if (bEnableDefaultLighting)
     {
-      plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+      PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
       pPreferences->ApplyDefaultValues(m_LightSettings);
     }
   }
 
-  plSimpleAssetDocument(plDocumentObjectManager* pObjectManager, plStringView sDocumentPath, plAssetDocEngineConnection engineConnectionType, bool bEnableDefaultLighting = false)
-    : BaseClass(sDocumentPath, pObjectManager, engineConnectionType)
+  plSimpleAssetDocument(plDocumentObjectManager* pObjectManager, const char* szDocumentPath, plAssetDocEngineConnection engineConnectionType, bool bEnableDefaultLighting = false)
+    : BaseClass(szDocumentPath, pObjectManager, engineConnectionType)
     , m_LightSettings(bEnableDefaultLighting)
   {
     if (bEnableDefaultLighting)
     {
-      plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+      PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
       pPreferences->ApplyDefaultValues(m_LightSettings);
     }
   }
@@ -161,5 +161,5 @@ protected:
 
   plDocumentObjectMirror m_ObjectMirror;
   plRttiConverterContext m_Context;
-  plEngineViewLightSettings m_LightSettings;
+  PlasmaEngineViewLightSettings m_LightSettings;
 };

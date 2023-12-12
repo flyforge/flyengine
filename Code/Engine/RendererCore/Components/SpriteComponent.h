@@ -10,7 +10,7 @@ using plTexture2DResourceHandle = plTypedResourceHandle<class plTexture2DResourc
 
 struct plSpriteBlendMode
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -49,7 +49,7 @@ public:
   plUInt32 m_uiUniqueID;
 };
 
-using plSpriteComponentManager = plComponentManager<class plSpriteComponent, plBlockStorageType::Compact>;
+typedef plComponentManager<class plSpriteComponent, plBlockStorageType::Compact> plSpriteComponentManager;
 
 class PLASMA_RENDERERCORE_DLL plSpriteComponent : public plRenderComponent
 {

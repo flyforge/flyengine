@@ -17,7 +17,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGizmoHandle, 1, plRTTINoAllocator)
 }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEngineGizmoHandle, 1, plRTTIDefaultAllocator<plEngineGizmoHandle>)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEngineGizmoHandle, 1, plRTTIDefaultAllocator<PlasmaEngineGizmoHandle>)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -63,20 +63,21 @@ void plGizmoHandle::SetTransformation(const plTransform& m)
 
 void plGizmoHandle::SetTransformation(const plMat4& m)
 {
-  plTransform t = plTransform::MakeFromMat4(m);
+  plTransform t;
+  t.SetFromMat4(m);
   SetTransformation(t);
 }
 
-static plMeshBufferResourceHandle CreateMeshBufferResource(plGeometry& inout_geom, const char* szResourceName, const char* szDescription, plGALPrimitiveTopology::Enum topology)
+static plMeshBufferResourceHandle CreateMeshBufferResource(plGeometry& geom, const char* szResourceName, const char* szDescription, plGALPrimitiveTopology::Enum topology)
 {
-  inout_geom.ComputeFaceNormals();
-  inout_geom.ComputeSmoothVertexNormals();
+  geom.ComputeFaceNormals();
+  geom.ComputeSmoothVertexNormals();
 
   plMeshBufferResourceDescriptor desc;
   desc.AddStream(plGALVertexAttributeSemantic::Position, plGALResourceFormat::XYZFloat);
   desc.AddStream(plGALVertexAttributeSemantic::Color0, plGALResourceFormat::RGBAUByteNormalized);
   desc.AddStream(plGALVertexAttributeSemantic::Normal, plGALResourceFormat::XYZFloat);
-  desc.AllocateStreamsFromGeometry(inout_geom, topology);
+  desc.AllocateStreamsFromGeometry(geom, topology);
   desc.ComputeBounds();
 
   return plResourceManager::CreateResource<plMeshBufferResource>(szResourceName, std::move(desc), szDescription);
@@ -95,7 +96,7 @@ static plMeshBufferResourceHandle CreateMeshBufferArrow()
   const float fLength = 1.0f;
 
   plGeometry::GeoOptions opt;
-  opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(90));
+  opt.m_Transform.SetRotationMatrixY(plAngle::Degree(90));
 
   plGeometry geom;
   geom.AddCylinderOnePiece(fThickness, fThickness, fLength * 0.5f, fLength * 0.5f, 16, opt);
@@ -119,7 +120,7 @@ static plMeshBufferResourceHandle CreateMeshBufferPiston()
   const float fLength = 1.0f;
 
   plGeometry::GeoOptions opt;
-  opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(90));
+  opt.m_Transform.SetRotationMatrixY(plAngle::Degree(90));
 
   plGeometry geom;
   geom.AddCylinderOnePiece(fThickness, fThickness, fLength * 0.5f, fLength * 0.5f, 16, opt);
@@ -143,7 +144,7 @@ static plMeshBufferResourceHandle CreateMeshBufferHalfPiston()
   const float fLength = 1.0f;
 
   plGeometry::GeoOptions opt;
-  opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(90));
+  opt.m_Transform.SetRotationMatrixY(plAngle::Degree(90));
   opt.m_Transform.SetTranslationVector(plVec3(fLength * 0.5f, 0, 0));
 
   plGeometry geom;
@@ -309,11 +310,11 @@ static plMeshBufferResourceHandle CreateMeshBufferBoxFaces()
 
   plGeometry geom;
   plGeometry::GeoOptions opt;
-  opt.m_Transform = plMat4::MakeTranslation(plVec3(0, 0, 0.5f));
+  opt.m_Transform.SetTranslationMatrix(plVec3(0, 0, 0.5f));
 
   geom.AddRectXY(plVec2(0.5f), 1, 1, opt);
 
-  opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(180.0));
+  opt.m_Transform.SetRotationMatrixY(plAngle::Degree(180.0));
   opt.m_Transform.SetTranslationVector(plVec3(0, 0, -0.5f));
   geom.AddRectXY(plVec2(0.5f), 1, 1, opt);
 
@@ -336,13 +337,13 @@ static plMeshBufferResourceHandle CreateMeshBufferBoxEdges()
 
   for (plUInt32 i = 0; i < 4; ++i)
   {
-    rot = plMat4::MakeRotationY(plAngle::MakeFromDegree(90.0f * i));
+    rot.SetRotationMatrixY(plAngle::Degree(90.0f * i));
 
-    opt.m_Transform = plMat4::MakeTranslation(plVec3(0.5f - 0.125f, 0, 0.5f));
+    opt.m_Transform.SetTranslationMatrix(plVec3(0.5f - 0.125f, 0, 0.5f));
     opt.m_Transform = rot * opt.m_Transform;
     geom.AddRectXY(plVec2(0.25f, 0.5f), 1, 1, opt);
 
-    opt.m_Transform = plMat4::MakeTranslation(plVec3(-0.5f + 0.125f, 0, 0.5f));
+    opt.m_Transform.SetTranslationMatrix(plVec3(-0.5f + 0.125f, 0, 0.5f));
     geom.AddRectXY(plVec2(0.25f, 0.5f), 1, 1, opt);
   }
 
@@ -360,30 +361,30 @@ static plMeshBufferResourceHandle CreateMeshBufferBoxCorners()
 
   plMat4 rot[6];
   rot[0].SetIdentity();
-  rot[1] = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
-  rot[2] = plMat4::MakeRotationX(plAngle::MakeFromDegree(180));
-  rot[3] = plMat4::MakeRotationX(plAngle::MakeFromDegree(270));
-  rot[4] = plMat4::MakeRotationY(plAngle::MakeFromDegree(90));
-  rot[5] = plMat4::MakeRotationY(plAngle::MakeFromDegree(-90));
+  rot[1].SetRotationMatrixX(plAngle::Degree(90));
+  rot[2].SetRotationMatrixX(plAngle::Degree(180));
+  rot[3].SetRotationMatrixX(plAngle::Degree(270));
+  rot[4].SetRotationMatrixY(plAngle::Degree(90));
+  rot[5].SetRotationMatrixY(plAngle::Degree(-90));
 
   plGeometry geom;
   plGeometry::GeoOptions opt;
 
   for (plUInt32 i = 0; i < 6; ++i)
   {
-    opt.m_Transform = plMat4::MakeTranslation(plVec3(0.5f - 0.125f, 0.5f - 0.125f, 0.5f));
+    opt.m_Transform.SetTranslationMatrix(plVec3(0.5f - 0.125f, 0.5f - 0.125f, 0.5f));
     opt.m_Transform = rot[i] * opt.m_Transform;
     geom.AddRectXY(plVec2(0.25f, 0.25f), 1, 1, opt);
 
-    opt.m_Transform = plMat4::MakeTranslation(plVec3(0.5f - 0.125f, -0.5f + 0.125f, 0.5f));
+    opt.m_Transform.SetTranslationMatrix(plVec3(0.5f - 0.125f, -0.5f + 0.125f, 0.5f));
     opt.m_Transform = rot[i] * opt.m_Transform;
     geom.AddRectXY(plVec2(0.25f, 0.25f), 1, 1, opt);
 
-    opt.m_Transform = plMat4::MakeTranslation(plVec3(-0.5f + 0.125f, 0.5f - 0.125f, 0.5f));
+    opt.m_Transform.SetTranslationMatrix(plVec3(-0.5f + 0.125f, 0.5f - 0.125f, 0.5f));
     opt.m_Transform = rot[i] * opt.m_Transform;
     geom.AddRectXY(plVec2(0.25f, 0.25f), 1, 1, opt);
 
-    opt.m_Transform = plMat4::MakeTranslation(plVec3(-0.5f + 0.125f, -0.5f + 0.125f, 0.5f));
+    opt.m_Transform.SetTranslationMatrix(plVec3(-0.5f + 0.125f, -0.5f + 0.125f, 0.5f));
     opt.m_Transform = rot[i] * opt.m_Transform;
     geom.AddRectXY(plVec2(0.25f, 0.25f), 1, 1, opt);
   }
@@ -401,7 +402,7 @@ static plMeshBufferResourceHandle CreateMeshBufferCone()
     return hMesh;
 
   plGeometry::GeoOptions opt;
-  opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(270.0f));
+  opt.m_Transform.SetRotationMatrixY(plAngle::Degree(270.0f));
   opt.m_Transform.SetTranslationVector(plVec3(1.0f, 0, 0));
 
   plGeometry geom;
@@ -457,7 +458,7 @@ static plMeshBufferResourceHandle CreateMeshBufferFromFile(const char* szFile)
   plGeometry geom;
   for (plUInt32 v = 0; v < obj.m_Positions.GetCount(); ++v)
   {
-    geom.AddVertex(obj.m_Positions[v], plVec3::MakeZero(), plVec2::MakeZero(), plColor::White);
+    geom.AddVertex(obj.m_Positions[v], plVec3::ZeroVector(), plVec2::ZeroVector(), plColor::White);
   }
 
   plStaticArray<plUInt32, 3> triangle;
@@ -494,9 +495,9 @@ static plMeshResourceHandle CreateMeshResource(const char* szMeshResourceName, p
   return plResourceManager::GetOrCreateResource<plMeshResource>(sIdentifier, std::move(md), pMeshBuffer->GetResourceDescription());
 }
 
-plEngineGizmoHandle::plEngineGizmoHandle() = default;
+PlasmaEngineGizmoHandle::PlasmaEngineGizmoHandle() = default;
 
-plEngineGizmoHandle::~plEngineGizmoHandle()
+PlasmaEngineGizmoHandle::~PlasmaEngineGizmoHandle()
 {
   if (m_hGameObject.IsInvalidated())
     return;
@@ -504,7 +505,7 @@ plEngineGizmoHandle::~plEngineGizmoHandle()
   m_pWorld->DeleteObjectDelayed(m_hGameObject);
 }
 
-void plEngineGizmoHandle::ConfigureHandle(plGizmo* pParentGizmo, plEngineGizmoHandleType type, const plColor& col, plBitflags<plGizmoFlags> flags, const char* szCustomMesh)
+void PlasmaEngineGizmoHandle::ConfigureHandle(plGizmo* pParentGizmo, PlasmaEngineGizmoHandleType type, const plColor& col, plBitflags<plGizmoFlags> flags, const char* szCustomMesh)
 {
   SetParentGizmo(pParentGizmo);
 
@@ -520,7 +521,7 @@ void plEngineGizmoHandle::ConfigureHandle(plGizmo* pParentGizmo, plEngineGizmoHa
   m_bFaceCamera = flags.IsSet(plGizmoFlags::FaceCamera);
 }
 
-bool plEngineGizmoHandle::SetupForEngine(plWorld* pWorld, plUInt32 uiNextComponentPickingID)
+bool PlasmaEngineGizmoHandle::SetupForEngine(plWorld* pWorld, plUInt32 uiNextComponentPickingID)
 {
   m_pWorld = pWorld;
 
@@ -532,103 +533,103 @@ bool plEngineGizmoHandle::SetupForEngine(plWorld* pWorld, plUInt32 uiNextCompone
 
   switch (m_iHandleType)
   {
-    case plEngineGizmoHandleType::Arrow:
+    case PlasmaEngineGizmoHandleType::Arrow:
     {
       hMeshBuffer = CreateMeshBufferArrow();
       szMeshGuid = "{9D02CF27-7A15-44EA-A372-C417AF2A8E9B}";
     }
     break;
-    case plEngineGizmoHandleType::Rect:
+    case PlasmaEngineGizmoHandleType::Rect:
     {
       hMeshBuffer = CreateMeshBufferRect();
       szMeshGuid = "{3DF4DDDA-F598-4A37-9691-D4C3677905A8}";
     }
     break;
-    case plEngineGizmoHandleType::LineRect:
+    case PlasmaEngineGizmoHandleType::LineRect:
     {
       hMeshBuffer = CreateMeshBufferLineRect();
       szMeshGuid = "{96129543-897C-4DEE-922D-931BC91C5725}";
     }
     break;
-    case plEngineGizmoHandleType::Ring:
+    case PlasmaEngineGizmoHandleType::Ring:
     {
       hMeshBuffer = CreateMeshBufferRing();
       szMeshGuid = "{629AD0C6-C81B-4850-A5BC-41494DC0BF95}";
     }
     break;
-    case plEngineGizmoHandleType::Box:
+    case PlasmaEngineGizmoHandleType::Box:
     {
       hMeshBuffer = CreateMeshBufferBox();
       szMeshGuid = "{13A59253-4A98-4638-8B94-5AA370E929A7}";
     }
     break;
-    case plEngineGizmoHandleType::Piston:
+    case PlasmaEngineGizmoHandleType::Piston:
     {
       hMeshBuffer = CreateMeshBufferPiston();
       szMeshGuid = "{44A4FE37-6AE3-44C1-897D-E8B95AE53EF6}";
     }
     break;
-    case plEngineGizmoHandleType::HalfPiston:
+    case PlasmaEngineGizmoHandleType::HalfPiston:
     {
       hMeshBuffer = CreateMeshBufferHalfPiston();
       szMeshGuid = "{64A45DD0-D7F9-4D1D-9F68-782FA3274200}";
     }
     break;
-    case plEngineGizmoHandleType::Sphere:
+    case PlasmaEngineGizmoHandleType::Sphere:
     {
       hMeshBuffer = CreateMeshBufferSphere();
       szMeshGuid = "{FC322E80-5EB0-452F-9D8E-9E65FCFDA652}";
     }
     break;
-    case plEngineGizmoHandleType::CylinderZ:
+    case PlasmaEngineGizmoHandleType::CylinderZ:
     {
       hMeshBuffer = CreateMeshBufferCylinderZ();
       szMeshGuid = "{893384EA-2F43-4265-AF75-662E2C81C167}";
     }
     break;
-    case plEngineGizmoHandleType::HalfSphereZ:
+    case PlasmaEngineGizmoHandleType::HalfSphereZ:
     {
       hMeshBuffer = CreateMeshBufferHalfSphereZ();
       szMeshGuid = "{0FC9B680-7B6B-40B6-97BD-CBFFA47F0EFF}";
     }
     break;
-    case plEngineGizmoHandleType::BoxCorners:
+    case PlasmaEngineGizmoHandleType::BoxCorners:
     {
       hMeshBuffer = CreateMeshBufferBoxCorners();
       szMeshGuid = "{89CCC389-11D5-43F4-9C18-C634EE3154B9}";
     }
     break;
-    case plEngineGizmoHandleType::BoxEdges:
+    case PlasmaEngineGizmoHandleType::BoxEdges:
     {
       hMeshBuffer = CreateMeshBufferBoxEdges();
       szMeshGuid = "{21508253-2E74-44CE-9399-523214BE7C3D}";
     }
     break;
-    case plEngineGizmoHandleType::BoxFaces:
+    case PlasmaEngineGizmoHandleType::BoxFaces:
     {
       hMeshBuffer = CreateMeshBufferBoxFaces();
       szMeshGuid = "{FD1A3C29-F8F0-42B0-BBB0-D0A2B28A65A0}";
     }
     break;
-    case plEngineGizmoHandleType::LineBox:
+    case PlasmaEngineGizmoHandleType::LineBox:
     {
       hMeshBuffer = CreateMeshBufferLineBox();
       szMeshGuid = "{4B136D72-BF43-4C4B-96D7-51C5028A7006}";
     }
     break;
-    case plEngineGizmoHandleType::Cone:
+    case PlasmaEngineGizmoHandleType::Cone:
     {
       hMeshBuffer = CreateMeshBufferCone();
       szMeshGuid = "{9A48962D-127A-445C-899A-A054D6AD8A9A}";
     }
     break;
-    case plEngineGizmoHandleType::Frustum:
+    case PlasmaEngineGizmoHandleType::Frustum:
     {
       szMeshGuid = "{22EC5D48-E8BE-410B-8EAD-51B7775BA058}";
       hMeshBuffer = CreateMeshBufferFrustum();
     }
     break;
-    case plEngineGizmoHandleType::FromFile:
+    case PlasmaEngineGizmoHandleType::FromFile:
     {
       szMeshGuid = m_sGizmoHandleMesh;
       hMeshBuffer = CreateMeshBufferFromFile(m_sGizmoHandleMesh);
@@ -698,7 +699,7 @@ bool plEngineGizmoHandle::SetupForEngine(plWorld* pWorld, plUInt32 uiNextCompone
   return true;
 }
 
-void plEngineGizmoHandle::UpdateForEngine(plWorld* pWorld)
+void PlasmaEngineGizmoHandle::UpdateForEngine(plWorld* pWorld)
 {
   if (m_hGameObject.IsInvalidated())
     return;
@@ -715,7 +716,7 @@ void plEngineGizmoHandle::UpdateForEngine(plWorld* pWorld)
   m_pGizmoComponent->SetActiveFlag(m_bVisible);
 }
 
-void plEngineGizmoHandle::SetColor(const plColor& col)
+void PlasmaEngineGizmoHandle::SetColor(const plColor& col)
 {
   m_Color = col;
   SetModified();

@@ -143,7 +143,7 @@ void plTaskSystem::WriteStateSnapshotToFile(const char* szPath /*= nullptr*/)
   {
     sPath = ":appdata/TaskGraphs/";
 
-    const plDateTime dt = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
+    const plDateTime dt = plTimestamp::CurrentTimestamp();
 
     sPath.AppendFormat("{0}-{1}-{2}_{3}-{4}-{5}-{6}", dt.GetYear(), plArgU(dt.GetMonth(), 2, true), plArgU(dt.GetDay(), 2, true), plArgU(dt.GetHour(), 2, true), plArgU(dt.GetMinute(), 2, true), plArgU(dt.GetSecond(), 2, true), plArgU(dt.GetMicroseconds() / 1000, 3, true));
 

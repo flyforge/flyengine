@@ -122,7 +122,7 @@ void plTaskWorkerThread::UpdateThreadUtilization(plTime timePassed)
   // The thread keeps track of how much time it spends executing tasks.
   // Here we retrieve that time and resets it to zero.
   {
-    m_ThreadActiveTime = plTime::MakeZero();
+    m_ThreadActiveTime = plTime::Zero();
 
     if (m_bExecutingTask)
     {

@@ -12,12 +12,12 @@ class plCurve1D;
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GUIFOUNDATION_DLL, plCurveTangentMode);
 
 template <typename T>
-void FindNearestControlPoints(plArrayPtr<T> cps, plInt64 iTick, T*& ref_pLlhs, T*& lhs, T*& rhs, T*& ref_pRrhs)
+void FindNearestControlPoints(plArrayPtr<T> cps, plInt64 iTick, T*& llhs, T*& lhs, T*& rhs, T*& rrhs)
 {
-  ref_pLlhs = nullptr;
+  llhs = nullptr;
   lhs = nullptr;
   rhs = nullptr;
-  ref_pRrhs = nullptr;
+  rrhs = nullptr;
   plInt64 lhsTick = plMath::MinValue<plInt64>();
   plInt64 llhsTick = plMath::MinValue<plInt64>();
   plInt64 rhsTick = plMath::MaxValue<plInt64>();
@@ -29,7 +29,7 @@ void FindNearestControlPoints(plArrayPtr<T> cps, plInt64 iTick, T*& ref_pLlhs, T
     {
       if (cp.m_iTick > lhsTick)
       {
-        ref_pLlhs = lhs;
+        llhs = lhs;
         llhsTick = lhsTick;
 
         lhs = &cp;
@@ -37,7 +37,7 @@ void FindNearestControlPoints(plArrayPtr<T> cps, plInt64 iTick, T*& ref_pLlhs, T
       }
       else if (cp.m_iTick > llhsTick)
       {
-        ref_pLlhs = &cp;
+        llhs = &cp;
         llhsTick = cp.m_iTick;
       }
     }
@@ -46,7 +46,7 @@ void FindNearestControlPoints(plArrayPtr<T> cps, plInt64 iTick, T*& ref_pLlhs, T
     {
       if (cp.m_iTick < rhsTick)
       {
-        ref_pRrhs = rhs;
+        rrhs = rhs;
         rrhsTick = rhsTick;
 
         rhs = &cp;
@@ -54,7 +54,7 @@ void FindNearestControlPoints(plArrayPtr<T> cps, plInt64 iTick, T*& ref_pLlhs, T
       }
       else if (cp.m_iTick < rrhsTick)
       {
-        ref_pRrhs = &cp;
+        rrhs = &cp;
         rrhsTick = cp.m_iTick;
       }
     }
@@ -66,8 +66,8 @@ class PLASMA_GUIFOUNDATION_DLL plCurveControlPointData : public plReflectedClass
   PLASMA_ADD_DYNAMIC_REFLECTION(plCurveControlPointData, plReflectedClass);
 
 public:
-  plTime GetTickAsTime() const { return plTime::MakeFromSeconds(m_iTick / 4800.0); }
-  void SetTickFromTime(plTime time, plInt64 iFps);
+  plTime GetTickAsTime() const { return plTime::Seconds(m_iTick / 4800.0); }
+  void SetTickFromTime(plTime time, plInt64 fps);
 
   plInt64 m_iTick; // 4800 ticks per second
   double m_fValue;
@@ -86,8 +86,8 @@ public:
   plColorGammaUB m_CurveColor;
   plDynamicArray<plCurveControlPointData> m_ControlPoints;
 
-  void ConvertToRuntimeData(plCurve1D& out_result) const;
-  double Evaluate(plInt64 iTick) const;
+  void ConvertToRuntimeData(plCurve1D& out_Result) const;
+  double Evaluate(plInt64 uiTick) const;
 };
 
 class PLASMA_GUIFOUNDATION_DLL plCurveExtentsAttribute : public plPropertyAttribute
@@ -128,7 +128,7 @@ public:
 
   plInt64 TickFromTime(plTime time) const;
 
-  void ConvertToRuntimeData(plUInt32 uiCurveIdx, plCurve1D& out_result) const;
+  void ConvertToRuntimeData(plUInt32 uiCurveIdx, plCurve1D& out_Result) const;
 };
 
 struct PLASMA_GUIFOUNDATION_DLL plSelectedCurveCP

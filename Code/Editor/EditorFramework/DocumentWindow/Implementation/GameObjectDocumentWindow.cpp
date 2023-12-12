@@ -54,7 +54,7 @@ plGridSettingsMsgToEngine plQtGameObjectDocumentWindow::GetGridSettings() const
   return msg;
 }
 
-void plQtGameObjectDocumentWindow::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
+void plQtGameObjectDocumentWindow::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   plQtEngineDocumentWindow::ProcessMessageEventHandler(pMsg);
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plQuerySelectionBBoxResultMsgToEditor>())
@@ -158,7 +158,7 @@ void plQtGameObjectDocumentWindow::HandleFocusOnSelection(const plQuerySelection
 
   // clamp the bbox of the selection to ranges that won't break down due to float precision
   {
-    bbox = plBoundingBox::MakeFromCenterAndHalfExtents(pMsg->m_vCenter, pMsg->m_vHalfExtents);
+    bbox.SetCenterAndHalfExtents(pMsg->m_vCenter, pMsg->m_vHalfExtents);
     bbox.m_vMin = bbox.m_vMin.CompMax(plVec3(-1000.0f));
     bbox.m_vMax = bbox.m_vMax.CompMin(plVec3(+1000.0f));
   }
@@ -173,7 +173,7 @@ void plQtGameObjectDocumentWindow::HandleFocusOnSelection(const plQuerySelection
 
     {
       plPlane p;
-      p = plPlane::MakeFromNormalAndPoint(vNewCameraDirection, vNewCameraPosition);
+      p.SetFromNormalAndPoint(vNewCameraDirection, vNewCameraPosition);
 
       // at some distance the floating point precision gets so crappy that the camera movement breaks
       // therefore we clamp it to a 'reasonable' distance here

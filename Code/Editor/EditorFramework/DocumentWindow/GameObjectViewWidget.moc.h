@@ -15,7 +15,7 @@ class PLASMA_EDITORFRAMEWORK_DLL plQtGameObjectViewWidget : public plQtEngineVie
 {
   Q_OBJECT
 public:
-  plQtGameObjectViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig);
+  plQtGameObjectViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig);
   ~plQtGameObjectViewWidget();
 
   plOrthoGizmoContext* m_pOrthoGizmoContext;

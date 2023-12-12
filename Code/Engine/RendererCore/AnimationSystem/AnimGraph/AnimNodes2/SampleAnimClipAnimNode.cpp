@@ -85,6 +85,7 @@ plResult plSampleAnimClipAnimNode::DeserializeNode(plStreamReader& stream)
 
 void plSampleAnimClipAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_Clip");
   const auto& clipInfo = ref_controller.GetAnimationClipInfo(m_sClip);
 
   if (!clipInfo.m_hClip.IsValid() || !m_OutPose.IsConnected())
@@ -94,7 +95,7 @@ void plSampleAnimClipAnimNode::Step(plAnimController& ref_controller, plAnimGrap
 
   if ((!m_InStart.IsConnected() && !pState->m_bPlaying) || m_InStart.IsTriggered(ref_graph))
   {
-    pState->m_PlaybackTime = plTime::MakeZero();
+    pState->m_PlaybackTime = plTime::Zero();
     pState->m_bPlaying = true;
 
     m_OutOnStarted.SetTriggered(ref_graph);

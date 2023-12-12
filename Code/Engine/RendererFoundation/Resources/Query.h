@@ -18,5 +18,5 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) = 0;
 
-  bool m_bStarted = false;
+  bool m_bStarted;
 };

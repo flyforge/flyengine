@@ -30,5 +30,5 @@ plTime plTime::Now()
   s_LastTime = temp.QuadPart;
 #endif
 
-  return plTime::MakeFromSeconds(double(temp.QuadPart) * g_fInvQpcFrequency);
+  return plTime::Seconds(double(temp.QuadPart) * g_fInvQpcFrequency);
 }

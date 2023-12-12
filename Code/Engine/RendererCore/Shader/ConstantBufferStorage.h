@@ -22,8 +22,8 @@ public:
   PLASMA_ALWAYS_INLINE plGALBufferHandle GetGALBufferHandle() const { return m_hGALConstantBuffer; }
 
 protected:
-  bool m_bHasBeenModified = false;
-  plUInt32 m_uiLastHash = 0;
+  bool m_bHasBeenModified;
+  plUInt32 m_uiLastHash;
   plGALBufferHandle m_hGALConstantBuffer;
 
   plArrayPtr<plUInt8> m_Data;
@@ -48,7 +48,7 @@ public:
   }
 };
 
-using plConstantBufferStorageId = plGenericId<24, 8>;
+typedef plGenericId<24, 8> plConstantBufferStorageId;
 
 class plConstantBufferStorageHandle
 {

@@ -11,7 +11,7 @@ o
 		s %AssetType{"ProcGen Graph"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{11212234289642059194,4637845551590943091}}
-		u4 %Hash{12307130037973249525}
+		u4 %Hash{9437934911957062223}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -114,7 +114,7 @@ o
 	u3 %v{1}
 	p
 	{
-		b %Active{0}
+		b %Active{1}
 		f %AlignToNormal{0x9A99993E}
 		u3 %CollisionLayer{0}
 		s %ColorGradient{""}
@@ -136,7 +136,6 @@ o
 			s{"{ 176b6229-ba87-48ec-bbc6-3fe14f54411b }"}
 		}
 		s %PlacementMode{"plProcPlacementMode::Raycast"}
-		s %PlacementPattern{"plProcPlacementPattern::Natural"}
 		Uuid %Scale{u4{9791305905673822488,12638390741642247297}}
 		s %Surface{"{ 2987eede-0d7c-4750-9043-0215249e52c0 }"}
 		Angle %YawRotationSnap{f{0}}
@@ -288,7 +287,7 @@ o
 	u3 %v{1}
 	p
 	{
-		b %Active{0}
+		b %Active{1}
 		f %AlignToNormal{0x0000003F}
 		u3 %CollisionLayer{0}
 		s %ColorGradient{"{ 6082de35-c174-4c40-a5a5-17fd67b11ce5 }"}
@@ -308,7 +307,6 @@ o
 			s{"{ 6670a1ca-a18d-4d10-b782-99097912c7a8 }"}
 		}
 		s %PlacementMode{"plProcPlacementMode::Raycast"}
-		s %PlacementPattern{"plProcPlacementPattern::Natural"}
 		Uuid %Scale{u4{14112596777051007533,7985040258764076844}}
 		s %Surface{"{ 2987eede-0d7c-4750-9043-0215249e52c0 }"}
 		Angle %YawRotationSnap{f{0}}
@@ -372,7 +370,7 @@ o
 	u3 %v{1}
 	p
 	{
-		b %Active{0}
+		b %Active{1}
 		f %AlignToNormal{0x0000003F}
 		u3 %CollisionLayer{0}
 		s %ColorGradient{"{ a1f3f932-460e-405a-8512-a0f3ce341d1b }"}
@@ -392,7 +390,6 @@ o
 			s{"{ bdc24e7e-33a2-459a-a611-7a466dc63024 }"}
 		}
 		s %PlacementMode{"plProcPlacementMode::Raycast"}
-		s %PlacementPattern{"plProcPlacementPattern::Natural"}
 		Uuid %Scale{u4{5956391832851329029,8065022560000220215}}
 		s %Surface{"{ 2987eede-0d7c-4750-9043-0215249e52c0 }"}
 		Angle %YawRotationSnap{f{0}}
@@ -436,23 +433,6 @@ o
 }
 Types
 {
-o
-{
-	Uuid %id{u4{11328927983653446892,144568098297487475}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plPropertyAttribute"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plTitleAttribute"}
-		u3 %TypeVersion{1}
-	}
-}
 o
 {
 	Uuid %id{u4{14749633442492691202,593399381445037268}}
@@ -501,23 +481,6 @@ o
 		s %PluginName{"plasmaEditorPluginProcGen"}
 		VarArray %Properties{}
 		s %TypeName{"plProcGen_Slope"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{8132462614681439308,3287167598379242619}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginProcGen"}
-		VarArray %Properties{}
-		s %TypeName{"plProcPlacementPattern"}
 		u3 %TypeVersion{1}
 	}
 }
@@ -659,40 +622,6 @@ o
 }
 o
 {
-	Uuid %id{u4{14209585135339028478,11308263336862562356}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plPropertyAttribute"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{10117293284305109392,11544913933193635751}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plPropertyAttribute"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plHiddenAttribute"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
 	Uuid %id{u4{13757272417693924605,15313730912403440498}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -705,23 +634,6 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderPipelineNodeOutputPin"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{6853598190348858983,16453551367257532047}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plPropertyAttribute"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plCategoryAttribute"}
 		u3 %TypeVersion{1}
 	}
 }

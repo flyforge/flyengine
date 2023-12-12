@@ -9,9 +9,9 @@ class plWorld;
 class plGizmoComponent;
 class plGizmo;
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGizmoHandle : public plEditorEngineSyncObject
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGizmoHandle : public PlasmaEditorEngineSyncObject
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGizmoHandle, plEditorEngineSyncObject);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plGizmoHandle, PlasmaEditorEngineSyncObject);
 
 public:
   plGizmoHandle();
@@ -36,7 +36,7 @@ private:
 };
 
 
-enum plEngineGizmoHandleType
+enum PlasmaEngineGizmoHandleType
 {
   Arrow,
   Ring,
@@ -86,15 +86,15 @@ struct plGizmoFlags
 
 PLASMA_DECLARE_FLAGS_OPERATORS(plGizmoFlags);
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineGizmoHandle : public plGizmoHandle
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineGizmoHandle : public plGizmoHandle
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEngineGizmoHandle, plGizmoHandle);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEngineGizmoHandle, plGizmoHandle);
 
 public:
-  plEngineGizmoHandle();
-  ~plEngineGizmoHandle();
+  PlasmaEngineGizmoHandle();
+  ~PlasmaEngineGizmoHandle();
 
-  void ConfigureHandle(plGizmo* pParentGizmo, plEngineGizmoHandleType type, const plColor& col, plBitflags<plGizmoFlags> flags, const char* szCustomMesh = nullptr);
+  void ConfigureHandle(plGizmo* pParentGizmo, PlasmaEngineGizmoHandleType type, const plColor& col, plBitflags<plGizmoFlags> flags, const char* szCustomMesh = nullptr);
 
   virtual bool SetupForEngine(plWorld* pWorld, plUInt32 uiNextComponentPickingID) override;
   virtual void UpdateForEngine(plWorld* pWorld) override;

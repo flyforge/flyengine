@@ -27,7 +27,7 @@ public:
 
 class PLASMA_RECASTPLUGIN_DLL plRcNavMeshComponentManager : public plComponentManager<class plRcNavMeshComponent, plBlockStorageType::Compact>
 {
-  using SUPER = plComponentManager<class plRcNavMeshComponent, plBlockStorageType::Compact>;
+  typedef plComponentManager<class plRcNavMeshComponent, plBlockStorageType::Compact> SUPER;
 
 public:
   plRcNavMeshComponentManager(plWorld* pWorld);
@@ -40,7 +40,7 @@ public:
   void Update(const plWorldModule::UpdateContext& context);
 
 private:
-  plRecastWorldModule* m_pWorldModule = nullptr;
+  plRecastWorldModule* m_pWorldModule;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -53,8 +53,8 @@ class PLASMA_RECASTPLUGIN_DLL plRcNavMeshComponent : public plRcComponent
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
-  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
+  virtual void SerializeComponent(plWorldWriter& stream) const override;
+  virtual void DeserializeComponent(plWorldReader& stream) override;
 
 protected:
   virtual void OnActivated() override;

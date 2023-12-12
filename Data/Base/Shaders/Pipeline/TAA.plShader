@@ -1,0 +1,163 @@
+[PLATFORMS]
+ALL
+
+[PERMUTATIONS]
+SHADING_QUALITY = SHADING_QUALITY_NORMAL
+
+
+[COMPUTESHADER]
+
+#include <Shaders/Common/Utils.h>
+#include <Shaders/Common/Lighting.h>
+#include <Shaders/Common/Tonemapping.h>
+
+#include "TAAConstants.h"
+
+Texture2D HistoryTexture;
+Texture2D InputTexture;
+Texture2D VelocityTexture;
+Texture2D DepthHistoryTexture;
+Texture2D PreviousVelocityTexture;
+RWTexture2D<float4> OutputTexture;
+
+// Neighborhood load optimization:
+#define USE_LDS
+
+// This hack can improve bright areas:
+//#define HDR_CORRECTION
+
+static const uint TILE_BORDER = 1;
+static const uint TILE_SIZE = POSTPROCESS_BLOCKSIZE    + TILE_BORDER * 2;
+
+groupshared float3 tile_color[TILE_SIZE*TILE_SIZE];
+groupshared float tile_depth[TILE_SIZE*TILE_SIZE];
+
+// 2D array index to flattened 1D array index
+inline uint flatten2D(uint2 coord, uint2 dim)
+{
+	return coord.x + coord.y * dim.x;
+}
+// flattened array index to 2D array index
+inline uint2 unflatten2D(uint idx, uint2 dim)
+{
+	return uint2(idx % dim.x, idx / dim.x);
+}
+
+[numthreads(POSTPROCESS_BLOCKSIZE , POSTPROCESS_BLOCKSIZE , 1)]
+void main(uint3 thread_id : SV_DispatchThreadID, uint3 group_thread_id : SV_GroupThreadID, uint3 group_id : SV_GroupID, uint group_index : SV_GroupIndex)
+{
+  const float2 uv = (thread_id.xy + 0.5f) * ViewportSize.zw;
+  float3 neighborhoodMin = 100000;
+  float3 neighborhoodMax = -100000;
+  float3 current;
+  float bestDepth = 1; 
+
+  #ifdef USE_LDS
+	const int2 tile_upperleft = group_id.xy * POSTPROCESS_BLOCKSIZE  - TILE_BORDER;
+	for (uint t = group_index; t < TILE_SIZE * TILE_SIZE; t += POSTPROCESS_BLOCKSIZE  * POSTPROCESS_BLOCKSIZE )
+	{
+		const uint2 pixel = tile_upperleft + unflatten2D(t, TILE_SIZE);
+		const float depth = GetLinearDepth(pixel);
+		const float3 color = InputTexture[pixel].rgb;
+		tile_color[t] = color;
+		tile_depth[t] = depth;
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	// Search for best velocity and compute color clamping range in 3x3 neighborhood:
+	int2 bestOffset = 0;
+	for (int x = -1; x <= 1; ++x)
+	{
+		for (int y = -1; y <= 1; ++y)
+		{
+			const int2 offset = int2(x, y);
+			const uint idx = flatten2D(group_thread_id.xy + TILE_BORDER + offset, TILE_SIZE);
+
+			const float3 neighbor = tile_color[idx];
+			neighborhoodMin = min(neighborhoodMin, neighbor);
+			neighborhoodMax = max(neighborhoodMax, neighbor);
+			if (x == 0 && y == 0)
+			{
+				current = neighbor;
+			}
+
+			const float depth = tile_depth[idx];
+			if (depth < bestDepth)
+			{
+				bestDepth = depth;
+				bestOffset = offset;
+			}
+		}
+	}
+	const float2 velocity = VelocityTexture[thread_id.xy + bestOffset].xy;
+
+#else
+
+  // Search for best velocity and compute color clamping range in 3x3 neighborhood:
+  int2 bestPixel = int2(0, 0);
+  for (int x = -1; x <= 1; ++x)
+  {
+    for (int y = -1; y <= 1; ++y)
+    {
+      uint2 curPixel = thread_id.xy + uint2(x, y);
+
+      const float3 neighbor = InputTexture[curPixel].rgb;
+      neighborhoodMin = min(neighborhoodMin, neighbor);
+      neighborhoodMax = max(neighborhoodMax, neighbor);
+      if (x == 0 && y == 0)
+      {
+        current = neighbor;
+      }
+
+      const float depth = GetLinearDepth(curPixel);
+      if (depth < bestDepth)
+      {
+        bestDepth = depth;
+        bestPixel = curPixel;
+      }
+    }
+  }
+  const float2 velocity = HistoryTexture[bestPixel].xy;
+#endif
+
+  const float2 prevUV = uv + velocity;
+
+
+ // Disocclusion fallback:
+ float depth_current = GetLinearDepth(thread_id.xy) * ClipPlanes.y;
+ float depth_history = GetLinearDepth(DepthHistoryTexture.SampleLevel(PointClampSampler, prevUV, 0).r);
+ if (length(velocity) > 0.01 && abs(depth_current - depth_history) > 1)
+ {
+   OutputTexture[thread_id.xy] = float4(current, 1.0);
+   return;
+ }
+
+  // we cannot avoid the linear filter here because point sampling could sample irrelevant pixels but we try to correct it later:
+  float3 history = HistoryTexture.SampleLevel(LinearClampSampler, prevUV, 0).rgb;
+
+  // simple correction of image signal incoherency (eg. moving shadows or lighting changes):
+  history.rgb = clamp(history.rgb, neighborhoodMin, neighborhoodMax);
+
+  // the linear filtering can cause blurry image, try to account for that:
+  float subpixelCorrection = frac(max(abs(velocity.x) * ViewportSize.x, abs(velocity.y) * ViewportSize.y)) ;
+
+  // compute a nice blend factor:
+  float blendfactor = saturate(lerp(0.05f, 1.0f, subpixelCorrection));
+
+  // if information can not be found on the screen, revert to aliased image:
+  blendfactor = is_saturated(prevUV) ? blendfactor : 1.0f;
+
+#ifdef HDR_CORRECTION
+  history.rgb = ToneMapping_Reinhard(history.rgb);
+  current.rgb = ToneMapping_Reinhard(current.rgb);
+#endif
+
+  // do the temporal super sampling by linearly accumulating previous samples with the current one:
+  float3 resolved = lerp(history.rgb, current.rgb, blendfactor * 0.8);
+
+#ifdef HDR_CORRECTION
+  resolved.rgb = ToneMapping_Reinhard_Inverse(resolved.rgb);
+#endif
+
+  OutputTexture[thread_id.xy] = float4(resolved.rgb, 1.0);
+}

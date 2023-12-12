@@ -24,9 +24,9 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSyncWithProcessMsgToEditor, 1, plRTTIDefau
 }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-///////////////////////////////////// plEditorEngineMsg /////////////////////////////////////
+///////////////////////////////////// PlasmaEditorEngineMsg /////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineMsg, 1, plRTTINoAllocator )
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorEngineMsg, 1, plRTTINoAllocator )
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plUpdateReflectionTypeMsgToEditor, 1, plRTTIDefaultAllocator<plUpdateReflectionTypeMsgToEditor>)
@@ -76,17 +76,6 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSaveProfilingResponseToEditor, 1, plRTTIDe
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("ProfilingFile", m_sProfilingFile),
-  }
-  PLASMA_END_PROPERTIES;
-}
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plReloadResourceMsgToEngine, 1, plRTTIDefaultAllocator<plReloadResourceMsgToEngine>)
-{
-  PLASMA_BEGIN_PROPERTIES
-  {
-    PLASMA_MEMBER_PROPERTY("Type", m_sResourceType),
-    PLASMA_MEMBER_PROPERTY("ID", m_sResourceID),
   }
   PLASMA_END_PROPERTIES;
 }
@@ -194,9 +183,9 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLongOpResultMsg, 1, plRTTIDefaultAllocator
 }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-///////////////////////////////////// plEditorEngineDocumentMsg /////////////////////////////////////
+///////////////////////////////////// PlasmaEditorEngineDocumentMsg /////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineDocumentMsg, 1, plRTTINoAllocator)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorEngineDocumentMsg, 1, plRTTINoAllocator)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -219,7 +208,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDocumentConfigMsgToEngine, 1, plRTTIDefaul
 }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineViewMsg, 1, plRTTINoAllocator)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorEngineViewMsg, 1, plRTTINoAllocator)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -459,7 +448,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCVarMsgToEditor, 1, plRTTIDefaultAllocator
 }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineSyncObjectMsg, 1, plRTTIDefaultAllocator<plEditorEngineSyncObjectMsg>)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorEngineSyncObjectMsg, 1, plRTTIDefaultAllocator<PlasmaEditorEngineSyncObjectMsg>)
 {
   PLASMA_BEGIN_PROPERTIES
   {

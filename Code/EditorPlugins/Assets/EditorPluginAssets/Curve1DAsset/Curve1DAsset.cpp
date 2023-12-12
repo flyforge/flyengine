@@ -6,17 +6,17 @@
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCurve1DAssetDocument, 3, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plCurve1DAssetDocument::plCurve1DAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plCurveGroupData>(sDocumentPath, plAssetDocEngineConnection::None)
+plCurve1DAssetDocument::plCurve1DAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plCurveGroupData>(szDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
 plCurve1DAssetDocument::~plCurve1DAssetDocument() = default;
 
-void plCurve1DAssetDocument::FillCurve(plUInt32 uiCurveIdx, plCurve1D& out_result) const
+void plCurve1DAssetDocument::FillCurve(plUInt32 uiCurveIdx, plCurve1D& out_Result) const
 {
   const plCurveGroupData* pProp = static_cast<const plCurveGroupData*>(GetProperties());
-  pProp->ConvertToRuntimeData(uiCurveIdx, out_result);
+  pProp->ConvertToRuntimeData(uiCurveIdx, out_Result);
 }
 
 plUInt32 plCurve1DAssetDocument::GetCurveCount() const
@@ -25,7 +25,7 @@ plUInt32 plCurve1DAssetDocument::GetCurveCount() const
   return pProp->m_Curves.GetCount();
 }
 
-void plCurve1DAssetDocument::WriteResource(plStreamWriter& inout_stream) const
+void plCurve1DAssetDocument::WriteResource(plStreamWriter& stream) const
 {
   const plCurveGroupData* pProp = GetProperties();
 
@@ -38,10 +38,10 @@ void plCurve1DAssetDocument::WriteResource(plStreamWriter& inout_stream) const
     desc.m_Curves[i].SortControlPoints();
   }
 
-  desc.Save(inout_stream);
+  desc.Save(stream);
 }
 
-plTransformStatus plCurve1DAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plCurve1DAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   WriteResource(stream);
   return plStatus(PLASMA_SUCCESS);
@@ -151,7 +151,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Left Tangent", "LeftTangent");
     pNode->RenameProperty("Right Tangent", "RightTangent");
@@ -169,7 +169,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override { pNode->RenameProperty("Control Points", "ControlPoints"); }
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override { pNode->RenameProperty("Control Points", "ControlPoints"); }
 };
 
 plCurve1DDataPatch_1_2 g_plCurve1DDataPatch_1_2;

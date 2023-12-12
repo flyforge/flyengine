@@ -90,7 +90,8 @@ namespace plRmlUiInternal
 
     PLASMA_VERIFY(m_CompiledGeometry.TryGetValue(GeometryId::FromRml(geometry_handle), batch.m_CompiledGeometry), "Invalid compiled geometry");
 
-    plMat4 offsetMat = plMat4::MakeTranslation(m_vOffset.GetAsVec3(0));
+    plMat4 offsetMat;
+    offsetMat.SetTranslationMatrix(m_vOffset.GetAsVec3(0));
 
     batch.m_Transform = offsetMat * m_mTransform;
     batch.m_Translation = plVec2(translation.x, translation.y);
@@ -167,14 +168,8 @@ namespace plRmlUiInternal
   {
     if (transform != nullptr)
     {
-      if(std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value)
-      {
-        m_mTransform = plMat4::MakeFromColumnMajorArray(transform->data());
-      }
-      else
-      {
-        m_mTransform = plMat4::MakeFromRowMajorArray(transform->data());
-      }
+      constexpr plMatrixLayout::Enum matrixLayout = std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value ? plMatrixLayout::ColumnMajor : plMatrixLayout::RowMajor;
+      m_mTransform.SetFromArray(transform->data(), matrixLayout);
     }
     else
     {
@@ -185,7 +180,7 @@ namespace plRmlUiInternal
   void Extractor::BeginExtraction(const plVec2I32& offset)
   {
     m_vOffset = plVec2(static_cast<float>(offset.x), static_cast<float>(offset.y));
-    m_mTransform = plMat4::MakeIdentity();
+    m_mTransform = plMat4::IdentityMatrix();
 
     m_Batches.Clear();
   }
@@ -198,7 +193,7 @@ namespace plRmlUiInternal
     {
       plRmlUiRenderData* pRenderData = PLASMA_NEW(plFrameAllocator::GetCurrentAllocator(), plRmlUiRenderData, plFrameAllocator::GetCurrentAllocator());
       pRenderData->m_GlobalTransform.SetIdentity();
-      pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
+      pRenderData->m_GlobalBounds.SetInvalid();
       pRenderData->m_Batches = m_Batches;
 
       return pRenderData;

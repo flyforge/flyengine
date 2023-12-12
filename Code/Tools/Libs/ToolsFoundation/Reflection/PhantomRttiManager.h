@@ -16,11 +16,13 @@ struct plPhantomRttiManagerEvent
   };
 
   plPhantomRttiManagerEvent()
+    : m_Type(Type::TypeAdded)
+    , m_pChangedType(nullptr)
+  {
+  }
 
-    = default;
-
-  Type m_Type = Type::TypeAdded;
-  const plRTTI* m_pChangedType = nullptr;
+  Type m_Type;
+  const plRTTI* m_pChangedType;
 };
 
 /// \brief Manages all plPhantomRTTI types that have been added to him.
@@ -40,7 +42,7 @@ public:
   /// m_TypeChangedEvent event will be called with the old and new plRTTI.
   ///
   /// \sa plReflectionUtils::GetReflectedTypeDescriptorFromRtti
-  static const plRTTI* RegisterType(plReflectedTypeDescriptor& ref_desc);
+  static const plRTTI* RegisterType(plReflectedTypeDescriptor& desc);
 
   /// \brief Removes a type from the list of accessible types.
   ///

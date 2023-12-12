@@ -12,37 +12,37 @@ class plDocument;
 class plQtEngineDocumentWindow;
 class plQtEngineViewWidget;
 
-enum class plEditorInput
+enum class PlasmaEditorInput
 {
   MayBeHandledByOthers,
   WasExclusivelyHandled,
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plEditorInputContext : public plReflectedClass
+class PLASMA_EDITORFRAMEWORK_DLL PlasmaEditorInputContext : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditorInputContext, plReflectedClass);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorInputContext, plReflectedClass);
 
 public:
-  plEditorInputContext();
+  PlasmaEditorInputContext();
 
-  virtual ~plEditorInputContext();
+  virtual ~PlasmaEditorInputContext();
 
   void FocusLost(bool bCancel);
 
-  plEditorInput KeyPressEvent(QKeyEvent* e) { return DoKeyPressEvent(e); }
-  plEditorInput KeyReleaseEvent(QKeyEvent* e) { return DoKeyReleaseEvent(e); }
-  plEditorInput MousePressEvent(QMouseEvent* e) { return DoMousePressEvent(e); }
-  plEditorInput MouseReleaseEvent(QMouseEvent* e) { return DoMouseReleaseEvent(e); }
-  plEditorInput MouseMoveEvent(QMouseEvent* e);
-  plEditorInput WheelEvent(QWheelEvent* e) { return DoWheelEvent(e); }
+  PlasmaEditorInput KeyPressEvent(QKeyEvent* e) { return DoKeyPressEvent(e); }
+  PlasmaEditorInput KeyReleaseEvent(QKeyEvent* e) { return DoKeyReleaseEvent(e); }
+  PlasmaEditorInput MousePressEvent(QMouseEvent* e) { return DoMousePressEvent(e); }
+  PlasmaEditorInput MouseReleaseEvent(QMouseEvent* e) { return DoMouseReleaseEvent(e); }
+  PlasmaEditorInput MouseMoveEvent(QMouseEvent* e);
+  PlasmaEditorInput WheelEvent(QWheelEvent* e) { return DoWheelEvent(e); }
 
-  static void SetActiveInputContext(plEditorInputContext* pContext) { s_pActiveInputContext = pContext; }
+  static void SetActiveInputContext(PlasmaEditorInputContext* pContext) { s_pActiveInputContext = pContext; }
 
   void MakeActiveInputContext(bool bActive = true);
 
   static bool IsAnyInputContextActive() { return s_pActiveInputContext != nullptr; }
 
-  static plEditorInputContext* GetActiveInputContext() { return s_pActiveInputContext; }
+  static PlasmaEditorInputContext* GetActiveInputContext() { return s_pActiveInputContext; }
 
   static void UpdateActiveInputContext();
 
@@ -89,15 +89,15 @@ protected:
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) = 0;
 
-  virtual plEditorInput DoKeyPressEvent(QKeyEvent* e);
-  virtual plEditorInput DoKeyReleaseEvent(QKeyEvent* e) { return plEditorInput::MayBeHandledByOthers; }
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) { return plEditorInput::MayBeHandledByOthers; }
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) { return plEditorInput::MayBeHandledByOthers; }
-  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) { return plEditorInput::MayBeHandledByOthers; }
-  virtual plEditorInput DoWheelEvent(QWheelEvent* e) { return plEditorInput::MayBeHandledByOthers; }
+  virtual PlasmaEditorInput DoKeyPressEvent(QKeyEvent* e);
+  virtual PlasmaEditorInput DoKeyReleaseEvent(QKeyEvent* e) { return PlasmaEditorInput::MayBeHandledByOthers; }
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) { return PlasmaEditorInput::MayBeHandledByOthers; }
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) { return PlasmaEditorInput::MayBeHandledByOthers; }
+  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) { return PlasmaEditorInput::MayBeHandledByOthers; }
+  virtual PlasmaEditorInput DoWheelEvent(QWheelEvent* e) { return PlasmaEditorInput::MayBeHandledByOthers; }
 
 private:
-  static plEditorInputContext* s_pActiveInputContext;
+  static PlasmaEditorInputContext* s_pActiveInputContext;
 
   plQtEngineDocumentWindow* m_pOwnerWindow;
   plQtEngineViewWidget* m_pOwnerView;

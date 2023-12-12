@@ -861,14 +861,16 @@ const plAbstractMemberProperty* plReflectionUtils::GetMemberProperty(const plRTT
 void plReflectionUtils::GatherTypesDerivedFromClass(const plRTTI* pBaseRtti, plSet<const plRTTI*>& out_types)
 {
   plRTTI::ForEachDerivedType(pBaseRtti,
-    [&](const plRTTI* pRtti) {
+    [&](const plRTTI* pRtti)
+    {
       out_types.Insert(pRtti);
     });
 }
 
 void plReflectionUtils::GatherDependentTypes(const plRTTI* pRtti, plSet<const plRTTI*>& inout_typesAsSet, plDynamicArray<const plRTTI*>* out_pTypesAsStack /*= nullptr*/)
 {
-  auto AddType = [&](const plRTTI* pNewRtti) {
+  auto AddType = [&](const plRTTI* pNewRtti)
+  {
     if (pNewRtti != pRtti && pNewRtti->GetTypeFlags().IsSet(plTypeFlags::StandardType) == false && inout_typesAsSet.Contains(pNewRtti) == false)
     {
       inout_typesAsSet.Insert(pNewRtti);
@@ -1057,7 +1059,7 @@ bool plReflectionUtils::StringToEnumeration(const plRTTI* pEnumerationRtti, cons
   }
   else
   {
-    PLASMA_REPORT_FAILURE("The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
+    PLASMA_ASSERT_DEV(false, "The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
     return false;
   }
 }
@@ -1072,7 +1074,7 @@ plInt64 plReflectionUtils::DefaultEnumerationValue(const plRTTI* pEnumerationRtt
   }
   else
   {
-    PLASMA_REPORT_FAILURE("The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
+    PLASMA_ASSERT_DEV(false, "The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
     return 0;
   }
 }
@@ -1114,7 +1116,7 @@ plInt64 plReflectionUtils::MakeEnumerationValid(const plRTTI* pEnumerationRtti, 
   }
   else
   {
-    PLASMA_REPORT_FAILURE("The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
+    PLASMA_ASSERT_DEV(false, "The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
     return 0;
   }
 }
@@ -1490,11 +1492,11 @@ plVariant plReflectionUtils::GetDefaultVariantFromType(plVariant::Type::Enum typ
     case plVariant::Type::Quaternion:
       return plVariant(plQuat(0.0f, 0.0f, 0.0f, 1.0f));
     case plVariant::Type::Matrix3:
-      return plVariant(plMat3::MakeIdentity());
+      return plVariant(plMat3::IdentityMatrix());
     case plVariant::Type::Matrix4:
-      return plVariant(plMat4::MakeIdentity());
+      return plVariant(plMat4::IdentityMatrix());
     case plVariant::Type::Transform:
-      return plVariant(plTransform::MakeIdentity());
+      return plVariant(plTransform::IdentityTransform());
     case plVariant::Type::String:
       return plVariant(plString());
     case plVariant::Type::StringView:
@@ -1522,6 +1524,7 @@ plVariant plReflectionUtils::GetDefaultVariantFromType(plVariant::Type::Enum typ
       PLASMA_REPORT_FAILURE("Invalid case statement");
       return plVariant();
   }
+  return plVariant();
 }
 
 plVariant plReflectionUtils::GetDefaultValue(const plAbstractProperty* pProperty, plVariant index)
@@ -1655,6 +1658,7 @@ plVariant plReflectionUtils::GetDefaultVariantFromType(const plRTTI* pRtti)
     default:
       return GetDefaultVariantFromType(type);
   }
+  return plVariant();
 }
 
 void plReflectionUtils::SetAllMemberPropertiesToDefault(const plRTTI* pRtti, void* pObject)

@@ -29,9 +29,9 @@ void plProcGenActions::MapMenuActions()
   plActionMap* pMap = plActionMapManager::GetActionMap("ProcGenAssetMenuBar");
   PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
-  pMap->MapAction(s_hCategory, "G.Tools.Document", 10.0f);
-  pMap->MapAction(s_hDumpAST, "G.Tools.Document", "ProcGen", 1.0f);
-  pMap->MapAction(s_hDumpDisassembly, "G.Tools.Document", "ProcGen", 2.0f);
+  pMap->MapAction(s_hCategory, "Menu.Tools", 9.0f);
+  pMap->MapAction(s_hDumpAST, "Menu.Tools", 10.0f);
+  pMap->MapAction(s_hDumpDisassembly, "Menu.Tools", 11.0f);
 
   pMap = plActionMapManager::GetActionMap("ProcGenAssetToolBar");
   PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");

@@ -111,7 +111,7 @@ private:
 private:
   plUuid m_TypeScriptComponentGuid;
   plTime m_LastUpdate;
-  plTime m_UpdateInterval = plTime::MakeZero();
+  plTime m_UpdateInterval = plTime::Zero();
 
   //////////////////////////////////////////////////////////////////////////
   // Exposed Parameters

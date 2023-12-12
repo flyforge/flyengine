@@ -11,7 +11,6 @@
 #include <RendererDX11/Resources/QueryDX11.h>
 #include <RendererDX11/Resources/RenderTargetViewDX11.h>
 #include <RendererDX11/Resources/ResourceViewDX11.h>
-#include <RendererDX11/Resources/SharedTextureDX11.h>
 #include <RendererDX11/Resources/TextureDX11.h>
 #include <RendererDX11/Resources/UnorderedAccessViewDX11.h>
 #include <RendererDX11/Shader/ShaderDX11.h>
@@ -29,9 +28,9 @@
 #  include <d3d11_1.h>
 #endif
 
-plInternal::NewInstance<plGALDevice> CreateDX11Device(plAllocatorBase* pAllocator, const plGALDeviceCreationDescription& description)
+plInternal::NewInstance<plGALDevice> CreateDX11Device(plAllocatorBase* pAllocator, const plGALDeviceCreationDescription& Description)
 {
-  return PLASMA_NEW(pAllocator, plGALDeviceDX11, description);
+  return PLASMA_NEW(pAllocator, plGALDeviceDX11, Description);
 }
 
 // clang-format off
@@ -52,8 +51,14 @@ PLASMA_END_SUBSYSTEM_DECLARATION;
 
 plGALDeviceDX11::plGALDeviceDX11(const plGALDeviceCreationDescription& Description)
   : plGALDevice(Description)
-  // NOLINTNEXTLINE
+  , m_pDevice(nullptr)
+  , m_pDevice3(nullptr)
+  , m_pDebug(nullptr)
+  , m_pDXGIFactory(nullptr)
+  , m_pDXGIAdapter(nullptr)
+  , m_pDXGIDevice(nullptr)
   , m_uiFeatureLevel(D3D_FEATURE_LEVEL_9_1)
+  , m_uiFrameCounter(0)
 {
 }
 
@@ -219,7 +224,7 @@ retry:
       }
   }
 
-  // #TODO_DX11 Replace ring buffer with proper pool like in Vulkan to prevent buffer overrun.
+  //#TODO_DX11 Replace ring buffer with proper pool like in Vulkan to prevent buffer overrun.
   m_Timestamps.SetCountUninitialized(2048);
   for (plUInt32 i = 0; i < m_Timestamps.GetCount(); ++i)
   {
@@ -230,7 +235,7 @@ retry:
     }
   }
 
-  m_SyncTimeDiff = plTime::MakeZero();
+  m_SyncTimeDiff.SetZero();
 
   plGALWindowSwapChain::SetFactoryMethod([this](const plGALWindowSwapChainCreationDescription& desc) -> plGALSwapChainHandle { return CreateSwapChain([this, &desc](plAllocatorBase* pAllocator) -> plGALSwapChain* { return PLASMA_NEW(pAllocator, plGALSwapChainDX11, desc); }); });
 
@@ -255,7 +260,7 @@ void plGALDeviceDX11::ReportLiveGpuObjects()
   if (hDxgiDebugDLL == nullptr)
     return;
 
-  using FnGetDebugInterfacePtr = HRESULT(WINAPI*)(REFIID, void**);
+  typedef HRESULT(WINAPI * FnGetDebugInterfacePtr)(REFIID, void**);
   FnGetDebugInterfacePtr GetDebugInterfacePtr = (FnGetDebugInterfacePtr)GetProcAddress(hDxgiDebugDLL, "DXGIGetDebugInterface");
 
   if (GetDebugInterfacePtr == nullptr)
@@ -396,11 +401,6 @@ void plGALDeviceDX11::EndPassPlatform(plGALPass* pPass)
 #endif
 
   m_pDefaultPass->EndPass();
-}
-
-void plGALDeviceDX11::FlushPlatform()
-{
-  m_pImmediateContext->Flush();
 }
 
 // State creation functions
@@ -556,26 +556,6 @@ void plGALDeviceDX11::DestroyTexturePlatform(plGALTexture* pTexture)
   PLASMA_DELETE(&m_Allocator, pDX11Texture);
 }
 
-plGALTexture* plGALDeviceDX11::CreateSharedTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, plEnum<plGALSharedTextureType> sharedType, plGALPlatformSharedHandle handle)
-{
-  plGALSharedTextureDX11* pTexture = PLASMA_NEW(&m_Allocator, plGALSharedTextureDX11, Description, sharedType, handle);
-
-  if (!pTexture->InitPlatform(this, pInitialData).Succeeded())
-  {
-    PLASMA_DELETE(&m_Allocator, pTexture);
-    return nullptr;
-  }
-
-  return pTexture;
-}
-
-void plGALDeviceDX11::DestroySharedTexturePlatform(plGALTexture* pTexture)
-{
-  plGALSharedTextureDX11* pDX11Texture = static_cast<plGALSharedTextureDX11*>(pTexture);
-  pDX11Texture->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11Texture);
-}
-
 plGALResourceView* plGALDeviceDX11::CreateResourceViewPlatform(plGALResourceBase* pResource, const plGALResourceViewCreationDescription& Description)
 {
   plGALResourceViewDX11* pResourceView = PLASMA_NEW(&m_Allocator, plGALResourceViewDX11, pResource, Description);
@@ -719,11 +699,11 @@ plResult plGALDeviceDX11::GetTimestampResultPlatform(plGALTimestampHandle hTimes
 
   if (pPerFrameData->m_fInvTicksPerSecond == 0.0)
   {
-    result = plTime::MakeZero();
+    result.SetZero();
   }
   else
   {
-    result = plTime::MakeFromSeconds(double(uiTimestamp) * pPerFrameData->m_fInvTicksPerSecond) + m_SyncTimeDiff;
+    result = plTime::Seconds(double(uiTimestamp) * pPerFrameData->m_fInvTicksPerSecond) + m_SyncTimeDiff;
   }
   return PLASMA_SUCCESS;
 }
@@ -812,7 +792,7 @@ void plGALDeviceDX11::EndFramePlatform()
               plThreadUtils::YieldTimeSlice();
             }
 
-            m_SyncTimeDiff = plTime::Now() - plTime::MakeFromSeconds(double(uiTimestamp) * perFrameData.m_fInvTicksPerSecond);
+            m_SyncTimeDiff = plTime::Now() - plTime::Seconds(double(uiTimestamp) * perFrameData.m_fInvTicksPerSecond);
             m_bSyncTimeNeeded = false;
           }
         }
@@ -853,8 +833,8 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
   switch (m_uiFeatureLevel)
   {
     case D3D_FEATURE_LEVEL_11_1:
+      m_Capabilities.m_bB5G6R5Textures = true;
       m_Capabilities.m_bNoOverwriteBufferUpdate = true;
-      [[fallthrough]];
 
     case D3D_FEATURE_LEVEL_11_0:
       m_Capabilities.m_bShaderStageSupported[plGALShaderStage::VertexShader] = true;
@@ -866,10 +846,10 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       m_Capabilities.m_bInstancing = true;
       m_Capabilities.m_b32BitIndices = true;
       m_Capabilities.m_bIndirectDraw = true;
+      m_Capabilities.m_bStreamOut = true;
       m_Capabilities.m_uiMaxConstantBuffers = D3D11_COMMONSHADER_CONSTANT_BUFFER_HW_SLOT_COUNT;
       m_Capabilities.m_bTextureArrays = true;
       m_Capabilities.m_bCubemapArrays = true;
-      m_Capabilities.m_bSharedTextures = true;
       m_Capabilities.m_uiMaxTextureDimension = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION;
       m_Capabilities.m_uiMaxCubemapDimension = D3D11_REQ_TEXTURECUBE_DIMENSION;
       m_Capabilities.m_uiMax3DTextureDimension = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
@@ -890,6 +870,7 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       m_Capabilities.m_bInstancing = true;
       m_Capabilities.m_b32BitIndices = true;
       m_Capabilities.m_bIndirectDraw = false;
+      m_Capabilities.m_bStreamOut = true;
       m_Capabilities.m_uiMaxConstantBuffers = D3D11_COMMONSHADER_CONSTANT_BUFFER_HW_SLOT_COUNT;
       m_Capabilities.m_bTextureArrays = true;
       m_Capabilities.m_bCubemapArrays = (m_uiFeatureLevel == D3D_FEATURE_LEVEL_10_1 ? true : false);
@@ -912,6 +893,7 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       m_Capabilities.m_bInstancing = true;
       m_Capabilities.m_b32BitIndices = true;
       m_Capabilities.m_bIndirectDraw = false;
+      m_Capabilities.m_bStreamOut = false;
       m_Capabilities.m_uiMaxConstantBuffers = D3D11_COMMONSHADER_CONSTANT_BUFFER_HW_SLOT_COUNT;
       m_Capabilities.m_bTextureArrays = false;
       m_Capabilities.m_bCubemapArrays = false;
@@ -943,72 +925,12 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       m_Capabilities.m_bVertexShaderRenderTargetArrayIndex = featureOpts3.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer != 0;
     }
   }
-
-  m_Capabilities.m_FormatSupport.SetCount(plGALResourceFormat::ENUM_COUNT);
-  for (plUInt32 i = 0; i < plGALResourceFormat::ENUM_COUNT; i++)
-  {
-    plGALResourceFormat::Enum format = (plGALResourceFormat::Enum)i;
-    const plGALFormatLookupEntryDX11& entry = m_FormatLookupTable.GetFormatInfo(format);
-    const bool bIsDepth = plGALResourceFormat::IsDepthFormat(format);
-    if (bIsDepth)
-    {
-      UINT uiSampleSupport;
-      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eDepthOnlyType, &uiSampleSupport)))
-      {
-        if (uiSampleSupport & D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_SHADER_SAMPLE)
-          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::Sample);
-      }
-
-      UINT uiRenderSupport;
-      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eDepthStencilType, &uiRenderSupport)))
-      {
-        if (uiRenderSupport & D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
-          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::Render);
-      }
-    }
-    else
-    {
-      UINT uiSampleSupport;
-      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eResourceViewType, &uiSampleSupport)))
-      {
-        UINT uiSampleFlag = plGALResourceFormat::IsIntegerFormat(format) ? D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_SHADER_LOAD : D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_SHADER_SAMPLE;
-        if (uiSampleSupport & uiSampleFlag)
-          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::Sample);
-      }
-
-      UINT uiVertexSupport;
-      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eVertexAttributeType, &uiVertexSupport)))
-      {
-        if (uiVertexSupport & D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_IA_VERTEX_BUFFER)
-          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::VertexAttribute);
-      }
-
-      UINT uiRenderSupport;
-      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eRenderTarget, &uiRenderSupport)))
-      {
-        if (uiRenderSupport & D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_RENDER_TARGET)
-          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::Render);
-      }
-    }
-  }
 }
 
 void plGALDeviceDX11::WaitIdlePlatform()
 {
   m_pImmediateContext->Flush();
   DestroyDeadObjects();
-}
-
-const plGALSharedTexture* plGALDeviceDX11::GetSharedTexture(plGALTextureHandle hTexture) const
-{
-  auto pTexture = GetTexture(hTexture);
-  if (pTexture == nullptr)
-  {
-    return nullptr;
-  }
-
-  // Resolve proxy texture if any
-  return static_cast<const plGALSharedTextureDX11*>(pTexture->GetParentResource());
 }
 
 ID3D11Resource* plGALDeviceDX11::FindTempBuffer(plUInt32 uiSize)
@@ -1298,7 +1220,7 @@ bool plGALDeviceDX11::IsFenceReachedPlatform(ID3D11DeviceContext* pContext, ID3D
   BOOL data = FALSE;
   if (pContext->GetData(pFence, &data, sizeof(data), 0) == S_OK)
   {
-    PLASMA_ASSERT_DEV(data != FALSE, "Implementation error");
+    PLASMA_ASSERT_DEV(data == TRUE, "Implementation error");
     return true;
   }
 
@@ -1313,7 +1235,7 @@ void plGALDeviceDX11::WaitForFencePlatform(ID3D11DeviceContext* pContext, ID3D11
     plThreadUtils::YieldTimeSlice();
   }
 
-  PLASMA_ASSERT_DEV(data != FALSE, "Implementation error");
+  PLASMA_ASSERT_DEV(data == TRUE, "Implementation error");
 }
 
 PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Device_Implementation_DeviceDX11);

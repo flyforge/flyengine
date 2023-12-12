@@ -9,7 +9,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Implementation of ObjectStream text input stream.
-class JPH_EXPORT ObjectStreamTextIn : public ObjectStreamIn
+class ObjectStreamTextIn : public ObjectStreamIn
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE

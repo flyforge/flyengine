@@ -149,7 +149,7 @@ plResourceLoadData plTextureResourceLoader::OpenDataStream(const plResource* pRe
 
   if (cvar_StreamingTextureLoadDelay > 0)
   {
-    plThreadUtils::Sleep(plTime::MakeFromSeconds(cvar_StreamingTextureLoadDelay));
+    plThreadUtils::Sleep(plTime::Seconds(cvar_StreamingTextureLoadDelay));
   }
 
   return res;

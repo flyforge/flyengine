@@ -18,7 +18,6 @@ plTextureCubeAssetDocumentManager::plTextureCubeAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Texture Cube";
   m_DocTypeDesc.m_sFileExtension = "plTextureCubeAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Texture_Cube.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plTextureCubeAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Texture_Cube");
@@ -40,7 +39,7 @@ void plTextureCubeAssetDocumentManager::OnDocumentManagerEvent(const plDocumentM
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plTextureCubeAssetDocument>())
       {
-        new plQtTextureCubeAssetDocumentWindow(static_cast<plTextureCubeAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtTextureCubeAssetDocumentWindow* pDocWnd = new plQtTextureCubeAssetDocumentWindow(static_cast<plTextureCubeAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -51,9 +50,9 @@ void plTextureCubeAssetDocumentManager::OnDocumentManagerEvent(const plDocumentM
 }
 
 void plTextureCubeAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plTextureCubeAssetDocument(sPath);
+  out_pDocument = new plTextureCubeAssetDocument(szPath);
 }
 
 void plTextureCubeAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

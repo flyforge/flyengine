@@ -24,15 +24,15 @@ class plVisualShaderNodeManager : public plDocumentNodeManager
 {
 public:
   virtual bool InternalIsNode(const plDocumentObject* pObject) const override;
-  virtual void InternalCreatePins(const plDocumentObject* pObject, NodeInternal& ref_node) override;
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const override;
+  virtual void InternalCreatePins(const plDocumentObject* pObject, NodeInternal& node) override;
+  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const override;
 
-  virtual plStatus InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_result) const override;
-  virtual plStringView GetTypeCategory(const plRTTI* pRtti) const override;
+  virtual plStatus InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_Result) const override;
+  virtual const char* GetTypeCategory(const plRTTI* pRtti) const override;
 
 private:
   virtual plStatus InternalCanAdd(
-    const plRTTI* pRtti, const plDocumentObject* pParent, plStringView sParentProperty, const plVariant& index) const override;
+    const plRTTI* pRtti, const plDocumentObject* pParent, const char* szParentProperty, const plVariant& index) const override;
 
   plUInt32 CountNodesOfType(plVisualShaderNodeType::Enum type) const;
 };

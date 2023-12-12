@@ -41,7 +41,7 @@ plGameApplication::plGameApplication(const char* szAppName, const char* szProjec
   : plGameApplicationBase(szAppName)
   , m_sAppProjectPath(szProjectPath)
 {
-  m_pUpdateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "UpdateWorldsAndExtractViews", plTaskNesting::Never, plMakeDelegate(&plGameApplication::UpdateWorldsAndExtractViews, this));
+  m_pUpdateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "", plMakeDelegate(&plGameApplication::UpdateWorldsAndExtractViews, this));
   m_pUpdateTask->ConfigureTask("GameApplication.Update", plTaskNesting::Maybe);
 
   s_pGameApplicationInstance = this;

@@ -46,7 +46,7 @@ void plJoltShapeBoxComponent::SerializeComponent(plWorldWriter& inout_stream) co
 void plJoltShapeBoxComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
   s >> m_vHalfExtents;
@@ -54,7 +54,7 @@ void plJoltShapeBoxComponent::DeserializeComponent(plWorldReader& inout_stream)
 
 void plJoltShapeBoxComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vHalfExtents, m_vHalfExtents)), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingBox(-m_vHalfExtents, m_vHalfExtents), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeBoxComponent::ExtractGeometry(plMsgExtractGeometry& ref_msg) const
@@ -64,7 +64,7 @@ void plJoltShapeBoxComponent::ExtractGeometry(plMsgExtractGeometry& ref_msg) con
 
 void plJoltShapeBoxComponent::SetHalfExtents(const plVec3& value)
 {
-  m_vHalfExtents = value.CompMax(plVec3::MakeZero());
+  m_vHalfExtents = value.CompMax(plVec3::ZeroVector());
 
   if (IsActiveAndInitialized())
   {
@@ -88,7 +88,7 @@ void plJoltShapeBoxComponent::CreateShapes(plDynamicArray<plJoltSubShape>& out_S
 
   plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
   sub.m_pShape = pNewShape;
-  sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+  sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
 }
 
 

@@ -14,10 +14,10 @@ class StreamIn;
 class StreamOut;
 
 /// Resource that contains the joint hierarchy for a skeleton
-class JPH_EXPORT Skeleton : public RefTarget<Skeleton>
+class Skeleton : public RefTarget<Skeleton>
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(JPH_EXPORT, Skeleton)
+	JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(Skeleton)
 
 	using SkeletonResult = Result<Ref<Skeleton>>;
 
@@ -25,7 +25,7 @@ public:
 	class Joint
 	{
 	public:
-		JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(JPH_EXPORT, Joint)
+		JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(Joint)
 
 							Joint() = default;
 							Joint(const string_view &inName, const string_view &inParentName, int inParentJointIndex) : mName(inName), mParentName(inParentName), mParentJointIndex(inParentJointIndex) { }

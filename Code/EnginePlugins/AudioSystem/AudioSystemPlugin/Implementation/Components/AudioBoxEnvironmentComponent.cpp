@@ -16,6 +16,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAudioBoxEnvironmentComponent, kVersion_AudioBoxEnv
     new plBoxManipulatorAttribute("HalfExtends", 1.0f, true),
     new plBoxVisualizerAttribute("HalfExtends", 1.0f, plColor::White, "Color"),
     new plSphereVisualizerAttribute("MaxDistance", plColor::White, "Color"),
+    new plColorAttribute(plColorScheme::Sound),
   }
   PLASMA_END_ATTRIBUTES;
 
@@ -33,7 +34,7 @@ void plAudioBoxEnvironmentComponent::Initialize()
 {
   SUPER::Initialize();
 
-  m_Box = plBoundingBox::MakeFromCenterAndHalfExtents(GetOwner()->GetGlobalPosition(), m_vHalfExtends);
+  m_Box.SetCenterAndHalfExtents(GetOwner()->GetGlobalPosition(), m_vHalfExtends);
 }
 
 void plAudioBoxEnvironmentComponent::Deinitialize()
@@ -103,7 +104,7 @@ void plAudioBoxEnvironmentComponent::SetHalfExtends(const plVec3& vHalfExtends)
 
 void plAudioBoxEnvironmentComponent::Update()
 {
-  m_Box = plBoundingBox::MakeFromCenterAndHalfExtents(GetOwner()->GetGlobalPosition(), m_vHalfExtends);
+  m_Box.SetCenterAndHalfExtents(GetOwner()->GetGlobalPosition(), m_vHalfExtends);
 }
 
 PLASMA_STATICLINK_FILE(AudioSystemPlugin, AudioSystemPlugin_Implementation_Components_AudioBoxEnvironmentComponent);

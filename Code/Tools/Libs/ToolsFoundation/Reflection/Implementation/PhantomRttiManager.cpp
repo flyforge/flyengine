@@ -36,12 +36,12 @@ PLASMA_END_SUBSYSTEM_DECLARATION;
 // plPhantomRttiManager public functions
 ////////////////////////////////////////////////////////////////////////
 
-const plRTTI* plPhantomRttiManager::RegisterType(plReflectedTypeDescriptor& ref_desc)
+const plRTTI* plPhantomRttiManager::RegisterType(plReflectedTypeDescriptor& desc)
 {
   PLASMA_PROFILE_SCOPE("RegisterType");
-  const plRTTI* pType = plRTTI::FindTypeByName(ref_desc.m_sTypeName);
+  const plRTTI* pType = plRTTI::FindTypeByName(desc.m_sTypeName);
   plPhantomRTTI* pPhantom = nullptr;
-  s_NameToPhantom.TryGetValue(ref_desc.m_sTypeName, pPhantom);
+  s_NameToPhantom.TryGetValue(desc.m_sTypeName, pPhantom);
 
   // concrete type !
   if (pPhantom == nullptr && pType != nullptr)
@@ -49,17 +49,17 @@ const plRTTI* plPhantomRttiManager::RegisterType(plReflectedTypeDescriptor& ref_
     return pType;
   }
 
-  if (pPhantom != nullptr && pPhantom->IsEqualToDescriptor(ref_desc))
+  if (pPhantom != nullptr && pPhantom->IsEqualToDescriptor(desc))
     return pPhantom;
 
   if (pPhantom == nullptr)
   {
-    pPhantom = PLASMA_DEFAULT_NEW(plPhantomRTTI, ref_desc.m_sTypeName.GetData(), plRTTI::FindTypeByName(ref_desc.m_sParentTypeName), 0,
-      ref_desc.m_uiTypeVersion, plVariantType::Invalid, ref_desc.m_Flags, ref_desc.m_sPluginName.GetData());
+    pPhantom = PLASMA_DEFAULT_NEW(plPhantomRTTI, desc.m_sTypeName.GetData(), plRTTI::FindTypeByName(desc.m_sParentTypeName), 0,
+      desc.m_uiTypeVersion, plVariantType::Invalid, desc.m_Flags, desc.m_sPluginName.GetData());
 
-    pPhantom->SetProperties(ref_desc.m_Properties);
-    pPhantom->SetAttributes(ref_desc.m_Attributes);
-    pPhantom->SetFunctions(ref_desc.m_Functions);
+    pPhantom->SetProperties(desc.m_Properties);
+    pPhantom->SetAttributes(desc.m_Attributes);
+    pPhantom->SetFunctions(desc.m_Functions);
     pPhantom->SetupParentHierarchy();
 
     s_NameToPhantom[pPhantom->GetTypeName()] = pPhantom;
@@ -72,7 +72,7 @@ const plRTTI* plPhantomRttiManager::RegisterType(plReflectedTypeDescriptor& ref_
   }
   else
   {
-    pPhantom->UpdateType(ref_desc);
+    pPhantom->UpdateType(desc);
 
     plPhantomRttiManagerEvent msg;
     msg.m_pChangedType = pPhantom;

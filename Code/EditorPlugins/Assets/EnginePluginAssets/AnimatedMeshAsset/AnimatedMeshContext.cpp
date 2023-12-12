@@ -18,14 +18,14 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plAnimatedMeshContext::plAnimatedMeshContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_pAnimatedMeshObject = nullptr;
 }
 
-void plAnimatedMeshContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
+void plAnimatedMeshContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocMsg)
 {
-  if (auto* pMsg = plDynamicCast<const plEditorEngineSetMaterialsMsg*>(pDocMsg))
+  if (auto* pMsg = plDynamicCast<const PlasmaEditorEngineSetMaterialsMsg*>(pDocMsg))
   {
     plAnimatedMeshComponent* pAnimatedMesh;
     if (m_pAnimatedMeshObject && m_pAnimatedMeshObject->TryGetComponentOfBaseType(pAnimatedMesh))
@@ -64,7 +64,7 @@ void plAnimatedMeshContext::HandleMessage(const plEditorEngineDocumentMsg* pDocM
     }
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pDocMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pDocMsg);
 }
 
 void plAnimatedMeshContext::OnInitialize()
@@ -92,17 +92,17 @@ void plAnimatedMeshContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plAnimatedMeshContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plAnimatedMeshContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plAnimatedMeshViewContext, this);
 }
 
-void plAnimatedMeshContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plAnimatedMeshContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
-bool plAnimatedMeshContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plAnimatedMeshContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
@@ -111,12 +111,13 @@ bool plAnimatedMeshContext::UpdateThumbnailViewContext(plEngineProcessViewContex
 }
 
 
-void plAnimatedMeshContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
+void plAnimatedMeshContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (m_pAnimatedMeshObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   {
     PLASMA_LOCK(m_pWorld->GetWriteMarker());

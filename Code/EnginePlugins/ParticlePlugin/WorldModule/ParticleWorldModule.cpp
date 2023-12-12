@@ -213,7 +213,7 @@ void plParticleWorldModule::CreateFinisherComponent(plParticleEffectInstance* pE
     plParticleFinisherComponent::CreateComponent(pFinisher, pFinisherComp);
 
     pFinisherComp->m_EffectController = plParticleEffectController(this, pEffect->GetHandle());
-    pFinisherComp->m_EffectController.SetTransform(transform, plVec3::MakeZero()); // clear the velocity
+    pFinisherComp->m_EffectController.SetTransform(transform, plVec3::ZeroVector()); // clear the velocity
   }
 }
 

@@ -7,7 +7,7 @@
 
 struct plReflectionProbeMode
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -36,10 +36,10 @@ struct PLASMA_RENDERERCORE_DLL plReflectionProbeDesc
   float m_fSaturation = 1.0f;
   float m_fNearPlane = 0.0f;
   float m_fFarPlane = 100.0f;
-  plVec3 m_vCaptureOffset = plVec3::MakeZero();
+  plVec3 m_vCaptureOffset = plVec3::ZeroVector();
 };
 
-using plReflectionProbeId = plGenericId<24, 8>;
+typedef plGenericId<24, 8> plReflectionProbeId;
 
 template <>
 struct plHashHelper<plReflectionProbeId>
@@ -95,7 +95,7 @@ struct plHashHelper<plReflectionProbeRef>
 /// \brief Flags that describe a reflection probe.
 struct plProbeFlags
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {

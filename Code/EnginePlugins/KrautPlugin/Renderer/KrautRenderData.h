@@ -22,6 +22,6 @@ public:
   plUInt8 m_uiSubMeshIndex = 0;
   plUInt8 m_uiThisLodIndex = 0;
   bool m_bCastShadows = false;
-  plVec3 m_vWindTrunk = plVec3::MakeZero();
-  plVec3 m_vWindBranches = plVec3::MakeZero();
+  plVec3 m_vWindTrunk = plVec3::ZeroVector();
+  plVec3 m_vWindBranches = plVec3::ZeroVector();
 };

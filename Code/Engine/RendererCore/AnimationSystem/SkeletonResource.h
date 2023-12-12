@@ -34,7 +34,7 @@ struct PLASMA_RENDERERCORE_DLL plSkeletonResourceDescriptor
 
   plUInt64 GetHeapMemoryUsage() const;
 
-  plTransform m_RootTransform = plTransform::MakeIdentity();
+  plTransform m_RootTransform = plTransform::IdentityTransform();
   plSkeleton m_Skeleton;
   float m_fMaxImpulse = plMath::HighValue<float>();
 

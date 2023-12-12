@@ -43,20 +43,22 @@ public:
   /// \brief Creates an invalidated timestamp.
   plTimestamp(); // [tested]
 
-  /// \brief Returns an invalid timestamp
-  [[nodiscard]] static plTimestamp MakeInvalid() { return plTimestamp(); }
-
-  /// \brief Returns a timestamp initialized from 'iTimeValue' in 'unitOfTime' since Unix epoch.
-  [[nodiscard]] static plTimestamp MakeFromInt(plInt64 iTimeValue, plSIUnitOfTime::Enum unitOfTime);
+  /// \brief Creates an new timestamp with the given time in the given unit of time since Unix epoch.
+  plTimestamp(plInt64 iTimeValue, plSIUnitOfTime::Enum unitOfTime); // [tested]
 
   // *** Public Functions ***
 public:
+  /// \brief Invalidates the timestamp.
+  void Invalidate(); // [tested]
 
   /// \brief Returns whether the timestamp is valid.
   bool IsValid() const; // [tested]
 
   /// \brief Returns the number of 'unitOfTime' since Unix epoch.
   plInt64 GetInt64(plSIUnitOfTime::Enum unitOfTime) const; // [tested]
+
+  /// \brief Sets the timestamp as 'iTimeValue' in 'unitOfTime' since Unix epoch.
+  void SetInt64(plInt64 iTimeValue, plSIUnitOfTime::Enum unitOfTime); // [tested]
 
   /// \brief Returns whether this timestamp is considered equal to 'rhs' in the given mode.
   ///
@@ -84,11 +86,9 @@ public:
 
 
 private:
-  static constexpr const plInt64 PLASMA_INVALID_TIME_STAMP = 0x7FFFFFFFFFFFFFFFLL;
-
   PLASMA_ALLOW_PRIVATE_PROPERTIES(plTimestamp);
   /// \brief The date is stored as microseconds since Unix epoch.
-  plInt64 m_iTimestamp = PLASMA_INVALID_TIME_STAMP;
+  plInt64 m_iTimestamp;
 };
 
 /// \brief Returns a timestamp that is "timeSpan" further into the future from "timestamp".
@@ -107,33 +107,23 @@ public:
   ///
   /// Day, Month and Year will be invalid and must be set.
   plDateTime(); // [tested]
-  ~plDateTime();
 
-  /// \brief Checks whether all values are within valid ranges.
-  bool IsValid() const;
-
-  /// \brief Returns a date time that is all zero.
-  [[nodiscard]] static plDateTime MakeZero() { return plDateTime(); }
-
-  /// \brief Sets this instance to the given timestamp.
-  ///
-  /// This calls SetFromTimestamp() internally and asserts that the conversion succeeded.
-  /// Use SetFromTimestamp() directly, if you need to be able to react to invalid data.
-  [[nodiscard]] static plDateTime MakeFromTimestamp(plTimestamp timestamp);
+  /// \brief Creates a date time instance from the given timestamp.
+  plDateTime(plTimestamp timestamp); // [tested]
 
   /// \brief Converts this instance' values into a plTimestamp.
   ///
   /// The conversion is done via the OS and can fail for values that are outside the supported range.
   /// In this case, the returned value will be invalid. Anything after 1970 and before the
   /// not so distant future should be safe.
-  [[nodiscard]] const plTimestamp GetTimestamp() const; // [tested]
+  const plTimestamp GetTimestamp() const; // [tested]
 
   /// \brief Sets this instance to the given timestamp.
   ///
   /// The conversion is done via the OS and will fail for invalid dates and values outside the supported range,
-  /// in which case PLASMA_FAILURE will be returned.
+  /// in which case false will be returned.
   /// Anything after 1970 and before the not so distant future should be safe.
-  plResult SetFromTimestamp(plTimestamp timestamp);
+  bool SetTimestamp(plTimestamp timestamp); // [tested]
 
   // *** Accessors ***
 public:
@@ -146,62 +136,62 @@ public:
   /// \brief Returns the currently set month.
   plUInt8 GetMonth() const; // [tested]
 
-  /// \brief Sets the month to the given value. Asserts that the value is in the valid range [1, 12].
+  /// \brief Sets the month to the given value, will be clamped to valid range [1, 12].
   void SetMonth(plUInt8 uiMonth); // [tested]
 
   /// \brief Returns the currently set day.
   plUInt8 GetDay() const; // [tested]
 
-  /// \brief Sets the day to the given value. Asserts that the value is in the valid range [1, 31].
+  /// \brief Sets the day to the given value, will be clamped to valid range [1, 31].
   void SetDay(plUInt8 uiDay); // [tested]
 
   /// \brief Returns the currently set day of week.
   plUInt8 GetDayOfWeek() const;
 
-  /// \brief Sets the day of week to the given value. Asserts that the value is in the valid range [0, 6].
+  /// \brief Sets the day of week to the given value, will be clamped to valid range [0, 6].
   void SetDayOfWeek(plUInt8 uiDayOfWeek);
 
   /// \brief Returns the currently set hour.
   plUInt8 GetHour() const; // [tested]
 
-  /// \brief Sets the hour to the given value. Asserts that the value is in the valid range [0, 23].
+  /// \brief Sets the hour to the given value, will be clamped to valid range [0, 23].
   void SetHour(plUInt8 uiHour); // [tested]
 
   /// \brief Returns the currently set minute.
   plUInt8 GetMinute() const; // [tested]
 
-  /// \brief Sets the minute to the given value. Asserts that the value is in the valid range [0, 59].
+  /// \brief Sets the minute to the given value, will be clamped to valid range [0, 59].
   void SetMinute(plUInt8 uiMinute); // [tested]
 
   /// \brief Returns the currently set second.
   plUInt8 GetSecond() const; // [tested]
 
-  /// \brief Sets the second to the given value. Asserts that the value is in the valid range [0, 59].
+  /// \brief Sets the second to the given value, will be clamped to valid range [0, 59].
   void SetSecond(plUInt8 uiSecond); // [tested]
 
   /// \brief Returns the currently set microseconds.
   plUInt32 GetMicroseconds() const; // [tested]
 
-  /// \brief Sets the microseconds to the given value. Asserts that the value is in the valid range [0, 999999].
+  /// \brief Sets the microseconds to the given value, will be clamped to valid range [0, 999999].
   void SetMicroseconds(plUInt32 uiMicroSeconds); // [tested]
 
 private:
   /// \brief The fraction of a second in microseconds of this date [0, 999999].
-  plUInt32 m_uiMicroseconds = 0;
+  plUInt32 m_uiMicroseconds;
   /// \brief The year of this date [-32k, +32k].
-  plInt16 m_iYear = 0;
+  plInt16 m_iYear;
   /// \brief The month of this date [1, 12].
-  plUInt8 m_uiMonth = 0;
+  plUInt8 m_uiMonth;
   /// \brief The day of this date [1, 31].
-  plUInt8 m_uiDay = 0;
+  plUInt8 m_uiDay;
   /// \brief The day of week of this date [0, 6].
-  plUInt8 m_uiDayOfWeek = 0;
+  plUInt8 m_uiDayOfWeek;
   /// \brief The hour of this date [0, 23].
-  plUInt8 m_uiHour = 0;
+  plUInt8 m_uiHour;
   /// \brief The number of minutes of this date [0, 59].
-  plUInt8 m_uiMinute = 0;
+  plUInt8 m_uiMinute;
   /// \brief The number of seconds of this date [0, 59].
-  plUInt8 m_uiSecond = 0;
+  plUInt8 m_uiSecond;
 };
 
 PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plDateTime& arg);

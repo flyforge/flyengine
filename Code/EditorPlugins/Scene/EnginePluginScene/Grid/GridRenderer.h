@@ -25,12 +25,12 @@ public:
   bool m_bGlobal;
 };
 
-class plEditorGridExtractor : public plExtractor
+class PlasmaEditorGridExtractor : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditorGridExtractor, plExtractor);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorGridExtractor, plExtractor);
 
 public:
-  plEditorGridExtractor(const char* szName = "EditorGridExtractor");
+  PlasmaEditorGridExtractor(const char* szName = "EditorGridExtractor");
 
   virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData) override;
 

@@ -36,7 +36,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, plUInt8 uiValue)
 
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plUInt8& out_uiValue)
 {
-  //PLASMA_VERIFY(inout_stream.ReadBytes(&out_uiValue, sizeof(plUInt8)) == sizeof(plUInt8), "End of stream reached.");
+  PLASMA_VERIFY(inout_stream.ReadBytes(&out_uiValue, sizeof(plUInt8)) == sizeof(plUInt8), "End of stream reached.");
   return inout_stream;
 }
 

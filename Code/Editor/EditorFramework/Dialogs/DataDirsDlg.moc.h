@@ -11,7 +11,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtDataDirsDlg(QWidget* pParent);
+  plQtDataDirsDlg(QWidget* parent);
 
 private Q_SLOTS:
   void on_ButtonOK_clicked();

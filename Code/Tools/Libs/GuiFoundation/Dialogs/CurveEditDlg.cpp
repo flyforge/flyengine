@@ -8,8 +8,8 @@
 
 QByteArray plQtCurveEditDlg::s_LastDialogGeometry;
 
-plQtCurveEditDlg::plQtCurveEditDlg(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pCurveObject, QWidget* pParent)
-  : QDialog(pParent)
+plQtCurveEditDlg::plQtCurveEditDlg(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pCurveObject, QWidget* parent)
+  : QDialog(parent)
 {
   m_pObjectAccessor = pObjectAccessor;
   m_pCurveObject = pCurveObject;
@@ -47,7 +47,7 @@ void plQtCurveEditDlg::RetrieveCurveState()
   auto& curve = m_Curves.m_Curves.PeekBack();
 
   plInt32 iNumPoints = 0;
-  m_pObjectAccessor->GetCount(m_pCurveObject, "ControlPoints", iNumPoints).AssertSuccess();
+  m_pObjectAccessor->GetCount(m_pCurveObject, "ControlPoints", iNumPoints).IgnoreResult();
   curve->m_ControlPoints.SetCount(iNumPoints);
 
   plVariant v;
@@ -57,25 +57,25 @@ void plQtCurveEditDlg::RetrieveCurveState()
   {
     const plDocumentObject* pPoint = m_pObjectAccessor->GetChildObject(m_pCurveObject, "ControlPoints", i);
 
-    m_pObjectAccessor->GetValue(pPoint, "Tick", v).AssertSuccess();
+    m_pObjectAccessor->GetValue(pPoint, "Tick", v).IgnoreResult();
     curve->m_ControlPoints[i].m_iTick = v.ConvertTo<plInt32>();
 
-    m_pObjectAccessor->GetValue(pPoint, "Value", v).AssertSuccess();
+    m_pObjectAccessor->GetValue(pPoint, "Value", v).IgnoreResult();
     curve->m_ControlPoints[i].m_fValue = v.ConvertTo<double>();
 
-    m_pObjectAccessor->GetValue(pPoint, "LeftTangent", v).AssertSuccess();
+    m_pObjectAccessor->GetValue(pPoint, "LeftTangent", v).IgnoreResult();
     curve->m_ControlPoints[i].m_LeftTangent = v.ConvertTo<plVec2>();
 
-    m_pObjectAccessor->GetValue(pPoint, "RightTangent", v).AssertSuccess();
+    m_pObjectAccessor->GetValue(pPoint, "RightTangent", v).IgnoreResult();
     curve->m_ControlPoints[i].m_RightTangent = v.ConvertTo<plVec2>();
 
-    m_pObjectAccessor->GetValue(pPoint, "Linked", v).AssertSuccess();
+    m_pObjectAccessor->GetValue(pPoint, "Linked", v).IgnoreResult();
     curve->m_ControlPoints[i].m_bTangentsLinked = v.ConvertTo<bool>();
 
-    m_pObjectAccessor->GetValue(pPoint, "LeftTangentMode", v).AssertSuccess();
+    m_pObjectAccessor->GetValue(pPoint, "LeftTangentMode", v).IgnoreResult();
     curve->m_ControlPoints[i].m_LeftTangentMode = (plCurveTangentMode::Enum)v.ConvertTo<plInt32>();
 
-    m_pObjectAccessor->GetValue(pPoint, "RightTangentMode", v).AssertSuccess();
+    m_pObjectAccessor->GetValue(pPoint, "RightTangentMode", v).IgnoreResult();
     curve->m_ControlPoints[i].m_RightTangentMode = (plCurveTangentMode::Enum)v.ConvertTo<plInt32>();
   }
 }
@@ -117,7 +117,7 @@ void plQtCurveEditDlg::accept()
 void plQtCurveEditDlg::cancel()
 {
   auto& cmd = *m_pObjectAccessor->GetObjectManager()->GetDocument()->GetCommandHistory();
-  cmd.Undo(cmd.GetUndoStackSize() - m_uiActionsUndoBaseline).AssertSuccess();
+  cmd.Undo(cmd.GetUndoStackSize() - m_uiActionsUndoBaseline).IgnoreResult();
 
   QDialog::reject();
 }
@@ -159,8 +159,8 @@ void plQtCurveEditDlg::OnCpMovedEvent(plUInt32 curveIdx, plUInt32 cpIdx, plInt64
   {
     const plDocumentObject* pPoint = m_pObjectAccessor->GetChildObject(m_pCurveObject, "ControlPoints", cpIdx);
 
-    m_pObjectAccessor->SetValue(pPoint, "Tick", iTickX).AssertSuccess();
-    m_pObjectAccessor->SetValue(pPoint, "Value", newPosY).AssertSuccess();
+    m_pObjectAccessor->SetValue(pPoint, "Tick", iTickX).IgnoreResult();
+    m_pObjectAccessor->SetValue(pPoint, "Value", newPosY).IgnoreResult();
   }
 }
 
@@ -174,7 +174,7 @@ void plQtCurveEditDlg::OnCpDeletedEvent(plUInt32 curveIdx, plUInt32 cpIdx)
   // update the actual object
   {
     const plDocumentObject* pPoint = m_pObjectAccessor->GetChildObject(m_pCurveObject, "ControlPoints", cpIdx);
-    m_pObjectAccessor->RemoveObject(pPoint).AssertSuccess();
+    m_pObjectAccessor->RemoveObject(pPoint).IgnoreResult();
   }
 }
 
@@ -195,9 +195,9 @@ void plQtCurveEditDlg::OnTangentMovedEvent(plUInt32 curveIdx, plUInt32 cpIdx, fl
     const plDocumentObject* pPoint = m_pObjectAccessor->GetChildObject(m_pCurveObject, "ControlPoints", cpIdx);
 
     if (rightTangent)
-      m_pObjectAccessor->SetValue(pPoint, "RightTangent", plVec2(newPosX, newPosY)).AssertSuccess();
+      m_pObjectAccessor->SetValue(pPoint, "RightTangent", plVec2(newPosX, newPosY)).IgnoreResult();
     else
-      m_pObjectAccessor->SetValue(pPoint, "LeftTangent", plVec2(newPosX, newPosY)).AssertSuccess();
+      m_pObjectAccessor->SetValue(pPoint, "LeftTangent", plVec2(newPosX, newPosY)).IgnoreResult();
   }
 }
 
@@ -215,12 +215,12 @@ void plQtCurveEditDlg::OnInsertCpEvent(plUInt32 curveIdx, plInt64 tickX, double 
   // update the actual object
   {
     plUuid guid;
-    m_pObjectAccessor->AddObject(m_pCurveObject, "ControlPoints", -1, plGetStaticRTTI<plCurveControlPointData>(), guid).AssertSuccess();
+    m_pObjectAccessor->AddObject(m_pCurveObject, "ControlPoints", -1, plGetStaticRTTI<plCurveControlPointData>(), guid).IgnoreResult();
 
     const plDocumentObject* pPoint = m_pObjectAccessor->GetObject(guid);
 
-    m_pObjectAccessor->SetValue(pPoint, "Tick", tickX).AssertSuccess();
-    m_pObjectAccessor->SetValue(pPoint, "Value", value).AssertSuccess();
+    m_pObjectAccessor->SetValue(pPoint, "Tick", tickX).IgnoreResult();
+    m_pObjectAccessor->SetValue(pPoint, "Value", value).IgnoreResult();
   }
 }
 
@@ -236,7 +236,7 @@ void plQtCurveEditDlg::OnTangentLinkEvent(plUInt32 curveIdx, plUInt32 cpIdx, boo
   {
     const plDocumentObject* pPoint = m_pObjectAccessor->GetChildObject(m_pCurveObject, "ControlPoints", cpIdx);
 
-    m_pObjectAccessor->SetValue(pPoint, "Linked", bLink).AssertSuccess();
+    m_pObjectAccessor->SetValue(pPoint, "Linked", bLink).IgnoreResult();
   }
 }
 
@@ -257,9 +257,9 @@ void plQtCurveEditDlg::OnCpTangentModeEvent(plUInt32 curveIdx, plUInt32 cpIdx, b
     const plDocumentObject* pPoint = m_pObjectAccessor->GetChildObject(m_pCurveObject, "ControlPoints", cpIdx);
 
     if (rightTangent)
-      m_pObjectAccessor->SetValue(pPoint, "RightTangentMode", mode).AssertSuccess();
+      m_pObjectAccessor->SetValue(pPoint, "RightTangentMode", mode).IgnoreResult();
     else
-      m_pObjectAccessor->SetValue(pPoint, "LeftTangentMode", mode).AssertSuccess();
+      m_pObjectAccessor->SetValue(pPoint, "LeftTangentMode", mode).IgnoreResult();
   }
 }
 

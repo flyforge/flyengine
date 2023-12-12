@@ -5,7 +5,6 @@
 #include <JoltPlugin/Shapes/JoltShapeComponent.h>
 #include <JoltPlugin/System/JoltWorldModule.h>
 #include <JoltPlugin/Utilities/JoltUserData.h>
-#include <Physics/Collision/CollisionCollectorImpl.h>
 
 void FillCastResult(plPhysicsCastResult& ref_result, const plVec3& vStart, const plVec3& vDir, float fDistance, const JPH::BodyID& bodyId, const JPH::SubShapeID& subShapeId, const JPH::BodyLockInterface& lockInterface, const JPH::BodyInterface& bodyInterface, const plJoltWorldModule* pModule)
 {
@@ -26,10 +25,7 @@ void FillCastResult(plPhysicsCastResult& ref_result, const plVec3& vStart, const
 
   if (const plJoltMaterial* pMaterial = static_cast<const plJoltMaterial*>(bodyInterface.GetMaterial(bodyId, subShapeId)))
   {
-    if (pMaterial->m_pSurface)
-    {
-      ref_result.m_hSurface = pMaterial->m_pSurface->GetResourceHandle();
-    }
+    ref_result.m_hSurface = pMaterial->m_pSurface->GetResourceHandle();
   }
 
   const size_t uiBodyId = bodyId.GetIndexAndSequenceNumber();
@@ -207,7 +203,8 @@ bool plJoltWorldModule::SweepTestCapsule(plPhysicsCastResult& out_result, float 
 
   const JPH::CapsuleShape shape(fCapsuleHeight * 0.5f, fCapsuleRadius);
 
-  plQuat qFixRot = plQuat::MakeFromAxisAndAngle(plVec3(1, 0, 0), plAngle::MakeFromDegree(90.0f));
+  plQuat qFixRot;
+  qFixRot.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Degree(90.0f));
 
   plQuat qRot;
   qRot = transform.m_qRotation;
@@ -291,7 +288,8 @@ bool plJoltWorldModule::OverlapTestCapsule(float fCapsuleRadius, float fCapsuleH
 
   const JPH::CapsuleShape shape(fCapsuleHeight * 0.5f, fCapsuleRadius);
 
-  plQuat qFixRot = plQuat::MakeFromAxisAndAngle(plVec3(1, 0, 0), plAngle::MakeFromDegree(90.0f));
+  plQuat qFixRot;
+  qFixRot.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Degree(90.0f));
 
   plQuat qRot;
   qRot = transform.m_qRotation;
@@ -365,54 +363,5 @@ void plJoltWorldModule::QueryShapesInSphere(plPhysicsOverlapResultArray& out_res
   }
 }
 
-void plJoltWorldModule::QueryGeometryInBox(const plPhysicsQueryParameters& params, plBoundingBox box, plDynamicArray<plPhysicsTriangle>& out_triangles) const
-{
-  JPH::AABox aabb;
-  aabb.mMin = plJoltConversionUtils::ToVec3(box.m_vMin);
-  aabb.mMax = plJoltConversionUtils::ToVec3(box.m_vMax);
-
-  JPH::AllHitCollisionCollector<JPH::TransformedShapeCollector> collector;
-
-  plJoltBroadPhaseLayerFilter broadphaseFilter(params.m_ShapeTypes);
-  plJoltObjectLayerFilter objectFilter(params.m_uiCollisionLayer);
-  plJoltBodyFilter bodyFilter(params.m_uiIgnoreObjectFilterID);
-
-  m_pSystem->GetNarrowPhaseQuery().CollectTransformedShapes(aabb, collector, broadphaseFilter, objectFilter, bodyFilter);
-
-  const int cMaxTriangles = 128;
-
-  plStaticArray<plVec3, cMaxTriangles * 3> positionsTmp;
-  positionsTmp.SetCountUninitialized(cMaxTriangles * 3);
-
-  plStaticArray<const JPH::PhysicsMaterial*, cMaxTriangles> materialsTmp;
-  materialsTmp.SetCountUninitialized(cMaxTriangles);
-
-  for (const JPH::TransformedShape& ts : collector.mHits)
-  {
-    JPH::Shape::GetTrianglesContext ctx;
-    ts.GetTrianglesStart(ctx, aabb, JPH::Vec3::sZero());
-
-    while (true)
-    {
-      const int triCount = ts.GetTrianglesNext(ctx, cMaxTriangles, reinterpret_cast<JPH::Float3*>(positionsTmp.GetData()), materialsTmp.GetData());
-
-      if (triCount == 0)
-        break;
-
-      out_triangles.Reserve(out_triangles.GetCount() + triCount);
-
-      for (plUInt32 i = 0; i < triCount; ++i)
-      {
-        const plJoltMaterial* pMat = static_cast<const plJoltMaterial*>(materialsTmp[i]);
-
-        auto& tri = out_triangles.ExpandAndGetRef();
-        tri.m_pSurface = pMat ? pMat->m_pSurface : nullptr;
-        tri.m_Vertices[0] = positionsTmp[i * 3 + 0];
-        tri.m_Vertices[1] = positionsTmp[i * 3 + 1];
-        tri.m_Vertices[2] = positionsTmp[i * 3 + 2];
-      }
-    }
-  }
-}
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltQueries);

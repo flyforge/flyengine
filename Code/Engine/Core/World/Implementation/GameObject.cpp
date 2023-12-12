@@ -682,7 +682,7 @@ plVec3 plGameObject::GetAngularVelocity() const
 {
   const plSimdFloat invDeltaSeconds = GetWorld()->GetInvDeltaSeconds();
   const plSimdQuat q = m_pTransformationData->m_globalTransform.m_Rotation * -m_pTransformationData->m_lastGlobalTransform.m_Rotation;
-  plSimdVec4f angularVelocity = plSimdVec4f::MakeZero();
+  plSimdVec4f angularVelocity = plSimdVec4f::ZeroVector();
 
   plSimdVec4f axis;
   plSimdFloat angle;
@@ -702,11 +702,11 @@ void plGameObject::UpdateGlobalTransform()
 void plGameObject::UpdateLocalBounds()
 {
   plMsgUpdateLocalBounds msg;
-  msg.m_ResultingLocalBounds = plBoundingBoxSphere::MakeInvalid();
+  msg.m_ResultingLocalBounds.SetInvalid();
 
   SendMessage(msg);
 
-  const bool bIsAlwaysVisible = m_pTransformationData->m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::MakeZero();
+  const bool bIsAlwaysVisible = m_pTransformationData->m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::Zero();
   bool bRecreateSpatialData = false;
 
   if (m_pTransformationData->m_hSpatialData.IsInvalidated() == false)
@@ -1131,7 +1131,7 @@ void plGameObject::TransformationData::UpdateLocalTransform()
 
   if (m_pParentData != nullptr)
   {
-    tLocal= plSimdTransform::MakeLocalTransform(m_pParentData->m_globalTransform, m_globalTransform);
+    tLocal.SetLocalTransform(m_pParentData->m_globalTransform, m_globalTransform);
   }
   else
   {
@@ -1187,7 +1187,7 @@ void plGameObject::TransformationData::UpdateGlobalBoundsAndSpatialData(plSpatia
 
   UpdateGlobalBounds();
 
-  const bool bIsAlwaysVisible = m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::MakeZero();
+  const bool bIsAlwaysVisible = m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::Zero();
   if (m_hSpatialData.IsInvalidated() == false && bIsAlwaysVisible == false && m_globalBounds != oldGlobalBounds)
   {
     ref_spatialSystem.UpdateSpatialDataBounds(m_hSpatialData, m_globalBounds);
@@ -1202,7 +1202,7 @@ void plGameObject::TransformationData::RecreateSpatialData(plSpatialSystem& ref_
     m_hSpatialData.Invalidate();
   }
 
-  const bool bIsAlwaysVisible = m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::MakeZero();
+  const bool bIsAlwaysVisible = m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::Zero();
   if (bIsAlwaysVisible)
   {
     m_hSpatialData = ref_spatialSystem.CreateSpatialDataAlwaysVisible(m_pObject, m_uiSpatialDataCategoryBitmask, m_pObject->m_Tags);

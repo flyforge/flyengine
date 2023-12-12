@@ -77,10 +77,10 @@ public:
   bool CanUndo() const;
   bool CanRedo() const;
 
-  plStringView GetUndoDisplayString() const;
-  plStringView GetRedoDisplayString() const;
+  const char* GetUndoDisplayString() const;
+  const char* GetRedoDisplayString() const;
 
-  void StartTransaction(const plFormatString& displayString);
+  void StartTransaction(const plFormatString& sDisplayString);
   void CancelTransaction() { EndTransaction(true); }
   void FinishTransaction() { EndTransaction(false); }
 
@@ -91,7 +91,7 @@ public:
   /// \brief Call this to start a series of transactions that typically change the same value over and over (e.g. dragging an object to a position).
   /// Every time a new transaction is started, the previous one is undone first. At the end of a series of temporary transactions, only the last
   /// transaction will be stored as a single undo step. Call this first and then start a transaction inside it.
-  void BeginTemporaryCommands(plStringView sDisplayString, bool bFireEventsWhenUndoingTempCommands = false);
+  void BeginTemporaryCommands(const char* szDisplayString, bool bFireEventsWhenUndoingTempCommands = false);
   void CancelTemporaryCommands();
   void FinishTemporaryCommands();
 
@@ -99,7 +99,7 @@ public:
   void SuspendTemporaryTransaction();
   void ResumeTemporaryTransaction();
 
-  plStatus AddCommand(plCommand& ref_command);
+  plStatus AddCommand(plCommand& command);
 
   void ClearUndoHistory();
   void ClearRedoHistory();
@@ -108,8 +108,8 @@ public:
 
   plUInt32 GetUndoStackSize() const;
   plUInt32 GetRedoStackSize() const;
-  const plCommandTransaction* GetUndoStackEntry(plUInt32 uiIndex) const;
-  const plCommandTransaction* GetRedoStackEntry(plUInt32 uiIndex) const;
+  const plCommandTransaction* GetUndoStackEntry(plUInt32 iIndex) const;
+  const plCommandTransaction* GetRedoStackEntry(plUInt32 iIndex) const;
 
   plSharedPtr<plCommandHistory::Storage> SwapStorage(plSharedPtr<plCommandHistory::Storage> pNewStorage);
   plSharedPtr<plCommandHistory::Storage> GetStorage() { return m_pHistoryStorage; }

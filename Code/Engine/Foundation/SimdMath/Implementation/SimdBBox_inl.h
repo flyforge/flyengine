@@ -8,33 +8,6 @@ PLASMA_ALWAYS_INLINE plSimdBBox::plSimdBBox(const plSimdVec4f& vMin, const plSim
 {
 }
 
-PLASMA_ALWAYS_INLINE plSimdBBox plSimdBBox::MakeZero()
-{
-  return plSimdBBox(plSimdVec4f::MakeZero(), plSimdVec4f::MakeZero());
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBox plSimdBBox::MakeInvalid()
-{
-  return plSimdBBox(plSimdVec4f(plMath::MaxValue<float>()), plSimdVec4f(-plMath::MaxValue<float>()));
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBox plSimdBBox::MakeFromCenterAndHalfExtents(const plSimdVec4f& vCenter, const plSimdVec4f& vHalfExtents)
-{
-  return plSimdBBox(vCenter - vHalfExtents, vCenter + vHalfExtents);
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBox plSimdBBox::MakeFromMinMax(const plSimdVec4f& vMin, const plSimdVec4f& vMax)
-{
-  return plSimdBBox(vMin, vMax);
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBox plSimdBBox::MakeFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /*= sizeof(plSimdVec4f)*/)
-{
-  plSimdBBox box = plSimdBBox::MakeInvalid();
-  box.ExpandToInclude(pPoints, uiNumPoints, uiStride);
-  return box;
-}
-
 PLASMA_ALWAYS_INLINE void plSimdBBox::SetInvalid()
 {
   m_Min.Set(plMath::MaxValue<float>());
@@ -49,7 +22,7 @@ PLASMA_ALWAYS_INLINE void plSimdBBox::SetCenterAndHalfExtents(const plSimdVec4f&
 
 PLASMA_ALWAYS_INLINE void plSimdBBox::SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride)
 {
-  *this = MakeInvalid();
+  SetInvalid();
   ExpandToInclude(pPoints, uiNumPoints, uiStride);
 }
 
@@ -110,7 +83,7 @@ inline void plSimdBBox::ExpandToCube()
   const plSimdVec4f center = GetCenter();
   const plSimdVec4f halfExtents = center - m_Min;
 
-  *this = plSimdBBox::MakeFromCenterAndHalfExtents(center, plSimdVec4f(halfExtents.HorizontalMax<3>()));
+  SetCenterAndHalfExtents(center, plSimdVec4f(halfExtents.HorizontalMax<3>()));
 }
 
 PLASMA_ALWAYS_INLINE bool plSimdBBox::Contains(const plSimdVec4f& vPoint) const
@@ -125,7 +98,8 @@ PLASMA_ALWAYS_INLINE bool plSimdBBox::Contains(const plSimdBBox& rhs) const
 
 inline bool plSimdBBox::Contains(const plSimdBSphere& rhs) const
 {
-  const plSimdBBox otherBox = plSimdBBox::MakeFromCenterAndHalfExtents(rhs.GetCenter(), plSimdVec4f(rhs.GetRadius()));
+  plSimdBBox otherBox;
+  otherBox.SetCenterAndHalfExtents(rhs.GetCenter(), plSimdVec4f(rhs.GetRadius()));
 
   return Contains(otherBox);
 }
@@ -169,7 +143,7 @@ PLASMA_ALWAYS_INLINE void plSimdBBox::Transform(const plSimdMat4f& mMat)
   newHalfExtents += mMat.m_col1.Abs() * halfExtents.y();
   newHalfExtents += mMat.m_col2.Abs() * halfExtents.z();
 
-  *this = plSimdBBox::MakeFromCenterAndHalfExtents(newCenter, newHalfExtents);
+  SetCenterAndHalfExtents(newCenter, newHalfExtents);
 }
 
 PLASMA_ALWAYS_INLINE plSimdVec4f plSimdBBox::GetClampedPoint(const plSimdVec4f& vPoint) const

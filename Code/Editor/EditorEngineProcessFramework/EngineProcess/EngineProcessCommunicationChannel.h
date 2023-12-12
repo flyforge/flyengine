@@ -2,7 +2,7 @@
 
 #include <EditorEngineProcessFramework/IPC/ProcessCommunicationChannel.h>
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineProcessCommunicationChannel : public plProcessCommunicationChannel
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineProcessCommunicationChannel : public plProcessCommunicationChannel
 {
 public:
   plResult ConnectToHostProcess();

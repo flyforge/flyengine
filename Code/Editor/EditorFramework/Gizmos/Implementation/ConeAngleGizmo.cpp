@@ -9,16 +9,16 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plConeAngleGizmo::plConeAngleGizmo()
 {
-  m_Angle = plAngle::MakeFromDegree(1.0f);
+  m_Angle = plAngle::Degree(1.0f);
   m_fAngleScale = 1.0f;
   m_fRadius = 1.0f;
 
   m_ManipulateMode = ManipulateMode::None;
 
-  m_hConeAngle.ConfigureHandle(this, plEngineGizmoHandleType::Cone, plColorLinearUB(200, 200, 0, 128), plGizmoFlags::Pickable);
+  m_hConeAngle.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Cone, plColorLinearUB(200, 200, 0, 128), plGizmoFlags::Pickable);
 
   SetVisible(false);
-  SetTransformation(plTransform::MakeIdentity());
+  SetTransformation(plTransform::IdentityTransform());
 }
 
 void plConeAngleGizmo::OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
@@ -35,7 +35,7 @@ void plConeAngleGizmo::OnTransformationChanged(const plTransform& transform)
 {
   plTransform t = transform;
 
-  t.m_vScale *= plVec3(1.0f, m_fAngleScale, m_fAngleScale) * m_fRadius;
+  t.m_vScale *= plVec3(1.0f, m_fAngleScale, m_fAngleScale) * (plMath::Sin(m_Angle) * m_fRadius);
   m_hConeAngle.SetTransformation(t);
 }
 
@@ -54,22 +54,22 @@ void plConeAngleGizmo::DoFocusLost(bool bCancel)
   m_ManipulateMode = ManipulateMode::None;
 }
 
-plEditorInput plConeAngleGizmo::DoMousePressEvent(QMouseEvent* e)
+PlasmaEditorInput plConeAngleGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
   if (e->modifiers() != 0)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (m_pInteractionGizmoHandle == &m_hConeAngle)
   {
     m_ManipulateMode = ManipulateMode::Angle;
   }
   else
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -77,7 +77,7 @@ plEditorInput plConeAngleGizmo::DoMousePressEvent(QMouseEvent* e)
 
   m_LastInteraction = plTime::Now();
 
-  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
 
   SetActiveInputContext(this);
 
@@ -86,50 +86,48 @@ plEditorInput plConeAngleGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plConeAngleGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+PlasmaEditorInput plConeAngleGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plConeAngleGizmo::DoMouseMoveEvent(QMouseEvent* e)
+PlasmaEditorInput plConeAngleGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
-    return plEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
 
-  const QPoint mousePosition = e->globalPosition().toPoint();
-
-  const plVec2I32 vNewMousePos = plVec2I32(mousePosition.x(), mousePosition.y());
+  const plVec2I32 vNewMousePos = plVec2I32(e->globalPos().x(), e->globalPos().y());
   const plVec2I32 vDiff = vNewMousePos - m_vLastMousePos;
 
   m_vLastMousePos = UpdateMouseMode(e);
 
   const float fSpeed = 0.02f;
-  const plAngle aSpeed = plAngle::MakeFromDegree(1.0f);
+  const plAngle aSpeed = plAngle::Degree(1.0f);
 
   {
     m_Angle += vDiff.x * aSpeed;
     m_Angle -= vDiff.y * aSpeed;
 
-    m_Angle = plMath::Clamp(m_Angle, plAngle(), plAngle::MakeFromDegree(179.0f));
+    m_Angle = plMath::Clamp(m_Angle, plAngle(), plAngle::Degree(179.0f));
 
     m_fAngleScale = plMath::Tan(m_Angle * 0.5f);
   }
@@ -142,7 +140,7 @@ plEditorInput plConeAngleGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
 void plConeAngleGizmo::SetAngle(plAngle angle)

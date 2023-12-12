@@ -20,30 +20,26 @@ public:
   // *** Constructors ***
 public:
   /// \brief default-constructed vector is uninitialized (for speed)
-  plVec3Template<Type>(); // [tested]
+  plVec3Template(); // [tested]
 
   /// \brief Initializes the vector with x,y,z
-  plVec3Template<Type>(Type x, Type y, Type z); // [tested]
+  plVec3Template(Type x, Type y, Type z); // [tested]
 
   /// \brief Initializes all 3 components with xyz
-  explicit plVec3Template<Type>(Type v); // [tested]
-
+  explicit plVec3Template(Type v); // [tested]
   // no copy-constructor and operator= since the default-generated ones will be faster
 
-  /// \brief Returns a vector with all components set to Not-a-Number (NaN).
-  [[nodiscard]] static plVec3Template<Type> MakeNaN() { return plVec3Template<Type>(plMath::NaN<Type>()); }
-
   /// \brief Returns a vector with all components set to zero.
-  [[nodiscard]] static plVec3Template<Type> MakeZero() { return plVec3Template<Type>(0); } // [tested]
+  static plVec3Template<Type> ZeroVector() { return plVec3Template(0); } // [tested]
+  /// \brief Returns a vector with all components set to one.
+  static plVec3Template<Type> OneVector() { return plVec3Template(1); }
 
-  /// \brief Returns a vector initialized to the X unit vector (1, 0, 0).
-  [[nodiscard]] static plVec3Template<Type> MakeAxisX() { return plVec3Template<Type>(1, 0, 0); } // [tested]
-
-  /// \brief Returns a vector initialized to the Y unit vector (0, 1, 0).
-  [[nodiscard]] static plVec3Template<Type> MakeAxisY() { return plVec3Template<Type>(0, 1, 0); } // [tested]
-
-  /// \brief Returns a vector initialized to the Z unit vector (0, 0, 1).
-  [[nodiscard]] static plVec3Template<Type> MakeAxisZ() { return plVec3Template<Type>(0, 0, 1); } // [tested]
+  /// \brief Returns a vector initialized to the x unit vector (1, 0, 0).
+  static const plVec3Template<Type> UnitXAxis() { return plVec3Template(1, 0, 0); }
+  /// \brief Returns a vector initialized to the y unit vector (0, 1, 0).
+  static const plVec3Template<Type> UnitYAxis() { return plVec3Template(0, 1, 0); }
+  /// \brief Returns a vector initialized to the z unit vector (0, 0, 1).
+  static const plVec3Template<Type> UnitZAxis() { return plVec3Template(0, 0, 1); }
 
 #if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
@@ -109,7 +105,8 @@ public:
 
   /// \brief Tries to normalize this vector. If the vector is too close to zero, PLASMA_FAILURE is returned and the vector is set to the given
   /// fallback value.
-  plResult NormalizeIfNotZero(const plVec3Template<Type>& vFallback = plVec3Template<Type>(1, 0, 0), Type fEpsilon = plMath::SmallEpsilon<Type>()); // [tested]
+  plResult NormalizeIfNotZero(
+    const plVec3Template<Type>& vFallback = plVec3Template(1, 0, 0), Type fEpsilon = plMath::SmallEpsilon<Type>()); // [tested]
 
   /// \brief Returns, whether this vector is (0, 0, 0).
   bool IsZero() const; // [tested]
@@ -166,8 +163,6 @@ public:
   /// \brief Returns the Dot-product of the two vectors (commutative, order does not matter)
   Type Dot(const plVec3Template<Type>& rhs) const; // [tested]
 
-
-
   /// \brief Returns the Cross-product of the two vectors (NOT commutative, order DOES matter)
   const plVec3Template<Type> CrossRH(const plVec3Template<Type>& rhs) const; // [tested]
 
@@ -210,28 +205,28 @@ public:
   /// \brief Returns this vector, refracted at vNormal, using the refraction index of the current medium and the medium it enters.
   const plVec3Template<Type> GetRefractedVector(const plVec3Template<Type>& vNormal, Type fRefIndex1, Type fRefIndex2) const;
 
-  /// \brief Returns a random point inside a unit sphere (radius 1).
-  [[nodiscard]] static plVec3Template<Type> MakeRandomPointInSphere(plRandom& inout_rng); // [tested]
+  /// \brief Sets the vector to a random point inside a unit sphere (radius 1).
+  static plVec3Template<Type> CreateRandomPointInSphere(plRandom& inout_rng); // [tested]
 
   /// \brief Creates a random direction vector. The vector is normalized.
-  [[nodiscard]] static plVec3Template<Type> MakeRandomDirection(plRandom& inout_rng); // [tested]
+  static plVec3Template<Type> CreateRandomDirection(plRandom& inout_rng); // [tested]
 
   /// \brief Creates a random vector around the x axis with a maximum deviation angle of \a maxDeviation. The vector is normalized.
   /// The deviation angle must be larger than zero.
-  [[nodiscard]] static plVec3Template<Type> MakeRandomDeviationX(plRandom& inout_rng, const plAngle& maxDeviation); // [tested]
+  static plVec3Template<Type> CreateRandomDeviationX(plRandom& inout_rng, const plAngle& maxDeviation); // [tested]
 
   /// \brief Creates a random vector around the y axis with a maximum deviation angle of \a maxDeviation. The vector is normalized.
   /// The deviation angle must be larger than zero.
-  [[nodiscard]] static plVec3Template<Type> MakeRandomDeviationY(plRandom& inout_rng, const plAngle& maxDeviation); // [tested]
+  static plVec3Template<Type> CreateRandomDeviationY(plRandom& inout_rng, const plAngle& maxDeviation); // [tested]
 
   /// \brief Creates a random vector around the z axis with a maximum deviation angle of \a maxDeviation. The vector is normalized.
   /// The deviation angle must be larger than zero.
-  [[nodiscard]] static plVec3Template<Type> MakeRandomDeviationZ(plRandom& inout_rng, const plAngle& maxDeviation); // [tested]
+  static plVec3Template<Type> CreateRandomDeviationZ(plRandom& inout_rng, const plAngle& maxDeviation); // [tested]
 
   /// \brief Creates a random vector around the given normal with a maximum deviation.
   /// \note If you are going to do this many times with the same axis, rather than calling this function, instead manually
   /// do what this function does (see inline code) and only compute the quaternion once.
-  [[nodiscard]] static plVec3Template<Type> MakeRandomDeviation(plRandom& inout_rng, const plAngle& maxDeviation, const plVec3Template<Type>& vNormal); // [tested]
+  static plVec3Template<Type> CreateRandomDeviation(plRandom& inout_rng, const plAngle& maxDeviation, const plVec3Template<Type>& vNormal); // [tested]
 };
 
 // *** Operators ***

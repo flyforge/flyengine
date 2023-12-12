@@ -11,9 +11,9 @@
 
 namespace plMeshImportUtils
 {
-  void FillFileFilter(plDynamicArray<plString>& out_list, plStringView sSeparated)
+  void FillFileFilter(plDynamicArray<plString>& out_List, plStringView sSeparated)
   {
-    sSeparated.Split(false, out_list, ";", "*", ".");
+    sSeparated.Split(false, out_List, ";", "*", ".");
   }
 
   plString ImportOrResolveTexture(const char* szImportSourceFolder, const char* szImportTargetFolder, plStringView sTexturePath, plModelImporter2::TextureSemantic hint, bool bTextureClamp, const plModelImporter2::Importer* pImporter)
@@ -41,14 +41,22 @@ namespace plMeshImportUtils
         return plString();
       }
 
-      itTex.Value().GenerateFileName(sFinalTextureName);
+      sFinalTextureName.Prepend("Embedded");
 
       plStringBuilder sEmbededFile;
       sEmbededFile = szImportTargetFolder;
       sEmbededFile.AppendPath(sFinalTextureName);
+      sEmbededFile.ChangeFileExtension(itTex.Value().m_sFileFormatExtension);
+
+      // plFileWriter out;
+      // if (out.Open(sEmbededFile).Succeeded())
+      //{
+      //   out.WriteBytes(itTex.Value().m_RawData.GetPtr(), itTex.Value().m_RawData.GetCount()).AssertSuccess();
+      // }
 
       relTexturePath = sEmbededFile;
     }
+
 
     plStringBuilder newAssetPathAbs = szImportTargetFolder;
     newAssetPathAbs.AppendPath(sFinalTextureName);
@@ -139,7 +147,7 @@ namespace plMeshImportUtils
       // TODO: Set... something else?
 
       pAccessor->FinishTransaction();
-      textureDocument->SaveDocument().LogFailure();
+      textureDocument->SaveDocument().IgnoreResult();
 
       plStringBuilder guid;
       plConversionUtils::ToString(textureDocument->GetGuid(), guid);
@@ -364,13 +372,11 @@ namespace plMeshImportUtils
     pAccessor->FinishTransaction();
   }
 
-  void ImportMeshAssetMaterials(plHybridArray<plMaterialResourceSlot, 8>& inout_materialSlots, plStringView sDocumentDirectory, const plModelImporter2::Importer* pImporter)
+  void ImportMeshAssetMaterials(plHybridArray<plMaterialResourceSlot, 8>& inout_materialSlots, const char* szDocumentDirectory, const plModelImporter2::Importer* pImporter)
   {
     PLASMA_PROFILE_SCOPE("ImportMeshAssetMaterials");
 
-    plStringBuilder targetDirectory = sDocumentDirectory;
-    targetDirectory.RemoveFileExtension();
-    targetDirectory.Append("_data/");
+    const plStringBuilder targetDirectory(szDocumentDirectory, "_data/");
     const plStringBuilder sourceDirectory = plPathUtils::GetFileDirectory(pImporter->GetImportOptions().m_sSourceFile);
 
     plStringBuilder tmp;
@@ -384,8 +390,7 @@ namespace plMeshImportUtils
 
     plHybridArray<plDocument*, 32> pendingSaveTasks;
 
-    auto WaitForPendingTasks = [&pendingSaveTasks]()
-    {
+    auto WaitForPendingTasks = [&pendingSaveTasks]() {
       PLASMA_PROFILE_SCOPE("WaitForPendingTasks");
       for (plDocument* pDoc : pendingSaveTasks)
       {
@@ -406,11 +411,13 @@ namespace plMeshImportUtils
       }
 
       plStringBuilder sFinalTextureName;
-      itTex.Value().GenerateFileName(sFinalTextureName);
+      plPathUtils::MakeValidFilename(itTex.Key().GetFileName(), '_', sFinalTextureName);
+      sFinalTextureName.Prepend("Embedded");
 
       plStringBuilder sEmbededFile;
       sEmbededFile = targetDirectory;
       sEmbededFile.AppendPath(sFinalTextureName);
+      sEmbededFile.ChangeFileExtension(itTex.Value().m_sFileFormatExtension);
 
       plDeferredFileWriter out;
       out.SetOutput(sEmbededFile, true);
@@ -467,7 +474,7 @@ namespace plMeshImportUtils
       // If we have a material now, fill the mapping.
       // It is important to do this even for "old"/known materials since a mesh might have gotten a new slot that points to the same
       // material as previous slots.
-      if (!inout_materialSlots[subMeshIdx].m_sResource.IsEmpty())
+      if (inout_materialSlots[subMeshIdx].m_sResource)
       {
         importMatToGuid.Insert(&impMaterial, inout_materialSlots[subMeshIdx].m_sResource);
       }

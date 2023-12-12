@@ -170,24 +170,20 @@ plStatus plPrefabDefaultStateProvider::CreateRevertContainerDiff(SuperArray supe
     // We create a sub-graph of only the parent node in both re-mapped prefab as well as from the actually object. We limit the graph to only the container property.
     auto pNode = pGraph->GetNode(objectPrefabGuid);
     plAbstractObjectGraph prefabSubGraph;
-    pGraph->Clone(prefabSubGraph, pNode, [pRootNode = pNode, pRootProp = pProp](const plAbstractObjectNode* pNode, const plAbstractObjectNode::Property* pProp) {
-      if (pNode == pRootNode && pProp->m_sPropertyName != pRootProp->GetPropertyName())
+    plAbstractObjectNode* pPrefabSubRoot = pGraph->Clone(prefabSubGraph, pNode, [pRootNode = pNode, pRootProp = pProp](const plAbstractObjectNode* pNode, const plAbstractObjectNode::Property* pProp) {
+      if (pNode == pRootNode && (pProp->m_sPropertyName != pRootProp->GetPropertyName()))
         return false;
-
-      return true; //
+      return true;
     });
-
     prefabSubGraph.ReMapNodeGuids(m_PrefabSeedGuid);
 
     plAbstractObjectGraph instanceSubGraph;
     plDocumentObjectConverterWriter writer(&instanceSubGraph, pObject->GetDocumentObjectManager(), [pRootObject = pObject, pRootProp = pProp](const plDocumentObject* pObject, const plAbstractProperty* pProp) {
       if (pObject == pRootObject && pProp != pRootProp)
         return false;
-
-      return true; //
+      return true;
     });
-
-    writer.AddObjectToGraph(pObject);
+    plAbstractObjectNode* pInstanceSubRoot = writer.AddObjectToGraph(pObject);
 
     prefabSubGraph.CreateDiffWithBaseGraph(instanceSubGraph, out_diff);
 

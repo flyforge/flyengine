@@ -19,7 +19,7 @@ struct PLASMA_GAMEENGINE_DLL plMsgMoveCharacterController : public plMessage
   bool m_bRun = false;
   bool m_bJump = false;
   bool m_bCrouch = false;
-  plQuat m_qVelocityRotation = plQuat::MakeIdentity();
+  plQuat m_qVelocityRotation = plQuat::IdentityQuaternion();
 };
 
 /// \brief Base class for implementations of a character controller.

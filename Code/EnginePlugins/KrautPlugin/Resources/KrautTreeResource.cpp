@@ -22,7 +22,7 @@ PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plKrautTreeResource);
 plKrautTreeResource::plKrautTreeResource()
   : plResource(DoUpdate::OnAnyThread, 1)
 {
-  m_Details.m_Bounds = plBoundingBoxSphere::MakeInvalid();
+  m_Details.m_Bounds.SetInvalid();
 }
 
 plResourceLoadDesc plKrautTreeResource::UnloadData(Unload WhatToUnload)
@@ -204,7 +204,7 @@ void plKrautTreeResourceDescriptor::Save(plStreamWriter& inout_stream0) const
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
   uiCompressionMode = 1;
-  plCompressedStreamWriterZstd stream(&inout_stream0, 0, plCompressedStreamWriterZstd::Compression::Average);
+  plCompressedStreamWriterZstd stream(&inout_stream0, plCompressedStreamWriterZstd::Compression::Average);
 #else
   plStreamWriter& stream = stream0;
 #endif

@@ -26,6 +26,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAnimationControllerComponent, 2, plComponentMode::
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
+    new plColorAttribute(plColorScheme::Animation),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -117,7 +118,7 @@ void plAnimationControllerComponent::Update()
     return;
 
   m_AnimController.Update(m_ElapsedTimeSinceUpdate, GetOwner());
-  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
+  m_ElapsedTimeSinceUpdate.SetZero();
 
   plVec3 translation;
   plAngle rotationX;

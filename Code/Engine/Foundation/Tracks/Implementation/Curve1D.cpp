@@ -245,7 +245,7 @@ void plCurve1D::CreateLinearApproximation(double fMaxError /*= 0.01f*/, plUInt8 
 
   if (m_ControlPoints.IsEmpty())
   {
-    m_LinearApproximation.PushBack(plVec2d::MakeZero());
+    m_LinearApproximation.PushBack(plVec2d::ZeroVector());
     return;
   }
 
@@ -284,7 +284,7 @@ void plCurve1D::RecomputeExtents()
     m_fMinX = plMath::Min(m_fMinX, cp.m_Position.x);
     m_fMaxX = plMath::Max(m_fMaxX, cp.m_Position.x);
 
-    // ignore X values that could go outside the control point range due to Bezier curve interpolation
+    // ignore X values that could go outside the control point range due to Bplier curve interpolation
     // we just assume the curve is always restricted along X by the CPs
 
     // m_fMinX = plMath::Min(m_fMinX, cp.m_Position.x + cp.m_LeftTangent.x);

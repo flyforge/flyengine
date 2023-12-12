@@ -7,11 +7,11 @@
 
 plGALQueryDX11::plGALQueryDX11(const plGALQueryCreationDescription& Description)
   : plGALQuery(Description)
-
+  , m_pDXQuery(nullptr)
 {
 }
 
-plGALQueryDX11::~plGALQueryDX11() = default;
+plGALQueryDX11::~plGALQueryDX11() {}
 
 plResult plGALQueryDX11::InitPlatform(plGALDevice* pDevice)
 {

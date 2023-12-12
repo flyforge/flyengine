@@ -14,10 +14,10 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapMenuActions(plStringView sMapping);
-  static void MapMenuSimulationSpeed(plStringView sMapping);
+  static void MapMenuActions(const char* szMapping, const char* szPath);
+  static void MapMenuSimulationSpeed(const char* szMapping, const char* szPath);
 
-  static void MapToolbarActions(plStringView sMapping);
+  static void MapToolbarActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hGameObjectCategory;
   static plActionDescriptorHandle s_hRenderSelectionOverlay;

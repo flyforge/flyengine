@@ -17,7 +17,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Flies, 1, plRTTIDe
     PLASMA_MEMBER_PROPERTY("FlySpeed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1000.0f)),
     PLASMA_MEMBER_PROPERTY("PathLength", m_fPathLength)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 100.0f)),
     PLASMA_MEMBER_PROPERTY("MaxEmitterDistance", m_fMaxEmitterDistance)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 100.0f)),
-    PLASMA_MEMBER_PROPERTY("MaxSteeringAngle", m_MaxSteeringAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30)), new plClampValueAttribute(plAngle::MakeFromDegree(1.0f), plAngle::MakeFromDegree(180.0f))),
+    PLASMA_MEMBER_PROPERTY("MaxSteeringAngle", m_MaxSteeringAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30)), new plClampValueAttribute(plAngle::Degree(1.0f), plAngle::Degree(180.0f))),
   }
   PLASMA_END_PROPERTIES;
 }
@@ -89,7 +89,7 @@ void plParticleBehavior_Flies::CreateRequiredStreams()
   CreateStream("Position", plProcessingStream::DataType::Float4, &m_pStreamPosition, false);
   CreateStream("Velocity", plProcessingStream::DataType::Float3, &m_pStreamVelocity, false);
 
-  m_TimeToChangeDir = plTime::MakeZero();
+  m_TimeToChangeDir.SetZero();
 }
 
 void plParticleBehavior_Flies::Process(plUInt64 uiNumElements)
@@ -128,13 +128,13 @@ void plParticleBehavior_Flies::Process(plUInt64 uiNumElements)
       vPivot = vDir.CrossRH(vPartToEm);
       vPivot.NormalizeIfNotZero().IgnoreResult();
 
-      qRot = plQuat::MakeFromAxisAndAngle(vPivot, m_MaxSteeringAngle);
+      qRot.SetFromAxisAndAngle(vPivot, m_MaxSteeringAngle);
 
       itVelocity.Current() = qRot * vVelocity;
     }
     else
     {
-      itVelocity.Current() = plVec3::MakeRandomDeviation(GetRNG(), m_MaxSteeringAngle, vDir) * m_fSpeed;
+      itVelocity.Current() = plVec3::CreateRandomDeviation(GetRNG(), m_MaxSteeringAngle, vDir) * m_fSpeed;
     }
 
     itPosition.Advance();

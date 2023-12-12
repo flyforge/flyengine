@@ -25,7 +25,7 @@ class plTypeScriptAssetDocument : public plSimpleAssetDocument<plTypeScriptAsset
   PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptAssetDocument, plSimpleAssetDocument<plTypeScriptAssetProperties>);
 
 public:
-  plTypeScriptAssetDocument(plStringView sDocumentPath);
+  plTypeScriptAssetDocument(const char* szDocumentPath);
 
   void EditScript();
 
@@ -38,7 +38,7 @@ protected:
 
   virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
 
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   plStatus ValidateScriptCode();

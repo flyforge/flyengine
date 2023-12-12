@@ -25,7 +25,7 @@ static plUInt64 HighLowToUInt64(plUInt32 uiHigh32, plUInt32 uiLow32)
 
 plResult plOSFile::InternalOpen(plStringView sFile, plFileOpenMode::Enum OpenMode, plFileShareMode::Enum FileShareMode)
 {
-  const plTime sleepTime = plTime::MakeFromMilliseconds(20);
+  const plTime sleepTime = plTime::Milliseconds(20);
   plInt32 iRetries = 20;
 
   if (FileShareMode == plFileShareMode::Default)
@@ -305,7 +305,7 @@ plResult plOSFile::InternalGetFileStats(plStringView sFileOrFolder, plFileStats&
     out_Stats.m_bIsDirectory = true;
     out_Stats.m_sParentPath.Clear();
     out_Stats.m_sName = s;
-    out_Stats.m_LastModificationTime = plTimestamp::MakeInvalid();
+    out_Stats.m_LastModificationTime.Invalidate();
     return PLASMA_SUCCESS;
   }
 
@@ -320,7 +320,7 @@ plResult plOSFile::InternalGetFileStats(plStringView sFileOrFolder, plFileStats&
   out_Stats.m_sParentPath = sFileOrFolder;
   out_Stats.m_sParentPath.PathParentDirectory();
   out_Stats.m_sName = data.cFileName;
-  out_Stats.m_LastModificationTime = plTimestamp::MakeFromInt(FileTimeToEpoch(data.ftLastWriteTime), plSIUnitOfTime::Microsecond);
+  out_Stats.m_LastModificationTime.SetInt64(FileTimeToEpoch(data.ftLastWriteTime), plSIUnitOfTime::Microsecond);
 
   FindClose(hSearch);
   return PLASMA_SUCCESS;
@@ -380,7 +380,7 @@ void plFileSystemIterator::StartSearch(plStringView sSearchStart, plBitflags<plF
   m_CurFile.m_bIsDirectory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
   m_CurFile.m_sParentPath = m_sCurPath;
   m_CurFile.m_sName = data.cFileName;
-  m_CurFile.m_LastModificationTime = plTimestamp::MakeFromInt(FileTimeToEpoch(data.ftLastWriteTime), plSIUnitOfTime::Microsecond);
+  m_CurFile.m_LastModificationTime.SetInt64(FileTimeToEpoch(data.ftLastWriteTime), plSIUnitOfTime::Microsecond);
 
   m_Data.m_Handles.PushBack(hSearch);
 
@@ -451,7 +451,7 @@ plInt32 plFileSystemIterator::InternalNext()
       m_CurFile.m_bIsDirectory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
       m_CurFile.m_sParentPath = m_sCurPath;
       m_CurFile.m_sName = data.cFileName;
-      m_CurFile.m_LastModificationTime = plTimestamp::MakeFromInt(FileTimeToEpoch(data.ftLastWriteTime), plSIUnitOfTime::Microsecond);
+      m_CurFile.m_LastModificationTime.SetInt64(FileTimeToEpoch(data.ftLastWriteTime), plSIUnitOfTime::Microsecond);
 
       m_Data.m_Handles.PushBack(hSearch);
 
@@ -498,7 +498,7 @@ plInt32 plFileSystemIterator::InternalNext()
   m_CurFile.m_bIsDirectory = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
   m_CurFile.m_sParentPath = m_sCurPath;
   m_CurFile.m_sName = data.cFileName;
-  m_CurFile.m_LastModificationTime = plTimestamp::MakeFromInt(FileTimeToEpoch(data.ftLastWriteTime), plSIUnitOfTime::Microsecond);
+  m_CurFile.m_LastModificationTime.SetInt64(FileTimeToEpoch(data.ftLastWriteTime), plSIUnitOfTime::Microsecond);
 
   if ((m_CurFile.m_sName == "..") || (m_CurFile.m_sName == "."))
     return ReturnCallInternalNext;
@@ -649,32 +649,6 @@ plString plOSFile::GetTempDataFolder(plStringView sSubFolder /*= nullptr*/)
   }
 
   s = s_sTempDataPath;
-  s.AppendPath(sSubFolder);
-  s.MakeCleanPath();
-  return s;
-}
-
-plString plOSFile::GetUserDocumentsFolder(plStringView sSubFolder /*= {}*/)
-{
-  if (s_sUserDocumentsPath.IsEmpty())
-  {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
-#else
-    wchar_t* pPath = nullptr;
-    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_PublicDocuments, KF_FLAG_DEFAULT, nullptr, &pPath)))
-    {
-      s_sUserDocumentsPath = plStringWChar(pPath);
-    }
-
-    if (pPath != nullptr)
-    {
-      CoTaskMemFree(pPath);
-    }
-#endif
-  }
-
-  plStringBuilder s = s_sUserDocumentsPath;
   s.AppendPath(sSubFolder);
   s.MakeCleanPath();
   return s;

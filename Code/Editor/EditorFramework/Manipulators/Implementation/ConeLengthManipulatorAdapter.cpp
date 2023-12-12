@@ -4,9 +4,9 @@
 #include <EditorFramework/Manipulators/ConeLengthManipulatorAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plConeLengthManipulatorAdapter::plConeLengthManipulatorAdapter() = default;
+plConeLengthManipulatorAdapter::plConeLengthManipulatorAdapter() {}
 
-plConeLengthManipulatorAdapter::~plConeLengthManipulatorAdapter() = default;
+plConeLengthManipulatorAdapter::~plConeLengthManipulatorAdapter() {}
 
 void plConeLengthManipulatorAdapter::Finalize()
 {

@@ -160,9 +160,9 @@ static void BuildRawOzzSkeleton(const plSkeleton& skeleton, plUInt16 uiExpectedP
     dstJoint.transform.translation.x = srcTransform.m_vPosition.x;
     dstJoint.transform.translation.y = srcTransform.m_vPosition.y;
     dstJoint.transform.translation.z = srcTransform.m_vPosition.z;
-    dstJoint.transform.rotation.x = srcTransform.m_qRotation.x;
-    dstJoint.transform.rotation.y = srcTransform.m_qRotation.y;
-    dstJoint.transform.rotation.z = srcTransform.m_qRotation.z;
+    dstJoint.transform.rotation.x = srcTransform.m_qRotation.v.x;
+    dstJoint.transform.rotation.y = srcTransform.m_qRotation.v.y;
+    dstJoint.transform.rotation.z = srcTransform.m_qRotation.v.z;
     dstJoint.transform.rotation.w = srcTransform.m_qRotation.w;
     dstJoint.transform.scale.x = srcTransform.m_vScale.x;
     dstJoint.transform.scale.y = srcTransform.m_vScale.y;
@@ -208,12 +208,12 @@ plUInt64 plSkeleton::GetHeapMemoryUsage() const
 
 plAngle plSkeletonJoint::GetTwistLimitLow() const
 {
-  return plMath::Max(plAngle::MakeFromDegree(-179), m_TwistLimitCenterAngle - m_TwistLimitHalfAngle);
+  return plMath::Max(plAngle::Degree(-179), m_TwistLimitCenterAngle - m_TwistLimitHalfAngle);
 }
 
 plAngle plSkeletonJoint::GetTwistLimitHigh() const
 {
-  return plMath::Min(plAngle::MakeFromDegree(179), m_TwistLimitCenterAngle + m_TwistLimitHalfAngle);
+  return plMath::Min(plAngle::Degree(179), m_TwistLimitCenterAngle + m_TwistLimitHalfAngle);
 }
 
 PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_Skeleton);

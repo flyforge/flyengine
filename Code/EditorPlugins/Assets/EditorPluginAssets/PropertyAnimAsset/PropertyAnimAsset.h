@@ -60,11 +60,11 @@ struct plPropertyAnimAssetDocumentEvent
 
 class plPropertyAnimAssetDocument : public plSimpleAssetDocument<plPropertyAnimationTrackGroup, plGameObjectContextDocument>
 {
-  using BaseClass = plSimpleAssetDocument<plPropertyAnimationTrackGroup, plGameObjectContextDocument>;
+  typedef plSimpleAssetDocument<plPropertyAnimationTrackGroup, plGameObjectContextDocument> BaseClass;
   PLASMA_ADD_DYNAMIC_REFLECTION(plPropertyAnimAssetDocument, BaseClass);
 
 public:
-  plPropertyAnimAssetDocument(plStringView sDocumentPath);
+  plPropertyAnimAssetDocument(const char* szDocumentPath);
   ~plPropertyAnimAssetDocument();
 
   void SetAnimationDurationTicks(plUInt64 uiNumTicks);
@@ -77,9 +77,9 @@ public:
 
   plEvent<const plPropertyAnimAssetDocumentEvent&> m_PropertyAnimEvents;
 
-  void SetPlayAnimation(bool bPlay);
+  void SetPlayAnimation(bool play);
   bool GetPlayAnimation() const { return m_bPlayAnimation; }
-  void SetRepeatAnimation(bool bRepeat);
+  void SetRepeatAnimation(bool repeat);
   bool GetRepeatAnimation() const { return m_bRepeatAnimation; }
   void ExecuteAnimationPlaybackStep();
 
@@ -91,19 +91,19 @@ public:
   plUuid FindTrack(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, plPropertyAnimTarget::Enum target) const;
   plUuid CreateTrack(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, plPropertyAnimTarget::Enum target);
 
-  plUuid FindCurveCp(const plUuid& trackGuid, plInt64 iTickX);
-  plUuid InsertCurveCpAt(const plUuid& trackGuid, plInt64 iTickX, double fNewPosY);
+  plUuid FindCurveCp(const plUuid& trackGuid, plInt64 tickX);
+  plUuid InsertCurveCpAt(const plUuid& trackGuid, plInt64 tickX, double newPosY);
 
-  plUuid FindGradientColorCp(const plUuid& trackGuid, plInt64 iTickX);
-  plUuid InsertGradientColorCpAt(const plUuid& trackGuid, plInt64 iTickX, const plColorGammaUB& color);
+  plUuid FindGradientColorCp(const plUuid& trackGuid, plInt64 tickX);
+  plUuid InsertGradientColorCpAt(const plUuid& trackGuid, plInt64 tickX, const plColorGammaUB& color);
 
-  plUuid FindGradientAlphaCp(const plUuid& trackGuid, plInt64 iTickX);
-  plUuid InsertGradientAlphaCpAt(const plUuid& trackGuid, plInt64 iTickX, plUInt8 uiAlpha);
+  plUuid FindGradientAlphaCp(const plUuid& trackGuid, plInt64 tickX);
+  plUuid InsertGradientAlphaCpAt(const plUuid& trackGuid, plInt64 tickX, plUInt8 alpha);
 
-  plUuid FindGradientIntensityCp(const plUuid& trackGuid, plInt64 iTickX);
-  plUuid InsertGradientIntensityCpAt(const plUuid& trackGuid, plInt64 iTickX, float fIntensity);
+  plUuid FindGradientIntensityCp(const plUuid& trackGuid, plInt64 tickX);
+  plUuid InsertGradientIntensityCpAt(const plUuid& trackGuid, plInt64 tickX, float intensity);
 
-  plUuid InsertEventTrackCpAt(plInt64 iTickX, const char* szValue);
+  plUuid InsertEventTrackCpAt(plInt64 tickX, const char* szValue);
 
   virtual plManipulatorSearchStrategy GetManipulatorSearchStrategy() const override
   {
@@ -111,7 +111,7 @@ public:
   }
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
   virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;
 
@@ -142,7 +142,7 @@ private:
   void RebuildMapping();
   void RemoveTrack(const plUuid& track);
   void AddTrack(const plUuid& track);
-  plStatus FindTrackKeys(
+  void FindTrackKeys(
     const char* szObjectSearchSequence, const char* szComponentType, const char* szPropertyPath, plHybridArray<plPropertyReference, 1>& keys) const;
   void GenerateTrackInfo(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, plStringBuilder& sObjectSearchSequence,
     plStringBuilder& sComponentType, plStringBuilder& sPropertyPath) const;

@@ -106,10 +106,15 @@ void plResourceCacheVulkan::GetRenderPassDesc(const plGALRenderingSetup& renderi
     const auto& formatInfo = s_pDevice->GetFormatLookupTable().GetFormatInfo(format);
 
     AttachmentDesc& depthAttachment = out_desc.attachments.ExpandAndGetRef();
-    depthAttachment.format = formatInfo.m_format;
+    depthAttachment.format = formatInfo.m_eRenderTarget;
+    if (pTex->GetFormatOverrideEnabled())
+    {
+      depthAttachment.format = pTex->GetImageFormat();
+    }
+
     depthAttachment.samples = plConversionUtilsVulkan::GetSamples(texDesc.m_SampleCount);
 
-    if (renderingSetup.m_bDiscardDepth && !renderingSetup.m_bClearDepth)
+    if (renderingSetup.m_bDiscardDepth)
     {
       depthAttachment.initialLayout = vk::ImageLayout::eUndefined;
       depthAttachment.loadOp = vk::AttachmentLoadOp::eDontCare;
@@ -146,10 +151,15 @@ void plResourceCacheVulkan::GetRenderPassDesc(const plGALRenderingSetup& renderi
     const auto& formatInfo = s_pDevice->GetFormatLookupTable().GetFormatInfo(format);
 
     AttachmentDesc& colorAttachment = out_desc.attachments.ExpandAndGetRef();
-    colorAttachment.format = formatInfo.m_format;
+    colorAttachment.format = formatInfo.m_eRenderTarget;
+    if (pTex->GetFormatOverrideEnabled())
+    {
+      colorAttachment.format = pTex->GetImageFormat();
+    }
+
     colorAttachment.samples = plConversionUtilsVulkan::GetSamples(texDesc.m_SampleCount);
 
-    if (renderingSetup.m_bDiscardColor && !(renderingSetup.m_uiRenderTargetClearMask & (1u << i)))
+    if (renderingSetup.m_bDiscardColor)
     {
       colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
       colorAttachment.loadOp = vk::AttachmentLoadOp::eDontCare;
@@ -371,8 +381,8 @@ vk::PipelineLayout plResourceCacheVulkan::RequestPipelineLayout(const PipelineLa
 #endif // PLASMA_LOG_VULKAN_RESOURCES
 
   vk::PipelineLayoutCreateInfo layoutInfo;
-  layoutInfo.setLayoutCount = desc.m_layout.GetCount();
-  layoutInfo.pSetLayouts = desc.m_layout.GetData();
+  layoutInfo.setLayoutCount = 1;
+  layoutInfo.pSetLayouts = &desc.m_layout;
 
   vk::PipelineLayout layout;
   VK_ASSERT_DEBUG(s_device.createPipelineLayout(&layoutInfo, nullptr, &layout));
@@ -413,7 +423,7 @@ vk::Pipeline plResourceCacheVulkan::RequestGraphicsPipeline(const GraphicsPipeli
   // Specify rasterization state.
   const vk::PipelineRasterizationStateCreateInfo* raster = desc.m_pCurrentRasterizerState->GetRasterizerState();
 
-  // Our attachment will write to all color channels
+  // Our attachment will write to all color channels, but no blending is enabled.
   vk::PipelineColorBlendStateCreateInfo blend = *desc.m_pCurrentBlendState->GetBlendState();
   blend.attachmentCount = desc.m_uiAttachmentCount;
 
@@ -422,10 +432,10 @@ vk::Pipeline plResourceCacheVulkan::RequestGraphicsPipeline(const GraphicsPipeli
   viewport.viewportCount = 1;
   viewport.scissorCount = 1;
 
-  // Depth Testing
+  // Disable all depth testing.
   const vk::PipelineDepthStencilStateCreateInfo* depth_stencil = desc.m_pCurrentDepthStencilState->GetDepthStencilState();
 
-  // Multisampling.
+  // No multisampling.
   vk::PipelineMultisampleStateCreateInfo multisample;
   multisample.rasterizationSamples = plConversionUtilsVulkan::GetSamples(desc.m_msaa);
   if (multisample.rasterizationSamples != vk::SampleCountFlagBits::e1 && desc.m_pCurrentBlendState->GetDescription().m_bAlphaToCoverage)
@@ -714,27 +724,13 @@ bool plResourceCacheVulkan::ResourceCacheHash::Equal(const FramebufferKey& a, co
 plUInt32 plResourceCacheVulkan::ResourceCacheHash::Hash(const PipelineLayoutDesc& desc)
 {
   plHashStreamWriter32 writer;
-  const plUInt32 uiCount = desc.m_layout.GetCount();
-  writer << uiCount;
-  for (plUInt32 i = 0; i < uiCount; ++i)
-  {
-    writer << desc.m_layout[i];
-  }
+  writer << desc.m_layout;
   return writer.GetHashValue();
 }
 
 bool plResourceCacheVulkan::ResourceCacheHash::Equal(const PipelineLayoutDesc& a, const PipelineLayoutDesc& b)
 {
-  if (a.m_layout.GetCount() != b.m_layout.GetCount())
-    return false;
-
-  const plUInt32 uiCount = a.m_layout.GetCount();
-  for (plUInt32 i = 0; i < uiCount; ++i)
-  {
-    if (a.m_layout[i] != b.m_layout[i])
-      return false;
-  }
-  return true;
+  return a.m_layout == b.m_layout;
 }
 
 plUInt32 plResourceCacheVulkan::ResourceCacheHash::Hash(const GraphicsPipelineDesc& desc)

@@ -151,7 +151,7 @@ plUInt32 PlacementTile::PlaceObjects(plWorld& world, plArrayPtr<const PlacementT
         // Set the color
         plMsgSetColor msg;
         msg.m_Color = objectTransform.m_ObjectColor.ToLinearFloat();
-        pRootObject->PostMessageRecursive(msg, plTime::MakeZero(), plObjectMsgQueueType::AfterInitialized);
+        pRootObject->PostMessageRecursive(msg, plTime::Zero(), plObjectMsgQueueType::AfterInitialized);
       }
     }
 

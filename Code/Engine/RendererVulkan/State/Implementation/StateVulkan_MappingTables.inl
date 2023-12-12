@@ -1,5 +1,5 @@
 
-static vk::CullModeFlagBits GALCullModeToVulkan[plGALCullMode::ENUM_COUNT] =
+static vk::CullModeFlagBits GALCullModeToVulkan[plGALCullMode::ENUM_COUNT] = 
 {
   vk::CullModeFlagBits::eNone,
   vk::CullModeFlagBits::eFront,

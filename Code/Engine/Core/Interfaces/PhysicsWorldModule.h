@@ -61,12 +61,6 @@ struct plPhysicsOverlapResultArray
   plHybridArray<plPhysicsOverlapResult, 16> m_Results;
 };
 
-struct plPhysicsTriangle
-{
-  plVec3 m_Vertices[3];
-  const plSurfaceResource* m_pSurface = nullptr;
-};
-
 /// \brief Flags for selecting which types of physics shapes should be included in things like overlap queries and raycasts.
 ///
 /// This is mainly for optimization purposes. It is up to the physics integration to support some or all of these flags.
@@ -118,11 +112,6 @@ protected:
   }
 
 public:
-  /// \brief Searches for a collision layer with the given name and returns its index.
-  ///
-  /// Returns plInvalidIndex if no such collision layer exists.
-  virtual plUInt32 GetCollisionLayerByName(plStringView sName) const = 0;
-
   virtual bool Raycast(plPhysicsCastResult& out_result, const plVec3& vStart, const plVec3& vDir, float fDistance, const plPhysicsQueryParameters& params, plPhysicsHitCollection collection = plPhysicsHitCollection::Closest) const = 0;
 
   virtual bool RaycastAll(plPhysicsCastResultArray& out_results, const plVec3& vStart, const plVec3& vDir, float fDistance, const plPhysicsQueryParameters& params) const = 0;
@@ -141,8 +130,6 @@ public:
 
   virtual plVec3 GetGravity() const = 0;
 
-  virtual void QueryGeometryInBox(const plPhysicsQueryParameters& params, plBoundingBox box, plDynamicArray<plPhysicsTriangle>& out_triangles) const = 0;
-
   //////////////////////////////////////////////////////////////////////////
   // ABSTRACTION HELPERS
   //
@@ -157,8 +144,8 @@ public:
   {
     plGameObjectHandle m_hActorA;
     plGameObjectHandle m_hActorB;
-    plTransform m_LocalFrameA = plTransform::MakeIdentity();
-    plTransform m_LocalFrameB = plTransform::MakeIdentity();
+    plTransform m_LocalFrameA = plTransform::IdentityTransform();
+    plTransform m_LocalFrameB = plTransform::IdentityTransform();
   };
 
   struct FixedJointConfig : JointConfig

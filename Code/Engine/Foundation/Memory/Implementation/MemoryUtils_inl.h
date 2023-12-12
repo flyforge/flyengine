@@ -206,7 +206,7 @@ PLASMA_ALWAYS_INLINE plInt32 plMemoryUtils::RawByteCompare(const void* a, const 
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE T* plMemoryUtils::AddByteOffset(T* pPtr, std::ptrdiff_t iOffset)
+PLASMA_ALWAYS_INLINE T* plMemoryUtils::AddByteOffset(T* pPtr, ptrdiff_t iOffset)
 {
   return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pPtr) + iOffset);
 }
@@ -372,8 +372,6 @@ template <typename T>
 PLASMA_ALWAYS_INLINE void plMemoryUtils::Destruct(T* pDestination, size_t uiCount, plTypeIsPod)
 {
   // Nothing to do here. See Construct of for more info.
-
-  static_assert(std::is_trivially_destructible<T>::value != 0, "Class is declared as POD but has a non-trivial destructor. Remove the destructor or don't declare it as POD.");
 }
 
 template <typename T>

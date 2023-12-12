@@ -19,15 +19,15 @@ class plImageDataAssetDocument : public plSimpleAssetDocument<plImageDataAssetPr
   PLASMA_ADD_DYNAMIC_REFLECTION(plImageDataAssetDocument, plSimpleAssetDocument<plImageDataAssetProperties>);
 
 public:
-  plImageDataAssetDocument(plStringView sDocumentPath);
+  plImageDataAssetDocument(const char* szDocumentPath);
 
   const plEvent<const plImageDataAssetEvent&>& Events() const { return m_Events; }
 
 protected:
   plEvent<const plImageDataAssetEvent&> m_Events;
 
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override { return plStatus(PLASMA_SUCCESS); }
-  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override { return plStatus(PLASMA_SUCCESS); }
+  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   plStatus RunTexConv(const char* szTargetFile, const plAssetFileHeader& AssetHeader, bool bUpdateThumbnail);
 };

@@ -102,7 +102,7 @@ plSkeletonAssetDocument* plQtSkeletonAssetDocumentWindow::GetSkeletonDocument()
 void plQtSkeletonAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   auto* pDoc = GetSkeletonDocument();
@@ -237,7 +237,7 @@ void plQtSkeletonAssetDocumentWindow::CommandEventHandler(const plCommandHistory
 
 void plQtSkeletonAssetDocumentWindow::SendLiveResourcePreview()
 {
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   plSkeletonAssetDocument* pDoc = plDynamicCast<plSkeletonAssetDocument*>(GetDocument());
@@ -267,10 +267,10 @@ void plQtSkeletonAssetDocumentWindow::SendLiveResourcePreview()
   AssetHeader.Write(memoryWriter).IgnoreResult();
 
   // Write Asset Data
-  pDoc->WriteResource(memoryWriter, *pDoc->GetProperties()).AssertSuccess();
+  pDoc->WriteResource(memoryWriter, *pDoc->GetProperties()).LogFailure();
   msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtSkeletonAssetDocumentWindow::RestoreResource()
@@ -281,17 +281,17 @@ void plQtSkeletonAssetDocumentWindow::RestoreResource()
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtSkeletonAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
 
-void plQtSkeletonAssetDocumentWindow::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
+void plQtSkeletonAssetDocumentWindow::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plQuerySelectionBBoxResultMsgToEditor>())
   {

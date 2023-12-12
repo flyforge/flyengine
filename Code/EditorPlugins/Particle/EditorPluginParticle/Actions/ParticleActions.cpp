@@ -64,7 +64,7 @@ void plParticleActions::UnregisterActions()
     plActionManager::UnregisterAction(s_hSimulationSpeed[i]);
 }
 
-void plParticleActions::MapActions(const char* szMapping)
+void plParticleActions::MapActions(const char* szMapping, const char* szPath)
 {
   plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
   PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);

@@ -30,6 +30,8 @@ plCopyTexturePass::~plCopyTexturePass() = default;
 bool plCopyTexturePass::GetRenderTargetDescriptions(
   const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
+
   const plGALTextureCreationDescription* pInput = inputs[m_PinInput.m_uiInputIndex];
 
   if (pInput != nullptr)

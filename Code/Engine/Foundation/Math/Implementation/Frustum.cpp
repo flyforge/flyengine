@@ -34,14 +34,10 @@ bool plFrustum::IsValid() const
   return true;
 }
 
-plFrustum plFrustum::MakeFromPlanes(const plPlane* pPlanes)
+void plFrustum::SetFrustum(const plPlane* pPlanes)
 {
-  plFrustum f;
-
   for (plUInt32 i = 0; i < PLANE_COUNT; ++i)
-    f.m_Planes[i] = pPlanes[i];
-
-  return f;
+    m_Planes[i] = pPlanes[i];
 }
 
 void plFrustum::TransformFrustum(const plMat4& mTransform)
@@ -207,7 +203,7 @@ void plFrustum::ComputeCornerPoints(plVec3 out_pPoints[FrustumCorner::CORNER_COU
   // clang-format on
 }
 
-plFrustum plFrustum::MakeFromMVP(const plMat4& mModelViewProjection0, plClipSpaceDepthRange::Enum depthRange, plHandedness::Enum handedness)
+void plFrustum::SetFrustum(const plMat4& mModelViewProjection0, plClipSpaceDepthRange::Enum depthRange, plHandedness::Enum handedness)
 {
   plMat4 ModelViewProjection = mModelViewProjection0;
   plGraphicsUtils::ConvertProjectionMatrixDepthRange(ModelViewProjection, depthRange, plClipSpaceDepthRange::MinusOneToOne);
@@ -260,13 +256,10 @@ plFrustum plFrustum::MakeFromMVP(const plMat4& mModelViewProjection0, plClipSpac
   }
 
   static_assert(offsetof(plPlane, m_vNormal) == offsetof(plVec4, x) && offsetof(plPlane, m_fNegDistance) == offsetof(plVec4, w));
-
-  plFrustum res;
-  plMemoryUtils::Copy(res.m_Planes, (plPlane*)planes, 6);
-  return res;
+  plMemoryUtils::Copy(m_Planes, (plPlane*)planes, 6);
 }
 
-plFrustum plFrustum::MakeFromFOV(const plVec3& vPosition, const plVec3& vForwards, const plVec3& vUp, plAngle fovX, plAngle fovY, float fNearPlane, float fFarPlane)
+void plFrustum::SetFrustum(const plVec3& vPosition, const plVec3& vForwards, const plVec3& vUp, plAngle fovX, plAngle fovY, float fNearPlane, float fFarPlane)
 {
   PLASMA_ASSERT_DEBUG(plMath::Abs(vForwards.GetNormalized().Dot(vUp.GetNormalized())) < 0.999f, "Up dir must be different from forward direction");
 
@@ -274,18 +267,16 @@ plFrustum plFrustum::MakeFromFOV(const plVec3& vPosition, const plVec3& vForward
   const plVec3 vRightNorm = vForwards.CrossRH(vUp).GetNormalized();
   const plVec3 vUpNorm = vRightNorm.CrossRH(vForwards).GetNormalized();
 
-  plFrustum res;
-
   // Near Plane
-  res.m_Planes[NearPlane] = plPlane::MakeFromNormalAndPoint(-vForwardsNorm, vPosition + fNearPlane * vForwardsNorm);
+  m_Planes[NearPlane].SetFromNormalAndPoint(-vForwardsNorm, vPosition + fNearPlane * vForwardsNorm);
 
   // Far Plane
-  res.m_Planes[FarPlane] = plPlane::MakeFromNormalAndPoint(vForwardsNorm, vPosition + fFarPlane * vForwardsNorm);
+  m_Planes[FarPlane].SetFromNormalAndPoint(vForwardsNorm, vPosition + fFarPlane * vForwardsNorm);
 
   // Making sure the near/far plane is always closest/farthest.
   if (fNearPlane > fFarPlane)
   {
-    plMath::Swap(res.m_Planes[NearPlane], res.m_Planes[FarPlane]);
+    plMath::Swap(m_Planes[NearPlane], m_Planes[FarPlane]);
   }
 
   plMat3 mLocalFrame;
@@ -304,7 +295,7 @@ plFrustum plFrustum::MakeFromFOV(const plVec3& vPosition, const plVec3& vForward
     plVec3 vPlaneNormal = mLocalFrame * plVec3(-fCosFovX, 0, fSinFovX);
     vPlaneNormal.Normalize();
 
-    res.m_Planes[LeftPlane] = plPlane::MakeFromNormalAndPoint(vPlaneNormal, vPosition);
+    m_Planes[LeftPlane].SetFromNormalAndPoint(vPlaneNormal, vPosition);
   }
 
   // Right Plane
@@ -312,7 +303,7 @@ plFrustum plFrustum::MakeFromFOV(const plVec3& vPosition, const plVec3& vForward
     plVec3 vPlaneNormal = mLocalFrame * plVec3(fCosFovX, 0, fSinFovX);
     vPlaneNormal.Normalize();
 
-    res.m_Planes[RightPlane] = plPlane::MakeFromNormalAndPoint(vPlaneNormal, vPosition);
+    m_Planes[RightPlane].SetFromNormalAndPoint(vPlaneNormal, vPosition);
   }
 
   // Bottom Plane
@@ -320,7 +311,7 @@ plFrustum plFrustum::MakeFromFOV(const plVec3& vPosition, const plVec3& vForward
     plVec3 vPlaneNormal = mLocalFrame * plVec3(0, -fCosFovY, fSinFovY);
     vPlaneNormal.Normalize();
 
-    res.m_Planes[BottomPlane] = plPlane::MakeFromNormalAndPoint(vPlaneNormal, vPosition);
+    m_Planes[BottomPlane].SetFromNormalAndPoint(vPlaneNormal, vPosition);
   }
 
   // Top Plane
@@ -328,10 +319,8 @@ plFrustum plFrustum::MakeFromFOV(const plVec3& vPosition, const plVec3& vForward
     plVec3 vPlaneNormal = mLocalFrame * plVec3(0, fCosFovY, fSinFovY);
     vPlaneNormal.Normalize();
 
-    res.m_Planes[TopPlane] = plPlane::MakeFromNormalAndPoint(vPlaneNormal, vPosition);
+    m_Planes[TopPlane].SetFromNormalAndPoint(vPlaneNormal, vPosition);
   }
-
-  return res;
 }
 
 PLASMA_STATICLINK_FILE(Foundation, Foundation_Math_Implementation_Frustum);

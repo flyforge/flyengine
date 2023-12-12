@@ -16,6 +16,7 @@ void plWorldRttiConverterContext::Clear()
   m_UnknownTypes.Clear();
 }
 
+
 void plWorldRttiConverterContext::DeleteExistingObjects()
 {
   if (m_pWorld == nullptr)

@@ -30,16 +30,16 @@ plPropertyMetaState::plPropertyMetaState()
 {
 }
 
-void plPropertyMetaState::GetTypePropertiesState(const plDocumentObject* pObject, plMap<plString, plPropertyUiState>& out_propertyStates)
+void plPropertyMetaState::GetTypePropertiesState(const plDocumentObject* pObject, plMap<plString, plPropertyUiState>& out_PropertyStates)
 {
   plPropertyMetaStateEvent eventData;
-  eventData.m_pPropertyStates = &out_propertyStates;
+  eventData.m_pPropertyStates = &out_PropertyStates;
   eventData.m_pObject = pObject;
 
   m_Events.Broadcast(eventData);
 }
 
-void plPropertyMetaState::GetTypePropertiesState(const plHybridArray<plPropertySelection, 8>& items, plMap<plString, plPropertyUiState>& out_propertyStates)
+void plPropertyMetaState::GetTypePropertiesState(const plHybridArray<plPropertySelection, 8>& items, plMap<plString, plPropertyUiState>& out_PropertyStates)
 {
   for (const auto& sel : items)
   {
@@ -48,7 +48,7 @@ void plPropertyMetaState::GetTypePropertiesState(const plHybridArray<plPropertyS
 
     for (auto it = m_Temp.GetIterator(); it.IsValid(); ++it)
     {
-      auto& curState = out_propertyStates[it.Key()];
+      auto& curState = out_PropertyStates[it.Key()];
 
       curState.m_Visibility = plMath::Max(curState.m_Visibility, it.Value().m_Visibility);
       curState.m_sNewLabelText = it.Value().m_sNewLabelText;
@@ -56,17 +56,17 @@ void plPropertyMetaState::GetTypePropertiesState(const plHybridArray<plPropertyS
   }
 }
 
-void plPropertyMetaState::GetContainerElementsState(const plDocumentObject* pObject, const char* szProperty, plHashTable<plVariant, plPropertyUiState>& out_propertyStates)
+void plPropertyMetaState::GetContainerElementsState(const plDocumentObject* pObject, const char* szProperty, plHashTable<plVariant, plPropertyUiState>& out_PropertyStates)
 {
   plContainerElementMetaStateEvent eventData;
-  eventData.m_pContainerElementStates = &out_propertyStates;
+  eventData.m_pContainerElementStates = &out_PropertyStates;
   eventData.m_pObject = pObject;
   eventData.m_szProperty = szProperty;
 
   m_ContainerEvents.Broadcast(eventData);
 }
 
-void plPropertyMetaState::GetContainerElementsState(const plHybridArray<plPropertySelection, 8>& items, const char* szProperty, plHashTable<plVariant, plPropertyUiState>& out_propertyStates)
+void plPropertyMetaState::GetContainerElementsState(const plHybridArray<plPropertySelection, 8>& items, const char* szProperty, plHashTable<plVariant, plPropertyUiState>& out_PropertyStates)
 {
   for (const auto& sel : items)
   {
@@ -75,7 +75,7 @@ void plPropertyMetaState::GetContainerElementsState(const plHybridArray<plProper
 
     for (auto it = m_Temp2.GetIterator(); it.IsValid(); ++it)
     {
-      auto& curState = out_propertyStates[it.Key()];
+      auto& curState = out_PropertyStates[it.Key()];
 
       curState.m_Visibility = plMath::Max(curState.m_Visibility, it.Value().m_Visibility);
       curState.m_sNewLabelText = it.Value().m_sNewLabelText;

@@ -26,9 +26,9 @@ plQtDoubleSpinBox::plQtDoubleSpinBox(QWidget* pParent, bool bIntMode)
   connect(this, &QWidget::customContextMenuRequested, this, &plQtDoubleSpinBox::onCustomContextMenuRequested);
 }
 
-void plQtDoubleSpinBox::SetIntMode(bool bEnable)
+void plQtDoubleSpinBox::SetIntMode(bool enable)
 {
-  m_bIntMode = bEnable;
+  m_bIntMode = enable;
 }
 
 void plQtDoubleSpinBox::setDisplaySuffix(const char* szSuffix)
@@ -64,17 +64,17 @@ void plQtDoubleSpinBox::setMaximum(const plVariant& val)
     setMaximum(fValue);
 }
 
-QString plQtDoubleSpinBox::textFromValue(double fVal) const
+QString plQtDoubleSpinBox::textFromValue(double val) const
 {
   if (m_bInvalid)
     return QString();
 
-  if (hasFocus() && fVal == m_fDisplayedValue && !plMath::IsNaN(m_fDisplayedValue))
+  if (hasFocus() && val == m_fDisplayedValue && !plMath::IsNaN(m_fDisplayedValue))
   {
     return m_sDisplayedText;
   }
 
-  if (fVal == 0.0)
+  if (val == 0.0)
   {
     m_fDisplayedValue = 0;
     m_sDisplayedText = "0";
@@ -84,9 +84,9 @@ QString plQtDoubleSpinBox::textFromValue(double fVal) const
   }
 
   if (m_bIntMode)
-    fVal = plMath::Round(QDoubleSpinBox::value());
+    val = plMath::Round(QDoubleSpinBox::value());
 
-  QString sText = QDoubleSpinBox::textFromValue(fVal);
+  QString sText = QDoubleSpinBox::textFromValue(val);
 
   while (sText.startsWith('0'))
     sText.remove(0, 1);
@@ -101,7 +101,7 @@ QString plQtDoubleSpinBox::textFromValue(double fVal) const
       sText.insert(0, '0');
   }
 
-  m_fDisplayedValue = fVal;
+  m_fDisplayedValue = val;
   m_sDisplayedText = sText;
 
   if (!hasFocus())
@@ -112,14 +112,14 @@ QString plQtDoubleSpinBox::textFromValue(double fVal) const
   return sText;
 }
 
-double plQtDoubleSpinBox::valueFromText(const QString& sText) const
+double plQtDoubleSpinBox::valueFromText(const QString& text) const
 {
   if (m_bInvalid)
   {
     m_bInvalid = false;
   }
 
-  QString sFixedText = sText;
+  QString sFixedText = text;
 
   if (sFixedText.isEmpty())
   {
@@ -138,7 +138,7 @@ double plQtDoubleSpinBox::valueFromText(const QString& sText) const
 
   if (hasFocus())
   {
-    m_sDisplayedText = sText;
+    m_sDisplayedText = text;
     m_fDisplayedValue = val;
   }
 
@@ -153,12 +153,12 @@ void plQtDoubleSpinBox::setValueInvalid()
   QDoubleSpinBox::setValue(minimum());
 }
 
-void plQtDoubleSpinBox::setValue(double fVal)
+void plQtDoubleSpinBox::setValue(double val)
 {
-  PLASMA_ASSERT_DEBUG(plMath::IsFinite(fVal), "Spin box value must be finite!");
+  PLASMA_ASSERT_DEBUG(plMath::IsFinite(val), "Spin box value must be finite!");
   m_bInvalid = false;
   m_fDisplayedValue = plMath::NaN<float>();
-  QDoubleSpinBox::setValue(fVal);
+  QDoubleSpinBox::setValue(val);
 }
 
 void plQtDoubleSpinBox::setValue(const plVariant& val)
@@ -177,6 +177,14 @@ double plQtDoubleSpinBox::value() const
 
   PLASMA_ASSERT_DEBUG(!plMath::IsNaN(QDoubleSpinBox::value()), "Spin box valid value should never be NaN!");
   return m_bIntMode ? plMath::Round(QDoubleSpinBox::value()) : QDoubleSpinBox::value();
+}
+
+void plQtDoubleSpinBox::wheelEvent(QWheelEvent* event)
+{
+  if(!hasFocus())
+    event->ignore();
+  else
+    QDoubleSpinBox::wheelEvent(event);
 }
 
 void plQtDoubleSpinBox::focusInEvent(QFocusEvent* event)
@@ -216,7 +224,7 @@ void plQtDoubleSpinBox::mousePressEvent(QMouseEvent* event)
       m_bDragging = true;
       m_iDragDelta = 0;
       m_bModified = false;
-      m_LastDragPos = event->globalPosition().toPoint();
+      m_LastDragPos = event->globalPos();
       grabMouse();
       event->accept();
       return;
@@ -271,11 +279,11 @@ void plQtDoubleSpinBox::mouseMoveEvent(QMouseEvent* event)
   {
     if (m_bDragging)
     {
-      int iDelta = m_LastDragPos.y() - event->globalPosition().toPoint().y();
+      int iDelta = m_LastDragPos.y() - event->globalPos().y();
       m_iDragDelta += iDelta;
       {
-        m_LastDragPos = event->globalPosition().toPoint();
-        const QRect dsize = plWidgetUtils::GetClosestScreen(event->globalPosition().toPoint()).availableGeometry();
+        m_LastDragPos = event->globalPos();
+        const QRect dsize = plWidgetUtils::GetClosestScreen(event->globalPos()).availableGeometry();
         if (m_LastDragPos.y() < (dsize.top() + 10))
         {
           m_LastDragPos.setY(dsize.bottom() - 10);
@@ -336,3 +344,4 @@ void plQtDoubleSpinBox::onCustomContextMenuRequested()
     setValue(m_fDefaultValue);
   }
 }
+

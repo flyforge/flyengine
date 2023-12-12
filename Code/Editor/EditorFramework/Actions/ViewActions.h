@@ -17,7 +17,7 @@ public:
     ActivateRemoteProcess = PLASMA_BIT(2),
   };
 
-  static void MapToolbarActions(plStringView sMapping, plUInt32 uiFlags);
+  static void MapActions(const char* szMapping, const char* szPath, plUInt32 flags);
 
   static plActionDescriptorHandle s_hRenderMode;
   static plActionDescriptorHandle s_hPerspective;

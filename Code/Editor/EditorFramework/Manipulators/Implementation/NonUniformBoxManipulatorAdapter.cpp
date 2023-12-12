@@ -8,16 +8,16 @@
 plNonUniformBoxManipulatorAdapter::plNonUniformBoxManipulatorAdapter() = default;
 plNonUniformBoxManipulatorAdapter::~plNonUniformBoxManipulatorAdapter() = default;
 
-void plNonUniformBoxManipulatorAdapter::QueryGridSettings(plGridSettingsMsgToEngine& out_gridSettings)
+void plNonUniformBoxManipulatorAdapter::QueryGridSettings(plGridSettingsMsgToEngine& outGridSettings)
 {
-  out_gridSettings.m_vGridCenter = m_Gizmo.GetTransformation().m_vPosition;
+  outGridSettings.m_vGridCenter = m_Gizmo.GetTransformation().m_vPosition;
 
   // if density != 0, it is enabled at least in ortho mode
-  out_gridSettings.m_fGridDensity = plSnapProvider::GetTranslationSnapValue();
+  outGridSettings.m_fGridDensity = plSnapProvider::GetTranslationSnapValue();
 
   // to be active in perspective mode, tangents have to be non-zero
-  out_gridSettings.m_vGridTangent1.SetZero();
-  out_gridSettings.m_vGridTangent2.SetZero();
+  outGridSettings.m_vGridTangent1.SetZero();
+  outGridSettings.m_vGridTangent2.SetZero();
 }
 
 void plNonUniformBoxManipulatorAdapter::Finalize()

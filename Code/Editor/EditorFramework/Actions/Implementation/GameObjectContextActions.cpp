@@ -33,26 +33,26 @@ void plGameObjectContextActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hClearContextObject);
 }
 
-void plGameObjectContextActions::MapToolbarActions(plStringView sMapping)
+void plGameObjectContextActions::MapToolbarActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
   pMap->MapAction(s_hCategory, "", 10.0f);
 
-  const plStringView szSubPath = "GameObjectContextCategory";
+  plStringBuilder szSubPath(szPath, "/GameObjectContextCategory");
   pMap->MapAction(s_hPickContextScene, szSubPath, 1.0f);
 }
 
 
-void plGameObjectContextActions::MapContextMenuActions(plStringView sMapping)
+void plGameObjectContextActions::MapContextMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
   pMap->MapAction(s_hCategory, "", 10.0f);
 
-  const plStringView szSubPath = "GameObjectContextCategory";
+  plStringBuilder szSubPath(szPath, "/GameObjectContextCategory");
   pMap->MapAction(s_hPickContextObject, szSubPath, 1.0f);
   pMap->MapAction(s_hClearContextObject, szSubPath, 2.0f);
 }

@@ -27,7 +27,7 @@ plGALSwapChain::plGALSwapChain(const plRTTI* pSwapChainType)
 {
 }
 
-plGALSwapChain::~plGALSwapChain() = default;
+plGALSwapChain::~plGALSwapChain() {}
 
 //////////////////////////////////////////////////////////////////////////
 

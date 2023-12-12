@@ -535,7 +535,7 @@ plUInt64 plVariant::ComputeHash(plUInt64 uiSeed) const
     return uiSeed;
 
   ComputeHashFunc obj;
-  return DispatchTo<ComputeHashFunc>(obj, GetType(), *this, GetData(), uiSeed + GetType());
+  return DispatchTo<ComputeHashFunc>(obj, GetType(), *this, GetData(), uiSeed);
 }
 
 
@@ -626,6 +626,33 @@ plStringView plVariant::GetTypeName(const plRTTI* pType)
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+struct LerpFunc
+{
+  constexpr static bool CanInterpolate(plVariantType::Enum variantType)
+  {
+    return variantType >= plVariantType::Int8 && variantType <= plVariantType::Vector4;
+  }
+
+  template <typename T>
+  PLASMA_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, double x, plVariant& out_res)
+  {
+    if constexpr (std::is_same_v<T, plQuat>)
+    {
+      plQuat q;
+      q.SetSlerp(a.Get<plQuat>(), b.Get<plQuat>(), static_cast<float>(x));
+      out_res = q;
+    }
+    else if constexpr (CanInterpolate(static_cast<plVariantType::Enum>(plVariantTypeDeduction<T>::value)))
+    {
+      out_res = plMath::Lerp(a.Get<T>(), b.Get<T>(), static_cast<float>(x));
+    }
+    else
+    {
+      out_res = (x < 0.5) ? a : b;
+    }
+  }
+};
 
 struct AddFunc
 {
@@ -837,31 +864,6 @@ plVariant operator/(const plVariant& a, const plVariant& b)
 
 //////////////////////////////////////////////////////////////////////////
 
-struct LerpFunc
-{
-  constexpr static bool CanInterpolate(plVariantType::Enum variantType)
-  {
-    return variantType >= plVariantType::Int8 && variantType <= plVariantType::Vector4;
-  }
-
-  template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, double x, plVariant& out_res)
-  {
-    if constexpr (std::is_same_v<T, plQuat>)
-    {
-      plQuat q = plQuat::MakeSlerp(a.Get<plQuat>(), b.Get<plQuat>(), static_cast<float>(x));
-      out_res = q;
-    }
-    else if constexpr (CanInterpolate(static_cast<plVariantType::Enum>(plVariantTypeDeduction<T>::value)))
-    {
-      out_res = plMath::Lerp(a.Get<T>(), b.Get<T>(), static_cast<float>(x));
-    }
-    else
-    {
-      out_res = (x < 0.5) ? a : b;
-    }
-  }
-};
 
 namespace plMath
 {
@@ -872,6 +874,6 @@ namespace plMath
     plVariant::DispatchTo(func, a.GetType(), a, b, fFactor, result);
     return result;
   }
-} // namespace plMath
+}
 
 PLASMA_STATICLINK_FILE(Foundation, Foundation_Types_Implementation_Variant);

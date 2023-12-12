@@ -16,9 +16,9 @@ void plCapsuleVisualizerAdapter::Finalize()
 
   const plCapsuleVisualizerAttribute* pAttr = static_cast<const plCapsuleVisualizerAttribute*>(m_pVisualizerAttr);
 
-  m_hCylinder.ConfigureHandle(nullptr, plEngineGizmoHandleType::CylinderZ, pAttr->m_Color, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
-  m_hSphereTop.ConfigureHandle(nullptr, plEngineGizmoHandleType::HalfSphereZ, pAttr->m_Color, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
-  m_hSphereBottom.ConfigureHandle(nullptr, plEngineGizmoHandleType::HalfSphereZ, pAttr->m_Color, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
+  m_hCylinder.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::CylinderZ, pAttr->m_Color, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
+  m_hSphereTop.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::HalfSphereZ, pAttr->m_Color, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
+  m_hSphereBottom.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::HalfSphereZ, pAttr->m_Color, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
 
   pAssetDocument->AddSyncObject(&m_hCylinder);
   pAssetDocument->AddSyncObject(&m_hSphereTop);
@@ -50,7 +50,7 @@ void plCapsuleVisualizerAdapter::Update()
       return;
 
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, pProp, value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, pProp, value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property '{0}' bound to plCapsuleVisualizerAttribute 'radius'", pAttr->GetRadiusProperty());
     m_fRadius = value.ConvertTo<float>();
@@ -59,7 +59,7 @@ void plCapsuleVisualizerAdapter::Update()
   if (!pAttr->GetHeightProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetHeightProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetHeightProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plCapsuleVisualizerAttribute 'height'");
     m_fHeight = value.ConvertTo<float>();
@@ -68,7 +68,7 @@ void plCapsuleVisualizerAdapter::Update()
   if (!pAttr->GetColorProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plCapsuleVisualizerAttribute 'color'");
     m_hSphereTop.SetColor(value.ConvertTo<plColor>() * pAttr->m_Color);
@@ -79,7 +79,7 @@ void plCapsuleVisualizerAdapter::Update()
 
 void plCapsuleVisualizerAdapter::UpdateGizmoTransform()
 {
-  plVec3 vOffset = plVec3::MakeZero();
+  plVec3 vOffset = plVec3::ZeroVector();
 
   if (m_Anchor.IsSet(plVisualizerAnchor::PosX))
     vOffset.x -= m_fRadius;

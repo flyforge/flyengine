@@ -22,7 +22,7 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11ShaderResourceView* m_pDXResourceView = nullptr;
+  ID3D11ShaderResourceView* m_pDXResourceView;
 };
 
 #include <RendererDX11/Resources/Implementation/ResourceViewDX11_inl.h>

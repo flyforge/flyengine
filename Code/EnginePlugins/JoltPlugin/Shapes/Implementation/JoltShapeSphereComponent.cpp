@@ -45,7 +45,7 @@ void plJoltShapeSphereComponent::SerializeComponent(plWorldWriter& inout_stream)
 void plJoltShapeSphereComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
 
   auto& s = inout_stream.GetStream();
@@ -54,7 +54,7 @@ void plJoltShapeSphereComponent::DeserializeComponent(plWorldReader& inout_strea
 
 void plJoltShapeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fRadius), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingSphere(plVec3::ZeroVector(), m_fRadius), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeSphereComponent::SetRadius(float f)
@@ -77,7 +77,7 @@ void plJoltShapeSphereComponent::CreateShapes(plDynamicArray<plJoltSubShape>& ou
 
   plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
   sub.m_pShape = pNewShape;
-  sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+  sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
 }
 
 

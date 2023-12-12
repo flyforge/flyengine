@@ -37,7 +37,7 @@ void plClothSimulator::SimulateStep(const plSimdFloat tDiffSqr, plUInt32 uiMaxIt
 
 plSimdFloat plClothSimulator::EnforceDistanceConstraint()
 {
-  plSimdFloat fError = plSimdFloat::MakeZero();
+  plSimdFloat fError = plSimdFloat::Zero();
 
   for (plUInt32 y = 0; y < m_uiHeight; ++y)
   {
@@ -86,7 +86,7 @@ plSimdVec4f plClothSimulator::MoveTowards(const plSimdVec4f posThis, const plSim
   plSimdVec4f vDir = (posNext - posThis);
   plSimdFloat fLen = vDir.GetLength<3>();
 
-  if (fLen.IsEqual(plSimdFloat::MakeZero(), 0.001f))
+  if (fLen.IsEqual(plSimdFloat::Zero(), 0.001f))
   {
     vDir = fallbackDir;
     fLen = 1;

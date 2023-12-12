@@ -12,7 +12,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtWindowCfgDlg(QWidget* pParent);
+  plQtWindowCfgDlg(QWidget* parent);
 
 private Q_SLOTS:
   void on_m_ButtonBox_clicked(QAbstractButton* button);
@@ -30,3 +30,4 @@ private:
   plWindowCreationDesc m_Descs[2];
   bool m_bOverrideProjectDefault[2];
 };
+

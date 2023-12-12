@@ -32,13 +32,11 @@ plTypeScriptAssetDocumentManager::plTypeScriptAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "TypeScript";
   m_DocTypeDesc.m_sFileExtension = "plTypeScriptAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/TypeScript.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Scripting";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plTypeScriptAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
-  m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Code_TypeScript");
 
-  // Typescript doesn't fully work with the new scripting infrastructure yet. Uncomment at your own risk.
-  // m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_ScriptClass");
+  // TODO: Get typescript working with new script interface
+  m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Code_TypeScript");
 
   m_DocTypeDesc.m_sResourceFileExtension = "plTypeScriptRes";
   m_DocTypeDesc.m_AssetDocumentFlags = plAssetDocumentFlags::None;
@@ -72,7 +70,7 @@ void plTypeScriptAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMa
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plTypeScriptAssetDocument>())
       {
-        new plQtTypeScriptAssetDocumentWindow(static_cast<plTypeScriptAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtTypeScriptAssetDocumentWindow* pDocWnd = new plQtTypeScriptAssetDocumentWindow(static_cast<plTypeScriptAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -82,9 +80,9 @@ void plTypeScriptAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMa
   }
 }
 
-void plTypeScriptAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plTypeScriptAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plTypeScriptAssetDocument(sPath);
+  out_pDocument = new plTypeScriptAssetDocument(szPath);
 }
 
 void plTypeScriptAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const
@@ -198,7 +196,7 @@ void plTypeScriptAssetDocumentManager::InitializeTranspiler()
 
   if (plFileSystem::FindDataDirectoryWithRoot("TypeScript") == nullptr)
   {
-    plFileSystem::AddDataDirectory(">sdk/Data/Tools/plEditor/Typescript", "TypeScript", "TypeScript").IgnoreResult();
+    plFileSystem::AddDataDirectory(">sdk/Data/Tools/PlasmaEditor/Typescript", "TypeScript", "TypeScript").IgnoreResult();
   }
 
   m_Transpiler.SetOutputFolder(":project/AssetCache/Temp");
@@ -372,7 +370,7 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
   {
     for (auto pAssetInfo : allTsAssets)
     {
-      const plString& docPath = pAssetInfo->m_Path.GetDataDirParentRelativePath();
+      const plString& docPath = pAssetInfo->m_sDataDirParentRelativePath;
       const plUuid& docGuid = pAssetInfo->m_Info->m_DocumentID;
 
       sFilename = plPathUtils::GetFileName(docPath);
@@ -412,12 +410,12 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
   return PLASMA_SUCCESS;
 }
 
-plStatus plTypeScriptAssetDocumentManager::GetAdditionalOutputs(plDynamicArray<plString>& ref_files)
+plStatus plTypeScriptAssetDocumentManager::GetAdditionalOutputs(plDynamicArray<plString>& files)
 {
   if (GenerateScriptCompendium(plTransformFlags::Default).Failed())
     return plStatus("Failed to build TypeScript compendium.");
 
-  ref_files.PushBack("AssetCache/Common/Scripts.plScriptCompendium");
+  files.PushBack("AssetCache/Common/Scripts.plScriptCompendium");
 
   return plStatus(PLASMA_SUCCESS);
 }

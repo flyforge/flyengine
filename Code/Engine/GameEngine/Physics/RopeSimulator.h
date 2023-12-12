@@ -18,8 +18,8 @@ class PLASMA_GAMEENGINE_DLL plRopeSimulator
 public:
   struct Node
   {
-    plSimdVec4f m_vPosition = plSimdVec4f::MakeZero();
-    plSimdVec4f m_vPreviousPosition = plSimdVec4f::MakeZero();
+    plSimdVec4f m_vPosition = plSimdVec4f::ZeroVector();
+    plSimdVec4f m_vPreviousPosition = plSimdVec4f::ZeroVector();
 
     // could add per node acceleration
     // could add per node mass

@@ -37,7 +37,7 @@ plResult plApplication::BeforeCoreSystemsStartup()
   {
     while (!plSystemInformation::IsDebuggerAttached())
     {
-      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(1));
+      plThreadUtils::Sleep(plTime::Milliseconds(1));
     }
 
     PLASMA_DEBUG_BREAK;

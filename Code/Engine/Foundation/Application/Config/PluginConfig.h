@@ -30,7 +30,6 @@ public:
   mutable plHybridArray<PluginConfig, 8> m_Plugins;
 };
 
-
 using plApplicationPluginConfig_PluginConfig = plApplicationPluginConfig::PluginConfig;
 
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plApplicationPluginConfig);

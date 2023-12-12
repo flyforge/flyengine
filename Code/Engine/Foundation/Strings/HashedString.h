@@ -60,10 +60,8 @@ public:
   /// \brief Moves the given plHashedString.
   plHashedString(plHashedString&& rhs); // [tested]
 
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
   /// \brief Releases the reference to the internal data. Does NOT deallocate any data, even if this held the last reference to some string.
   ~plHashedString();
-#endif
 
   /// \brief Copies the given plHashedString.
   void operator=(const plHashedString& rhs); // [tested]
@@ -133,9 +131,6 @@ public:
 
   /// \brief Returns a pointer to the internal Utf8 string.
   PLASMA_ALWAYS_INLINE operator const char*() const { return GetData(); }
-
-  /// \brief Returns a pointer to the internal Utf8 string.
-  PLASMA_ALWAYS_INLINE operator const char8_t*() const {return reinterpret_cast<const char8_t*>(GetData()); }
 
 private:
   static void InitHashedString();

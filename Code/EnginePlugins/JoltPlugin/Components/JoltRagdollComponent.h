@@ -81,16 +81,16 @@ public:
 
   plUInt32 GetObjectFilterID() const { return m_uiObjectFilterID; } // [ scriptable ]
 
-  void OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& ref_msg);      // [ msg handler ]
+  void OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& ref_msg); // [ msg handler ]
   void OnMsgAnimationPoseProposal(plMsgAnimationPoseProposal& ref_msg); // [ msg handler ]
-  void OnRetrieveBoneState(plMsgRetrieveBoneState& ref_msg) const;      // [ msg handler ]
+  void OnRetrieveBoneState(plMsgRetrieveBoneState& ref_msg) const; // [ msg handler ]
 
   float GetGravityFactor() const { return m_fGravityFactor; } // [ property ]
   void SetGravityFactor(float fFactor);                       // [ property ]
 
-  bool m_bSelfCollision = false;   // [ property ]
-  float m_fStiffnessFactor = 1.0f; // [ property ]
-  float m_fMass = 50.0f;           // [ property ]
+  bool m_bSelfCollision = false;        // [ property ]
+  float m_fStiffnessFactor = 1.0f;     // [ property ]
+  float m_fMass = 50.0f;                // [ property ]
 
   void SetStartMode(plEnum<plJoltRagdollStartMode> mode);                     // [ property ]
   plEnum<plJoltRagdollStartMode> GetStartMode() const { return m_StartMode; } // [ property ]
@@ -122,7 +122,7 @@ public:
   float m_fOwnerVelocityScale = 1.0f;              // [ property ]
   float m_fCenterVelocity = 0.0f;                  // [ property ]
   float m_fCenterAngularVelocity = 0.0f;           // [ property ]
-  plVec3 m_vCenterPosition = plVec3::MakeZero();   // [ property ]
+  plVec3 m_vCenterPosition = plVec3::ZeroVector(); // [ property ]
 
   void SetJointTypeOverride(plStringView sJointName, plEnum<plSkeletonJointType> type);
 
@@ -174,10 +174,10 @@ protected:
   JPH::RagdollSettings* m_pRagdollSettings = nullptr;
   plDynamicArray<Limb> m_Limbs;
   plTransform m_RootBodyLocalTransform;
-  plTime m_ElapsedTimeSinceUpdate = plTime::MakeZero();
+  plTime m_ElapsedTimeSinceUpdate = plTime::Zero();
 
-  plVec3 m_vInitialImpulsePosition = plVec3::MakeZero();
-  plVec3 m_vInitialImpulseDirection = plVec3::MakeZero();
+  plVec3 m_vInitialImpulsePosition = plVec3::ZeroVector();
+  plVec3 m_vInitialImpulseDirection = plVec3::ZeroVector();
   plUInt8 m_uiNumInitialImpulses = 0;
 
   struct JointOverride

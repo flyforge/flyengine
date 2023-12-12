@@ -11,12 +11,13 @@ PLASMA_BEGIN_COMPONENT_TYPE(plHeadBoneComponent, 1, plComponentMode::Dynamic)
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("VerticalRotation", m_MaxVerticalRotation)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(80)), new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(89.0f))),
+    PLASMA_MEMBER_PROPERTY("VerticalRotation", m_MaxVerticalRotation)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(80)), new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(89.0f))),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Animation"),
+    new plCategoryAttribute("Transform"),
+    new plColorAttribute(plColorScheme::Gameplay),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_FUNCTIONS
@@ -37,10 +38,10 @@ void plHeadBoneComponent::Update()
   m_NewVerticalRotation = plMath::Clamp(m_NewVerticalRotation, -m_MaxVerticalRotation, m_MaxVerticalRotation);
 
   plQuat qOld, qNew;
-  qOld = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), m_CurVerticalRotation);
-  qNew = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), m_NewVerticalRotation);
+  qOld.SetFromAxisAndAngle(plVec3(0, 1, 0), m_CurVerticalRotation);
+  qNew.SetFromAxisAndAngle(plVec3(0, 1, 0), m_NewVerticalRotation);
 
-  const plQuat qChange = qNew * qOld.GetInverse();
+  const plQuat qChange = qNew * -qOld;
 
   const plQuat qFinalNew = qChange * GetOwner()->GetLocalRotation();
 
@@ -74,12 +75,12 @@ void plHeadBoneComponent::DeserializeComponent(plWorldReader& stream)
 
 void plHeadBoneComponent::SetVerticalRotation(float radians)
 {
-  m_NewVerticalRotation = plAngle::MakeFromRadian(radians);
+  m_NewVerticalRotation = plAngle::Radian(radians);
 }
 
 void plHeadBoneComponent::ChangeVerticalRotation(float radians)
 {
-  m_NewVerticalRotation += plAngle::MakeFromRadian(radians);
+  m_NewVerticalRotation += plAngle::Radian(radians);
 }
 
 PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_HeadBoneComponent);

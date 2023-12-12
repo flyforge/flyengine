@@ -4,7 +4,7 @@
 
 class plJoltCollisionMeshContext;
 
-class plJoltCollisionMeshViewContext : public plEngineProcessViewContext
+class plJoltCollisionMeshViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plJoltCollisionMeshViewContext(plJoltCollisionMeshContext* pMeshContext);

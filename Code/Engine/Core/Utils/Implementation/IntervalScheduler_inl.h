@@ -15,7 +15,7 @@ PLASMA_ALWAYS_INLINE plUInt32 plIntervalSchedulerBase::GetHistogramIndex(plTime 
 PLASMA_ALWAYS_INLINE plTime plIntervalSchedulerBase::GetHistogramSlotValue(plUInt32 uiIndex)
 {
   if (uiIndex == 0)
-    return plTime::MakeZero();
+    return plTime::Zero();
 
   constexpr double norm = 1.0 / (HistogramSize - 2.0);
   const double x = (uiIndex - 1) * norm;
@@ -28,7 +28,7 @@ PLASMA_ALWAYS_INLINE float plIntervalSchedulerBase::GetRandomZeroToOne(int pos, 
   return plSimdRandom::FloatZeroToOne(plSimdVec4i(pos), plSimdVec4u(seed++)).x();
 }
 
-constexpr plTime s_JitterRange = plTime::MakeFromMicroseconds(10);
+constexpr plTime s_JitterRange = plTime::Microseconds(10);
 
 // static
 PLASMA_ALWAYS_INLINE plTime plIntervalSchedulerBase::GetRandomTimeJitter(int pos, plUInt32& seed)
@@ -72,7 +72,7 @@ void plIntervalScheduler<T>::AddOrUpdateWork(const T& work, plTime interval)
 
   Data data;
   data.m_Work = work;
-  data.m_Interval = plMath::Max(interval, plTime::MakeZero());
+  data.m_Interval = plMath::Max(interval, plTime::Zero());
   data.m_DueTime = m_CurrentTime + GetRandomZeroToOne(m_Data.GetCount(), m_uiSeed) * data.m_Interval;
   data.m_LastScheduledTime = m_CurrentTime;
 
@@ -189,7 +189,7 @@ void plIntervalScheduler<T>::Update(plTime deltaTime, RunWorkCallback runWorkCal
 template <typename T>
 void plIntervalScheduler<T>::Clear()
 {
-  m_CurrentTime = plTime::MakeZero();
+  m_CurrentTime = plTime::Zero();
   m_uiSeed = 0;
   plMemoryUtils::ZeroFill(m_Histogram, HistogramSize);
 

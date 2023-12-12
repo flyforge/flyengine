@@ -1,6 +1,4 @@
 #include <RendererFoundation/Resources/ResourceFormats.h>
-#include <RendererVulkan/Utils/ConversionUtilsVulkan.h>
-
 
 namespace
 {
@@ -81,7 +79,6 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
   {
     case plGALTextureType::Texture2D:
     case plGALTextureType::Texture2DProxy:
-    case plGALTextureType::Texture2DShared:
       range.layerCount = viewDesc.m_uiArraySize;
       range.baseArrayLayer = viewDesc.m_uiFirstArraySlice;
       break;
@@ -120,7 +117,6 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
   {
     case plGALTextureType::Texture2D:
     case plGALTextureType::Texture2DProxy:
-    case plGALTextureType::Texture2DShared:
       range.baseArrayLayer = viewDesc.m_uiFirstArraySlice;
       break;
     case plGALTextureType::TextureCube:
@@ -160,7 +156,6 @@ PLASMA_ALWAYS_INLINE vk::ImageViewType plConversionUtilsVulkan::GetImageViewType
   {
     case plGALTextureType::Texture2D:
     case plGALTextureType::Texture2DProxy:
-    case plGALTextureType::Texture2DShared:
       if (!bIsArrayView)
       {
         return vk::ImageViewType::e2D;
@@ -294,56 +289,3 @@ PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipeline
 
   return res;
 }
-
-PLASMA_ALWAYS_INLINE vk::DescriptorType plConversionUtilsVulkan::GetDescriptorType(plGALShaderDescriptorType::Enum type)
-{
-  switch (type)
-  {
-    case plGALShaderDescriptorType::Unknown:
-      PLASMA_REPORT_FAILURE("Unknown descriptor type");
-    case plGALShaderDescriptorType::Sampler:
-      return vk::DescriptorType::eSampler;
-    case plGALShaderDescriptorType::ConstantBuffer:
-      return vk::DescriptorType::eUniformBuffer;
-    case plGALShaderDescriptorType::Texture:
-      return vk::DescriptorType::eSampledImage;
-    case plGALShaderDescriptorType::TexelBuffer:
-      return vk::DescriptorType::eUniformTexelBuffer;
-    case plGALShaderDescriptorType::StructuredBuffer:
-      return vk::DescriptorType::eStorageBuffer;
-    case plGALShaderDescriptorType::TextureRW:
-      return vk::DescriptorType::eStorageImage;
-    case plGALShaderDescriptorType::TexelBufferRW:
-      return vk::DescriptorType::eStorageTexelBuffer;
-    case plGALShaderDescriptorType::StructuredBufferRW:
-      return vk::DescriptorType::eStorageBuffer;
-  }
-
-  return vk::DescriptorType::eMutableVALVE;
-}
-
-PLASMA_ALWAYS_INLINE vk::ShaderStageFlagBits plConversionUtilsVulkan::GetShaderStages(plBitflags<plGALShaderStageFlags> stages)
-{
-  return (vk::ShaderStageFlagBits)stages.GetValue();
-}
-
-PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipelineStages(plBitflags<plGALShaderStageFlags> stages)
-{
-  vk::PipelineStageFlags res;
-  for (int i = 0; i < plGALShaderStage::ENUM_COUNT; ++i)
-  {
-    plGALShaderStageFlags::Enum flag = plGALShaderStageFlags::MakeFromShaderStage((plGALShaderStage::Enum)i);
-    if (stages.IsSet(flag))
-    {
-      res |= GetPipelineStage((plGALShaderStage::Enum)i);
-    }
-  }
-  return res;
-}
-
-PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eVertex == (plUInt32)plGALShaderStageFlags::VertexShader);
-PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eTessellationControl == (plUInt32)plGALShaderStageFlags::HullShader);
-PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eTessellationEvaluation == (plUInt32)plGALShaderStageFlags::DomainShader);
-PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eGeometry == (plUInt32)plGALShaderStageFlags::GeometryShader);
-PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eFragment == (plUInt32)plGALShaderStageFlags::PixelShader);
-PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eCompute == (plUInt32)plGALShaderStageFlags::ComputeShader);

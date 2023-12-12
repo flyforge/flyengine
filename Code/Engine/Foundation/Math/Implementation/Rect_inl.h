@@ -22,62 +22,6 @@ PLASMA_ALWAYS_INLINE plRectTemplate<Type>::plRectTemplate(Type width, Type heigh
 }
 
 template <typename Type>
-plRectTemplate<Type> plRectTemplate<Type>::MakeInvalid()
-{
-  /// \test This is new
-
-  plRectTemplate<Type> res;
-
-  const Type fLargeValue = plMath::MaxValue<Type>() / 2;
-  res.x = fLargeValue;
-  res.y = fLargeValue;
-  res.width = -fLargeValue;
-  res.height = -fLargeValue;
-
-  return res;
-}
-
-template <typename Type>
-plRectTemplate<Type> plRectTemplate<Type>::MakeIntersection(const plRectTemplate<Type>& r0, const plRectTemplate<Type>& r1)
-{
-  /// \test This is new
-
-  plRectTemplate<Type> res;
-
-  Type x1 = plMath::Max(r0.GetX1(), r1.GetX1());
-  Type y1 = plMath::Max(r0.GetY1(), r1.GetY1());
-  Type x2 = plMath::Min(r0.GetX2(), r1.GetX2());
-  Type y2 = plMath::Min(r0.GetY2(), r1.GetY2());
-
-  res.x = x1;
-  res.y = y1;
-  res.width = x2 - x1;
-  res.height = y2 - y1;
-
-  return res;
-}
-
-template <typename Type>
-plRectTemplate<Type> plRectTemplate<Type>::MakeUnion(const plRectTemplate<Type>& r0, const plRectTemplate<Type>& r1)
-{
-  /// \test This is new
-
-  plRectTemplate<Type> res;
-
-  Type x1 = plMath::Min(r0.GetX1(), r1.GetX1());
-  Type y1 = plMath::Min(r0.GetY1(), r1.GetY1());
-  Type x2 = plMath::Max(r0.GetX2(), r1.GetX2());
-  Type y2 = plMath::Max(r0.GetY2(), r1.GetY2());
-
-  res.x = x1;
-  res.y = y1;
-  res.width = x2 - x1;
-  res.height = y2 - y1;
-
-  return res;
-}
-
-template <typename Type>
 PLASMA_ALWAYS_INLINE bool plRectTemplate<Type>::operator==(const plRectTemplate<Type>& rhs) const
 {
   return x == rhs.x && y == rhs.y && width == rhs.width && height == rhs.height;
@@ -140,38 +84,6 @@ void plRectTemplate<Type>::ExpandToInclude(const plRectTemplate<Type>& other)
 }
 
 template <typename Type>
-void plRectTemplate<Type>::ExpandToInclude(const plVec2Template<Type>& other)
-{
-  Type thisRight = Right();
-  Type thisBottom = Bottom();
-
-  if (other.x < x)
-    x = other.x;
-
-  if (other.y < y)
-    y = other.y;
-
-  if (other.x > thisRight)
-    width = other.x - x;
-  else
-    width = thisRight - x;
-
-  if (other.y > thisBottom)
-    height = other.y - y;
-  else
-    height = thisBottom - y;
-}
-
-template <typename Type>
-void plRectTemplate<Type>::Grow(Type xy)
-{
-  x -= xy;
-  y -= xy;
-  width += xy * 2;
-  height += xy * 2;
-}
-
-template <typename Type>
 PLASMA_ALWAYS_INLINE void plRectTemplate<Type>::Clip(const plRectTemplate<Type>& clipRect)
 {
   Type newLeft = plMath::Max<Type>(x, clipRect.x);
@@ -184,6 +96,18 @@ PLASMA_ALWAYS_INLINE void plRectTemplate<Type>::Clip(const plRectTemplate<Type>&
   y = newTop;
   width = newRight - newLeft;
   height = newBottom - newTop;
+}
+
+template <typename Type>
+PLASMA_ALWAYS_INLINE void plRectTemplate<Type>::SetInvalid()
+{
+  /// \test This is new
+
+  const Type fLargeValue = plMath::MaxValue<Type>() / 2;
+  x = fLargeValue;
+  y = fLargeValue;
+  width = -fLargeValue;
+  height = -fLargeValue;
 }
 
 template <typename Type>
@@ -200,6 +124,38 @@ PLASMA_ALWAYS_INLINE const plVec2Template<Type> plRectTemplate<Type>::GetClamped
   /// \test This is new
 
   return plVec2Template<Type>(plMath::Clamp(vPoint.x, Left(), Right()), plMath::Clamp(vPoint.y, Top(), Bottom()));
+}
+
+template <typename Type>
+void plRectTemplate<Type>::SetIntersection(const plRectTemplate<Type>& r0, const plRectTemplate<Type>& r1)
+{
+  /// \test This is new
+
+  Type x1 = plMath::Max(r0.GetX1(), r1.GetX1());
+  Type y1 = plMath::Max(r0.GetY1(), r1.GetY1());
+  Type x2 = plMath::Min(r0.GetX2(), r1.GetX2());
+  Type y2 = plMath::Min(r0.GetY2(), r1.GetY2());
+
+  x = x1;
+  y = y1;
+  width = x2 - x1;
+  height = y2 - y1;
+}
+
+template <typename Type>
+void plRectTemplate<Type>::SetUnion(const plRectTemplate<Type>& r0, const plRectTemplate<Type>& r1)
+{
+  /// \test This is new
+
+  Type x1 = plMath::Min(r0.GetX1(), r1.GetX1());
+  Type y1 = plMath::Min(r0.GetY1(), r1.GetY1());
+  Type x2 = plMath::Max(r0.GetX2(), r1.GetX2());
+  Type y2 = plMath::Max(r0.GetY2(), r1.GetY2());
+
+  x = x1;
+  y = y1;
+  width = x2 - x1;
+  height = y2 - y1;
 }
 
 template <typename Type>

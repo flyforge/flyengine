@@ -4,7 +4,7 @@
 
 class plAnimationClipContext;
 
-class plAnimationClipViewContext : public plEngineProcessViewContext
+class plAnimationClipViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plAnimationClipViewContext(plAnimationClipContext* pContext);

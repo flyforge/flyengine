@@ -60,7 +60,7 @@ struct PLASMA_RENDERERCORE_DLL plMsgExtractGeometry : public plMessage
   plWorldGeoExtractionUtil::ExtractionMode m_Mode = plWorldGeoExtractionUtil::ExtractionMode::RenderMesh;
 
   /// \brief Append mesh objects to this to describe the requested world geometry
-  plWorldGeoExtractionUtil::MeshObjectList* m_pMeshObjects = nullptr;
+  plWorldGeoExtractionUtil::MeshObjectList* m_pMeshObjects;
 
   void AddMeshObject(const plTransform& transform, plCpuMeshResourceHandle hMeshResource);
   void AddBox(const plTransform& transform, plVec3 vExtents);

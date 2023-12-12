@@ -22,11 +22,6 @@ PLASMA_ALWAYS_INLINE plSimdVec4i::plSimdVec4i(plInternal::QuadInt v)
   m_v = v;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4i plSimdVec4i::MakeZero()
-{
-  return plSimdVec4i(0);
-}
-
 PLASMA_ALWAYS_INLINE void plSimdVec4i::Set(plInt32 xyzw)
 {
   m_v.Set(xyzw);
@@ -361,6 +356,12 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4i::operator>(const plSimdVec4i& v) co
   result[3] = m_v.w > v.m_v.w;
 
   return plSimdVec4b(result[0], result[1], result[2], result[3]);
+}
+
+// static
+PLASMA_ALWAYS_INLINE plSimdVec4i plSimdVec4i::ZeroVector()
+{
+  return plVec4I32::ZeroVector();
 }
 
 // static

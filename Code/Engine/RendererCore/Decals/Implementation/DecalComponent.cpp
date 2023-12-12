@@ -45,8 +45,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plDecalComponent, 8, plComponentMode::Static)
     PLASMA_ACCESSOR_PROPERTY("SortOrder", GetSortOrder, SetSortOrder)->AddAttributes(new plClampValueAttribute(-64.0f, 64.0f)),
     PLASMA_ACCESSOR_PROPERTY("WrapAround", GetWrapAround, SetWrapAround),
     PLASMA_ACCESSOR_PROPERTY("MapNormalToGeometry", GetMapNormalToGeometry, SetMapNormalToGeometry)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ACCESSOR_PROPERTY("InnerFadeAngle", GetInnerFadeAngle, SetInnerFadeAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(89.0f)), new plDefaultValueAttribute(plAngle::MakeFromDegree(50.0f))),
-    PLASMA_ACCESSOR_PROPERTY("OuterFadeAngle", GetOuterFadeAngle, SetOuterFadeAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(89.0f)), new plDefaultValueAttribute(plAngle::MakeFromDegree(80.0f))),
+    PLASMA_ACCESSOR_PROPERTY("InnerFadeAngle", GetInnerFadeAngle, SetInnerFadeAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(89.0f)), new plDefaultValueAttribute(plAngle::Degree(50.0f))),
+    PLASMA_ACCESSOR_PROPERTY("OuterFadeAngle", GetOuterFadeAngle, SetOuterFadeAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(89.0f)), new plDefaultValueAttribute(plAngle::Degree(80.0f))),
     PLASMA_MEMBER_PROPERTY("FadeOutDelay", m_FadeOutDelay),
     PLASMA_MEMBER_PROPERTY("FadeOutDuration", m_FadeOutDuration),
     PLASMA_ENUM_MEMBER_PROPERTY("OnFinishedAction", plOnComponentFinishedAction, m_OnFinishedAction),
@@ -56,6 +56,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plDecalComponent, 8, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
+    new plColorAttribute(plColorScheme::Effects),
     new plDirectionVisualizerAttribute("ProjectionAxis", 0.5f, plColorScheme::LightUI(plColorScheme::Blue)),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxVisualizerAttribute("Extents"),
@@ -74,7 +75,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plDecalComponent, 8, plComponentMode::Static)
 PLASMA_END_COMPONENT_TYPE
 // clang-format on
 
-plDecalComponent::plDecalComponent() = default;
+plDecalComponent::plDecalComponent() {}
 
 plDecalComponent::~plDecalComponent() = default;
 
@@ -227,13 +228,13 @@ plResult plDecalComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAl
   const plQuat axisRotation = plBasisAxis::GetBasisRotation_PosX(m_ProjectionAxis);
   plVec3 vHalfExtents = (axisRotation * vAspectCorrection).Abs().CompMul(m_vExtents * 0.5f);
 
-  bounds = plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-vHalfExtents, vHalfExtents));
+  bounds = plBoundingBox(-vHalfExtents, vHalfExtents);
   return PLASMA_SUCCESS;
 }
 
 void plDecalComponent::SetExtents(const plVec3& value)
 {
-  m_vExtents = value.CompMax(plVec3::MakeZero());
+  m_vExtents = value.CompMax(plVec3::ZeroVector());
 
   TriggerLocalBoundsUpdate();
 }
@@ -275,7 +276,7 @@ plColor plDecalComponent::GetEmissiveColor() const
 
 void plDecalComponent::SetInnerFadeAngle(plAngle spotAngle)
 {
-  m_InnerFadeAngle = plMath::Clamp(spotAngle, plAngle::MakeFromDegree(0.0f), m_OuterFadeAngle);
+  m_InnerFadeAngle = plMath::Clamp(spotAngle, plAngle::Degree(0.0f), m_OuterFadeAngle);
 }
 
 plAngle plDecalComponent::GetInnerFadeAngle() const
@@ -285,7 +286,7 @@ plAngle plDecalComponent::GetInnerFadeAngle() const
 
 void plDecalComponent::SetOuterFadeAngle(plAngle spotAngle)
 {
-  m_OuterFadeAngle = plMath::Clamp(spotAngle, m_InnerFadeAngle, plAngle::MakeFromDegree(90.0f));
+  m_OuterFadeAngle = plMath::Clamp(spotAngle, m_InnerFadeAngle, plAngle::Degree(90.0f));
 }
 
 plAngle plDecalComponent::GetOuterFadeAngle() const
@@ -389,7 +390,7 @@ void plDecalComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
   if (finalColor.a <= 0.0f)
     return;
 
-  const bool bNoFade = m_InnerFadeAngle == plAngle::MakeFromRadian(0.0f) && m_OuterFadeAngle == plAngle::MakeFromRadian(0.0f);
+  const bool bNoFade = m_InnerFadeAngle == plAngle::Radian(0.0f) && m_OuterFadeAngle == plAngle::Radian(0.0f);
   const float fCosInner = plMath::Cos(m_InnerFadeAngle);
   const float fCosOuter = plMath::Cos(m_OuterFadeAngle);
   const float fFadeParamScale = bNoFade ? 0.0f : (1.0f / plMath::Max(0.001f, (fCosInner - fCosOuter)));
@@ -529,11 +530,11 @@ void plDecalComponent::OnSimulationStarted()
   plWorld* pWorld = GetWorld();
 
   // no fade out -> fade out pretty late
-  m_StartFadeOutTime = plTime::MakeFromHours(24.0 * 365.0 * 100.0); // 100 years should be enough for everybody (ignoring leap years)
+  m_StartFadeOutTime = plTime::Hours(24.0 * 365.0 * 100.0); // 100 years should be enough for everybody (ignoring leap years)
 
   if (m_FadeOutDelay.m_Value.GetSeconds() > 0.0 || m_FadeOutDuration.GetSeconds() > 0.0)
   {
-    const plTime tFadeOutDelay = plTime::MakeFromSeconds(pWorld->GetRandomNumberGenerator().DoubleVariance(m_FadeOutDelay.m_Value.GetSeconds(), m_FadeOutDelay.m_fVariance));
+    const plTime tFadeOutDelay = plTime::Seconds(pWorld->GetRandomNumberGenerator().DoubleVariance(m_FadeOutDelay.m_Value.GetSeconds(), m_FadeOutDelay.m_fVariance));
     m_StartFadeOutTime = pWorld->GetClock().GetAccumulatedTime() + tFadeOutDelay;
 
     if (m_OnFinishedAction != plOnComponentFinishedAction::None)

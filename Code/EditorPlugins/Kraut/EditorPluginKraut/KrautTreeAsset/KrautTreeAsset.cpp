@@ -12,8 +12,8 @@ using namespace AE_NS_FOUNDATION;
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeAssetDocument, 4, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plKrautTreeAssetDocument::plKrautTreeAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plKrautTreeAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
+plKrautTreeAssetDocument::plKrautTreeAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plKrautTreeAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
 }
 
@@ -77,7 +77,7 @@ static void GetMaterialLabel(plStringBuilder& ref_sOut, plKrautBranchType branch
   }
 }
 
-plTransformStatus plKrautTreeAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plKrautTreeAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plProgressRange range("Transforming Asset", 2, false);
 
@@ -225,28 +225,25 @@ plKrautTreeAssetDocumentGenerator::plKrautTreeAssetDocumentGenerator()
 
 plKrautTreeAssetDocumentGenerator::~plKrautTreeAssetDocumentGenerator() = default;
 
-void plKrautTreeAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
+void plKrautTreeAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const
 {
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
+  baseOutputFile.ChangeFileExtension("plKrautTreeAsset");
+
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::DefaultPriority;
     info.m_sName = "KrautTreeImport.Tree";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Kraut_Tree.svg";
   }
 }
 
-plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
 
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sInputFileAbs, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
 
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
@@ -257,7 +254,7 @@ plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sInputFileAbs,
     return plStatus("Target document is not a valid plKrautTreeAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("KrautFile", sInputFileRel.GetView());
+  accessor.SetValue("KrautFile", sDataDirRelativePath);
 
   return plStatus(PLASMA_SUCCESS);
 }

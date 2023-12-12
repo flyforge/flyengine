@@ -3,9 +3,9 @@
 #include <EditorPluginRmlUi/RmlUiAsset/RmlUiAsset.h>
 #include <Foundation/IO/FileSystem/FileReader.h>
 
-plStringView FindRCSSReference(plStringView& ref_sRml)
+plStringView FindRCSSReference(plStringView& sRml)
 {
-  const char* szCurrent = ref_sRml.FindSubString("href");
+  const char* szCurrent = sRml.FindSubString("href");
   if (szCurrent == nullptr)
     return plStringView();
 
@@ -31,7 +31,7 @@ plStringView FindRCSSReference(plStringView& ref_sRml)
 
   if (szStart != nullptr && szEnd != nullptr)
   {
-    ref_sRml.SetStartPosition(szEnd);
+    sRml.SetStartPosition(szEnd);
 
     plStringView rcss = plStringView(szStart, szEnd);
     if (rcss.EndsWith_NoCase(".rcss"))
@@ -46,12 +46,12 @@ plStringView FindRCSSReference(plStringView& ref_sRml)
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiAssetDocument, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plRmlUiAssetDocument::plRmlUiAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plRmlUiAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple)
+plRmlUiAssetDocument::plRmlUiAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plRmlUiAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple)
 {
 }
 
-plTransformStatus plRmlUiAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plRmlUiAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plRmlUiAssetProperties* pProp = GetProperties();
 

@@ -7,17 +7,17 @@
 QByteArray plQtColorDialog::s_LastDialogGeometry;
 
 void plQtUiServices::ShowColorDialog(
-  const plColor& color, bool bAlpha, bool bHDR, QWidget* pParent, const char* szSlotCurColChanged, const char* szSlotAccept, const char* szSlotReject)
+  const plColor& color, bool bAlpha, bool bHDR, QWidget* pParent, const char* slotCurColChanged, const char* slotAccept, const char* slotReject)
 {
   m_pColorDlg = new plQtColorDialog(color, pParent);
   m_pColorDlg->restoreGeometry(m_ColorDlgGeometry);
   m_pColorDlg->ShowAlpha(bAlpha);
   m_pColorDlg->ShowHDR(bHDR);
 
-  PLASMA_VERIFY(QWidget::connect(m_pColorDlg, SIGNAL(CurrentColorChanged(const plColor&)), pParent, szSlotCurColChanged) != nullptr,
+  PLASMA_VERIFY(QWidget::connect(m_pColorDlg, SIGNAL(CurrentColorChanged(const plColor&)), pParent, slotCurColChanged) != nullptr,
     "signal/slot connection failed");
-  PLASMA_VERIFY(QWidget::connect(m_pColorDlg, SIGNAL(accepted()), pParent, szSlotAccept) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(QWidget::connect(m_pColorDlg, SIGNAL(rejected()), pParent, szSlotReject) != nullptr, "signal/slot connection failed");
+  PLASMA_VERIFY(QWidget::connect(m_pColorDlg, SIGNAL(accepted()), pParent, slotAccept) != nullptr, "signal/slot connection failed");
+  PLASMA_VERIFY(QWidget::connect(m_pColorDlg, SIGNAL(rejected()), pParent, slotReject) != nullptr, "signal/slot connection failed");
 
   m_pColorDlg->exec();
   delete m_pColorDlg;
@@ -26,8 +26,8 @@ void plQtUiServices::ShowColorDialog(
   m_ColorDlgGeometry = plQtColorDialog::GetLastDialogGeometry();
 }
 
-plQtColorDialog::plQtColorDialog(const plColor& initial, QWidget* pParent)
-  : QDialog(pParent)
+plQtColorDialog::plQtColorDialog(const plColor& initial, QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 
@@ -84,27 +84,27 @@ plQtColorDialog::~plQtColorDialog()
   s_LastDialogGeometry = saveGeometry();
 }
 
-void plQtColorDialog::ShowAlpha(bool bEnable)
+void plQtColorDialog::ShowAlpha(bool enable)
 {
-  m_bAlpha = bEnable;
-  SpinAlpha->setVisible(bEnable);
-  LabelAlpha->setVisible(bEnable);
+  m_bAlpha = enable;
+  SpinAlpha->setVisible(enable);
+  LabelAlpha->setVisible(enable);
 
   ApplyColor();
 }
 
-void plQtColorDialog::ShowHDR(bool bEnable)
+void plQtColorDialog::ShowHDR(bool enable)
 {
-  m_bHDR = bEnable;
-  LineRed32->setVisible(bEnable);
-  LineGreen32->setVisible(bEnable);
-  LineBlue32->setVisible(bEnable);
-  LabelExposure->setVisible(bEnable);
-  LineExposure->setVisible(bEnable);
-  SliderExposure->setVisible(bEnable);
-  LabelR32->setVisible(bEnable);
-  LabelG32->setVisible(bEnable);
-  LabelB32->setVisible(bEnable);
+  m_bHDR = enable;
+  LineRed32->setVisible(enable);
+  LineGreen32->setVisible(enable);
+  LineBlue32->setVisible(enable);
+  LabelExposure->setVisible(enable);
+  LineExposure->setVisible(enable);
+  SliderExposure->setVisible(enable);
+  LabelR32->setVisible(enable);
+  LabelG32->setVisible(enable);
+  LabelB32->setVisible(enable);
 
   ApplyColor();
 }
@@ -277,7 +277,8 @@ void plQtColorDialog::ComputeRgbAndHsv(const plColor& color)
 
 void plQtColorDialog::RecomputeRGB()
 {
-  plColor col = plColor::MakeHSV(m_fHue, m_fSaturation, m_fValue);
+  plColor col;
+  col.SetHSV(m_fHue, m_fSaturation, m_fValue);
   plColorGammaUB colGamma = col;
 
   m_uiGammaRed = colGamma.r;
@@ -298,7 +299,7 @@ void plQtColorDialog::RecomputeHSV()
 
 void plQtColorDialog::RecomputeHDR()
 {
-  m_CurrentColor = plColor::MakeHSV(m_fHue, m_fSaturation, m_fValue);
+  m_CurrentColor.SetHSV(m_fHue, m_fSaturation, m_fValue);
   m_CurrentColor.ApplyHdrExposureValue(m_fExposureValue);
   m_CurrentColor.a = plMath::ColorByteToFloat(m_uiAlpha);
 }

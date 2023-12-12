@@ -18,7 +18,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plSurfaceInteraction, plNoBase, 1, plRTTIDefa
     PLASMA_ACCESSOR_PROPERTY("Prefab", GetPrefab, SetPrefab)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
     PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Prefab")),
     PLASMA_ENUM_MEMBER_PROPERTY("Alignment", plSurfaceInteractionAlignment, m_Alignment),
-    PLASMA_MEMBER_PROPERTY("Deviation", m_Deviation)->AddAttributes(new plClampValueAttribute(plVariant(plAngle::MakeFromDegree(0.0f)), plVariant(plAngle::MakeFromDegree(90.0f)))),
+    PLASMA_MEMBER_PROPERTY("Deviation", m_Deviation)->AddAttributes(new plClampValueAttribute(plVariant(plAngle::Degree(0.0f)), plVariant(plAngle::Degree(90.0f)))),
     PLASMA_MEMBER_PROPERTY("ImpulseThreshold", m_fImpulseThreshold),
     PLASMA_MEMBER_PROPERTY("ImpulseScale", m_fImpulseScale)->AddAttributes(new plDefaultValueAttribute(1.0f)),
   }
@@ -34,7 +34,6 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResourceDescriptor, 3, plRTTIDefaul
     PLASMA_MEMBER_PROPERTY("Restitution", m_fPhysicsRestitution)->AddAttributes(new plDefaultValueAttribute(0.25f)),
     PLASMA_MEMBER_PROPERTY("StaticFriction", m_fPhysicsFrictionStatic)->AddAttributes(new plDefaultValueAttribute(0.6f)),
     PLASMA_MEMBER_PROPERTY("DynamicFriction", m_fPhysicsFrictionDynamic)->AddAttributes(new plDefaultValueAttribute(0.4f)),
-    PLASMA_MEMBER_PROPERTY("GroundType", m_iGroundType)->AddAttributes(new plDefaultValueAttribute(-1), new plDynamicEnumAttribute("AiGroundType")),
     PLASMA_MEMBER_PROPERTY("SoundObstruction", m_fSoundObstruction)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
     PLASMA_ACCESSOR_PROPERTY("OnCollideInteraction", GetCollisionInteraction, SetCollisionInteraction)->AddAttributes(new plDynamicStringEnumAttribute("SurfaceInteractionTypeEnum")),
     PLASMA_ACCESSOR_PROPERTY("SlideReaction", GetSlideReactionPrefabFile, SetSlideReactionPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
@@ -107,7 +106,7 @@ void plSurfaceResourceDescriptor::Load(plStreamReader& stream)
   plUInt8 uiVersion = 0;
 
   stream >> uiVersion;
-  PLASMA_ASSERT_DEV(uiVersion <= 9, "Invalid version {0} for surface resource", uiVersion);
+  PLASMA_ASSERT_DEV(uiVersion <= 8, "Invalid version {0} for surface resource", uiVersion);
 
   stream >> m_fPhysicsRestitution;
   stream >> m_fPhysicsFrictionStatic;
@@ -179,11 +178,6 @@ void plSurfaceResourceDescriptor::Load(plStreamReader& stream)
       }
     }
   }
-
-  if (uiVersion >= 9)
-  {
-    stream >> m_iGroundType;
-  }
 }
 
 void plSurfaceResourceDescriptor::Save(plStreamWriter& stream) const
@@ -229,9 +223,6 @@ void plSurfaceResourceDescriptor::Save(plStreamWriter& stream) const
       stream << ia.m_Parameters.GetValue(i);
     }
   }
-
-  // version 9
-  stream << m_iGroundType;
 }
 
 void plSurfaceResourceDescriptor::SetBaseSurfaceFile(const char* szFile)

@@ -127,6 +127,7 @@ plResult plSampleBlendSpace1DAnimNode::DeserializeNode(plStreamReader& stream)
 
 void plSampleBlendSpace1DAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_Blendspace1D");
   if (!m_OutPose.IsConnected() || !m_InLerp.IsConnected() || m_Clips.IsEmpty())
     return;
 
@@ -134,7 +135,7 @@ void plSampleBlendSpace1DAnimNode::Step(plAnimController& ref_controller, plAnim
 
   if ((!m_InStart.IsConnected() && !pState->m_bPlaying) || m_InStart.IsTriggered(ref_graph))
   {
-    pState->m_PlaybackTime = plTime::MakeZero();
+    pState->m_PlaybackTime = plTime::Zero();
     pState->m_bPlaying = true;
 
     m_OutOnStarted.SetTriggered(ref_graph);

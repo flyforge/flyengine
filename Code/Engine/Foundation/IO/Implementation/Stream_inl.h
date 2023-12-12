@@ -62,7 +62,7 @@ plResult plStreamWriter::WriteDWordValue(const T* pDWordValue)
 {
   PLASMA_CHECK_AT_COMPILETIME(sizeof(T) == sizeof(plUInt32));
 
-  plUInt32 uiTemp = *reinterpret_cast<const plUInt32*>(pDWordValue);
+  plUInt32 uiTemp = *reinterpret_cast<const plUInt16*>(pDWordValue);
   uiTemp = plEndianHelper::Switch(uiTemp);
 
   return WriteBytes(reinterpret_cast<plUInt8*>(&uiTemp), sizeof(T));

@@ -11,9 +11,11 @@ class PLASMA_TOOLSFOUNDATION_DLL plDocumentObject
 {
 public:
   plDocumentObject()
-
-    = default;
-  virtual ~plDocumentObject() = default;
+    : m_pDocumentObjectManager(nullptr)
+    , m_pParent(nullptr)
+  {
+  }
+  virtual ~plDocumentObject() {}
 
   // Accessors
   const plUuid& GetGuid() const { return m_Guid; }
@@ -28,15 +30,15 @@ public:
   // Ownership
   const plDocumentObject* GetParent() const { return m_pParent; }
 
-  virtual void InsertSubObject(plDocumentObject* pObject, plStringView sProperty, const plVariant& index);
+  virtual void InsertSubObject(plDocumentObject* pObject, const char* szProperty, const plVariant& index);
   virtual void RemoveSubObject(plDocumentObject* pObject);
 
   // Helper
-  void ComputeObjectHash(plUInt64& ref_uiHash) const;
+  void ComputeObjectHash(plUInt64& uiHash) const;
   const plHybridArray<plDocumentObject*, 8>& GetChildren() const { return m_Children; }
   plDocumentObject* GetChild(const plUuid& guid);
   const plDocumentObject* GetChild(const plUuid& guid) const;
-  plStringView GetParentProperty() const { return m_sParentProperty; }
+  const char* GetParentProperty() const { return m_sParentProperty; }
   const plAbstractProperty* GetParentPropertyType() const;
   plVariant GetPropertyIndex() const;
   bool IsOnHeap() const;
@@ -48,9 +50,9 @@ private:
 
 protected:
   plUuid m_Guid;
-  plDocumentObjectManager* m_pDocumentObjectManager = nullptr;
+  plDocumentObjectManager* m_pDocumentObjectManager;
 
-  plDocumentObject* m_pParent = nullptr;
+  plDocumentObject* m_pParent;
   plHybridArray<plDocumentObject*, 8> m_Children;
 
   // Sub object data
@@ -66,7 +68,7 @@ public:
   {
   }
 
-  virtual ~plDocumentStorageObject() = default;
+  virtual ~plDocumentStorageObject() {}
 
   virtual const plIReflectedTypeAccessor& GetTypeAccessor() const override { return m_ObjectPropertiesAccessor; }
 

@@ -8,7 +8,8 @@
 #include <RendererCore/../../../Data/Base/Shaders/Common/ObjectConstants.h>
 
 plInstanceData::plInstanceData(plUInt32 uiMaxInstanceCount /*= 1024*/)
-
+  : m_uiBufferSize(0)
+  , m_uiBufferOffset(0)
 {
   CreateBuffer(uiMaxInstanceCount);
 
@@ -93,9 +94,9 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInstanceDataProvider, 1, plRTTIDefaultAllo
   }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plInstanceDataProvider::plInstanceDataProvider() = default;
+plInstanceDataProvider::plInstanceDataProvider() {}
 
-plInstanceDataProvider::~plInstanceDataProvider() = default;
+plInstanceDataProvider::~plInstanceDataProvider() {}
 
 void* plInstanceDataProvider::UpdateData(const plRenderViewContext& renderViewContext, const plExtractedRenderData& extractedData)
 {

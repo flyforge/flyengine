@@ -18,7 +18,7 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plDecalContext::plDecalContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
@@ -42,13 +42,13 @@ void plDecalContext::OnInitialize()
       geom.AddBox(plVec3(0.5f, 1.0f, 1.0f), true);
 
       plMat4 t, r;
-      t = plMat4::MakeTranslation(plVec3(0, 1.5f, 0));
-      r = plMat4::MakeRotationZ(plAngle::MakeFromDegree(90));
+      t.SetTranslationMatrix(plVec3(0, 1.5f, 0));
+      r.SetRotationMatrixZ(plAngle::Degree(90));
       opt.m_Transform = t * r;
       geom.AddSphere(0.5f, 64, 64, opt);
 
       t.SetTranslationVector(plVec3(0, -1.5f, 0));
-      r = plMat4::MakeRotationY(plAngle::MakeFromDegree(90));
+      r.SetRotationMatrixY(plAngle::Degree(90));
       opt.m_Transform = t * r;
       geom.AddTorus(0.1f, 0.5f, 32, 64, true, opt);
 
@@ -131,7 +131,7 @@ void plDecalContext::OnInitialize()
     // box
     {
       obj.m_sName.Assign("Decal4");
-      obj.m_LocalRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(180));
+      obj.m_LocalRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(180));
       obj.m_LocalPosition.Set(0.25f, 0, 0);
       pWorld->CreateObject(obj, pObj);
 
@@ -144,7 +144,7 @@ void plDecalContext::OnInitialize()
     // torus
     {
       obj.m_sName.Assign("Decal5");
-      obj.m_LocalRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(180));
+      obj.m_LocalRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(180));
       obj.m_LocalPosition.Set(0.2f, -1.5f, 0);
       pWorld->CreateObject(obj, pObj);
 
@@ -157,7 +157,7 @@ void plDecalContext::OnInitialize()
     // sphere
     {
       obj.m_sName.Assign("Decal6");
-      obj.m_LocalRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(180));
+      obj.m_LocalRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(180));
       obj.m_LocalPosition.Set(0.5f, 1.5f, 0);
       pWorld->CreateObject(obj, pObj);
 
@@ -169,12 +169,12 @@ void plDecalContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plDecalContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plDecalContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plDecalViewContext, this);
 }
 
-void plDecalContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plDecalContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }

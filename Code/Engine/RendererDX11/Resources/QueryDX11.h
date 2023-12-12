@@ -21,7 +21,7 @@ protected:
 
   virtual void SetDebugNamePlatform(const char* szName) const override;
 
-  ID3D11Query* m_pDXQuery = nullptr;
+  ID3D11Query* m_pDXQuery;
 };
 
 #include <RendererDX11/Resources/Implementation/QueryDX11_inl.h>

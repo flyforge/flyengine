@@ -3,7 +3,7 @@
 #include <Core/ResourceManager/ResourceHandle.h>
 #include <RendererCore/Pipeline/Renderer.h>
 
-struct plPerSpriteData;
+struct SpriteData;
 class plRenderDataBatch;
 using plShaderResourceHandle = plTypedResourceHandle<class plShaderResource>;
 
@@ -24,10 +24,10 @@ public:
     const plRenderViewContext& renderContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const override;
 
 protected:
-  plGALBufferHandle CreateSpriteDataBuffer(plUInt32 uiBufferSize) const;
+  plGALBufferHandle CreateSpriteDataBuffer() const;
   void DeleteSpriteDataBuffer(plGALBufferHandle hBuffer) const;
-  virtual void FillSpriteData(const plRenderDataBatch& batch) const;
+  virtual void FillSpriteData(const plRenderDataBatch& batch, plUInt32 uiStartIndex, plUInt32 uiCount) const;
 
   plShaderResourceHandle m_hShader;
-  mutable plDynamicArray<plPerSpriteData, plAlignedAllocatorWrapper> m_SpriteData;
+  mutable plDynamicArray<SpriteData, plAlignedAllocatorWrapper> m_SpriteData;
 };

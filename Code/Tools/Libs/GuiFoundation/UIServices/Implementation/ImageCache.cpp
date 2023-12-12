@@ -83,7 +83,7 @@ void plQtImageCache::InvalidateCache(const char* szAbsolutePath)
 }
 
 const QPixmap* plQtImageCache::QueryPixmap(
-  const char* szAbsolutePath, QModelIndex index, QVariant userData1, QVariant userData2, plUInt32* out_pImageID)
+  const char* szAbsolutePath, QModelIndex index, QVariant UserData1, QVariant UserData2, plUInt32* out_pImageID)
 {
   if (out_pImageID)
     *out_pImageID = 0;
@@ -121,8 +121,8 @@ const QPixmap* plQtImageCache::QueryPixmap(
   Request r;
   r.m_sPath = sHashed;
   r.m_Index = index;
-  r.m_UserData1 = userData1;
-  r.m_UserData2 = userData2;
+  r.m_UserData1 = UserData1;
+  r.m_UserData2 = UserData2;
 
   // we could / should implement prioritization here
   m_Requests.Insert(r);
@@ -134,14 +134,14 @@ const QPixmap* plQtImageCache::QueryPixmap(
 
 
 const QPixmap* plQtImageCache::QueryPixmapForType(const char* szType, const char* szAbsolutePath, QModelIndex index /*= QModelIndex()*/,
-  QVariant userData1 /*= QVariant()*/, QVariant userData2 /*= QVariant()*/, plUInt32* out_pImageID /*= nullptr*/)
+  QVariant UserData1 /*= QVariant()*/, QVariant UserData2 /*= QVariant()*/, plUInt32* out_pImageID /*= nullptr*/)
 {
   const QPixmap* pTypeImage = QueryTypeImage(szType);
 
   if (pTypeImage != nullptr)
     return pTypeImage;
 
-  return QueryPixmap(szAbsolutePath, index, userData1, userData2, out_pImageID);
+  return QueryPixmap(szAbsolutePath, index, UserData1, UserData2, out_pImageID);
 }
 
 void plQtImageCache::RunLoadingTask()
@@ -207,7 +207,7 @@ void plQtImageCache::StopRequestProcessing(bool bPurgeExistingCache)
       bTaskRunning = m_bTaskRunning;
     }
 
-    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(100));
+    plThreadUtils::Sleep(plTime::Milliseconds(100));
   }
 }
 
@@ -222,6 +222,9 @@ void plQtImageCache::EnableRequestProcessing()
 
 void plQtImageCache::RegisterTypeImage(const char* szType, QPixmap pixmap)
 {
+  int width = pixmap.width();
+  int height = pixmap.height();
+
   m_TypeImages[QString::fromUtf8(szType)] = pixmap;
 }
 
@@ -296,7 +299,7 @@ void plQtImageCache::CleanupCache()
   const plTime tNow = plTime::Now();
 
   // do not clean up too often
-  if (tNow - m_LastCleanupTime < plTime::MakeFromSeconds(10))
+  if (tNow - m_LastCleanupTime < plTime::Seconds(10))
     return;
 
   m_LastCleanupTime = tNow;
@@ -304,7 +307,7 @@ void plQtImageCache::CleanupCache()
   // purge everything older than 5 minutes, then 4 minutes, ...
   for (plInt32 i = 5; i > 2; --i)
   {
-    const plTime tPurgeThreshold = plTime::MakeFromSeconds(60) * i;
+    const plTime tPurgeThreshold = plTime::Seconds(60) * i;
 
     // purge images that have not been accessed in a longer time
     for (auto it = m_ImageCache.GetIterator(); it.IsValid();)

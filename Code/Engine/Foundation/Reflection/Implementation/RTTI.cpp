@@ -360,7 +360,7 @@ void plRTTI::ForEachType(VisitorFunc func, plBitflags<ForEachOptions> options /*
 
   pData->m_bIterating = true;
   // Can't use ranged based for loop here since we might add new types while iterating and the m_AllTypes array might re-allocate.
-  for (plUInt32 i = 0; i < pData->m_AllTypes.GetCount(); ++i)
+  for (plUInt32 i = 0; i < pData->m_AllTypes.GetCount(); ++i) 
   {
     auto pRtti = pData->m_AllTypes.GetData()[i];
     if (options.IsSet(ForEachOptions::ExcludeNonAllocatable) && (pRtti->GetAllocator() == nullptr || pRtti->GetAllocator()->CanAllocate() == false))

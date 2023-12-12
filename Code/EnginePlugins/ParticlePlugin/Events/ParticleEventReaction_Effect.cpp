@@ -283,7 +283,7 @@ void plParticleEventReaction_Effect::ProcessEvent(const plParticleEvent& e)
 
   if (!vAlignDir.IsZero())
   {
-    god.m_LocalRotation = plQuat::MakeShortestRotation(plVec3(0, 0, 1), vAlignDir);
+    god.m_LocalRotation.SetShortestRotation(plVec3(0, 0, 1), vAlignDir);
   }
 
   plGameObject* pObject = nullptr;

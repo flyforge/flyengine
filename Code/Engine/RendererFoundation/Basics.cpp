@@ -17,4 +17,9 @@ const char* plGALShaderStage::Names[ENUM_COUNT] = {
   "ComputeShader",
 };
 
+PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plGALMSAASampleCount, 1)
+  PLASMA_ENUM_CONSTANTS(
+    plGALMSAASampleCount::None, plGALMSAASampleCount::TwoSamples, plGALMSAASampleCount::FourSamples, plGALMSAASampleCount::EightSamples)
+PLASMA_END_STATIC_REFLECTED_ENUM;
+
 PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Basics);

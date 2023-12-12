@@ -2,7 +2,6 @@
 
 #include <Core/Graphics/Camera.h>
 #include <Foundation/Configuration/CVar.h>
-#include <Foundation/IO/TypeVersionContext.h>
 #include <Foundation/Profiling/Profiling.h>
 #include <RendererCore/Components/FogComponent.h>
 #include <RendererCore/Debug/DebugRenderer.h>
@@ -31,7 +30,7 @@ namespace
     float fAspectRatio = view.GetViewport().width / view.GetViewport().height;
 
     plMat4 mProj;
-    pCamera->GetProjectionMatrix(fAspectRatio, mProj);
+    pCamera->GetProjectionMatrix(view.GetViewport().width / (float)view.GetViewport().height, mProj);
 
     plAngle fFovLeft;
     plAngle fFovRight;
@@ -171,7 +170,7 @@ plClusteredDataExtractor::plClusteredDataExtractor(const char* szName)
   m_ClusterBoundingSpheres.SetCountUninitialized(NUM_CLUSTERS);
 }
 
-plClusteredDataExtractor::~plClusteredDataExtractor() = default;
+plClusteredDataExtractor::~plClusteredDataExtractor() {}
 
 void plClusteredDataExtractor::PostSortAndBatch(
   const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData)
@@ -407,21 +406,6 @@ void plClusteredDataExtractor::PostSortAndBatch(
 #if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
   VisualizeClusteredData(view, pData, m_ClusterBoundingSpheres);
 #endif
-}
-
-plResult plClusteredDataExtractor::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  return PLASMA_SUCCESS;
-}
-
-
-plResult plClusteredDataExtractor::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  return PLASMA_SUCCESS;
 }
 
 namespace

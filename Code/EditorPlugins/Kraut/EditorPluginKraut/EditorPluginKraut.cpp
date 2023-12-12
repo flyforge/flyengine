@@ -15,17 +15,17 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("KrautTreeAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("KrautTreeAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+      plStandardMenus::MapActions("KrautTreeAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
       plProjectActions::MapActions("KrautTreeAssetMenuBar");
-      plDocumentActions::MapMenuActions("KrautTreeAssetMenuBar");
-      plAssetActions::MapMenuActions("KrautTreeAssetMenuBar");
-      plCommandHistoryActions::MapActions("KrautTreeAssetMenuBar");
+      plDocumentActions::MapActions("KrautTreeAssetMenuBar", "Menu.File", false);
+      plAssetActions::MapMenuActions("KrautTreeAssetMenuBar", "Menu.File");
+      plCommandHistoryActions::MapActions("KrautTreeAssetMenuBar", "Menu.Edit");
     }
-    
+
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("KrautTreeAssetToolBar").IgnoreResult();
-      plDocumentActions::MapToolbarActions("KrautTreeAssetToolBar");
+      plDocumentActions::MapActions("KrautTreeAssetToolBar", "", true);
       plCommandHistoryActions::MapActions("KrautTreeAssetToolBar", "");
       plAssetActions::MapToolBarActions("KrautTreeAssetToolBar", true);
     }

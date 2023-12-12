@@ -18,8 +18,8 @@
 
 bool plQtExportProjectDlg::s_bTransformAll = true;
 
-plQtExportProjectDlg::plQtExportProjectDlg(QWidget* pParent)
-  : QDialog(pParent)
+plQtExportProjectDlg::plQtExportProjectDlg(QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 

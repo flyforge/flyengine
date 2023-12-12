@@ -23,6 +23,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plVolumeComponent, 1)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
+    new plColorAttribute(plColorScheme::Gameplay),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -166,7 +167,7 @@ void plVolumeSphereComponent::DeserializeComponent(plWorldReader& inout_stream)
 
 void plVolumeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg) const
 {
-  ref_msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fRadius), s_VolumeCategory);
+  ref_msg.AddBounds(plBoundingSphere(plVec3::ZeroVector(), m_fRadius), s_VolumeCategory);
 }
 
 //////////////////////////////////////////////////////////////////////////

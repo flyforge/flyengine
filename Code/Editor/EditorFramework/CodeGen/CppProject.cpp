@@ -34,6 +34,9 @@ plString plCppProject::GetGeneratorFolderName(const plCppSettings& cfg)
     case plCppSettings::Compiler::None:
       return "";
 
+    case plCppSettings::Compiler::Vs2019:
+      return "Vs2019x64";
+
     case plCppSettings::Compiler::Vs2022:
       return "Vs2022x64";
 
@@ -49,6 +52,9 @@ plString plCppProject::GetCMakeGeneratorName(const plCppSettings& cfg)
   {
     case plCppSettings::Compiler::None:
       return "";
+
+    case plCppSettings::Compiler::Vs2019:
+      return "Visual Studio 16 2019";
 
     case plCppSettings::Compiler::Vs2022:
       return "Visual Studio 17 2022";
@@ -325,8 +331,14 @@ plResult plCppProject::CompileSolution(const plCppSettings& cfg)
 
   if (cfg.m_sMsBuildPath.IsEmpty())
   {
-    plLog::Error("MSBuild path is not available.");
-    return PLASMA_FAILURE;
+    FindMsBuild(cfg).IgnoreResult();
+
+    if (cfg.m_sMsBuildPath.IsEmpty())
+    {
+      plLog::Error("MSBuild path is not available.");
+
+      return PLASMA_FAILURE;
+    }
   }
 
   if (plSystemInformation::IsDebuggerAttached())
@@ -452,7 +464,7 @@ void plCppProject::UpdatePluginConfig(const plCppSettings& cfg)
   plugin.m_bLoadCopy = true;
   plugin.m_bSelected = true;
   plugin.m_bMissing = true;
-  plugin.m_LastModificationTime = plTimestamp::MakeInvalid();
+  plugin.m_LastModificationTime.Invalidate();
   plugin.m_ExclusiveFeatures.PushBack("ProjectPlugin");
   txt.Set("'", cfg.m_sPluginName, "' project plugin");
   plugin.m_sDisplayName = txt;

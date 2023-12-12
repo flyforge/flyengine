@@ -31,7 +31,7 @@ public:
   plQtTreeSearchFilterModel* GetProxyFilterModel() const { return m_pFilterModel.get(); }
 
 protected:
-  virtual bool event(QEvent* pEvent) override;
+  virtual void keyPressEvent(QKeyEvent* e) override;
 
 private Q_SLOTS:
   void on_selectionChanged_triggered(const QItemSelection& selected, const QItemSelection& deselected);

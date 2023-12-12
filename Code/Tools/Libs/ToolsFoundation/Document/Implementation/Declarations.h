@@ -7,7 +7,7 @@ class plAbstractObjectGraph;
 
 struct plDocumentFlags
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -24,7 +24,6 @@ struct plDocumentFlags
     StorageType RequestWindow : 1;
     StorageType AddToRecentFilesList : 1;
     StorageType AsyncSave : 1;
-    StorageType EmptyDocument : 1;
   };
 };
 
@@ -39,7 +38,7 @@ struct PLASMA_TOOLSFOUNDATION_DLL plDocumentTypeDescriptor
   plString m_sIcon;
   const plRTTI* m_pDocumentType = nullptr;
   plDocumentManager* m_pManager = nullptr;
-  plStringView m_sAssetCategory; // passed to plColorScheme::GetCategoryColor() with CategoryColorUsage::AssetMenuIcon
+  plColorScheme::ColorGroup m_IconColorGroup = plColorScheme::ColorGroup::None;
 
   /// This list is used to decide which asset types can be picked from the asset browser for a property.
   /// The strings are arbitrary and don't need to be registered anywhere else.
@@ -58,14 +57,13 @@ struct plDocumentEvent
     ReadOnlyChanged,
     EnsureVisible,
     DocumentSaved,
-    DocumentRenamed,
     DocumentStatusMsg,
   };
 
   Type m_Type;
   const plDocument* m_pDocument;
 
-  plStringView m_sStatusMsg;
+  const char* m_szStatusMsg;
 };
 
 class PLASMA_TOOLSFOUNDATION_DLL plDocumentInfo : public plReflectedClass

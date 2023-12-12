@@ -8,7 +8,10 @@
 template <int v>
 struct plTraitInt
 {
-  static constexpr int value = v;
+  enum
+  {
+    value = v
+  };
 };
 
 using plTypeIsMemRelocatable = plTraitInt<2>;

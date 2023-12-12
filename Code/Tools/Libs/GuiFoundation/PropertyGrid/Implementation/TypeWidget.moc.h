@@ -29,35 +29,35 @@ public:
 private:
   struct PropertyGroup
   {
-    PropertyGroup(const plGroupAttribute* pAttr, float& ref_fOrder)
+    PropertyGroup(const plGroupAttribute* attr, float& fOrder)
     {
-      if (pAttr)
+      if (attr)
       {
-        m_sGroup = pAttr->GetGroup();
-        m_sIconName = pAttr->GetIconName();
-        m_fOrder = pAttr->GetOrder();
+        m_sGroup = attr->GetGroup();
+        m_sIconName = attr->GetIconName();
+        m_fOrder = attr->GetOrder();
         if (m_fOrder == -1.0f)
         {
-          ref_fOrder += 1.0f;
-          m_fOrder = ref_fOrder;
+          fOrder += 1.0f;
+          m_fOrder = fOrder;
         }
       }
       else
       {
-        ref_fOrder += 1.0f;
-        m_fOrder = ref_fOrder;
+        fOrder += 1.0f;
+        m_fOrder = fOrder;
       }
     }
 
-    void MergeGroup(const plGroupAttribute* pAttr)
+    void MergeGroup(const plGroupAttribute* attr)
     {
-      if (pAttr)
+      if (attr)
       {
-        m_sGroup = pAttr->GetGroup();
-        m_sIconName = pAttr->GetIconName();
-        if (pAttr->GetOrder() != -1.0f)
+        m_sGroup = attr->GetGroup();
+        m_sIconName = attr->GetIconName();
+        if (attr->GetOrder() != -1.0f)
         {
-          m_fOrder = pAttr->GetOrder();
+          m_fOrder = attr->GetOrder();
         }
       }
     }

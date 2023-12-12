@@ -8,7 +8,7 @@
 
 class plLongOpWorker;
 struct plProgressEvent;
-using plDataBuffer = plDynamicArray<plUInt8>;
+typedef plDynamicArray<plUInt8> plDataBuffer;
 
 /// \brief The LongOp worker manager is active in the engine process of the editor.
 ///
@@ -36,7 +36,7 @@ private:
   };
 
   virtual void ProcessCommunicationChannelEventHandler(const plProcessCommunicationChannel::Event& e) override;
-  WorkerOpInfo* GetOperation(const plUuid& opGuid) const;
+  WorkerOpInfo* GetOperation(const plUuid& guid) const;
   void LaunchWorkerOperation(WorkerOpInfo& opInfo, plStreamReader& config);
   void WorkerProgressBarEventHandler(const plProgressEvent& e);
   void RemoveOperation(plUuid opGuid);

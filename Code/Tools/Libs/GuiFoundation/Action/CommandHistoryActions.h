@@ -11,7 +11,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(plStringView sMapping, plStringView sTargetMenu = "G.Edit");
+  static void MapActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hCommandHistoryCategory;
   static plActionDescriptorHandle s_hUndo;
@@ -35,7 +35,7 @@ public:
   ~plCommandHistoryAction();
 
   virtual void Execute(const plVariant& value) override;
-  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries) override;
+  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries) override;
 
 private:
   void UpdateState();

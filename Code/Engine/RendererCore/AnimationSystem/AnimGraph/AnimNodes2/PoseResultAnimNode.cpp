@@ -10,7 +10,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPoseResultAnimNode, 1, plRTTIDefaultAlloca
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("FadeDuration", m_FadeDuration)->AddAttributes(new plDefaultValueAttribute(plTime::MakeFromMilliseconds(200)), new plClampValueAttribute(plTime::MakeZero(), plTime::MakeFromSeconds(10))),
+    PLASMA_MEMBER_PROPERTY("FadeDuration", m_FadeDuration)->AddAttributes(new plDefaultValueAttribute(plTime::Milliseconds(200)), new plClampValueAttribute(plTime::Zero(), plTime::Seconds(10))),
     PLASMA_MEMBER_PROPERTY("InPose", m_InPose)->AddAttributes(new plHiddenAttribute),
     PLASMA_MEMBER_PROPERTY("InTargetWeight", m_InTargetWeight)->AddAttributes(new plHiddenAttribute),
     PLASMA_MEMBER_PROPERTY("InFadeDuration", m_InFadeDuration)->AddAttributes(new plHiddenAttribute),
@@ -74,6 +74,7 @@ plResult plPoseResultAnimNode::DeserializeNode(plStreamReader& stream)
 
 void plPoseResultAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_PoseResults");
   if (!m_InPose.IsConnected())
     return;
 
@@ -109,8 +110,8 @@ void plPoseResultAnimNode::Step(plAnimController& ref_controller, plAnimGraphIns
   {
     pInstance->m_fStartWeight = fCurrentWeight;
     pInstance->m_fEndWeight = fNewTargetWeight;
-    pInstance->m_PlayTime = plTime::MakeZero();
-    pInstance->m_EndTime = plTime::MakeFromSeconds(m_InFadeDuration.GetNumber(ref_graph, m_FadeDuration.GetSeconds()));
+    pInstance->m_PlayTime = plTime::Zero();
+    pInstance->m_EndTime = plTime::Seconds(m_InFadeDuration.GetNumber(ref_graph, m_FadeDuration.GetSeconds()));
   }
 
   m_OutCurrentWeight.SetNumber(ref_graph, fCurrentWeight);

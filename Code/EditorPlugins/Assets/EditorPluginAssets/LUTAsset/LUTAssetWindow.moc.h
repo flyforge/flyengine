@@ -25,5 +25,5 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(plStringView sMapping);
+  static void MapActions(const char* szMapping, const char* szPath);
 };

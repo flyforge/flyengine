@@ -83,15 +83,15 @@ void plGameObjectDocumentActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hPickTransparent);
 }
 
-void plGameObjectDocumentActions::MapMenuActions(plStringView sMapping)
+void plGameObjectDocumentActions::MapMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
   PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
-    pMap->MapAction(s_hGameObjectCategory, "G.View", 0.9f);
+    pMap->MapAction(s_hGameObjectCategory, szPath, 0.9f);
 
-    const plStringView sSubPath = "GameObjectCategory";
+    plStringBuilder sSubPath(szPath, "/GameObjectCategory");
     pMap->MapAction(s_hRenderSelectionOverlay, sSubPath, 1.0f);
     pMap->MapAction(s_hRenderVisualizers, sSubPath, 2.0f);
     pMap->MapAction(s_hRenderShapeIcons, sSubPath, 3.0f);
@@ -102,32 +102,32 @@ void plGameObjectDocumentActions::MapMenuActions(plStringView sMapping)
   }
 }
 
-void plGameObjectDocumentActions::MapMenuSimulationSpeed(plStringView sMapping)
+void plGameObjectDocumentActions::MapMenuSimulationSpeed(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
   PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
-    const plStringView sSubPath = "GameObjectCategory";
+    plStringBuilder sSubPath(szPath, "/GameObjectCategory");
 
-    pMap->MapAction(s_hGameObjectCategory, "G.Scene", 1.0f);
+    pMap->MapAction(s_hGameObjectCategory, szPath, 1.0f);
     pMap->MapAction(s_hSimulationSpeedMenu, sSubPath, 3.0f);
 
     plStringBuilder sSubPathSim(sSubPath, "/Scene.Simulation.Speed.Menu");
     for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_hSimulationSpeed); ++i)
-      pMap->MapAction(s_hSimulationSpeed[i], "G.Scene", sSubPathSim, i + 1.0f);
+      pMap->MapAction(s_hSimulationSpeed[i], sSubPathSim, i + 1.0f);
   }
 }
 
-void plGameObjectDocumentActions::MapToolbarActions(plStringView sMapping)
+void plGameObjectDocumentActions::MapToolbarActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
   PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
-    pMap->MapAction(s_hGameObjectCategory, "", 12.0f);
+    pMap->MapAction(s_hGameObjectCategory, szPath, 12.0f);
 
-    const plStringView sSubPath("GameObjectCategory");
+    plStringBuilder sSubPath(szPath, "/GameObjectCategory");
     pMap->MapAction(s_hRenderSelectionOverlay, sSubPath, 4.0f);
     pMap->MapAction(s_hRenderVisualizers, sSubPath, 5.0f);
     pMap->MapAction(s_hRenderShapeIcons, sSubPath, 6.0f);
@@ -373,6 +373,8 @@ plCameraSpeedSliderAction::~plCameraSpeedSliderAction()
 
 void plCameraSpeedSliderAction::Execute(const plVariant& value)
 {
+  const plInt32 iValue = value.Get<plInt32>();
+
   switch (m_Type)
   {
     case ActionType::CameraSpeed:

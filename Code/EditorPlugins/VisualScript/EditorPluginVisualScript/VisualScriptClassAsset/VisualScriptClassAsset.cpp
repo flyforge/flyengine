@@ -20,17 +20,17 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetProperties, 1, plRTT
 }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetDocument, 4, plRTTINoAllocator)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetDocument, 3, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plVisualScriptClassAssetDocument::plVisualScriptClassAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plVisualScriptClassAssetProperties>(PLASMA_DEFAULT_NEW(plVisualScriptNodeManager), sDocumentPath, plAssetDocEngineConnection::None)
+plVisualScriptClassAssetDocument::plVisualScriptClassAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plVisualScriptClassAssetProperties>(PLASMA_DEFAULT_NEW(plVisualScriptNodeManager), szDocumentPath, plAssetDocEngineConnection::None)
 {
   m_pObjectAccessor = PLASMA_DEFAULT_NEW(plNodeCommandAccessor, GetCommandHistory());
 }
 
-plTransformStatus plVisualScriptClassAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plVisualScriptClassAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   auto pManager = static_cast<plVisualScriptNodeManager*>(GetObjectManager());
 
@@ -147,7 +147,7 @@ bool plVisualScriptClassAssetDocument::CopySelectedObjects(plAbstractObjectGraph
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plVisualScriptClassAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
+bool plVisualScriptClassAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);

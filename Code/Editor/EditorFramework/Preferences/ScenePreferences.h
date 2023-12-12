@@ -12,7 +12,7 @@ public:
   void SetCameraSpeed(plInt32 value);
   plInt32 GetCameraSpeed() const { return m_iCameraSpeed; }
 
-  void SetShowGrid(bool bShow);
+  void SetShowGrid(bool show);
   bool GetShowGrid() const { return m_bShowGrid; }
 
 protected:

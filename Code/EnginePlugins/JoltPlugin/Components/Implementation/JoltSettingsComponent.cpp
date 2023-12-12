@@ -20,6 +20,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltSettingsComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Misc"),
+    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -46,7 +47,7 @@ void plJoltSettingsComponent::SerializeComponent(plWorldWriter& inout_stream) co
 void plJoltSettingsComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 

@@ -4,9 +4,9 @@
 #include <EditorFramework/Manipulators/TransformManipulatorAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plTransformManipulatorAdapter::plTransformManipulatorAdapter() = default;
+plTransformManipulatorAdapter::plTransformManipulatorAdapter() {}
 
-plTransformManipulatorAdapter::~plTransformManipulatorAdapter() = default;
+plTransformManipulatorAdapter::~plTransformManipulatorAdapter() {}
 
 void plTransformManipulatorAdapter::Finalize()
 {
@@ -22,6 +22,7 @@ void plTransformManipulatorAdapter::Finalize()
   m_ScaleGizmo.SetTransformation(GetObjectTransform());
 
   const plTransformManipulatorAttribute* pAttr = static_cast<const plTransformManipulatorAttribute*>(m_pManipulatorAttr);
+  plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
 
   if (!pAttr->GetTranslateProperty().IsEmpty())
   {
@@ -58,7 +59,7 @@ void plTransformManipulatorAdapter::Update()
 void plTransformManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
 {
   const plTransformManipulatorAttribute* pAttr = static_cast<const plTransformManipulatorAttribute*>(m_pManipulatorAttr);
-
+  plObjectAccessorBase* pAccessor = GetObjectAccessor();
   switch (e.m_Type)
   {
     case plGizmoEvent::Type::BeginInteractions:
@@ -81,7 +82,7 @@ void plTransformManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
         const plTransform tParent = GetObjectTransform();
         const plTransform tGlobal = static_cast<const plGizmo*>(e.m_pGizmo)->GetTransformation();
         plTransform tLocal;
-        tLocal = plTransform::MakeLocalTransform(tParent, tGlobal);
+        tLocal.SetLocalTransform(tParent, tGlobal);
         if (e.m_pGizmo == &m_TranslateGizmo)
         {
           ChangeProperties(pAttr->GetTranslateProperty(), tLocal.m_vPosition);
@@ -104,6 +105,8 @@ void plTransformManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
 
 void plTransformManipulatorAdapter::UpdateGizmoTransform()
 {
+  const plTransformManipulatorAttribute* pAttr = static_cast<const plTransformManipulatorAttribute*>(m_pManipulatorAttr);
+
   m_TranslateGizmo.SetVisible(m_bManipulatorIsVisible && !m_bHideTranslate);
   m_RotateGizmo.SetVisible(m_bManipulatorIsVisible && !m_bHideRotate);
   m_ScaleGizmo.SetVisible(m_bManipulatorIsVisible && !m_bHideScale);
@@ -118,7 +121,7 @@ void plTransformManipulatorAdapter::UpdateGizmoTransform()
   tLocal.m_qRotation = vRot;
   tLocal.m_vScale = vScale;
   plTransform tGlobal;
-  tGlobal = plTransform::MakeGlobalTransform(tParent, tLocal);
+  tGlobal.SetGlobalTransform(tParent, tLocal);
   // Let's not apply scaling to the gizmos.
   tGlobal.m_vScale = plVec3(1, 1, 1);
 
@@ -150,7 +153,7 @@ plQuat plTransformManipulatorAdapter::GetRotation()
     return pObjectAccessor->Get<plQuat>(m_pObject, GetProperty(pAttr->GetRotateProperty()));
   }
 
-  return plQuat::MakeIdentity();
+  return plQuat::IdentityQuaternion();
 }
 
 plVec3 plTransformManipulatorAdapter::GetScale()

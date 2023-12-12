@@ -5,39 +5,39 @@
 #include <QPainter>
 #include <qevent.h>
 
-plQtColorAreaWidget::plQtColorAreaWidget(QWidget* pParent)
-  : QWidget(pParent)
+plQtColorAreaWidget::plQtColorAreaWidget(QWidget* parent)
+  : QWidget(parent)
 {
   setAutoFillBackground(false);
 
   m_fHue = -1.0f;
 }
 
-void plQtColorAreaWidget::SetHue(float fHue)
+void plQtColorAreaWidget::SetHue(float hue)
 {
-  if (m_fHue == fHue)
+  if (m_fHue == hue)
     return;
 
-  m_fHue = fHue;
+  m_fHue = hue;
   UpdateImage();
   update();
 }
 
-void plQtColorAreaWidget::SetSaturation(float fSat)
+void plQtColorAreaWidget::SetSaturation(float sat)
 {
-  if (m_fSaturation == fSat)
+  if (m_fSaturation == sat)
     return;
 
-  m_fSaturation = fSat;
+  m_fSaturation = sat;
   update();
 }
 
-void plQtColorAreaWidget::SetValue(float fVal)
+void plQtColorAreaWidget::SetValue(float val)
 {
-  if (m_fValue == fVal)
+  if (m_fValue == val)
     return;
 
-  m_fValue = fVal;
+  m_fValue = val;
   update();
 }
 
@@ -72,7 +72,8 @@ void plQtColorAreaWidget::UpdateImage()
   {
     for (int x = 0; x < width; ++x)
     {
-      plColor c = plColor::MakeHSV(m_fHue, (double)x / (width - 1), (double)y / (height - 1));
+      plColor c;
+      c.SetHSV(m_fHue, (double)x / (width - 1), (double)y / (height - 1));
 
       plColorGammaUB cg = c;
       m_Image.setPixel(x, (height - 1) - y, qRgb(cg.r, cg.g, cg.b));
@@ -107,18 +108,18 @@ void plQtColorAreaWidget::mousePressEvent(QMouseEvent* event)
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-plQtColorRangeWidget::plQtColorRangeWidget(QWidget* pParent)
-  : QWidget(pParent)
+plQtColorRangeWidget::plQtColorRangeWidget(QWidget* parent)
+  : QWidget(parent)
 {
   setAutoFillBackground(false);
 }
 
-void plQtColorRangeWidget::SetHue(float fHue)
+void plQtColorRangeWidget::SetHue(float hue)
 {
-  if (m_fHue == fHue)
+  if (m_fHue == hue)
     return;
 
-  m_fHue = fHue;
+  m_fHue = hue;
   update();
 }
 
@@ -170,12 +171,14 @@ void plQtColorRangeWidget::paintEvent(QPaintEvent* event)
 void plQtColorRangeWidget::UpdateImage()
 {
   const int width = rect().width();
+  const int height = rect().height();
 
   m_Image = QImage(width, 1, QImage::Format::Format_RGB32);
 
   for (int x = 0; x < width; ++x)
   {
-    plColor c = plColor::MakeHSV(((double)x / (width - 1.0)) * 360.0, 1, 1);
+    plColor c;
+    c.SetHSV(((double)x / (width - 1.0)) * 360.0, 1, 1);
 
     plColorGammaUB cg = c;
     m_Image.setPixel(x, 0, qRgb(cg.r, cg.g, cg.b));
@@ -207,7 +210,7 @@ void plQtColorRangeWidget::mousePressEvent(QMouseEvent* event)
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-plQtColorCompareWidget::plQtColorCompareWidget(QWidget* pParent)
+plQtColorCompareWidget::plQtColorCompareWidget(QWidget* parent)
 {
   setAutoFillBackground(false);
 }

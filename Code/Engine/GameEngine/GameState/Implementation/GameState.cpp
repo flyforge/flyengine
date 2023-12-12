@@ -136,13 +136,13 @@ plUniquePtr<plActor> plGameState::CreateXRActor()
     pOutput = CreateMainOutputTarget(pMainWindow.Borrow());
     ConfigureMainWindowInputDevices(pMainWindow.Borrow());
     CreateMainView();
-    SetupMainView(pOutput->m_hSwapChain, pMainWindow->GetClientAreaSize());
+    SetupMainView(pOutput->m_hSwapChain, pMainWindow->GetRenderAreaSize(), pMainWindow->GetClientAreaSize());
   }
   else
   {
     // XR Window (no companion window)
     CreateMainView();
-    SetupMainView({}, {});
+    SetupMainView({}, {}, {});
   }
 
   if (m_bXRRemotingEnabled)
@@ -174,7 +174,7 @@ void plGameState::CreateActors()
   plUniquePtr<plWindowOutputTargetGAL> pOutput = CreateMainOutputTarget(pMainWindow.Borrow());
   ConfigureMainWindowInputDevices(pMainWindow.Borrow());
   CreateMainView();
-  SetupMainView(pOutput->m_hSwapChain, pMainWindow->GetClientAreaSize());
+  SetupMainView(pOutput->m_hSwapChain, pMainWindow->GetRenderAreaSize(), pMainWindow->GetClientAreaSize());
 
   {
     // Default flat window
@@ -191,7 +191,7 @@ void plGameState::ConfigureMainWindowInputDevices(plWindow* pWindow) {}
 
 void plGameState::ConfigureInputActions() {}
 
-void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 viewportSize)
+void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 renderSize, plSizeU32 windowSize)
 {
   plView* pView = nullptr;
   if (!plRenderWorld::TryGetView(m_hMainView, pView))
@@ -202,7 +202,8 @@ void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 viewp
   if (m_bXREnabled)
   {
     const plXRConfig* pConfig = plGameApplicationBase::GetGameApplicationBaseInstance()->GetPlatformProfile().GetTypeConfig<plXRConfig>();
-    
+    plXRInterface* pXRInterface = plSingletonRegistry::GetSingletonInstance<plXRInterface>();
+
     auto renderPipeline = plResourceManager::LoadResource<plRenderPipelineResource>(pConfig->m_sXRRenderPipeline);
     pView->SetRenderPipelineResource(renderPipeline);
     // Render target setup is done by plXRInterface::CreateActor
@@ -215,7 +216,8 @@ void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 viewp
       auto renderPipeline = plResourceManager::LoadResource<plRenderPipelineResource>(pConfig->m_sMainRenderPipeline);
       pView->SetRenderPipelineResource(renderPipeline);
       pView->SetSwapChain(hSwapChain);
-      pView->SetViewport(plRectFloat(0.0f, 0.0f, (float)viewportSize.width, (float)viewportSize.height));
+      pView->SetViewport(plRectFloat(0.0f, 0.0f, (float)renderSize.width, (float)renderSize.height));
+      pView->SetTargetViewport(plRectFloat(0.0f, 0.0f, (float)windowSize.width, (float)windowSize.height));
       pView->ForceUpdate();
     }
   }
@@ -367,7 +369,7 @@ plUniquePtr<plWindowOutputTargetGAL> plGameState::CreateMainOutputTarget(plWindo
 {
   plUniquePtr<plWindowOutputTargetGAL> pOutput = PLASMA_DEFAULT_NEW(plWindowOutputTargetGAL, [this, pMainWindow](plGALSwapChainHandle hSwapChain, plSizeU32 size)
   {
-      SetupMainView(hSwapChain, size);
+      SetupMainView(hSwapChain, pMainWindow->GetRenderAreaSize(), size);
   });
 
   plGALWindowSwapChainCreationDescription desc;

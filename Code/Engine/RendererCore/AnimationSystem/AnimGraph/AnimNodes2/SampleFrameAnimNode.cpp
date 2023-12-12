@@ -69,6 +69,7 @@ plResult plSampleFrameAnimNode::DeserializeNode(plStreamReader& stream)
 
 void plSampleFrameAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_SampleFrame");
   if (!m_OutPose.IsConnected())
     return;
 

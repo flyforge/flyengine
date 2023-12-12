@@ -10,7 +10,7 @@ class plPhysicsWorldModuleInterface;
 
 //////////////////////////////////////////////////////////////////////////
 
-using plRcMarkPoiVisibleComponentManager = plComponentManagerSimple<class plRcMarkPoiVisibleComponent, plComponentUpdateType::WhenSimulating>;
+typedef plComponentManagerSimple<class plRcMarkPoiVisibleComponent, plComponentUpdateType::WhenSimulating> plRcMarkPoiVisibleComponentManager;
 
 class PLASMA_RECASTPLUGIN_DLL plRcMarkPoiVisibleComponent : public plRcComponent
 {
@@ -20,8 +20,8 @@ class PLASMA_RECASTPLUGIN_DLL plRcMarkPoiVisibleComponent : public plRcComponent
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
-  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
+  virtual void SerializeComponent(plWorldWriter& stream) const override;
+  virtual void DeserializeComponent(plWorldReader& stream) override;
 
 protected:
   virtual void OnSimulationStarted() override;

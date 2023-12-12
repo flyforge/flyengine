@@ -44,7 +44,7 @@ PLASMA_FORCE_INLINE plInternal::plAllocatorImpl<A, TrackingFlags>::plAllocatorIm
   : m_allocator(pParent)
   , m_ThreadID(plThreadUtils::GetCurrentThreadID())
 {
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
   {
     PLASMA_CHECK_AT_COMPILETIME_MSG((TrackingFlags & ~plMemoryTrackingFlags::All) == 0, "Invalid tracking flags");
     const plUInt32 uiTrackingFlags = TrackingFlags;
@@ -58,7 +58,7 @@ plInternal::plAllocatorImpl<A, TrackingFlags>::~plAllocatorImpl()
 {
   // PLASMA_ASSERT_RELEASE(m_ThreadID == plThreadUtils::GetCurrentThreadID(), "Allocator is deleted from another thread");
 
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
   {
     plMemoryTracker::DeregisterAllocator(this->m_Id);
   }
@@ -78,7 +78,7 @@ void* plInternal::plAllocatorImpl<A, TrackingFlags>::Allocate(size_t uiSize, siz
   void* ptr = m_allocator.Allocate(uiSize, uiAlign);
   PLASMA_ASSERT_DEV(ptr != nullptr, "Could not allocate {0} bytes. Out of memory?", uiSize);
 
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
   {
     plBitflags<plMemoryTrackingFlags> flags;
     flags.SetValue(TrackingFlags);
@@ -92,7 +92,7 @@ void* plInternal::plAllocatorImpl<A, TrackingFlags>::Allocate(size_t uiSize, siz
 template <typename A, plUInt32 TrackingFlags>
 void plInternal::plAllocatorImpl<A, TrackingFlags>::Deallocate(void* pPtr)
 {
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
   {
     plMemoryTracker::RemoveAllocation(this->m_Id, pPtr);
   }
@@ -103,14 +103,12 @@ void plInternal::plAllocatorImpl<A, TrackingFlags>::Deallocate(void* pPtr)
 template <typename A, plUInt32 TrackingFlags>
 size_t plInternal::plAllocatorImpl<A, TrackingFlags>::AllocatedSize(const void* pPtr)
 {
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
   {
     return plMemoryTracker::GetAllocationInfo(this->m_Id, pPtr).m_uiSize;
   }
-  else
-  {
-    return 0;
-  }
+
+  return 0;
 }
 
 template <typename A, plUInt32 TrackingFlags>
@@ -122,14 +120,12 @@ plAllocatorId plInternal::plAllocatorImpl<A, TrackingFlags>::GetId() const
 template <typename A, plUInt32 TrackingFlags>
 plAllocatorBase::Stats plInternal::plAllocatorImpl<A, TrackingFlags>::GetStats() const
 {
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
   {
     return plMemoryTracker::GetAllocatorStats(this->m_Id);
   }
-  else
-  {
-    return Stats();
-  }
+
+  return Stats();
 }
 
 template <typename A, plUInt32 TrackingFlags>
@@ -153,7 +149,7 @@ plInternal::plAllocatorMixinReallocate<A, TrackingFlags, true>::plAllocatorMixin
 template <typename A, plUInt32 TrackingFlags>
 void* plInternal::plAllocatorMixinReallocate<A, TrackingFlags, true>::Reallocate(void* pPtr, size_t uiCurrentSize, size_t uiNewSize, size_t uiAlign)
 {
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
   {
     plMemoryTracker::RemoveAllocation(this->m_Id, pPtr);
   }
@@ -162,7 +158,7 @@ void* plInternal::plAllocatorMixinReallocate<A, TrackingFlags, true>::Reallocate
 
   void* pNewMem = this->m_allocator.Reallocate(pPtr, uiCurrentSize, uiNewSize, uiAlign);
 
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
   {
     plBitflags<plMemoryTrackingFlags> flags;
     flags.SetValue(TrackingFlags);

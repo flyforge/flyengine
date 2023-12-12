@@ -19,7 +19,7 @@ protected:
   plRenderPipelineNodeInputPin m_PinInput;
   plRenderPipelineNodeOutputPin m_PinOutput;
 
-  bool m_bIsDepth = false;
-  plGALMSAASampleCount::Enum m_MsaaSampleCount = plGALMSAASampleCount::None;
+  bool m_bIsDepth;
+  plGALMSAASampleCount::Enum m_MsaaSampleCount;
   plShaderResourceHandle m_hDepthResolveShader;
 };

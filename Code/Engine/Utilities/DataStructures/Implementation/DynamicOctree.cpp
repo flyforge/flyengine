@@ -28,7 +28,7 @@ void plDynamicOctree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExten
   // the bounding box should be square, so use the maximum of the x, y and z extents
   float fMax = plMath::Max(vHalfExtents.x, plMath::Max(vHalfExtents.y, vHalfExtents.z));
 
-  m_BBox = plBoundingBox::MakeFromCenterAndHalfExtents(vCenter, plVec3(fMax));
+  m_BBox.SetCenterAndHalfExtents(vCenter, plVec3(fMax));
 
   float fLength = fMax * 2.0f;
 

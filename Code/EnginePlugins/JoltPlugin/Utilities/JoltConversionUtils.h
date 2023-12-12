@@ -35,7 +35,7 @@ namespace plJoltConversionUtils
 
   PLASMA_ALWAYS_INLINE plSimdQuat ToSimdQuat(const JPH::Quat& q) { return reinterpret_cast<const plSimdQuat&>(q); }
 
-  PLASMA_ALWAYS_INLINE JPH::Quat ToQuat(const plQuat& q) { return JPH::Quat(q.x, q.y, q.z, q.w); }
+  PLASMA_ALWAYS_INLINE JPH::Quat ToQuat(const plQuat& q) { return JPH::Quat(q.v.x, q.v.y, q.v.z, q.w); }
 
   PLASMA_ALWAYS_INLINE JPH::Quat ToQuat(const plSimdQuat& q) { return reinterpret_cast<const JPH::Quat&>(q); }
 

@@ -8,30 +8,21 @@
 PLASMA_FOUNDATION_INTERNAL_HEADER
 
 #include <Foundation/Math/Math.h>
+#include <execinfo.h>
 
-#if __has_include(<execinfo.h>)
-#  include <execinfo.h>
-#  define HAS_EXECINFO 1
-#endif
-
-void plStackTracer::OnPluginEvent(const plPluginEvent& e)
-{
-}
+void plStackTracer::OnPluginEvent(const plPluginEvent& e) {}
 
 // static
 plUInt32 plStackTracer::GetStackTrace(plArrayPtr<void*>& trace, void* pContext)
 {
-#if HAS_EXECINFO
-  return backtrace(trace.GetPtr(), trace.GetCount());
-#else
-  return 0;
-#endif
+  int iSymbols = backtrace(trace.GetPtr(), trace.GetCount());
+
+  return iSymbols;
 }
 
 // static
 void plStackTracer::ResolveStackTrace(const plArrayPtr<void*>& trace, PrintFunc printFunc)
 {
-#if HAS_EXECINFO
   char szBuffer[512];
 
   char** ppSymbols = backtrace_symbols(trace.GetPtr(), trace.GetCount());
@@ -50,7 +41,4 @@ void plStackTracer::ResolveStackTrace(const plArrayPtr<void*>& trace, PrintFunc 
 
     free(ppSymbols);
   }
-#else
-  printFunc("Could not record stack trace on this Linux system, because execinfo.h is not available.");
-#endif
 }

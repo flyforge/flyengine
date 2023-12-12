@@ -23,7 +23,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSetBlackboardNumberAnimNode, 1, plRTTIDefa
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plTitleAttribute("Set Number: '{BlackboardEntry}' to {Number}"),
+    new plTitleAttribute("Set Number: '{BlackboardEntry}'"),
     new plCategoryAttribute("Blackboard"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red)),
   }
@@ -81,7 +81,10 @@ void plSetBlackboardNumberAnimNode::Step(plAnimController& ref_controller, plAni
   if (pBlackboard == nullptr)
     return;
 
-  pBlackboard->SetEntryValue(m_sBlackboardEntry, m_InNumber.GetNumber(ref_graph, m_fNumber)).IgnoreResult();
+  if (pBlackboard->SetEntryValue(m_sBlackboardEntry, m_InNumber.GetNumber(ref_graph, m_fNumber)).Failed())
+  {
+    plLog::Warning("AnimController::SetBlackboardNumber: '{}' doesn't exist.", m_sBlackboardEntry);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -418,7 +421,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSetBlackboardBoolAnimNode, 1, plRTTIDefaul
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plTitleAttribute("Set Bool: '{BlackboardEntry}' to {Bool}"),
+    new plTitleAttribute("Set Bool: '{BlackboardEntry}'"),
     new plCategoryAttribute("Blackboard"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red)),
   }
@@ -476,7 +479,10 @@ void plSetBlackboardBoolAnimNode::Step(plAnimController& ref_controller, plAnimG
   if (pBlackboard == nullptr)
     return;
 
-  pBlackboard->SetEntryValue(m_sBlackboardEntry, m_InBool.GetBool(ref_graph, m_bBool)).IgnoreResult();
+  if (pBlackboard->SetEntryValue(m_sBlackboardEntry, m_InBool.GetBool(ref_graph, m_bBool)).Failed())
+  {
+    plLog::Warning("AnimController::SetBlackboardBool: '{}' doesn't exist.", m_sBlackboardEntry);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////

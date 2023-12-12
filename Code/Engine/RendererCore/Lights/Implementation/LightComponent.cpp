@@ -6,6 +6,11 @@
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <RendererCore/Lights/LightComponent.h>
 
+PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plLightUnit, 1)
+  PLASMA_ENUM_CONSTANT(plLightUnit::Lumen),
+  PLASMA_ENUM_CONSTANT(plLightUnit::Candela),
+PLASMA_END_STATIC_REFLECTED_ENUM;
+
 // clang-format off
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLightRenderData, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
@@ -19,13 +24,17 @@ void plLightRenderData::FillBatchIdAndSortingKey(float fScreenSpaceSize)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 4)
+PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 7)
 {
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_ACCESSOR_PROPERTY("LightColor", GetLightColor, SetLightColor),
-    PLASMA_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(10.0f)),
+    PLASMA_ENUM_MEMBER_PROPERTY("LightUnit", plLightUnit, m_LightUnit)->AddAttributes(new plDefaultValueAttribute(plLightUnit::Lumen)),
+    PLASMA_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(800.0f)),
+    PLASMA_ACCESSOR_PROPERTY("SpecularMultiplier", GetSpecularMultiplier, SetSpecularMultiplier)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PLASMA_ACCESSOR_PROPERTY("Temperature", GetTemperature, SetTemperature)->AddAttributes(new plClampValueAttribute(1000.0f, 15000.0f), new plDefaultValueAttribute(6550.0f), new plSuffixAttribute(" kelvin")),
     PLASMA_ACCESSOR_PROPERTY("CastShadows", GetCastShadows, SetCastShadows),
+    PLASMA_ACCESSOR_PROPERTY("VolumetricIntensity", GetVolumetricIntensity, SetVolumetricIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
     PLASMA_ACCESSOR_PROPERTY("PenumbraSize", GetPenumbraSize, SetPenumbraSize)->AddAttributes(new plClampValueAttribute(0.0f, 0.5f), new plDefaultValueAttribute(0.1f), new plSuffixAttribute(" m")),
     PLASMA_ACCESSOR_PROPERTY("SlopeBias", GetSlopeBias, SetSlopeBias)->AddAttributes(new plClampValueAttribute(0.0f, 10.0f), new plDefaultValueAttribute(0.25f)),
     PLASMA_ACCESSOR_PROPERTY("ConstantBias", GetConstantBias, SetConstantBias)->AddAttributes(new plClampValueAttribute(0.0f, 10.0f), new plDefaultValueAttribute(0.1f))
@@ -33,7 +42,8 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 4)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Lighting"),
+    new plCategoryAttribute("Rendering/Lighting"),
+    new plColorAttribute(plColorScheme::Lighting),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -60,16 +70,62 @@ plColorGammaUB plLightComponent::GetLightColor() const
   return m_LightColor;
 }
 
+void plLightComponent::SetLightUnit(plEnum<plLightUnit> lightUnit)
+{
+  m_LightUnit = lightUnit;
+}
+
+plEnum<plLightUnit> plLightComponent::GetLightUnit() const
+{
+  return m_LightUnit;
+}
+
 void plLightComponent::SetIntensity(float fIntensity)
 {
   m_fIntensity = plMath::Max(fIntensity, 0.0f);
 
-  TriggerLocalBoundsUpdate();
+  InvalidateCachedRenderData();
 }
 
 float plLightComponent::GetIntensity() const
 {
   return m_fIntensity;
+}
+
+void plLightComponent::SetSpecularMultiplier(float fSpecularMultiplier)
+{
+  m_fSpecularMultiplier = plMath::Max(fSpecularMultiplier, 0.0f);
+
+  InvalidateCachedRenderData();
+}
+
+float plLightComponent::GetSpecularMultiplier() const
+{
+  return m_fSpecularMultiplier;
+}
+
+void plLightComponent::SetVolumetricIntensity(float fVolumetricIntensity)
+{
+  m_fVolumetricIntensity = plMath::Max(fVolumetricIntensity, 0.0f);
+
+  InvalidateCachedRenderData();
+}
+
+float plLightComponent::GetVolumetricIntensity() const
+{
+  return m_fVolumetricIntensity;
+}
+
+void plLightComponent::SetTemperature(float fTemperature)
+{
+  m_fTemperature = plMath::Clamp(fTemperature, 1500.0f, 40000.0f);
+
+  InvalidateCachedRenderData();
+}
+
+float plLightComponent::GetTemperature() const
+{
+  return m_fTemperature;
 }
 
 void plLightComponent::SetCastShadows(bool bCastShadows)
@@ -127,10 +183,12 @@ void plLightComponent::SerializeComponent(plWorldWriter& inout_stream) const
 
   s << m_LightColor;
   s << m_fIntensity;
+  s << m_fTemperature;
   s << m_fPenumbraSize;
   s << m_fSlopeBias;
   s << m_fConstantBias;
   s << m_bCastShadows;
+  s << m_LightUnit;
 }
 
 void plLightComponent::DeserializeComponent(plWorldReader& inout_stream)
@@ -142,6 +200,11 @@ void plLightComponent::DeserializeComponent(plWorldReader& inout_stream)
 
   s >> m_LightColor;
   s >> m_fIntensity;
+
+  if (uiVersion >= 5)
+  {
+    s >> m_fTemperature;
+  }
 
   if (uiVersion >= 3)
   {
@@ -155,6 +218,11 @@ void plLightComponent::DeserializeComponent(plWorldReader& inout_stream)
   }
 
   s >> m_bCastShadows;
+
+  if (uiVersion >= 7)
+  {
+    s >> m_LightUnit;
+  }
 }
 
 void plLightComponent::OnMsgSetColor(plMsgSetColor& ref_msg)

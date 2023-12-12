@@ -20,13 +20,13 @@ public:
     m_Filter = filter;
   }
 
-  plAbstractObjectNode* AddObjectToGraph(const plDocumentObject* pObject, plStringView sNodeName = nullptr);
+  plAbstractObjectNode* AddObjectToGraph(const plDocumentObject* pObject, const char* szNodeName = nullptr);
 
 private:
   void AddProperty(plAbstractObjectNode* pNode, const plAbstractProperty* pProp, const plDocumentObject* pObject);
   void AddProperties(plAbstractObjectNode* pNode, const plDocumentObject* pObject);
 
-  plAbstractObjectNode* AddSubObjectToGraph(const plDocumentObject* pObject, plStringView sNodeName);
+  plAbstractObjectNode* AddSubObjectToGraph(const plDocumentObject* pObject, const char* szNodeName);
 
   const plDocumentObjectManager* m_pManager;
   plAbstractObjectGraph* m_pGraph;
@@ -51,10 +51,10 @@ public:
   plUInt32 GetNumUnknownObjectCreations() const { return m_uiUnknownTypeInstances; }
   const plSet<plString>& GetUnknownObjectTypes() const { return m_UnknownTypes; }
 
-  static void ApplyDiffToObject(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pObject, plDeque<plAbstractGraphDiffOperation>& ref_diff);
+  static void ApplyDiffToObject(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pObject, plDeque<plAbstractGraphDiffOperation>& diff);
 
 private:
-  void AddObject(plDocumentObject* pObject, plDocumentObject* pParent, plStringView sParentProperty, plVariant index);
+  void AddObject(plDocumentObject* pObject, plDocumentObject* pParent, const char* szParentProperty, plVariant index);
   void ApplyProperty(plDocumentObject* pObject, const plAbstractProperty* pProp, const plAbstractObjectNode::Property* pSource);
   static void ApplyDiff(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp,
     plAbstractGraphDiffOperation& op, plDeque<plAbstractGraphDiffOperation>& diff);

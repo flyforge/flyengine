@@ -557,11 +557,11 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::Pow2:
             return CreateConstant(plMath::Pow2(fValue));
           case NodeType::Sin:
-            return CreateConstant(plMath::Sin(plAngle::MakeFromRadian(fValue)));
+            return CreateConstant(plMath::Sin(plAngle::Radian(fValue)));
           case NodeType::Cos:
-            return CreateConstant(plMath::Cos(plAngle::MakeFromRadian(fValue)));
+            return CreateConstant(plMath::Cos(plAngle::Radian(fValue)));
           case NodeType::Tan:
-            return CreateConstant(plMath::Tan(plAngle::MakeFromRadian(fValue)));
+            return CreateConstant(plMath::Tan(plAngle::Radian(fValue)));
           case NodeType::ASin:
             return CreateConstant(plMath::ASin(fValue).GetRadian());
           case NodeType::ACos:

@@ -12,7 +12,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtPluginSelectionDlg(plPluginBundleSet* pPluginSet, QWidget* pParent = nullptr);
+  plQtPluginSelectionDlg(plPluginBundleSet* pPluginSet, QWidget* parent = nullptr);
   ~plQtPluginSelectionDlg();
 
 

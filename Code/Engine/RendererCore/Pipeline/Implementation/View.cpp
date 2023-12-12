@@ -36,7 +36,7 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plView::plView()
 {
-  m_pExtractTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "", plTaskNesting::Never, plMakeDelegate(&plView::ExtractData, this));
+  m_pExtractTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "", plMakeDelegate(&plView::ExtractData, this));
 }
 
 plView::~plView() = default;
@@ -135,6 +135,13 @@ void plView::SetViewport(const plRectFloat& viewport)
   UpdateViewData(plRenderWorld::GetDataIndexForExtraction());
 }
 
+void plView::SetTargetViewport(const plRectFloat& viewport)
+{
+  m_Data.m_TargetViewportRect = viewport;
+
+  UpdateViewData(plRenderWorld::GetDataIndexForExtraction());
+}
+
 void plView::ForceUpdate()
 {
   if (m_pRenderPipeline)
@@ -161,7 +168,7 @@ void plView::ExtractData()
   plRenderWorld::s_ExtractionEvent.Broadcast(extractionEvent);
 }
 
-void plView::ComputeCullingFrustum(plFrustum& out_frustum) const
+void plView::ComputeCullingFrustum(plFrustum& out_Frustum) const
 {
   const plCamera* pCamera = GetCullingCamera();
   const float fViewportAspectRatio = m_Data.m_ViewPortRect.width / m_Data.m_ViewPortRect.height;
@@ -171,7 +178,7 @@ void plView::ComputeCullingFrustum(plFrustum& out_frustum) const
   plMat4 projectionMatrix;
   pCamera->GetProjectionMatrix(fViewportAspectRatio, projectionMatrix);
 
-  out_frustum = plFrustum::MakeFromMVP(projectionMatrix * viewMatrix);
+  out_Frustum.SetFrustum(projectionMatrix * viewMatrix);
 }
 
 void plView::SetShaderPermutationVariable(const char* szName, const char* szValue)
@@ -208,32 +215,6 @@ void plView::SetExtractorProperty(const char* szPassName, const char* szProperty
   SetProperty(m_ExtractorProperties, szPassName, szPropertyName, value);
 }
 
-void plView::ResetRenderPassProperties()
-{
-  for (auto it : m_PassProperties)
-  {
-    auto& prop = it.Value();
-    if (prop.m_bIsValid)
-    {
-      prop.m_CurrentValue = prop.m_DefaultValue;
-      prop.m_bIsDirty = true;
-    }
-  }
-}
-
-void plView::ResetExtractorProperties()
-{
-  for (auto it : m_ExtractorProperties)
-  {
-    auto& prop = it.Value();
-    if (prop.m_bIsValid)
-    {
-      prop.m_CurrentValue = prop.m_DefaultValue;
-      prop.m_bIsDirty = true;
-    }
-  }
-}
-
 void plView::SetRenderPassReadBackProperty(const char* szPassName, const char* szPropertyName, const plVariant& value)
 {
   SetReadBackProperty(m_PassReadBackProperties, szPassName, szPropertyName, value);
@@ -245,9 +226,7 @@ plVariant plView::GetRenderPassReadBackProperty(const char* szPassName, const ch
 
   auto it = m_PassReadBackProperties.Find(sKey);
   if (it.IsValid())
-  {
-    return it.Value().m_CurrentValue;
-  }
+    return it.Value().m_Value;
 
   plLog::Warning("Unknown read-back property '{0}::{1}'", szPassName, szPropertyName);
   return plVariant();
@@ -278,37 +257,88 @@ void plView::UpdateCachedMatrices() const
 
   if (m_uiLastCameraOrientationModification != pCamera->GetOrientationModificationCounter())
   {
+    const plMat4 viewMatrixL = pCamera->GetViewMatrix(plCameraEye::Left);
+    const plMat4 viewMatrixR = pCamera->GetViewMatrix(plCameraEye::Right);
+
+    const plMat4 invViewMatrixL = viewMatrixL.GetInverse(0.0f);
+    const plMat4 invViewMatrixR = viewMatrixR.GetInverse(0.0f);
+
+    if (m_uiLastCameraOrientationModification == 0)
+    {
+      m_Data.m_LastViewMatrix[0] = viewMatrixL;
+      m_Data.m_LastViewMatrix[1] = viewMatrixR;
+
+      m_Data.m_LastInverseViewMatrix[0] = invViewMatrixL;
+      m_Data.m_LastInverseViewMatrix[1] = invViewMatrixR;
+    }
+    else
+    {
+      m_Data.m_LastViewMatrix[0] = m_Data.m_ViewMatrix[0];
+      m_Data.m_LastViewMatrix[1] = m_Data.m_ViewMatrix[1];
+
+      m_Data.m_LastInverseViewMatrix[0] = m_Data.m_InverseViewMatrix[0];
+      m_Data.m_LastInverseViewMatrix[1] = m_Data.m_InverseViewMatrix[1];
+    }
+
     bUpdateVP = true;
     m_uiLastCameraOrientationModification = pCamera->GetOrientationModificationCounter();
 
-    m_Data.m_ViewMatrix[0] = pCamera->GetViewMatrix(plCameraEye::Left);
-    m_Data.m_ViewMatrix[1] = pCamera->GetViewMatrix(plCameraEye::Right);
+    m_Data.m_ViewMatrix[0] = viewMatrixL;
+    m_Data.m_ViewMatrix[1] = viewMatrixR;
 
     // Some of our matrices contain very small values so that the matrix inversion will fall below the default epsilon.
     // We pass zero as epsilon here since all view and projection matrices are invertible.
-    m_Data.m_InverseViewMatrix[0] = m_Data.m_ViewMatrix[0].GetInverse(0.0f);
-    m_Data.m_InverseViewMatrix[1] = m_Data.m_ViewMatrix[1].GetInverse(0.0f);
+    m_Data.m_InverseViewMatrix[0] = invViewMatrixL;
+    m_Data.m_InverseViewMatrix[1] = invViewMatrixR;
   }
 
   const float fViewportAspectRatio = m_Data.m_ViewPortRect.HasNonZeroArea() ? m_Data.m_ViewPortRect.width / m_Data.m_ViewPortRect.height : 1.0f;
   if (m_uiLastCameraSettingsModification != pCamera->GetSettingsModificationCounter() || m_fLastViewportAspectRatio != fViewportAspectRatio)
   {
-    bUpdateVP = true;
-    m_uiLastCameraSettingsModification = pCamera->GetSettingsModificationCounter();
     m_fLastViewportAspectRatio = fViewportAspectRatio;
 
+    plMat4 projectionMatrixL, projectionMatrixR;
 
-    pCamera->GetProjectionMatrix(m_fLastViewportAspectRatio, m_Data.m_ProjectionMatrix[0], plCameraEye::Left);
-    m_Data.m_InverseProjectionMatrix[0] = m_Data.m_ProjectionMatrix[0].GetInverse(0.0f);
+    pCamera->GetProjectionMatrix(m_fLastViewportAspectRatio, projectionMatrixL, plCameraEye::Left);
+    const plMat4 invProjectionMatrixL = projectionMatrixL.GetInverse(0.0f);
 
-    pCamera->GetProjectionMatrix(m_fLastViewportAspectRatio, m_Data.m_ProjectionMatrix[1], plCameraEye::Right);
-    m_Data.m_InverseProjectionMatrix[1] = m_Data.m_ProjectionMatrix[1].GetInverse(0.0f);
+    pCamera->GetProjectionMatrix(m_fLastViewportAspectRatio, projectionMatrixR, plCameraEye::Right);
+    const plMat4 invProjectionMatrixR = projectionMatrixL.GetInverse(0.0f);
+
+    if (m_uiLastCameraSettingsModification == 0)
+    {
+      m_Data.m_LastProjectionMatrix[0] = projectionMatrixL;
+      m_Data.m_LastProjectionMatrix[1] = projectionMatrixR;
+
+      m_Data.m_LastInverseProjectionMatrix[0] = invProjectionMatrixL;
+      m_Data.m_LastInverseProjectionMatrix[1] = invProjectionMatrixR;
+    }
+    else
+    {
+      m_Data.m_LastProjectionMatrix[0] = m_Data.m_ProjectionMatrix[0];
+      m_Data.m_LastProjectionMatrix[1] = m_Data.m_ProjectionMatrix[1];
+
+      m_Data.m_LastInverseProjectionMatrix[0] = m_Data.m_InverseProjectionMatrix[0];
+      m_Data.m_LastInverseProjectionMatrix[1] = m_Data.m_InverseProjectionMatrix[1];
+    }
+
+    bUpdateVP = true;
+    m_uiLastCameraSettingsModification = pCamera->GetSettingsModificationCounter();
+
+    m_Data.m_ProjectionMatrix[0] = projectionMatrixL;
+    m_Data.m_ProjectionMatrix[1] = projectionMatrixR;
+
+    m_Data.m_InverseProjectionMatrix[0] = invProjectionMatrixL;
+    m_Data.m_InverseProjectionMatrix[1] = invProjectionMatrixR;
   }
 
   if (bUpdateVP)
   {
     for (int i = 0; i < 2; ++i)
     {
+      m_Data.m_LastViewProjectionMatrix[i] = m_Data.m_LastProjectionMatrix[i] * m_Data.m_LastViewMatrix[i];
+      m_Data.m_LastInverseViewProjectionMatrix[i] = m_Data.m_LastViewProjectionMatrix[i].GetInverse(0.0f);
+
       m_Data.m_ViewProjectionMatrix[i] = m_Data.m_ProjectionMatrix[i] * m_Data.m_ViewMatrix[i];
       m_Data.m_InverseViewProjectionMatrix[i] = m_Data.m_ViewProjectionMatrix[i].GetInverse(0.0f);
     }
@@ -365,7 +395,7 @@ void plView::SetProperty(plMap<plString, PropertyValue>& map, const char* szPass
   }
 
   prop.m_bIsDirty = true;
-  prop.m_CurrentValue = value;
+  prop.m_Value = value;
 }
 
 
@@ -384,7 +414,7 @@ void plView::SetReadBackProperty(plMap<plString, PropertyValue>& map, const char
   }
 
   prop.m_bIsDirty = false;
-  prop.m_CurrentValue = value;
+  prop.m_Value = value;
 }
 
 void plView::ReadBackPassProperties()
@@ -431,7 +461,8 @@ void plView::ApplyRenderPassProperties()
 
     if (pObject == nullptr)
     {
-      plLog::Error("The render pass '{0}' does not exist. Property '{1}' cannot be applied.", propertyValue.m_sObjectName, propertyValue.m_sPropertyName);
+      plLog::Error(
+        "The render pass '{0}' does not exist. Property '{1}' cannot be applied.", propertyValue.m_sObjectName, propertyValue.m_sPropertyName);
 
       propertyValue.m_bIsValid = false;
       continue;
@@ -463,9 +494,9 @@ void plView::ApplyExtractorProperties()
   }
 }
 
-void plView::ApplyProperty(plReflectedClass* pObject, PropertyValue& data, const char* szTypeName)
+void plView::ApplyProperty(plReflectedClass* pClass, PropertyValue& data, const char* szTypeName)
 {
-  const plAbstractProperty* pAbstractProperty = pObject->GetDynamicRTTI()->FindPropertyByName(data.m_sPropertyName);
+  const plAbstractProperty* pAbstractProperty = pClass->GetDynamicRTTI()->FindPropertyByName(data.m_sPropertyName);
   if (pAbstractProperty == nullptr)
   {
     plLog::Error("The {0} '{1}' does not have a property called '{2}', it cannot be applied.", szTypeName, data.m_sObjectName, data.m_sPropertyName);
@@ -482,13 +513,7 @@ void plView::ApplyProperty(plReflectedClass* pObject, PropertyValue& data, const
     return;
   }
 
-  auto pMemberProperty = static_cast<const plAbstractMemberProperty*>(pAbstractProperty);
-  if (data.m_DefaultValue.IsValid() == false)
-  {
-    data.m_DefaultValue = plReflectionUtils::GetMemberPropertyValue(pMemberProperty, pObject);
-  }
-
-  plReflectionUtils::SetMemberPropertyValue(pMemberProperty, pObject, data.m_CurrentValue);
+  plReflectionUtils::SetMemberPropertyValue(static_cast<const plAbstractMemberProperty*>(pAbstractProperty), pClass, data.m_Value);
 }
 
 PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_View);

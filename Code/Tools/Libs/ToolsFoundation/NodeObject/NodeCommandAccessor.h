@@ -21,8 +21,8 @@ private:
 
   struct ConnectionInfo
   {
-    const plDocumentObject* m_pSource = nullptr;
-    const plDocumentObject* m_pTarget = nullptr;
+    const plDocumentObject* m_pSource;
+    const plDocumentObject* m_pTarget;
     plString m_sSourcePin;
     plString m_sTargetPin;
   };

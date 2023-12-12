@@ -19,19 +19,20 @@ void plSceneGizmoActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hGreyBoxingGizmo);
 }
 
-void plSceneGizmoActions::MapMenuActions(plStringView sMapping)
+void plSceneGizmoActions::MapMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
-  
-  pMap->MapAction(s_hGreyBoxingGizmo, "G.Gizmos", 5.0f);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+
+  plStringBuilder sSubPath(szPath, "/Gizmo.Menu");
+  pMap->MapAction(s_hGreyBoxingGizmo, sSubPath, 5.0f);
 }
 
-void plSceneGizmoActions::MapToolbarActions(plStringView sMapping)
+void plSceneGizmoActions::MapToolbarActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  const plStringView sSubPath("GizmoCategory");
+  plStringBuilder sSubPath(szPath, "/GizmoCategory");
   pMap->MapAction(s_hGreyBoxingGizmo, sSubPath, 5.0f);
 }

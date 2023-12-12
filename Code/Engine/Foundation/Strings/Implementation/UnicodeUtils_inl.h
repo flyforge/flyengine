@@ -76,7 +76,7 @@ plUInt32 plUnicodeUtils::DecodeUtf16ToUtf32(UInt16Iterator& ref_szUtf16Iterator)
 template <typename WCharIterator>
 plUInt32 plUnicodeUtils::DecodeWCharToUtf32(WCharIterator& ref_szWCharIterator)
 {
-  if constexpr (sizeof(wchar_t) == 2)
+  if (sizeof(wchar_t) == 2)
   {
     return DecodeUtf16ToUtf32(ref_szWCharIterator);
   }
@@ -110,7 +110,7 @@ void plUnicodeUtils::EncodeUtf32ToUtf16(plUInt32 uiUtf32, UInt16Iterator& ref_sz
 template <typename WCharIterator>
 void plUnicodeUtils::EncodeUtf32ToWChar(plUInt32 uiUtf32, WCharIterator& ref_szWCharOutput)
 {
-  if constexpr (sizeof(wchar_t) == 2)
+  if (sizeof(wchar_t) == 2)
   {
     EncodeUtf32ToUtf16(uiUtf32, ref_szWCharOutput);
   }

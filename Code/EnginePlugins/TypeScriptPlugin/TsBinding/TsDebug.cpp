@@ -139,7 +139,7 @@ static int __CPP_Debug_DrawSphere(duk_context* pDuk)
   switch (duk.GetFunctionMagicValue())
   {
     case 0:
-      plDebugRenderer::DrawLineSphere(pWorld, plBoundingSphere::MakeFromCenterAndRadius(vCenter, fRadius), color, transform);
+      plDebugRenderer::DrawLineSphere(pWorld, plBoundingSphere(vCenter, fRadius), color, transform);
       break;
   }
 

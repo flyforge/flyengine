@@ -18,7 +18,6 @@ plImageDataAssetDocumentManager::plImageDataAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Image Data";
   m_DocTypeDesc.m_sFileExtension = "plImageDataAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/ImageData.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Utilities";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plImageDataAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_sResourceFileExtension = "plImageData";
@@ -39,7 +38,7 @@ void plImageDataAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMan
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plImageDataAssetDocument>())
       {
-        new plQtImageDataAssetDocumentWindow(static_cast<plImageDataAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtImageDataAssetDocumentWindow* pDocWnd = new plQtImageDataAssetDocumentWindow(static_cast<plImageDataAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -49,9 +48,9 @@ void plImageDataAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMan
   }
 }
 
-void plImageDataAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plImageDataAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  plImageDataAssetDocument* pDoc = new plImageDataAssetDocument(sPath);
+  plImageDataAssetDocument* pDoc = new plImageDataAssetDocument(szPath);
   out_pDocument = pDoc;
 }
 

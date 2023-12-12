@@ -18,11 +18,11 @@ plLUTAssetDocumentManager::plLUTAssetDocumentManager()
 
   // LUT asset source files
   plAssetFileExtensionWhitelist::AddAssetFileExtension("LUT", "cube");
+  plAssetFileExtensionWhitelist::AddAssetFileExtension("LUT", "dds");
 
   m_DocTypeDesc.m_sDocumentTypeName = "LUT";
   m_DocTypeDesc.m_sFileExtension = "plLUTAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/LUT.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plLUTAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_sResourceFileExtension = "plLUT";
@@ -47,7 +47,7 @@ void plLUTAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager::
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plLUTAssetDocument>())
       {
-        new plQtLUTAssetDocumentWindow(static_cast<plLUTAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtLUTAssetDocumentWindow* pDocWnd = new plQtLUTAssetDocumentWindow(static_cast<plLUTAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -58,9 +58,9 @@ void plLUTAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager::
 }
 
 void plLUTAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  plLUTAssetDocument* pDoc = new plLUTAssetDocument(sPath);
+  plLUTAssetDocument* pDoc = new plLUTAssetDocument(szPath);
   out_pDocument = pDoc;
 }
 

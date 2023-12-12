@@ -25,6 +25,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plMarkerComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"),
+    new plColorAttribute(plColorScheme::Logic),
     new plSphereVisualizerAttribute("Radius", plColor::LightSkyBlue),
   }
   PLASMA_END_ATTRIBUTES;
@@ -61,7 +62,7 @@ float plMarkerComponent::GetRadius() const
 
 void plMarkerComponent::OnMsgUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3(0), m_fRadius), m_SpatialCategory);
+  msg.AddBounds(plBoundingSphere(plVec3(0), m_fRadius), m_SpatialCategory);
 }
 
 void plMarkerComponent::UpdateMarker()

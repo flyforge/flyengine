@@ -63,7 +63,7 @@ protected:
   plTime m_Duration;
   plAnimationClipResourceHandle m_hAnimationClip;
   plSkeletonResourceHandle m_hSkeleton;
-  plTime m_ElapsedTimeSinceUpdate = plTime::MakeZero();
+  plTime m_ElapsedTimeSinceUpdate = plTime::Zero();
 
   ozz::vector<ozz::math::SoaTransform> m_OzzLocalTransforms; // TODO: could be frame allocated
 };

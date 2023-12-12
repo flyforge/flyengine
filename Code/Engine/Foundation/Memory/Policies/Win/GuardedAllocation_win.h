@@ -84,7 +84,7 @@ namespace plMemoryPolicies
     }
 
     // Retrieve info from meta data first.
-    AlloctionMetaData* metaData = plMemoryUtils::AddByteOffset(static_cast<AlloctionMetaData*>(pPtr), -((std::ptrdiff_t)sizeof(AlloctionMetaData)));
+    AlloctionMetaData* metaData = plMemoryUtils::AddByteOffset(static_cast<AlloctionMetaData*>(pPtr), -((ptrdiff_t)sizeof(AlloctionMetaData)));
     size_t uiAlignedSize = metaData->m_uiSize;
 
     plMemoryUtils::Destruct(metaData, 1);
@@ -93,13 +93,13 @@ namespace plMemoryPolicies
     size_t uiPageSize = m_uiPageSize;
     size_t uiTotalSize = uiAlignedSize + sizeof(AlloctionMetaData);
     size_t uiFullPageSize = plMemoryUtils::AlignSize(uiTotalSize, uiPageSize);
-    pPtr = plMemoryUtils::AddByteOffset(pPtr, ((std::ptrdiff_t)uiAlignedSize) - uiFullPageSize);
+    pPtr = plMemoryUtils::AddByteOffset(pPtr, ((ptrdiff_t)uiAlignedSize) - uiFullPageSize);
 
     PLASMA_VERIFY(
       ::VirtualFree(pPtr, uiFullPageSize, MEM_DECOMMIT), "Could not decommit memory pages. Error Code '{0}'", plArgErrorCode(::GetLastError()));
 
     // Finally store the allocation so we can release it later
-    void* pMemory = plMemoryUtils::AddByteOffset(pPtr, -((std::ptrdiff_t)uiPageSize));
+    void* pMemory = plMemoryUtils::AddByteOffset(pPtr, -((ptrdiff_t)uiPageSize));
     m_AllocationsToFreeLater.PushBack(pMemory);
   }
 

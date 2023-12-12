@@ -11,21 +11,18 @@ struct PLASMA_FOUNDATION_DLL plTokenType
 {
   enum Enum
   {
-    Unknown,           ///< for internal use
-    Whitespace,        ///< The token is a space or tab
-    Identifier,        ///< a series of alphanumerics or underscores
-    NonIdentifier,     ///< Everything else
-    Newline,           ///< Either '\n' or '\r\n'
-    LineComment,       ///< A comment that starts with two slashes and ends at the next newline (or end of file)
-    BlockComment,      ///< A comment that starts with a slash and a star, and ends at the next star/slash combination (or end of file)
-    String1,           ///< A string enclosed in "
-    String2,           ///< A string enclosed in '
-    Integer,           ///< An integer number
-    Float,             ///< A floating point number
-    RawString1,        ///< A raw c++11 string enclosed in ". Contents do not contain the enclosing " or the start / end marker.
-    RawString1Prefix,  ///< The prefix part of a C++11 string. E.g: R"foo(
-    RawString1Postfix, ///< The postfix part of a C++11 string. E.g: )foo"
-    EndOfFile,         ///< End-of-file marker
+    Unknown,       ///< for internal use
+    Whitespace,    ///< The token is a space or tab
+    Identifier,    ///< a series of alphanumerics or underscores
+    NonIdentifier, ///< Everything else
+    Newline,       ///< Either '\n' or '\r\n'
+    LineComment,   ///< A comment that starts with two slashes and ends at the next newline (or end of file)
+    BlockComment,  ///< A comment that starts with a slash and a star, and ends at the next star/slash combination (or end of file)
+    String1,       ///< A string enclosed in "
+    String2,       ///< A string enclosed in '
+    Integer,       ///< An integer number
+    Float,         ///< A floating point number
+    EndOfFile,     ///< End-of-file marker
     ENUM_COUNT,
   };
 
@@ -87,9 +84,6 @@ public:
 
   /// \brief Clears any previous result and creates a new token stream for the given array.
   void Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog);
-  void TokenizeReference(plArrayPtr<const plUInt8> data, plLogInterface* pLog);
-
-  const plArrayPtr<const plUInt8> GetData() const { return m_Data;}
 
   /// \brief Gives read access to the token stream.
   const plDeque<plToken>& GetTokens() const { return m_Tokens; }
@@ -128,7 +122,6 @@ private:
 
   void HandleUnknown();
   void HandleString(char terminator);
-  void HandleRawString();
   void HandleNumber();
   void HandleLineComment();
   void HandleBlockComment();
@@ -139,7 +132,6 @@ private:
   plLogInterface* m_pLog = nullptr;
   plTokenType::Enum m_CurMode = plTokenType::Unknown;
   plStringView m_sIterator;
-  plStringView m_sRawStringMarker;
   plUInt32 m_uiCurLine = 1;
   plUInt32 m_uiCurColumn = -1;
   plUInt32 m_uiCurChar = '\0';

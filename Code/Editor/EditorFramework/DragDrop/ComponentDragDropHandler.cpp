@@ -16,7 +16,8 @@ void plComponentDragDropHandler::CreateDropObject(const plVec3& vPosition, const
   if (vPos.IsNaN())
     vPos.SetZero();
 
-  plUuid ObjectGuid = plUuid::MakeUuid();
+  plUuid ObjectGuid;
+  ObjectGuid.CreateNewUuid();
 
   plAddObjectCommand cmd;
   cmd.m_Parent = parent;
@@ -45,7 +46,8 @@ void plComponentDragDropHandler::AttachComponentToObject(const char* szType, con
 {
   auto history = m_pDocument->GetCommandHistory();
 
-  plUuid CmpGuid = plUuid::MakeUuid();
+  plUuid CmpGuid;
+  CmpGuid.CreateNewUuid();
 
   plAddObjectCommand cmd;
 
@@ -84,13 +86,13 @@ void plComponentDragDropHandler::MoveObjectToPosition(const plUuid& guid, const 
 
   cmd2.m_sProperty = "LocalPosition";
   cmd2.m_NewValue = vPosition;
-  history->AddCommand(cmd2).AssertSuccess();
+  history->AddCommand(cmd2).IgnoreResult();
 
   if (qRotation.IsValid())
   {
     cmd2.m_sProperty = "LocalRotation";
     cmd2.m_NewValue = qRotation;
-    history->AddCommand(cmd2).AssertSuccess();
+    history->AddCommand(cmd2).IgnoreResult();
   }
 }
 
@@ -113,7 +115,7 @@ void plComponentDragDropHandler::MoveDraggedObjectsToPosition(plVec3 vPosition, 
 
   if (normal.IsValid() && !m_vAlignAxisWithNormal.IsZero(0.01f))
   {
-    rot = plQuat::MakeShortestRotation(m_vAlignAxisWithNormal, normal);
+    rot.SetShortestRotation(m_vAlignAxisWithNormal, normal);
   }
 
   for (const auto& guid : m_DraggedObjects)

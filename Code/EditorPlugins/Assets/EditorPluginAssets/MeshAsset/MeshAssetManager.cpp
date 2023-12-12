@@ -19,7 +19,6 @@ plMeshAssetDocumentManager::plMeshAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Mesh";
   m_DocTypeDesc.m_sFileExtension = "plMeshAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Mesh.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plMeshAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Mesh_Static");
@@ -79,7 +78,7 @@ plResult plMeshAssetDocumentManager::OpenPickedDocument(const plDocumentObject* 
   // now we need to open the mesh and we cannot wait for it (usually that is queued for GUI reasons)
   // though we do not want a window
   plMeshAssetDocument* pMeshDoc =
-    static_cast<plMeshAssetDocument*>(plQtEditorApp::GetSingleton()->OpenDocument(pSubAsset->m_pAssetInfo->m_Path.GetAbsolutePath(), plDocumentFlags::None));
+    static_cast<plMeshAssetDocument*>(plQtEditorApp::GetSingleton()->OpenDocument(pSubAsset->m_pAssetInfo->m_sAbsolutePath, plDocumentFlags::None));
 
   if (!pMeshDoc)
     return PLASMA_FAILURE;
@@ -108,7 +107,7 @@ void plMeshAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager:
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plMeshAssetDocument>())
       {
-        new plQtMeshAssetDocumentWindow(static_cast<plMeshAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtMeshAssetDocumentWindow* pDocWnd = new plQtMeshAssetDocumentWindow(static_cast<plMeshAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -119,9 +118,9 @@ void plMeshAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager:
 }
 
 void plMeshAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plMeshAssetDocument(sPath);
+  out_pDocument = new plMeshAssetDocument(szPath);
 }
 
 void plMeshAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

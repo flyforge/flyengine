@@ -1,3 +1,9 @@
-plRmlUiCanvas2DComponent;RmlUi Canvas 2D
-plRmlUiScaleMode::Fixed;Fixed
-plRmlUiScaleMode::WithScreenSize;With Screen Size
+# Asset Types
+
+RmlUi;Rml UI
+
+# Component Types
+
+plRmlUiCanvas2DComponent;RmlUi Canvas 2D;;https://plasmaengine.github.io/PlasmaDocs/#ui/rmlui-canvas2d-component/
+
+# Properties

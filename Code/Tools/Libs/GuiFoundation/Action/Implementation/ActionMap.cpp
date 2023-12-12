@@ -16,47 +16,31 @@ PLASMA_END_STATIC_REFLECTED_TYPE;
 // plActionMap public functions
 ////////////////////////////////////////////////////////////////////////
 
-plActionMap::plActionMap() = default;
-
-plActionMap::~plActionMap() = default;
-
-void plActionMap::MapAction(plActionDescriptorHandle hAction, plStringView sPath, plStringView sSubPath, float fOrder)
+plActionMap::plActionMap()
 {
-  plStringBuilder sFullPath = sPath;
-
-  if (!sPath.IsEmpty() && sPath.FindSubString("/") == nullptr)
-  {
-    if (SearchPathForAction(sPath, sFullPath).Failed())
-    {
-      sFullPath = sPath;
-    }
-  }
-
-  sFullPath.AppendPath(sSubPath);
-
-  MapAction(hAction, sFullPath, fOrder);
+  // plReflectedTypeDescriptor desc;
+  // plToolsReflectionUtils::GetReflectedTypeDescriptorFromRtti(plGetStaticRTTI<plActionMapDescriptor>(), desc);
+  // m_pRtti = plPhantomRttiManager::RegisterType(desc);
 }
 
-void plActionMap::MapAction(plActionDescriptorHandle hAction, plStringView sPath, float fOrder)
+plActionMap::~plActionMap()
 {
-  plStringBuilder sCleanPath = sPath;
-  sCleanPath.MakeCleanPath();
-  sCleanPath.Trim("/");
+  // DestroyAllObjects();
+}
+
+void plActionMap::MapAction(plActionDescriptorHandle hAction, const char* szPath, float fOrder)
+{
+  plStringBuilder sPath = szPath;
+  sPath.MakeCleanPath();
+  sPath.Trim("/");
   plActionMapDescriptor d;
   d.m_hAction = hAction;
-  d.m_sPath = sCleanPath;
+  d.m_sPath = sPath;
   d.m_fOrder = fOrder;
 
-  if (!d.m_sPath.IsEmpty() && d.m_sPath.FindSubString("/") == nullptr)
-  {
-    plStringBuilder sFullPath;
-    if (SearchPathForAction(d.m_sPath, sFullPath).Succeeded())
-    {
-      d.m_sPath = sFullPath;
-    }
-  }
-
-  PLASMA_VERIFY(MapAction(d).IsValid(), "Mapping Failed");
+  // Ignore for now as this will be resolved when new menu setup in finished
+  //PLASMA_VERIFY(MapAction(d).IsValid(), "Mapping Failed");
+  MapAction(d);
 }
 
 plUuid plActionMap::MapAction(const plActionMapDescriptor& desc)
@@ -113,7 +97,6 @@ plUuid plActionMap::MapAction(const plActionMapDescriptor& desc)
   return pChild->GetGuid();
 }
 
-
 plResult plActionMap::UnmapAction(const plUuid& guid)
 {
   auto it = m_Descriptors.Find(guid);
@@ -129,25 +112,15 @@ plResult plActionMap::UnmapAction(const plUuid& guid)
   return PLASMA_SUCCESS;
 }
 
-plResult plActionMap::UnmapAction(plActionDescriptorHandle hAction, plStringView sPath)
+plResult plActionMap::UnmapAction(plActionDescriptorHandle hAction, const char* szPath)
 {
-  plStringBuilder sCleanPath = sPath;
-  sCleanPath.MakeCleanPath();
-  sCleanPath.Trim("/");
+  plStringBuilder sPath = szPath;
+  sPath.MakeCleanPath();
+  sPath.Trim("/");
   plActionMapDescriptor d;
   d.m_hAction = hAction;
-  d.m_sPath = sCleanPath;
+  d.m_sPath = sPath;
   d.m_fOrder = 0.0f; // unused.
-
-  if (!d.m_sPath.IsEmpty() && d.m_sPath.FindSubString("/") == nullptr)
-  {
-    plStringBuilder sFullPath;
-    if (SearchPathForAction(d.m_sPath, sFullPath).Succeeded())
-    {
-      d.m_sPath = sFullPath;
-    }
-  }
-
   return UnmapAction(d);
 }
 
@@ -178,7 +151,7 @@ plResult plActionMap::UnmapAction(const plActionMapDescriptor& desc)
   return PLASMA_FAILURE;
 }
 
-bool plActionMap::FindObjectByPath(plStringView sPath, plUuid& out_guid) const
+bool plActionMap::FindObjectByPath(const plStringView& sPath, plUuid& out_guid) const
 {
   out_guid = plUuid();
   if (sPath.IsEmpty())
@@ -200,44 +173,6 @@ bool plActionMap::FindObjectByPath(plStringView sPath, plUuid& out_guid) const
   return true;
 }
 
-plResult plActionMap::SearchPathForAction(plStringView sUniqueName, plStringBuilder& out_sPath) const
-{
-  out_sPath.Clear();
-
-  if (FindObjectPathByName(&m_Root, sUniqueName, out_sPath))
-  {
-    return PLASMA_SUCCESS;
-  }
-
-  return PLASMA_FAILURE;
-}
-
-bool plActionMap::FindObjectPathByName(const plTreeNode<plActionMapDescriptor>* pObject, plStringView sName, plStringBuilder& out_sPath) const
-{
-  plStringView sObjectName;
-
-  if (!pObject->m_Data.m_hAction.IsInvalidated())
-  {
-    sObjectName = pObject->m_Data.m_hAction.GetDescriptor()->m_sActionName;
-  }
-
-  out_sPath.AppendPath(sObjectName);
-
-  if (sObjectName == sName)
-    return true;
-
-  for (const plTreeNode<plActionMapDescriptor>* pChild : pObject->GetChildren())
-  {
-    const plActionMapDescriptor& pDesc = pChild->m_Data;
-
-    if (FindObjectPathByName(pChild, sName, out_sPath))
-      return true;
-  }
-
-  out_sPath.PathParentDirectory();
-  return false;
-}
-
 const plActionMapDescriptor* plActionMap::GetDescriptor(const plUuid& guid) const
 {
   auto it = m_Descriptors.Find(guid);
@@ -254,7 +189,8 @@ const plActionMapDescriptor* plActionMap::GetDescriptor(const plTreeNode<plActio
   return &pObject->m_Data;
 }
 
-const plTreeNode<plActionMapDescriptor>* plActionMap::GetChildByName(const plTreeNode<plActionMapDescriptor>* pObject, plStringView sName) const
+const plTreeNode<plActionMapDescriptor>* plActionMap::GetChildByName(
+  const plTreeNode<plActionMapDescriptor>* pObject, const plStringView& sName) const
 {
   for (const plTreeNode<plActionMapDescriptor>* pChild : pObject->GetChildren())
   {

@@ -10,23 +10,26 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 bool plAssetDragDropHandler::IsAssetType(const plDragDropInfo* pInfo) const
 {
-  return pInfo->m_pMimeData->hasFormat("application/plEditor.AssetGuid");
+  return pInfo->m_pMimeData->hasFormat("application/PlasmaEditor.AssetGuid");
 }
 
 plString plAssetDragDropHandler::GetAssetGuidString(const plDragDropInfo* pInfo) const
 {
-  QByteArray ba = pInfo->m_pMimeData->data("application/plEditor.AssetGuid");
+  QByteArray ba = pInfo->m_pMimeData->data("application/PlasmaEditor.AssetGuid");
   QDataStream stream(&ba, QIODevice::ReadOnly);
 
-  plHybridArray<QString, 1> guids;
-  stream >> guids;
+  int iGuids = 0;
+  stream >> iGuids;
 
-  if (guids.GetCount() > 1)
+  if (iGuids > 1)
   {
     plLog::Warning("Dragging more than one asset type is currently not supported");
   }
 
-  return guids[0].toUtf8().data();
+  QString sGuid;
+  stream >> sGuid;
+
+  return sGuid.toUtf8().data();
 }
 
 plString plAssetDragDropHandler::GetAssetsDocumentTypeName(const plUuid& assetTypeGuid) const

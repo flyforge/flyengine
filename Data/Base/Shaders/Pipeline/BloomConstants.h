@@ -1,14 +1,11 @@
 #pragma once
 
-#include "../Common/Platforms.h"
 #include "../Common/ConstantBufferMacros.h"
+#include "../Common/Platforms.h"
 
 CONSTANT_BUFFER(plBloomConstants, 3)
 {
   FLOAT2(PixelSize);
+  FLOAT1(BloomIntensity);
   FLOAT1(BloomThreshold);
-  FLOAT1(BloomIntensity);  
-  
-  COLOR4F(TintColor);
 };
-

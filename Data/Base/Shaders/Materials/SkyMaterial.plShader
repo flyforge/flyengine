@@ -7,9 +7,11 @@ BLEND_MODE
 RENDER_PASS
 TWO_SIDED = TRUE
 SHADING_MODE = SHADING_MODE_FULLBRIGHT
+FORWARD_PASS_WRITE_DEPTH
 CAMERA_MODE
 SHADING_QUALITY
 VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
+GAMEOBJECT_VELOCITY
 
 [MATERIALPARAMETER]
 
@@ -98,7 +100,7 @@ float3 GetDiffuseColor()
   float3 color = CubeMap.Sample(CubeMap_AutoSampler, CubeMapDirection(G.Input.ViewDirection)).rgb;
 
   color *= BaseColor.rgb;
-  float weight = exp2(ExposureBias);
+  float weight = ExposureBias;
 
   if (InverseTonemap)
   {
@@ -106,6 +108,7 @@ float3 GetDiffuseColor()
     weight *= rcp(max(1.0f - luminance, 0.001f));
   }
 
+  color = clamp(color, 0.0, 100.0);
   color *= weight;
 
   if (UseFog)
@@ -125,6 +128,11 @@ float3 GetSpecularColor()
 float GetRoughness()
 {
   return 1.0f;
+}
+
+float GetMetallic()
+{
+  return 0.0f;
 }
 
 float GetOpacity()

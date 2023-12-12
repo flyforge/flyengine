@@ -51,6 +51,11 @@ plResult plGALRenderTargetViewVulkan::InitPlatform(plGALDevice* pDevice)
   vk::Image vkImage = pTextureVulkan->GetImage();
   const bool bIsArrayView = IsArrayView(texDesc, m_Description);
 
+  if (pTextureVulkan->GetFormatOverrideEnabled())
+  {
+    vkViewFormat = pTextureVulkan->GetImageFormat();
+  }
+
   vk::ImageViewCreateInfo imageViewCreationInfo;
   if (bIsDepthFormat)
   {

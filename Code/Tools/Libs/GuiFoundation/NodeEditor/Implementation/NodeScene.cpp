@@ -1,7 +1,6 @@
 #include <GuiFoundation/GuiFoundationPCH.h>
 
 #include <Foundation/Strings/TranslationLookup.h>
-#include <GuiFoundation/GuiFoundationDLL.h>
 #include <GuiFoundation/NodeEditor/Connection.h>
 #include <GuiFoundation/NodeEditor/Node.h>
 #include <GuiFoundation/NodeEditor/Pin.h>
@@ -17,8 +16,8 @@ plRttiMappedObjectFactory<plQtPin> plQtNodeScene::s_PinFactory;
 plRttiMappedObjectFactory<plQtConnection> plQtNodeScene::s_ConnectionFactory;
 plVec2 plQtNodeScene::s_vLastMouseInteraction(0);
 
-plQtNodeScene::plQtNodeScene(QObject* pParent)
-  : QGraphicsScene(pParent)
+plQtNodeScene::plQtNodeScene(QObject* parent)
+  : QGraphicsScene(parent)
 {
   setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -313,7 +312,9 @@ void plQtNodeScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* contextMenu
     QAction* pAction = new QAction("Disconnect Pin", &menu);
     menu.addAction(pAction);
     connect(pAction, &QAction::triggered, this, [this, pPin](bool bChecked)
-      { DisconnectPinsAction(pPin); });
+    { 
+      DisconnectPinsAction(pPin); 
+    });
 
     pPin->ExtendContextMenu(menu);
   }
@@ -332,8 +333,10 @@ void plQtNodeScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* contextMenu
     {
       QAction* pAction = new QAction("Remove", &menu);
       menu.addAction(pAction);
-      connect(pAction, &QAction::triggered, this, [this](bool bChecked)
-        { RemoveSelectedNodesAction(); });
+      connect(pAction, &QAction::triggered, this, [this](bool bChecked) 
+      { 
+        RemoveSelectedNodesAction(); 
+      });
     }
 
     pNode->ExtendContextMenu(menu);
@@ -343,8 +346,7 @@ void plQtNodeScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* contextMenu
     plQtConnection* pConnection = static_cast<plQtConnection*>(pItem);
     QAction* pAction = new QAction("Delete Connection", &menu);
     menu.addAction(pAction);
-    connect(pAction, &QAction::triggered, this, [this, pConnection](bool bChecked)
-      { DisconnectPinsAction(pConnection); });
+    connect(pAction, &QAction::triggered, this, [this, pConnection](bool bChecked) { DisconnectPinsAction(pConnection); });
 
     pConnection->ExtendContextMenu(menu);
   }
@@ -410,6 +412,13 @@ void plQtNodeScene::CreateQtNode(const plDocumentObject* pObject)
   pNode->setPos(vPos.x, vPos.y);
 
   pNode->ResetFlags();
+
+
+  // Note: We dont create connections here as it can cause recusion issues
+  if (m_pTempConnection)
+  {
+    m_pTempNode = pNode;
+  }
 }
 
 void plQtNodeScene::DeleteQtNode(const plDocumentObject* pObject)
@@ -429,6 +438,9 @@ void plQtNodeScene::CreateQtConnection(const plDocumentObject* pObject)
 
   plQtNode* pSource = m_Nodes[pinSource.GetParent()];
   plQtNode* pTarget = m_Nodes[pinTarget.GetParent()];
+  if (!pTarget || !pSource)
+    return;
+
   plQtPin* pOutput = pSource->GetOutputPin(pinSource);
   plQtPin* pInput = pTarget->GetInputPin(pinTarget);
   PLASMA_ASSERT_DEV(pOutput != nullptr && pInput != nullptr, "Node does not contain pin!");
@@ -453,6 +465,8 @@ void plQtNodeScene::CreateQtConnection(const plDocumentObject* pObject)
 void plQtNodeScene::DeleteQtConnection(const plDocumentObject* pObject)
 {
   plQtConnection* pQtConnection = m_Connections[pObject];
+  if (!pQtConnection)
+    return;
   m_Connections.Remove(pObject);
 
   const plConnection* pConnection = pQtConnection->GetConnection();
@@ -495,7 +509,7 @@ void plQtNodeScene::CreateNodeObject(const plRTTI* pRtti)
   {
     plAddObjectCommand cmd;
     cmd.m_pType = pRtti;
-    cmd.m_NewObjectGuid = plUuid::MakeUuid();
+    cmd.m_NewObjectGuid.CreateNewUuid();
     cmd.m_Index = -1;
 
     res = history->AddCommand(cmd);
@@ -558,6 +572,7 @@ void plQtNodeScene::NodeEventsHandler(const plDocumentNodeManagerEvent& e)
 void plQtNodeScene::PropertyEventsHandler(const plDocumentObjectPropertyEvent& e)
 {
   auto it = m_Nodes.Find(e.m_pObject);
+
   if (it.IsValid())
   {
     it.Value()->ResetFlags();
@@ -592,6 +607,8 @@ void plQtNodeScene::SelectionEventsHandler(const plSelectionManagerEvent& e)
   for (auto itCon : m_Connections)
   {
     auto pQtCon = itCon.Value();
+    if (!pQtCon)
+      continue;
     auto pCon = pQtCon->GetConnection();
 
     const bool prev = pQtCon->m_bAdjacentNodeSelected;
@@ -723,42 +740,46 @@ void plQtNodeScene::OpenSearchMenu(QPoint screenPos)
   menu.addAction(pSearchMenu);
 
   connect(pSearchMenu, &plQtSearchableMenu::MenuItemTriggered, this, &plQtNodeScene::OnMenuItemTriggered);
-  connect(pSearchMenu, &plQtSearchableMenu::MenuItemTriggered, this, [&menu]()
-    { menu.close(); });
+  connect(pSearchMenu, &plQtSearchableMenu::MenuItemTriggered, this, [&menu]() { menu.close(); });
 
-  plStringBuilder tmp;
-  plStringBuilder sFullPath;
+  plStringBuilder sFullName, sCleanName2;
 
   plHybridArray<const plRTTI*, 32> types;
   m_pManager->GetCreateableTypes(types);
+
+  plStringBuilder tmp;
 
   for (const plRTTI* pRtti : types)
   {
     plStringView sCleanName = pRtti->GetTypeName();
 
-    if (const char* szUnderscore = sCleanName.FindLastSubString("_"))
-    {
+    const char* szColonColon = sCleanName.FindLastSubString("::");
+    if (szColonColon != nullptr)
+      sCleanName.SetStartPosition(szColonColon + 2);
+
+    const char* szUnderscore = sCleanName.FindLastSubString("_");
+    if (szUnderscore != nullptr)
       sCleanName.SetStartPosition(szUnderscore + 1);
-    }
 
-    if (const char* szBracket = sCleanName.FindLastSubString("<"))
+    sCleanName2 = sCleanName;
+    if (const char* szBracket = sCleanName2.FindLastSubString("<"))
     {
-      sCleanName = plStringView(sCleanName.GetStartPointer(), szBracket);
+      sCleanName2.SetSubString_FromTo(sCleanName2.GetData(), szBracket);
     }
 
-    sFullPath = m_pManager->GetTypeCategory(pRtti);
+    sFullName = m_pManager->GetTypeCategory(pRtti);
 
-    if (sFullPath.IsEmpty())
+    if (sFullName.IsEmpty())
     {
       if (auto pAttr = pRtti->GetAttributeByType<plCategoryAttribute>())
       {
-        sFullPath = pAttr->GetCategory();
+        sFullName = pAttr->GetCategory();
       }
     }
 
-    sFullPath.AppendPath(sCleanName);
+    sFullName.AppendPath(plTranslate(sCleanName.GetData(tmp)));
 
-    pSearchMenu->AddItem(plTranslate(sCleanName.GetData(tmp)), sFullPath, QVariant::fromValue((void*)pRtti));
+    pSearchMenu->AddItem(sFullName, QVariant::fromValue((void*)pRtti));
   }
 
   pSearchMenu->Finalize(m_sContextMenuSearchText);

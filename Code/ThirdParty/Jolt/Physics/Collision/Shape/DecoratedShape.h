@@ -9,9 +9,9 @@
 JPH_NAMESPACE_BEGIN
 
 /// Class that constructs a DecoratedShape
-class JPH_EXPORT DecoratedShapeSettings : public ShapeSettings
+class DecoratedShapeSettings : public ShapeSettings
 {
-	JPH_DECLARE_SERIALIZABLE_VIRTUAL(JPH_EXPORT, DecoratedShapeSettings)
+	JPH_DECLARE_SERIALIZABLE_VIRTUAL(DecoratedShapeSettings)
 
 	/// Default constructor for deserialization
 									DecoratedShapeSettings() = default;
@@ -25,7 +25,7 @@ class JPH_EXPORT DecoratedShapeSettings : public ShapeSettings
 };
 
 /// Base class for shapes that decorate another shape with extra functionality (e.g. scale, translation etc.)
-class JPH_EXPORT DecoratedShape : public Shape
+class DecoratedShape : public Shape
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE

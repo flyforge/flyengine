@@ -37,12 +37,12 @@ class plSceneObjectManager : public plDocumentObjectManager
 {
 public:
   plSceneObjectManager();
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const override;
+  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const override;
 
 private:
   virtual plStatus InternalCanAdd(
-    const plRTTI* pRtti, const plDocumentObject* pParent, plStringView sParentProperty, const plVariant& index) const override;
+    const plRTTI* pRtti, const plDocumentObject* pParent, const char* szParentProperty, const plVariant& index) const override;
   virtual plStatus InternalCanSelect(const plDocumentObject* pObject) const override;
   virtual plStatus InternalCanMove(
-    const plDocumentObject* pObject, const plDocumentObject* pNewParent, plStringView sParentProperty, const plVariant& index) const override;
+    const plDocumentObject* pObject, const plDocumentObject* pNewParent, const char* szParentProperty, const plVariant& index) const override;
 };

@@ -26,7 +26,7 @@ void plDynamicQuadtree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExt
   // the bounding box should be square, so use the maximum of the x and z extents
   float fMax = plMath::Max(vHalfExtents.x, vHalfExtents.z);
 
-  m_BBox = plBoundingBox::MakeInvalid();
+  m_BBox.SetInvalid();
 
   m_BBox.m_vMin.x = vCenter.x - fMax;
   m_BBox.m_vMax.x = vCenter.x + fMax;

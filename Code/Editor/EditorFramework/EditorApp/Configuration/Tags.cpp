@@ -22,7 +22,6 @@ plStatus plQtEditorApp::SaveTagRegistry()
   {
     return plStatus(plFmt("Could not open tags config file '{0}' for writing", sPath));
   }
-
   return plStatus(PLASMA_SUCCESS);
 }
 

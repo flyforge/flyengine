@@ -5,6 +5,7 @@
 #include <RendererCore/Pipeline/InstanceDataProvider.h>
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
+#include <Core/Interfaces/WindWorldModule.h>
 #include <Core/WorldSerializer/WorldReader.h>
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <RendererCore/../../../Data/Base/Shaders/Common/ObjectConstants.h>
@@ -26,6 +27,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plMeshInstanceData, plNoBase, 1, plRTTIDefaul
 
   PLASMA_BEGIN_ATTRIBUTES
   {
+    new plColorAttribute(plColorScheme::Rendering),
     new plTransformManipulatorAttribute("LocalPosition", "LocalRotation", "LocalScaling"),
   }
   PLASMA_END_ATTRIBUTES;
@@ -271,6 +273,15 @@ plMeshRenderData* plInstancedMeshComponent::CreateRenderData() const
   {
     pRenderData->m_pExplicitInstanceData = m_pExplicitInstanceData;
     pRenderData->m_uiExplicitInstanceCount = m_RawInstancedData.GetCount();
+
+    const plWindWorldModuleInterface* pWindInterface = GetWorld()->GetModuleReadOnly<plWindWorldModuleInterface>();
+    if (pWindInterface)
+    {
+      const plVec3 position = GetOwner()->GetGlobalPosition();
+      const plVec3 windSamplePosition = position + plVec3(0, 0, 2); // avoid issues where position is at the contact point with the floor
+      const plVec3 windowForce = pWindInterface->GetWindAt(windSamplePosition);
+      pRenderData->m_Wind = windowForce;
+    }
   }
 
   return pRenderData;
@@ -331,9 +342,18 @@ plArrayPtr<plPerInstanceData> plInstancedMeshComponent::GetInstanceData() const
 
     instanceData[i].ObjectToWorld = objectToWorld;
 
+    #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+      const plMat4 lastObjectToWorld = (GetOwner()->GetLastGlobalTransform() * m_RawInstancedData[i].m_transform).GetAsMat4();
+      instanceData[i].LastObjectToWorld = lastObjectToWorld;
+    #endif
+
     if (m_RawInstancedData[i].m_transform.ContainsUniformScale())
     {
       instanceData[i].ObjectToWorldNormal = objectToWorld;
+
+      #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+        instanceData[i].LastObjectToWorldNormal = lastObjectToWorld;
+      #endif
     }
     else
     {
@@ -345,6 +365,16 @@ plArrayPtr<plPerInstanceData> plInstancedMeshComponent::GetInstanceData() const
       plShaderTransform shaderT;
       shaderT = mInverse.GetTranspose();
       instanceData[i].ObjectToWorldNormal = shaderT;
+
+      #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+        mInverse = lastObjectToWorld.GetRotationalPart();
+        mInverse.Invert(0.0f).IgnoreResult();
+        // we explicitly ignore the return value here (success / failure)
+        // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
+
+        shaderT = mInverse.GetTranspose();
+        instanceData[i].LastObjectToWorldNormal = shaderT;
+      #endif
     }
 
     instanceData[i].GameObjectID = GetUniqueIdForRendering();

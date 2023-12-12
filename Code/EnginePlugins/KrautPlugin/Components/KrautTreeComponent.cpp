@@ -35,7 +35,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plKrautTreeComponent, 3, plComponentMode::Static)
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering/Terrain"),
+    new plCategoryAttribute("Terrain"),
+    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -210,7 +211,7 @@ void plKrautTreeComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) c
   ComputeWind();
 
   // ignore scale, the shader expects the wind strength in the global 0-20 m/sec range
-  const plVec3 vLocalWind = GetOwner()->GetGlobalRotation().GetInverse() * m_vWindSpringPos;
+  const plVec3 vLocalWind = -GetOwner()->GetGlobalRotation() * m_vWindSpringPos;
 
   const plUInt8 uiMaxLods = static_cast<plUInt8>(pTree->GetTreeLODs().GetCount());
   for (plUInt8 uiCurLod = 0; uiCurLod < uiMaxLods; ++uiCurLod)

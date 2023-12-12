@@ -69,7 +69,7 @@ void plImguiExtractor::Extract(const plView& view, const plDynamicArray<const pl
       plImguiRenderData* pRenderData = plCreateRenderDataForThisFrame<plImguiRenderData>(nullptr);
       pRenderData->m_uiSortingKey = draw;
       pRenderData->m_GlobalTransform.SetIdentity();
-      pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
+      pRenderData->m_GlobalBounds.SetInvalid();
 
       // copy the vertex data
       // uses the frame allocator to prevent unnecessary deallocations

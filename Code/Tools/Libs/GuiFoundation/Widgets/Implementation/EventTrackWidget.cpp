@@ -9,8 +9,8 @@
 #include <QRubberBand>
 #include <qevent.h>
 
-plQtEventTrackWidget::plQtEventTrackWidget(QWidget* pParent)
-  : QWidget(pParent)
+plQtEventTrackWidget::plQtEventTrackWidget(QWidget* parent)
+  : QWidget(parent)
 {
   setFocusPolicy(Qt::FocusPolicy::ClickFocus);
   setMouseTracking(true);
@@ -189,13 +189,13 @@ void plQtEventTrackWidget::ClearSelection()
 }
 
 
-void plQtEventTrackWidget::GetSelection(plHybridArray<plUInt32, 32>& out_selection) const
+void plQtEventTrackWidget::GetSelection(plHybridArray<plUInt32, 32>& out_Selection) const
 {
-  out_selection.Clear();
+  out_Selection.Clear();
 
   for (const auto& pt : m_SelectedPoints)
   {
-    out_selection.PushBack(m_Categories[pt.m_uiCategory].m_SortedPoints[pt.m_uiSortedIdx].m_uiOrgIndex);
+    out_Selection.PushBack(m_Categories[pt.m_uiCategory].m_SortedPoints[pt.m_uiSortedIdx].m_uiOrgIndex);
   }
 }
 
@@ -658,6 +658,7 @@ void plQtEventTrackWidget::wheelEvent(QWheelEvent* e)
   ClampZoomPan();
 
   changeX = m_SceneToPixelScale.x() / oldScaleX;
+  changeY = m_SceneToPixelScale.y() / oldScaleY;
 
   posDiff = posDiff * (1.0 / changeX);
 
@@ -1010,7 +1011,7 @@ void plQtEventTrackWidget::ComputeSelectionRect()
     return;
 
   plBoundingBox bbox;
-  bbox = plBoundingBox::MakeInvalid();
+  bbox.SetInvalid();
 
   // TODO: properly implement the Y value
   // for (const auto& cpSel : m_SelectedPoints)

@@ -7,7 +7,7 @@ plGALVertexDeclaration::plGALVertexDeclaration(const plGALVertexDeclarationCreat
 {
 }
 
-plGALVertexDeclaration::~plGALVertexDeclaration() = default;
+plGALVertexDeclaration::~plGALVertexDeclaration() {}
 
 
 

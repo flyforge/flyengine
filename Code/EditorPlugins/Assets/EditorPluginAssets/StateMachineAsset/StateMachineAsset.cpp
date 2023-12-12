@@ -7,16 +7,16 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineAssetDocument, 4, plRTTINoAllocator)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineAssetDocument, 3, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plStateMachineAssetDocument::plStateMachineAssetDocument(plStringView sDocumentPath)
-  : plAssetDocument(sDocumentPath, PLASMA_DEFAULT_NEW(plStateMachineNodeManager), plAssetDocEngineConnection::None)
+plStateMachineAssetDocument::plStateMachineAssetDocument(const char* szDocumentPath)
+  : plAssetDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plStateMachineNodeManager), plAssetDocEngineConnection::None)
 {
 }
 
-plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   auto pManager = static_cast<plStateMachineNodeManager*>(GetObjectManager());
 
@@ -170,18 +170,18 @@ void plStateMachineAssetDocument::RestoreMetaDataAfterLoading(const plAbstractOb
 
 void plStateMachineAssetDocument::GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const
 {
-  out_MimeTypes.PushBack("application/plEditor.StateMachineGraph");
+  out_MimeTypes.PushBack("application/PlasmaEditor.StateMachineGraph");
 }
 
 bool plStateMachineAssetDocument::CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const
 {
-  out_MimeType = "application/plEditor.StateMachineGraph";
+  out_MimeType = "application/PlasmaEditor.StateMachineGraph";
 
   const plDocumentNodeManager* pManager = static_cast<const plDocumentNodeManager*>(GetObjectManager());
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plStateMachineAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
+bool plStateMachineAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);

@@ -61,8 +61,8 @@ void plAnimationClipAssetProperties::PropertyMetaStateEventHandler(plPropertyMet
   }
 }
 
-plAnimationClipAssetDocument::plAnimationClipAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plAnimationClipAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
+plAnimationClipAssetDocument::plAnimationClipAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plAnimationClipAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
 }
 
@@ -94,7 +94,7 @@ double plAnimationClipAssetDocument::GetCommonAssetUiState(plCommonAssetUiState:
   return SUPER::GetCommonAssetUiState(state);
 }
 
-plTransformStatus plAnimationClipAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plAnimationClipAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plProgressRange range("Transforming Asset", 2, false);
 
@@ -174,7 +174,7 @@ plTransformStatus plAnimationClipAssetDocument::InternalCreateThumbnail(const Th
   return status;
 }
 
-plUuid plAnimationClipAssetDocument::InsertEventTrackCpAt(plInt64 iTickX, const char* szValue)
+plUuid plAnimationClipAssetDocument::InsertEventTrackCpAt(plInt64 tickX, const char* szValue)
 {
   plObjectCommandAccessor accessor(GetCommandHistory());
   plObjectAccessorBase& acc = accessor;
@@ -188,7 +188,7 @@ plUuid plAnimationClipAssetDocument::InsertEventTrackCpAt(plInt64 iTickX, const 
     acc.AddObject(accessor.GetObject(trackGuid), "ControlPoints", -1, plGetStaticRTTI<plEventTrackControlPointData>(), newObjectGuid).Succeeded(),
     "");
   const plDocumentObject* pCPObj = accessor.GetObject(newObjectGuid);
-  PLASMA_VERIFY(acc.SetValue(pCPObj, "Tick", iTickX).Succeeded(), "");
+  PLASMA_VERIFY(acc.SetValue(pCPObj, "Tick", tickX).Succeeded(), "");
   PLASMA_VERIFY(acc.SetValue(pCPObj, "Event", szValue).Succeeded(), "");
 
   acc.FinishTransaction();
@@ -360,35 +360,34 @@ plAnimationClipAssetDocumentGenerator::plAnimationClipAssetDocumentGenerator()
 
 plAnimationClipAssetDocumentGenerator::~plAnimationClipAssetDocumentGenerator() = default;
 
-void plAnimationClipAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
+void plAnimationClipAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const
 {
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
+  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
+
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::Undecided;
     info.m_sName = "AnimationClipImport";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Animation_Clip.svg";
   }
 }
 
-plStatus plAnimationClipAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plAnimationClipAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
 
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
   plAnimationClipAssetDocument* pAssetDoc = plDynamicCast<plAnimationClipAssetDocument*>(out_pGeneratedDocument);
+  if (pAssetDoc == nullptr)
+    return plStatus("Target document is not a valid plAnimationClipAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("File", sInputFileRel.GetView());
+  accessor.SetValue("File", sDataDirRelativePath);
 
   return plStatus(PLASMA_SUCCESS);
 }

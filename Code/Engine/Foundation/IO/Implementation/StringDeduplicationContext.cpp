@@ -105,14 +105,8 @@ plStringDeduplicationReadContext::~plStringDeduplicationReadContext() = default;
 
 plStringView plStringDeduplicationReadContext::DeserializeString(plStreamReader& ref_reader)
 {
-  plUInt32 uiIndex = plInvalidIndex;
+  plUInt32 uiIndex;
   ref_reader >> uiIndex;
-
-  if (uiIndex >= m_DeduplicatedStrings.GetCount())
-  {
-    PLASMA_ASSERT_DEBUG(uiIndex < m_DeduplicatedStrings.GetCount(), "Failed to read data from file.");
-    return {};
-  }
 
   return m_DeduplicatedStrings[uiIndex].GetView();
 }

@@ -32,11 +32,11 @@ public:
   plDocumentRootObject(const plRTTI* pRootType)
     : plDocumentStorageObject(pRootType)
   {
-    m_Guid = plUuid::MakeStableUuidFromString("DocumentRoot");
+    m_Guid = plUuid::StableUuidForString("DocumentRoot");
   }
 
 public:
-  virtual void InsertSubObject(plDocumentObject* pObject, plStringView sProperty, const plVariant& index) override;
+  virtual void InsertSubObject(plDocumentObject* pObject, const char* szProperty, const plVariant& index) override;
   virtual void RemoveSubObject(plDocumentObject* pObject) override;
 };
 
@@ -44,8 +44,11 @@ public:
 struct plDocumentObjectStructureEvent
 {
   plDocumentObjectStructureEvent()
-
-    = default;
+    : m_pObject(nullptr)
+    , m_pPreviousParent(nullptr)
+    , m_pNewParent(nullptr)
+  {
+  }
 
   const plAbstractProperty* GetProperty() const;
   plVariant getInsertIndex() const;
@@ -104,10 +107,9 @@ struct plDocumentObjectEvent
   {
     BeforeObjectDestroyed,
     AfterObjectCreated,
-    Invalid
   };
 
-  Type m_EventType = Type::Invalid;
+  Type m_EventType;
   const plDocumentObject* m_pObject;
 };
 
@@ -146,11 +148,11 @@ public:
 
   void DestroyObject(plDocumentObject* pObject);
   virtual void DestroyAllObjects();
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const {};
+  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const {};
 
   /// \brief Allows to annotate types with a category (group), such that things like creator menus can use this to present the types in a more user
   /// friendly way
-  virtual plStringView GetTypeCategory(const plRTTI* pRtti) const { return {}; }
+  virtual const char* GetTypeCategory(const plRTTI* pRtti) const { return nullptr; }
   void PatchEmbeddedClassObjects(const plDocumentObject* pObject) const;
 
   const plDocumentObject* GetRootObject() const { return &m_pObjectStorage->m_RootObject; }
@@ -161,26 +163,27 @@ public:
   plDocument* GetDocument() { return m_pObjectStorage->m_pDocument; }
 
   // Property Change
-  plStatus SetValue(plDocumentObject* pObject, plStringView sProperty, const plVariant& newValue, plVariant index = plVariant());
-  plStatus InsertValue(plDocumentObject* pObject, plStringView sProperty, const plVariant& newValue, plVariant index = plVariant());
-  plStatus RemoveValue(plDocumentObject* pObject, plStringView sProperty, plVariant index = plVariant());
-  plStatus MoveValue(plDocumentObject* pObject, plStringView sProperty, const plVariant& oldIndex, const plVariant& newIndex);
+  plStatus SetValue(plDocumentObject* pObject, const char* szProperty, const plVariant& newValue, plVariant index = plVariant());
+  plStatus InsertValue(plDocumentObject* pObject, const char* szProperty, const plVariant& newValue, plVariant index = plVariant());
+  plStatus RemoveValue(plDocumentObject* pObject, const char* szProperty, plVariant index = plVariant());
+  plStatus MoveValue(plDocumentObject* pObject, const char* szProperty, const plVariant& oldIndex, const plVariant& newIndex);
 
   // Structure Change
-  void AddObject(plDocumentObject* pObject, plDocumentObject* pParent, plStringView sParentProperty, plVariant index);
+  void AddObject(plDocumentObject* pObject, plDocumentObject* pParent, const char* szParentProperty, plVariant index);
   void RemoveObject(plDocumentObject* pObject);
-  void MoveObject(plDocumentObject* pObject, plDocumentObject* pNewParent, plStringView sParentProperty, plVariant index);
+  void MoveObject(plDocumentObject* pObject, plDocumentObject* pNewParent, const char* szParentProperty, plVariant index);
 
   // Structure Change Test
-  plStatus CanAdd(const plRTTI* pRtti, const plDocumentObject* pParent, plStringView sParentProperty, const plVariant& index) const;
+  plStatus CanAdd(const plRTTI* pRtti, const plDocumentObject* pParent, const char* szParentProperty, const plVariant& index) const;
   plStatus CanRemove(const plDocumentObject* pObject) const;
-  plStatus CanMove(const plDocumentObject* pObject, const plDocumentObject* pNewParent, plStringView sParentProperty, const plVariant& index) const;
+  plStatus CanMove(const plDocumentObject* pObject, const plDocumentObject* pNewParent, const char* szParentProperty, const plVariant& index) const;
   plStatus CanSelect(const plDocumentObject* pObject) const;
 
-  bool IsUnderRootProperty(plStringView sRootProperty, const plDocumentObject* pObject) const;
-  bool IsUnderRootProperty(plStringView sRootProperty, const plDocumentObject* pParent, plStringView sParentProperty) const;
+  bool IsUnderRootProperty(const char* szRootProperty, const plDocumentObject* pObject) const;
+  bool IsUnderRootProperty(const char* szRootProperty, const plDocumentObject* pParent, const char* szParentProperty) const;
+
   bool IsTemporary(const plDocumentObject* pObject) const;
-  bool IsTemporary(const plDocumentObject* pParent, plStringView sParentProperty) const;
+  bool IsTemporary(const plDocumentObject* pParent, const char* szParentProperty) const;
 
   plSharedPtr<plDocumentObjectManager::Storage> SwapStorage(plSharedPtr<plDocumentObjectManager::Storage> pNewStorage);
   plSharedPtr<plDocumentObjectManager::Storage> GetStorage() { return m_pObjectStorage; }
@@ -189,17 +192,17 @@ private:
   virtual plDocumentObject* InternalCreateObject(const plRTTI* pRtti) { return PLASMA_DEFAULT_NEW(plDocumentStorageObject, pRtti); }
   virtual void InternalDestroyObject(plDocumentObject* pObject) { PLASMA_DEFAULT_DELETE(pObject); }
 
-  void InternalAddObject(plDocumentObject* pObject, plDocumentObject* pParent, plStringView sParentProperty, plVariant index);
+  void InternalAddObject(plDocumentObject* pObject, plDocumentObject* pParent, const char* szParentProperty, plVariant index);
   void InternalRemoveObject(plDocumentObject* pObject);
-  void InternalMoveObject(plDocumentObject* pNewParent, plDocumentObject* pObject, plStringView sParentProperty, plVariant index);
+  void InternalMoveObject(plDocumentObject* pNewParent, plDocumentObject* pObject, const char* szParentProperty, plVariant index);
 
-  virtual plStatus InternalCanAdd(const plRTTI* pRtti, const plDocumentObject* pParent, plStringView sParentProperty, const plVariant& index) const
+  virtual plStatus InternalCanAdd(const plRTTI* pRtti, const plDocumentObject* pParent, const char* szParentProperty, const plVariant& index) const
   {
     return plStatus(PLASMA_SUCCESS);
   };
   virtual plStatus InternalCanRemove(const plDocumentObject* pObject) const { return plStatus(PLASMA_SUCCESS); };
   virtual plStatus InternalCanMove(
-    const plDocumentObject* pObject, const plDocumentObject* pNewParent, plStringView sParentProperty, const plVariant& index) const
+    const plDocumentObject* pObject, const plDocumentObject* pNewParent, const char* szParentProperty, const plVariant& index) const
   {
     return plStatus(PLASMA_SUCCESS);
   };

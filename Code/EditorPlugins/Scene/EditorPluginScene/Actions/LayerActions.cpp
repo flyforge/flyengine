@@ -50,14 +50,14 @@ void plLayerActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hLayerVisible);
 }
 
-void plLayerActions::MapContextMenuActions(plStringView sMapping)
+void plLayerActions::MapContextMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+
 
   pMap->MapAction(s_hLayerCategory, "", 0.0f);
-
-  const plStringView sSubPath = "LayerCategory";
+  plStringBuilder sSubPath(szPath, "/LayerCategory");
   pMap->MapAction(s_hCreateLayer, sSubPath, 1.0f);
   pMap->MapAction(s_hDeleteLayer, sSubPath, 2.0f);
   pMap->MapAction(s_hSaveLayer, sSubPath, 3.0f);

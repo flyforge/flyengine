@@ -20,7 +20,7 @@ public:
   plDrawBoxGizmo();
   ~plDrawBoxGizmo();
 
-  void GetResult(plVec3& out_vOrigin, float& out_fSizeNegX, float& out_fSizePosX, float& out_fSizeNegY, float& out_fSizePosY, float& out_fSizeNegZ,
+  void GetResult(plVec3& out_Origin, float& out_fSizeNegX, float& out_fSizePosX, float& out_fSizeNegY, float& out_fSizePosY, float& out_fSizeNegZ,
     float& out_fSizePosZ) const;
 
   ManipulateMode GetCurrentMode() const { return m_ManipulateMode; }
@@ -33,11 +33,11 @@ public:
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoKeyPressEvent(QKeyEvent* e) override;
-  virtual plEditorInput DoKeyReleaseEvent(QKeyEvent* e) override;
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoKeyPressEvent(QKeyEvent* e) override;
+  virtual PlasmaEditorInput DoKeyReleaseEvent(QKeyEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
@@ -51,7 +51,7 @@ private:
   bool PickPosition(QMouseEvent* e);
 
   ManipulateMode m_ManipulateMode;
-  plEngineGizmoHandle m_hBox;
+  PlasmaEngineGizmoHandle m_hBox;
 
   plInt32 m_iHeightChange = 0;
   plVec2I32 m_vLastMousePos;

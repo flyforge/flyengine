@@ -9,7 +9,7 @@ struct plMsgUpdateLocalBounds;
 struct plMsgExtractRenderData;
 struct plMsgTransformChanged;
 
-using plSkyLightComponentManager = plSettingsComponentManager<class plSkyLightComponent>;
+typedef plSettingsComponentManager<class plSkyLightComponent> plSkyLightComponentManager;
 
 class PLASMA_RENDERERCORE_DLL plSkyLightComponent : public plSettingsComponent
 {

@@ -2,7 +2,7 @@
 
 #include <RendererCore/AnimationSystem/AnimationPose.h>
 #include <RendererCore/AnimationSystem/Skeleton.h>
-#include <RendererFoundation/Shader/Types.h>
+#include <RendererCore/Shader/Types.h>
 
 // clang-format off
 PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgAnimationPosePreparing);
@@ -76,13 +76,6 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgRetrieveBoneState);
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgRetrieveBoneState, 1, plRTTIDefaultAllocator<plMsgRetrieveBoneState>)
-{
-  PLASMA_BEGIN_ATTRIBUTES
-  {
-    new plExcludeFromScript()
-  }
-  PLASMA_END_ATTRIBUTES;
-}
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plAnimationInvisibleUpdateRate, 1)
@@ -101,24 +94,24 @@ plTime plAnimationInvisibleUpdateRate::GetTimeStep(plAnimationInvisibleUpdateRat
   switch (value)
   {
     case plAnimationInvisibleUpdateRate::FullUpdate:
-      return plTime::MakeZero();
+      return plTime::Zero();
     case plAnimationInvisibleUpdateRate::Max60FPS:
-      return plTime::MakeFromSeconds(1.0 / 60.0);
+      return plTime::Seconds(1.0 / 60.0);
     case plAnimationInvisibleUpdateRate::Max30FPS:
-      return plTime::MakeFromSeconds(1.0 / 30.0);
+      return plTime::Seconds(1.0 / 30.0);
     case plAnimationInvisibleUpdateRate::Max15FPS:
-      return plTime::MakeFromSeconds(1.0 / 15.0);
+      return plTime::Seconds(1.0 / 15.0);
     case plAnimationInvisibleUpdateRate::Max10FPS:
-      return plTime::MakeFromSeconds(1.0 / 10.0);
+      return plTime::Seconds(1.0 / 10.0);
 
     case plAnimationInvisibleUpdateRate::Max5FPS:
     case plAnimationInvisibleUpdateRate::Pause: // full pausing should be handled separately, and if something isn't fully paused, it should behave like a very low update rate
-      return plTime::MakeFromSeconds(1.0 / 5.0);
+      return plTime::Seconds(1.0 / 5.0);
 
       PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
-  return plTime::MakeZero();
+  return plTime::Zero();
 }
 
 void plMsgAnimationPoseUpdated::ComputeFullBoneTransform(plUInt32 uiJointIndex, plMat4& ref_mFullTransform) const

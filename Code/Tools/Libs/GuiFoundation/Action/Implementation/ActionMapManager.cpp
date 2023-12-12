@@ -30,19 +30,19 @@ PLASMA_END_SUBSYSTEM_DECLARATION;
 // plActionMapManager public functions
 ////////////////////////////////////////////////////////////////////////
 
-plResult plActionMapManager::RegisterActionMap(plStringView sMapping)
+plResult plActionMapManager::RegisterActionMap(const char* szMapping)
 {
-  auto it = s_Mappings.Find(sMapping);
+  auto it = s_Mappings.Find(szMapping);
   if (it.IsValid())
     return PLASMA_FAILURE;
 
-  s_Mappings.Insert(sMapping, PLASMA_DEFAULT_NEW(plActionMap));
+  s_Mappings.Insert(szMapping, PLASMA_DEFAULT_NEW(plActionMap));
   return PLASMA_SUCCESS;
 }
 
-plResult plActionMapManager::UnregisterActionMap(plStringView sMapping)
+plResult plActionMapManager::UnregisterActionMap(const char* szMapping)
 {
-  auto it = s_Mappings.Find(sMapping);
+  auto it = s_Mappings.Find(szMapping);
   if (!it.IsValid())
     return PLASMA_FAILURE;
 
@@ -51,9 +51,9 @@ plResult plActionMapManager::UnregisterActionMap(plStringView sMapping)
   return PLASMA_SUCCESS;
 }
 
-plActionMap* plActionMapManager::GetActionMap(plStringView sMapping)
+plActionMap* plActionMapManager::GetActionMap(const char* szMapping)
 {
-  auto it = s_Mappings.Find(sMapping);
+  auto it = s_Mappings.Find(szMapping);
   if (!it.IsValid())
     return nullptr;
 
@@ -68,7 +68,7 @@ plActionMap* plActionMapManager::GetActionMap(plStringView sMapping)
 void plActionMapManager::Startup()
 {
   plActionMapManager::RegisterActionMap("DocumentWindowTabMenu").IgnoreResult();
-  plDocumentActions::MapMenuActions("DocumentWindowTabMenu", "");
+  plDocumentActions::MapActions("DocumentWindowTabMenu", "", false);
 }
 
 void plActionMapManager::Shutdown()

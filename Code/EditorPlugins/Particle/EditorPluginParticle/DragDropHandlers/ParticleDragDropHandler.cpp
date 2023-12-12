@@ -23,7 +23,7 @@ void plParticleComponentDragDropHandler::OnDragBegin(const plDragDropInfo* pInfo
   {
     CreateDropObject(pInfo->m_vDropPosition, "plParticleComponent", "Effect", GetAssetGuidString(pInfo), plUuid(), -1);
 
-    m_vAlignAxisWithNormal = plVec3::MakeAxisZ();
+    m_vAlignAxisWithNormal = plVec3::UnitZAxis();
   }
   else
     CreateDropObject(pInfo->m_vDropPosition, "plParticleComponent", "Effect", GetAssetGuidString(pInfo), pInfo->m_TargetObject, pInfo->m_iTargetObjectInsertChildIndex);

@@ -40,14 +40,14 @@ namespace plSimdConversion
   PLASMA_ALWAYS_INLINE plQuat ToQuat(const plSimdQuat& q)
   {
     plQuat tmp;
-    q.m_v.Store<4>(&tmp.x);
+    q.m_v.Store<4>(&tmp.v.x);
     return tmp;
   }
 
   PLASMA_ALWAYS_INLINE plSimdQuat ToQuat(const plQuat& q)
   {
     plSimdVec4f tmp;
-    tmp.Load<4>(&q.x);
+    tmp.Load<4>(&q.v.x);
     return plSimdQuat(tmp);
   }
 
@@ -70,30 +70,32 @@ namespace plSimdConversion
 
   PLASMA_ALWAYS_INLINE plSimdMat4f ToMat4(const plMat4& m)
   {
-    return plSimdMat4f::MakeFromColumnMajorArray(m.m_fElementsCM);
+    plSimdMat4f tmp;
+    tmp.SetFromArray(m.m_fElementsCM, plMatrixLayout::ColumnMajor);
+    return tmp;
   }
 
   PLASMA_ALWAYS_INLINE plBoundingBoxSphere ToBBoxSphere(const plSimdBBoxSphere& b)
   {
     plVec4 centerAndRadius = ToVec4(b.m_CenterAndRadius);
-    return plBoundingBoxSphere::MakeFromCenterExtents(centerAndRadius.GetAsVec3(), ToVec3(b.m_BoxHalfExtents), centerAndRadius.w);
+    return plBoundingBoxSphere(centerAndRadius.GetAsVec3(), ToVec3(b.m_BoxHalfExtents), centerAndRadius.w);
   }
 
   PLASMA_ALWAYS_INLINE plSimdBBoxSphere ToBBoxSphere(const plBoundingBoxSphere& b)
   {
-    return plSimdBBoxSphere::MakeFromCenterExtents(ToVec3(b.m_vCenter), ToVec3(b.m_vBoxHalfExtends), b.m_fSphereRadius);
+    return plSimdBBoxSphere(ToVec3(b.m_vCenter), ToVec3(b.m_vBoxHalfExtends), b.m_fSphereRadius);
   }
 
   PLASMA_ALWAYS_INLINE plBoundingSphere ToBSphere(const plSimdBSphere& s)
   {
     plVec4 centerAndRadius = ToVec4(s.m_CenterAndRadius);
-    return plBoundingSphere::MakeFromCenterAndRadius(centerAndRadius.GetAsVec3(), centerAndRadius.w);
+    return plBoundingSphere(centerAndRadius.GetAsVec3(), centerAndRadius.w);
   }
 
   PLASMA_ALWAYS_INLINE plSimdBSphere ToBSphere(const plBoundingSphere& s) { return plSimdBSphere(ToVec3(s.m_vCenter), s.m_fRadius); }
 
   PLASMA_ALWAYS_INLINE plSimdBBox ToBBox(const plBoundingBox& b) { return plSimdBBox(ToVec3(b.m_vMin), ToVec3(b.m_vMax)); }
 
-  PLASMA_ALWAYS_INLINE plBoundingBox ToBBox(const plSimdBBox& b) { return plBoundingBox::MakeFromMinMax(ToVec3(b.m_Min), ToVec3(b.m_Max)); }
+  PLASMA_ALWAYS_INLINE plBoundingBox ToBBox(const plSimdBBox& b) { return plBoundingBox(ToVec3(b.m_Min), ToVec3(b.m_Max)); }
 
 }; // namespace plSimdConversion

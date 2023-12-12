@@ -5,7 +5,7 @@
 #include <RendererCore/Pipeline/View.h>
 
 plParticleViewContext::plParticleViewContext(plParticleContext* pParticleContext)
-  : plEngineProcessViewContext(pParticleContext)
+  : PlasmaEngineProcessViewContext(pParticleContext)
 {
   m_pParticleContext = pParticleContext;
 }
@@ -27,7 +27,7 @@ plViewHandle plParticleViewContext::CreateView()
 
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
 
-  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   return pView->GetHandle();

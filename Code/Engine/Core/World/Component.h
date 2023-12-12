@@ -118,7 +118,7 @@ public:
   PLASMA_ALWAYS_INLINE bool SendMessage(plMessage& ref_msg) const { return SendMessageInternal(ref_msg, false); }
 
   /// \brief Queues the message for the given phase. The message is processed after the given delay in the corresponding phase.
-  void PostMessage(const plMessage& msg, plTime delay = plTime::MakeZero(), plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame) const;
+  void PostMessage(const plMessage& msg, plTime delay = plTime::Zero(), plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame) const;
 
   /// \brief Returns whether the given Message is handled by this component.
   virtual bool HandlesMessage(const plMessage& msg) const;

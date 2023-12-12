@@ -127,13 +127,6 @@ namespace plConversionUtils
     {
       const char c = *sText.GetStartPointer();
 
-      // c++ ' seperator can appear starting with the second digit
-      if (iCurRes > 0 && c == '\'')
-      {
-        sText.ChopAwayFirstCharacterAscii();
-        continue;
-      }
-
       // end of digits reached -> return success (allows to write something like "239*4" -> parses first part as 239)
       if (c < '0' || c > '9')
         break;
@@ -204,13 +197,6 @@ namespace plConversionUtils
         if (c == '.')
         {
           Part = Fraction;
-          sText.ChopAwayFirstCharacterAscii();
-          continue;
-        }
-
-        // c++ ' separator can appear starting with the second digit
-        if (uiIntegerPart > 0 && c == '\'')
-        {
           sText.ChopAwayFirstCharacterAscii();
           continue;
         }
@@ -662,7 +648,7 @@ namespace plConversionUtils
 
   const plStringBuilder& ToString(const plQuat& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ x={0}, y={1}, z={2}, w={3} }", value.x, value.y, value.z, value.w);
+    out_sResult.Format("{ x={0}, y={1}, z={2}, w={3} }", value.v.x, value.v.y, value.v.z, value.w);
     return out_sResult;
   }
 
@@ -719,6 +705,7 @@ namespace plConversionUtils
     out_sResult.Format("0x{}", plArgU(value.GetHash(), 16, true, 16));
     return out_sResult;
   }
+
 
   const plStringBuilder& ToString(const plDynamicArray<plVariant>& value, plStringBuilder& out_sResult)
   {

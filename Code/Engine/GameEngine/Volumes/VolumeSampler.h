@@ -11,7 +11,7 @@ public:
   plVolumeSampler();
   ~plVolumeSampler();
 
-  void RegisterValue(plHashedString sName, plVariant defaultValue, plTime interpolationDuration = plTime::MakeZero());
+  void RegisterValue(plHashedString sName, plVariant defaultValue, plTime interpolationDuration = plTime::Zero());
   void DeregisterValue(plHashedString sName);
   void DeregisterAllValues();
 

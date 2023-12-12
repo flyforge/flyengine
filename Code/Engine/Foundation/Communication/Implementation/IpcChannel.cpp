@@ -5,6 +5,7 @@
 #include <Foundation/Communication/IpcChannel.h>
 #include <Foundation/Communication/RemoteMessage.h>
 #include <Foundation/Logging/Log.h>
+#include <Foundation/Serialization/ReflectionSerializer.h>
 
 #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
 #  include <Foundation/Communication/Implementation/Win/PipeChannel_win.h>
@@ -12,25 +13,22 @@
 #  include <Foundation/Communication/Implementation/Linux/PipeChannel_linux.h>
 #endif
 
-PLASMA_CHECK_AT_COMPILETIME((plInt32)plIpcChannel::ConnectionState::Disconnected == (plInt32)plIpcChannelEvent::Disconnected);
-PLASMA_CHECK_AT_COMPILETIME((plInt32)plIpcChannel::ConnectionState::Connecting == (plInt32)plIpcChannelEvent::Connecting);
-PLASMA_CHECK_AT_COMPILETIME((plInt32)plIpcChannel::ConnectionState::Connected == (plInt32)plIpcChannelEvent::Connected);
-
 plIpcChannel::plIpcChannel(plStringView sAddress, Mode::Enum mode)
-  : m_sAddress(sAddress)
-  , m_Mode(mode)
+  : m_Mode(mode)
   , m_pOwner(plMessageLoop::GetSingleton())
 {
 }
 
 plIpcChannel::~plIpcChannel()
 {
-
+  plDeque<plUniquePtr<plProcessMessage>> messages;
+  SwapWorkQueue(messages);
+  messages.Clear();
 
   m_pOwner->RemoveChannel(this);
 }
 
-plInternal::NewInstance<plIpcChannel> plIpcChannel::CreatePipeChannel(plStringView sAddress, Mode::Enum mode)
+plIpcChannel* plIpcChannel::CreatePipeChannel(plStringView sAddress, Mode::Enum mode)
 {
   if (sAddress.IsEmpty() || sAddress.GetElementCount() > 200)
   {
@@ -49,7 +47,7 @@ plInternal::NewInstance<plIpcChannel> plIpcChannel::CreatePipeChannel(plStringVi
 }
 
 
-plInternal::NewInstance<plIpcChannel> plIpcChannel::CreateNetworkChannel(plStringView sAddress, Mode::Enum mode)
+plIpcChannel* plIpcChannel::CreateNetworkChannel(plStringView sAddress, Mode::Enum mode)
 {
 #ifdef BUILDSYSTEM_ENABLE_ENET_SUPPORT
   return PLASMA_DEFAULT_NEW(plIpcChannelEnet, sAddress, mode);
@@ -74,21 +72,24 @@ void plIpcChannel::Disconnect()
   m_pOwner->WakeUp();
 }
 
-
-bool plIpcChannel::Send(plArrayPtr<const plUInt8> data)
+bool plIpcChannel::Send(plProcessMessage* pMsg)
 {
   {
     PLASMA_LOCK(m_OutputQueueMutex);
     plMemoryStreamStorageInterface& storage = m_OutputQueue.ExpandAndGetRef();
     plMemoryStreamWriter writer(&storage);
-    plUInt32 uiSize = data.GetCount() + HEADER_SIZE;
+    plUInt32 uiSize = 0;
     plUInt32 uiMagic = MAGIC_VALUE;
     writer << uiMagic;
     writer << uiSize;
     PLASMA_ASSERT_DEBUG(storage.GetStorageSize32() == HEADER_SIZE, "Magic value and size should have written HEADER_SIZE bytes.");
-    writer.WriteBytes(data.GetPtr(), data.GetCount()).AssertSuccess("Failed to write to in-memory buffer, out of memory?");
+    plReflectionSerializer::WriteObjectToBinary(writer, pMsg->GetDynamicRTTI(), pMsg);
+
+    // reset to the beginning and write the stored size again
+    writer.SetWritePosition(4);
+    writer << storage.GetStorageSize32();
   }
-  if (IsConnected())
+  if (m_bConnected)
   {
     if (NeedWakeup())
     {
@@ -102,48 +103,50 @@ bool plIpcChannel::Send(plArrayPtr<const plUInt8> data)
   return false;
 }
 
-void plIpcChannel::SetReceiveCallback(ReceiveCallback callback)
+bool plIpcChannel::ProcessMessages()
 {
-  PLASMA_LOCK(m_ReceiveCallbackMutex);
-  m_ReceiveCallback = callback;
+  plDeque<plUniquePtr<plProcessMessage>> messages;
+  SwapWorkQueue(messages);
+  if (messages.IsEmpty())
+  {
+    return false;
+  }
+
+  while (!messages.IsEmpty())
+  {
+    plUniquePtr<plProcessMessage> msg = std::move(messages.PeekFront());
+    messages.PopFront();
+    m_MessageEvent.Broadcast(msg.Borrow());
+  }
+
+  return true;
+}
+
+void plIpcChannel::WaitForMessages()
+{
+  if (m_bConnected)
+  {
+    m_IncomingMessages.WaitForSignal();
+    ProcessMessages();
+  }
 }
 
 plResult plIpcChannel::WaitForMessages(plTime timeout)
 {
-  if (IsConnected())
+  if (m_bConnected)
   {
-    if (timeout == plTime::MakeZero())
-    {
-      m_IncomingMessages.WaitForSignal();
-    }
-    else if (m_IncomingMessages.WaitForSignal(timeout) == plThreadSignal::WaitResult::Timeout)
+    if (m_IncomingMessages.WaitForSignal(timeout) == plThreadSignal::WaitResult::Timeout)
     {
       return PLASMA_FAILURE;
     }
+    ProcessMessages();
   }
+
   return PLASMA_SUCCESS;
 }
 
-void plIpcChannel::SetConnectionState(plEnum<plIpcChannel::ConnectionState> state)
+void plIpcChannel::ReceiveMessageData(plArrayPtr<const plUInt8> data)
 {
-  const plEnum<plIpcChannel::ConnectionState> oldValue = m_iConnectionState.Set(state);
-
-  if (state != oldValue)
-  {
-    m_Events.Broadcast(plIpcChannelEvent((plIpcChannelEvent::Type)state.GetValue(), this));
-  }
-}
-
-void plIpcChannel::ReceiveData(plArrayPtr<const plUInt8> data)
-{
-  PLASMA_LOCK(m_ReceiveCallbackMutex);
-
-  if (!m_ReceiveCallback.IsValid())
-  {
-    m_MessageAccumulator.PushBackRange(data);
-    return;
-  }
-
   plArrayPtr<const plUInt8> remainingData = data;
   while (true)
   {
@@ -188,17 +191,50 @@ void plIpcChannel::ReceiveData(plArrayPtr<const plUInt8> data)
     remainingData = remainingData.GetSubArray(remainingMessageData);
 
     {
-      m_ReceiveCallback(plArrayPtr<const plUInt8>(m_MessageAccumulator.GetData() + HEADER_SIZE, uiMessageSize - HEADER_SIZE));
-      m_IncomingMessages.RaiseSignal();
-      m_Events.Broadcast(plIpcChannelEvent(plIpcChannelEvent::NewMessages, this));
+      // Message complete, de-serialize
+      plRawMemoryStreamReader reader(m_MessageAccumulator.GetData() + HEADER_SIZE, uiMessageSize - HEADER_SIZE);
+      const plRTTI* pRtti = nullptr;
+
+      plProcessMessage* pMsg = (plProcessMessage*)plReflectionSerializer::ReadObjectFromBinary(reader, pRtti);
+      plUniquePtr<plProcessMessage> msg(pMsg, plFoundation::GetDefaultAllocator());
+      if (msg != nullptr)
+      {
+        EnqueueMessage(std::move(msg));
+      }
+      else
+      {
+        plLog::Error("Channel received invalid Message!");
+      }
       m_MessageAccumulator.Clear();
     }
   }
+}
+
+void plIpcChannel::EnqueueMessage(plUniquePtr<plProcessMessage>&& msg)
+{
+  {
+    PLASMA_LOCK(m_IncomingQueueMutex);
+    m_IncomingQueue.PushBack(std::move(msg));
+  }
+  m_IncomingMessages.RaiseSignal();
+
+  m_Events.Broadcast(plIpcChannelEvent(plIpcChannelEvent::NewMessages, this));
+}
+
+void plIpcChannel::SwapWorkQueue(plDeque<plUniquePtr<plProcessMessage>>& messages)
+{
+  PLASMA_ASSERT_DEBUG(messages.IsEmpty(), "Swap target must be empty!");
+  PLASMA_LOCK(m_IncomingQueueMutex);
+  if (m_IncomingQueue.IsEmpty())
+    return;
+  messages.Swap(m_IncomingQueue);
 }
 
 void plIpcChannel::FlushPendingOperations()
 {
   m_pOwner->WaitForMessages(-1, this);
 }
+
+
 
 PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_IpcChannel);

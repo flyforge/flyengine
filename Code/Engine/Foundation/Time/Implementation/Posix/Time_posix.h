@@ -9,5 +9,5 @@ plTime plTime::Now()
   struct timespec sp;
   clock_gettime(CLOCK_MONOTONIC_RAW, &sp);
 
-  return plTime::MakeFromSeconds((double)sp.tv_sec + (double)(sp.tv_nsec / 1000000000.0));
+  return plTime::Seconds((double)sp.tv_sec + (double)(sp.tv_nsec / 1000000000.0));
 }

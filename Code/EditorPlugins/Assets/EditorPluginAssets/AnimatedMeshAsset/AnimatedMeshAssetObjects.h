@@ -16,7 +16,6 @@ public:
 
   bool m_bRecalculateNormals = false;
   bool m_bRecalculateTrangents = true;
-  bool m_bNormalizeWeights = false;
   bool m_bImportMaterials = true;
 
   plEnum<plMeshNormalPrecision> m_NormalPrecision;

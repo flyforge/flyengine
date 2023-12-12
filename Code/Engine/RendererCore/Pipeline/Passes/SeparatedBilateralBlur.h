@@ -20,8 +20,6 @@ public:
   virtual bool GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs) override;
 
   virtual void Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
-  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
-  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   void SetRadius(plUInt32 uiRadius);
   plUInt32 GetRadius() const;
@@ -37,9 +35,9 @@ protected:
   plRenderPipelineNodeInputPin m_PinDepthInput;
   plRenderPipelineNodeOutputPin m_PinOutput;
 
-  plUInt32 m_uiRadius = 7;
-  float m_fGaussianSigma = 3.5f;
-  float m_fSharpness = 120.0f;
+  plUInt32 m_uiRadius;
+  float m_fGaussianSigma;
+  float m_fSharpness;
   plConstantBufferStorageHandle m_hBilateralBlurCB;
   plShaderResourceHandle m_hShader;
 };

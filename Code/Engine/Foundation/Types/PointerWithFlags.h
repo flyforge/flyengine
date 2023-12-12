@@ -102,16 +102,6 @@ public:
     return !(*this == pPtr);
   }
 
-  bool operator==(const plPointerWithFlags<PtrType, NumFlagBits>& rhs) const
-  {
-    return GetPtr() == rhs.GetPtr();
-  }
-
-  bool operator!=(const plPointerWithFlags<PtrType, NumFlagBits>& rhs) const
-  {
-    return GetPtr() != rhs.GetPtr();
-  }
-
   /// \brief Compares the pointer part for equality (flags are ignored)
   bool operator==(PtrType* pPtr) const { return GetPtr() == pPtr; }
 

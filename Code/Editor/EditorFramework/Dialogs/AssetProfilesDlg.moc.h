@@ -19,7 +19,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtAssetProfilesDlg(QWidget* pParent);
+  plQtAssetProfilesDlg(QWidget* parent);
   ~plQtAssetProfilesDlg();
 
   plUInt32 m_uiActiveConfig = 0;

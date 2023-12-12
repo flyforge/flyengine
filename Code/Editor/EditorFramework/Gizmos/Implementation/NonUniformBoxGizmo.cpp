@@ -17,7 +17,7 @@ plNonUniformBoxGizmo::plNonUniformBoxGizmo()
 
   m_ManipulateMode = ManipulateMode::None;
 
-  m_hOutline.ConfigureHandle(this, plEngineGizmoHandleType::LineBox, plColorScheme::LightUI(plColorScheme::Gray), plGizmoFlags::ShowInOrtho);
+  m_hOutline.ConfigureHandle(this, PlasmaEngineGizmoHandleType::LineBox, plColorScheme::LightUI(plColorScheme::Gray), plGizmoFlags::ShowInOrtho);
 
   plColor cols[6] = {
     plColorScheme::LightUI(plColorScheme::Red),
@@ -30,11 +30,11 @@ plNonUniformBoxGizmo::plNonUniformBoxGizmo()
 
   for (plUInt32 i = 0; i < 6; ++i)
   {
-    m_Nobs[i].ConfigureHandle(this, plEngineGizmoHandleType::Box, cols[i], plGizmoFlags::ConstantSize | plGizmoFlags::OnTop | plGizmoFlags::ShowInOrtho | plGizmoFlags::Pickable);
+    m_Nobs[i].ConfigureHandle(this, PlasmaEngineGizmoHandleType::Box, cols[i], plGizmoFlags::ConstantSize | plGizmoFlags::OnTop | plGizmoFlags::ShowInOrtho | plGizmoFlags::Pickable);
   }
 
   SetVisible(false);
-  SetTransformation(plTransform::MakeIdentity());
+  SetTransformation(plTransform::IdentityTransform());
 }
 
 void plNonUniformBoxGizmo::OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
@@ -60,7 +60,7 @@ void plNonUniformBoxGizmo::OnVisibleChanged(bool bVisible)
 void plNonUniformBoxGizmo::OnTransformationChanged(const plTransform& transform)
 {
   plMat4 scale, rot;
-  scale = plMat4::MakeScaling(m_vNegSize + m_vPosSize);
+  scale.SetScalingMatrix(m_vNegSize + m_vPosSize);
 
   const plVec3 center = plMath::Lerp(-m_vNegSize, m_vPosSize, 0.5f);
 
@@ -127,15 +127,15 @@ void plNonUniformBoxGizmo::DoFocusLost(bool bCancel)
   m_ManipulateMode = ManipulateMode::None;
 }
 
-plEditorInput plNonUniformBoxGizmo::DoMousePressEvent(QMouseEvent* e)
+PlasmaEditorInput plNonUniformBoxGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
   if (e->modifiers() != 0)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   for (plUInt32 i = 0; i < 6; ++i)
   {
@@ -148,7 +148,7 @@ plEditorInput plNonUniformBoxGizmo::DoMousePressEvent(QMouseEvent* e)
     }
   }
 
-  return plEditorInput::MayBeHandledByOthers;
+  return PlasmaEditorInput::MayBeHandledByOthers;
 
 modify:
 
@@ -171,7 +171,7 @@ modify:
 
   m_LastInteraction = plTime::Now();
 
-  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::Normal);
+  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::Normal);
 
   SetActiveInputContext(this);
 
@@ -182,34 +182,37 @@ modify:
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plNonUniformBoxGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+PlasmaEditorInput plNonUniformBoxGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plNonUniformBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
+PlasmaEditorInput plNonUniformBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
-    return plEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
+
+  const plVec2I32 vNewMousePos = plVec2I32(e->globalPos().x(), e->globalPos().y());
+  const plVec2I32 vDiff = vNewMousePos - m_vLastMousePos;
 
   m_vNegSize = m_vStartNegSize;
   m_vPosSize = m_vStartPosSize;
@@ -220,7 +223,7 @@ plEditorInput plNonUniformBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
     if (GetPointOnAxis(e->pos().x(), m_vViewport.y - e->pos().y(), vCurrentInteractionPoint).Failed())
     {
       m_vLastMousePos = UpdateMouseMode(e);
-      return plEditorInput::WasExclusivelyHandled;
+      return PlasmaEditorInput::WasExclusivelyHandled;
     }
 
     const float fPerspectiveScale = (vCurrentInteractionPoint - m_pCamera->GetPosition()).GetLength() * 0.125;
@@ -228,7 +231,7 @@ plEditorInput plNonUniformBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
 
     const plVec3 vNewPos = vCurrentInteractionPoint - vOffset * fPerspectiveScale / m_fStartScale;
 
-    plVec3 vTranslate = GetTransformation().m_qRotation.GetInverse() * (vNewPos - m_vStartPosition);
+    plVec3 vTranslate = -GetTransformation().m_qRotation * (vNewPos - m_vStartPosition);
 
     // disable snapping when ALT is pressed
     if (!e->modifiers().testFlag(Qt::AltModifier))
@@ -283,13 +286,13 @@ plEditorInput plNonUniformBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-void plNonUniformBoxGizmo::SetSize(const plVec3& vNegSize, const plVec3& vPosSize, bool bLinkAxis)
+void plNonUniformBoxGizmo::SetSize(const plVec3& negSize, const plVec3& posSize, bool bLinkAxis)
 {
-  m_vNegSize = vNegSize;
-  m_vPosSize = vPosSize;
+  m_vNegSize = negSize;
+  m_vPosSize = posSize;
   m_bLinkAxis = bLinkAxis;
 
   // update the scale
@@ -313,7 +316,7 @@ plResult plNonUniformBoxGizmo::GetPointOnAxis(plInt32 iScreenPosX, plInt32 iScre
   const plVec3 vPlaneNormal = m_vMoveAxis.CrossRH(vPlaneTangent);
 
   plPlane Plane;
-  Plane = plPlane::MakeFromNormalAndPoint(vPlaneNormal, m_vStartPosition);
+  Plane.SetFromNormalAndPoint(vPlaneNormal, m_vStartPosition);
 
   plVec3 vIntersection;
   if (m_pCamera->IsPerspective())

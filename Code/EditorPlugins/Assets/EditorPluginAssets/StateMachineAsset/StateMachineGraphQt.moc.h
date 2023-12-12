@@ -28,7 +28,7 @@ public:
   virtual void InitNode(const plDocumentNodeManager* pManager, const plDocumentObject* pObject) override;
   virtual void UpdateGeometry() override;
   virtual void UpdateState() override;
-  virtual void ExtendContextMenu(QMenu& ref_menu) override;
+  virtual void ExtendContextMenu(QMenu& menu) override;
 
   bool IsInitialState() const;
   bool IsAnyState() const;
@@ -42,7 +42,7 @@ class plQtStateMachineAssetScene : public plQtNodeScene
   Q_OBJECT
 
 public:
-  plQtStateMachineAssetScene(QObject* pParent = nullptr);
+  plQtStateMachineAssetScene(QObject* parent = nullptr);
   ~plQtStateMachineAssetScene();
 
   void SetInitialState(plQtStateMachineNode* pNode);

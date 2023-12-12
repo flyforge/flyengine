@@ -6,7 +6,7 @@
 class plGameObjectDocument;
 class plQtGameObjectDocumentWindow;
 class plObjectAccessorBase;
-class plEditorInputContext;
+class PlasmaEditorInputContext;
 
 class PLASMA_EDITORFRAMEWORK_DLL plGameObjectGizmoInterface
 {
@@ -38,12 +38,12 @@ public:
   plQtGameObjectDocumentWindow* GetWindow() const { return m_pWindow; }
   plGameObjectGizmoInterface* GetGizmoInterface() const { return m_pInterface; }
   bool IsActive() const { return m_bIsActive; }
-  void SetActive(bool bActive);
+  void SetActive(bool active);
 
-  virtual plEditorInputContext* GetEditorInputContextOverride() { return nullptr; }
+  virtual PlasmaEditorInputContext* GetEditorInputContextOverride() { return nullptr; }
   virtual plEditToolSupportedSpaces GetSupportedSpaces() const { return plEditToolSupportedSpaces::WorldSpaceOnly; }
   virtual bool GetSupportsMoveParentOnly() const { return false; }
-  virtual void GetGridSettings(plGridSettingsMsgToEngine& out_gridSettings) {}
+  virtual void GetGridSettings(plGridSettingsMsgToEngine& outGridSettings) {}
 
 protected:
   virtual void OnConfigured() = 0;

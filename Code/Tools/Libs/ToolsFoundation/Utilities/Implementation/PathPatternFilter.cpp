@@ -3,9 +3,9 @@
 #include <Foundation/CodeUtils/Preprocessor.h>
 #include <ToolsFoundation/Utilities/PathPatternFilter.h>
 
-void plPathPattern::Configure(const plStringView sText0)
+void plPathPattern::Configure(const plStringView text0)
 {
-  plStringView text = sText0;
+  plStringView text = text0;
 
   text.Trim(" \t\r\n");
 
@@ -25,18 +25,18 @@ void plPathPattern::Configure(const plStringView sText0)
     m_MatchType = MatchType::Exact;
 }
 
-bool plPathPattern::Matches(const plStringView sText) const
+bool plPathPattern::Matches(const plStringView text) const
 {
   switch (m_MatchType)
   {
     case MatchType::Exact:
-      return sText.IsEqual_NoCase(m_sString.GetView());
+      return text.IsEqual_NoCase(m_sString.GetView());
     case MatchType::StartsWith:
-      return sText.StartsWith_NoCase(m_sString);
+      return text.StartsWith_NoCase(m_sString);
     case MatchType::EndsWith:
-      return sText.EndsWith_NoCase(m_sString);
+      return text.EndsWith_NoCase(m_sString);
     case MatchType::Contains:
-      return sText.FindSubString_NoCase(m_sString) != nullptr;
+      return text.FindSubString_NoCase(m_sString) != nullptr;
   }
 
   PLASMA_ASSERT_NOT_IMPLEMENTED;
@@ -45,19 +45,19 @@ bool plPathPattern::Matches(const plStringView sText) const
 
 //////////////////////////////////////////////////////////////////////////
 
-bool plPathPatternFilter::PassesFilters(plStringView sText) const
+bool plPathPatternFilter::PassesFilters(plStringView text) const
 {
   for (const auto& filter : m_IncludePatterns)
   {
     // if any include pattern matches, that overrides the exclude patterns
-    if (filter.Matches(sText))
+    if (filter.Matches(text))
       return true;
   }
 
   for (const auto& filter : m_ExcludePatterns)
   {
     // no include pattern matched, but any exclude pattern matches -> filter out
-    if (filter.Matches(sText))
+    if (filter.Matches(text))
       return false;
   }
 
@@ -83,7 +83,7 @@ void plPathPatternFilter::AddFilter(plStringView sText, bool bIncludeFilter)
     m_ExcludePatterns.ExpandAndGetRef().Configure(text);
 }
 
-plResult plPathPatternFilter::ReadConfigFile(plStringView sFile, const plDynamicArray<plString>& preprocessorDefines)
+plResult plPathPatternFilter::ReadConfigFile(const char* szFile, const plDynamicArray<plString>& preprocessorDefines)
 {
   plStringBuilder content;
 
@@ -98,7 +98,7 @@ plResult plPathPatternFilter::ReadConfigFile(plStringView sFile, const plDynamic
 
   // keep comments, because * and / can form a multi-line comment, and then we could lose vital information
   // instead only allow single-line comments and filter those out in AddFilter().
-  if (pp.Process(sFile, content, true, true).Failed())
+  if (pp.Process(szFile, content, true, true).Failed())
     return PLASMA_FAILURE;
 
   plDynamicArray<plStringView> lines;

@@ -114,8 +114,7 @@ float plJoltCustomShapeInfo::GetVolume() const
 void plJoltCustomShapeInfo::sRegister()
 {
   ShapeFunctions& f = ShapeFunctions::sGet(EShapeSubType::User1);
-  f.mConstruct = []() -> Shape*
-  { return new plJoltCustomShapeInfo; };
+  f.mConstruct = []() -> Shape* { return new plJoltCustomShapeInfo; };
   f.mColor = Color::sCyan;
 
   for (EShapeSubType s : sAllSubShapeTypes)
@@ -125,11 +124,6 @@ void plJoltCustomShapeInfo::sRegister()
     CollisionDispatch::sRegisterCastShape(EShapeSubType::User1, s, sCastUser1VsShape);
     CollisionDispatch::sRegisterCastShape(s, EShapeSubType::User1, sCastShapeVsUser1);
   }
-}
-
-void plJoltCustomShapeInfo::CollideSoftBodyVertices(JPH::Mat44Arg centerOfMassTransform, JPH::Vec3Arg scale, JPH::SoftBodyVertex* pVertices, JPH::uint uiNumVertices, float fDeltaTime, JPH::Vec3Arg displacementDueToGravity, int iCollidingShapeIndex) const
-{
-  mInnerShape->CollideSoftBodyVertices(centerOfMassTransform, scale, pVertices, uiNumVertices, fDeltaTime, displacementDueToGravity, iCollidingShapeIndex);
 }
 
 void plJoltCustomShapeInfo::sCollideUser1VsShape(const JPH::Shape* inShape1, const JPH::Shape* inShape2, JPH::Vec3Arg inScale1, JPH::Vec3Arg inScale2, JPH::Mat44Arg inCenterOfMassTransform1, JPH::Mat44Arg inCenterOfMassTransform2, const JPH::SubShapeIDCreator& inSubShapeIDCreator1, const JPH::SubShapeIDCreator& inSubShapeIDCreator2, const JPH::CollideShapeSettings& inCollideShapeSettings, JPH::CollideShapeCollector& ioCollector, const JPH::ShapeFilter& inShapeFilter)
@@ -152,6 +146,7 @@ void plJoltCustomShapeInfo::sCastUser1VsShape(const JPH::ShapeCast& inShapeCast,
 {
   // Fetch offset center of mass shape from cast shape
   JPH_ASSERT(inShapeCast.mShape->GetSubType() == EShapeSubType::User1);
+  const plJoltCustomShapeInfo* shape1 = static_cast<const plJoltCustomShapeInfo*>(inShapeCast.mShape);
 
   CollisionDispatch::sCastShapeVsShapeLocalSpace(inShapeCast, inShapeCastSettings, inShape, inScale, inShapeFilter, inCenterOfMassTransform2, inSubShapeIDCreator1, inSubShapeIDCreator2, ioCollector);
 }
@@ -166,3 +161,4 @@ void plJoltCustomShapeInfo::sCastShapeVsUser1(const JPH::ShapeCast& inShapeCast,
 
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltCustomShapeInfo);
+

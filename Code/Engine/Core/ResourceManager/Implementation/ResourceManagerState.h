@@ -98,8 +98,8 @@ private:
   plUInt32 m_uiNextResourceID = 0;
 
   // Resource Unloading
-  plTime m_AutoFreeUnusedTimeout = plTime::MakeZero();
-  plTime m_AutoFreeUnusedThreshold = plTime::MakeZero();
+  plTime m_AutoFreeUnusedTimeout = plTime::Zero();
+  plTime m_AutoFreeUnusedThreshold = plTime::Zero();
 
   plMap<const plRTTI*, plResourceManager::ResourceTypeInfo> m_TypeInfo;
 };

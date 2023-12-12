@@ -51,9 +51,6 @@ public:
 
   //////////////////////////////////////////////////////////////////////////
   // plPhysicsWorldModuleInterface
-  //
-
-  virtual plUInt32 GetCollisionLayerByName(plStringView sName) const override;
 
   virtual bool Raycast(plPhysicsCastResult& out_result, const plVec3& vStart, const plVec3& vDir, float fDistance, const plPhysicsQueryParameters& params, plPhysicsHitCollection collection = plPhysicsHitCollection::Closest) const override;
 
@@ -70,8 +67,6 @@ public:
   virtual bool OverlapTestCapsule(float fCapsuleRadius, float fCapsuleHeight, const plTransform& transform, const plPhysicsQueryParameters& params) const override;
 
   virtual void QueryShapesInSphere(plPhysicsOverlapResultArray& out_results, float fSphereRadius, const plVec3& vPosition, const plPhysicsQueryParameters& params) const override;
-
-  virtual void QueryGeometryInBox(const plPhysicsQueryParameters& params, plBoundingBox box, plDynamicArray<plPhysicsTriangle>& out_triangles) const override;
 
   virtual void AddStaticCollisionBox(plGameObject* pObject, plVec3 vBoxSize) override;
 
@@ -103,7 +98,6 @@ public:
   void CheckBreakableConstraints();
 
   plSet<plComponentHandle> m_BreakableConstraints;
-
 
 private:
   bool SweepTest(plPhysicsCastResult& out_Result, const JPH::Shape& shape, const JPH::Mat44& transform, const plVec3& vDir, float fDistance, const plPhysicsQueryParameters& params, plPhysicsHitCollection collection) const;
@@ -151,6 +145,7 @@ private:
   plMap<plJoltRagdollComponent*, plInt32> m_ActiveRagdolls;
   plMap<plJoltRopeComponent*, plInt32> m_ActiveRopes;
   plDynamicArray<plJoltRagdollComponent*> m_RagdollsPutToSleep;
+
 
   JPH::GroupFilter* m_pGroupFilter = nullptr;
   JPH::GroupFilter* m_pGroupFilterIgnoreSame = nullptr;

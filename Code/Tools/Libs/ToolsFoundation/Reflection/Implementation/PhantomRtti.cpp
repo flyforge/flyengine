@@ -4,14 +4,14 @@
 #include <ToolsFoundation/Reflection/PhantomProperty.h>
 #include <ToolsFoundation/Reflection/PhantomRtti.h>
 
-plPhantomRTTI::plPhantomRTTI(plStringView sName, const plRTTI* pParentType, plUInt32 uiTypeSize, plUInt32 uiTypeVersion, plUInt8 uiVariantType,
-  plBitflags<plTypeFlags> flags, plStringView sPluginName)
+plPhantomRTTI::plPhantomRTTI(const char* szName, const plRTTI* pParentType, plUInt32 uiTypeSize, plUInt32 uiTypeVersion, plUInt8 uiVariantType,
+  plBitflags<plTypeFlags> flags, const char* szPluginName)
   : plRTTI(nullptr, pParentType, uiTypeSize, uiTypeVersion, uiVariantType, flags | plTypeFlags::Phantom, nullptr, plArrayPtr<const plAbstractProperty*>(),
       plArrayPtr<const plAbstractFunctionProperty*>(), plArrayPtr<const plPropertyAttribute*>(), plArrayPtr<plAbstractMessageHandler*>(),
       plArrayPtr<plMessageSenderInfo>(), nullptr)
 {
-  m_sTypeNameStorage = sName;
-  m_sPluginNameStorage = sPluginName;
+  m_sTypeNameStorage = szName;
+  m_sPluginNameStorage = szPluginName;
 
   m_sTypeName = m_sTypeNameStorage.GetData();
   m_sPluginName = m_sPluginNameStorage.GetData();

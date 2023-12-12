@@ -46,7 +46,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgPhysicsJointBroke, 1, plRTTIDefaultAllo
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("JointObject", m_hJointObject)
+   PLASMA_MEMBER_PROPERTY("JointObject", m_hJointObject)
   }
   PLASMA_END_PROPERTIES;
 }

@@ -56,7 +56,7 @@ void plVolumeSampler::SampleAtPosition(plWorld& world, const plVec3& vGlobalPosi
   m_TargetValues.Clear();
 
   auto vPos = plSimdConversion::ToVec3(vGlobalPosition);
-  plBoundingSphere sphere = plBoundingSphere::MakeFromCenterAndRadius(vGlobalPosition, 0.01f);
+  plBoundingSphere sphere(vGlobalPosition, 0.01f);
 
   plSpatialSystem::QueryParams queryParams;
   queryParams.m_uiCategoryBitmask = s_VolumeCategory.GetBitmask();
@@ -81,7 +81,7 @@ void plVolumeSampler::SampleAtPosition(plWorld& world, const plVec3& vGlobalPosi
           if ((absLocalPos <= plSimdVec4f(1.0f)).AllSet<3>())
           {
             plSimdVec4f vAlpha = (plSimdVec4f(1.0f) - absLocalPos).CompDiv(plSimdConversion::ToVec3(pBoxComponent->GetFalloff().CompMax(plVec3(0.0001f))));
-            vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::MakeZero());
+            vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::ZeroVector());
             info.m_fAlpha = vAlpha.x() * vAlpha.y() * vAlpha.z();
           }
         }

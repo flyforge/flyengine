@@ -163,44 +163,44 @@ void plTranslateGizmoEditTool::OnPreferenceChange(plPreferences* pref)
   m_TranslateGizmo.SetCameraSpeed(plCameraMoveContext::ConvertCameraSpeed(pPref->GetCameraSpeed()));
 }
 
-void plTranslateGizmoEditTool::GetGridSettings(plGridSettingsMsgToEngine& ref_msg)
+void plTranslateGizmoEditTool::GetGridSettings(plGridSettingsMsgToEngine& msg)
 {
   auto pSceneDoc = GetDocument();
   plScenePreferencesUser* pPreferences = plPreferences::QueryPreferences<plScenePreferencesUser>(GetDocument());
 
   // if density != 0, it is enabled at least in ortho mode
-  ref_msg.m_fGridDensity = plSnapProvider::GetTranslationSnapValue() * (pSceneDoc->GetGizmoWorldSpace() ? 1.0f : -1.0f); // negative density = local space
+  msg.m_fGridDensity = plSnapProvider::GetTranslationSnapValue() * (pSceneDoc->GetGizmoWorldSpace() ? 1.0f : -1.0f); // negative density = local space
 
   // to be active in perspective mode, tangents have to be non-zero
-  ref_msg.m_vGridTangent1.SetZero();
-  ref_msg.m_vGridTangent2.SetZero();
+  msg.m_vGridTangent1.SetZero();
+  msg.m_vGridTangent2.SetZero();
 
   plTranslateGizmo& translateGizmo = m_TranslateGizmo;
 
   if (pPreferences->GetShowGrid() && translateGizmo.IsVisible())
   {
-    ref_msg.m_vGridCenter = translateGizmo.GetStartPosition();
+    msg.m_vGridCenter = translateGizmo.GetStartPosition();
 
     if (translateGizmo.GetTranslateMode() == plTranslateGizmo::TranslateMode::Axis)
-      ref_msg.m_vGridCenter = translateGizmo.GetTransformation().m_vPosition;
+      msg.m_vGridCenter = translateGizmo.GetTransformation().m_vPosition;
 
     if (pSceneDoc->GetGizmoWorldSpace())
     {
-      plSnapProvider::SnapTranslation(ref_msg.m_vGridCenter);
+      plSnapProvider::SnapTranslation(msg.m_vGridCenter);
 
       switch (translateGizmo.GetLastPlaneInteraction())
       {
         case plTranslateGizmo::PlaneInteraction::PlaneX:
-          ref_msg.m_vGridCenter.y = plMath::RoundToMultiple(ref_msg.m_vGridCenter.y, plSnapProvider::GetTranslationSnapValue() * 10);
-          ref_msg.m_vGridCenter.z = plMath::RoundToMultiple(ref_msg.m_vGridCenter.z, plSnapProvider::GetTranslationSnapValue() * 10);
+          msg.m_vGridCenter.y = plMath::RoundToMultiple(msg.m_vGridCenter.y, plSnapProvider::GetTranslationSnapValue() * 10);
+          msg.m_vGridCenter.z = plMath::RoundToMultiple(msg.m_vGridCenter.z, plSnapProvider::GetTranslationSnapValue() * 10);
           break;
         case plTranslateGizmo::PlaneInteraction::PlaneY:
-          ref_msg.m_vGridCenter.x = plMath::RoundToMultiple(ref_msg.m_vGridCenter.x, plSnapProvider::GetTranslationSnapValue() * 10);
-          ref_msg.m_vGridCenter.z = plMath::RoundToMultiple(ref_msg.m_vGridCenter.z, plSnapProvider::GetTranslationSnapValue() * 10);
+          msg.m_vGridCenter.x = plMath::RoundToMultiple(msg.m_vGridCenter.x, plSnapProvider::GetTranslationSnapValue() * 10);
+          msg.m_vGridCenter.z = plMath::RoundToMultiple(msg.m_vGridCenter.z, plSnapProvider::GetTranslationSnapValue() * 10);
           break;
         case plTranslateGizmo::PlaneInteraction::PlaneZ:
-          ref_msg.m_vGridCenter.x = plMath::RoundToMultiple(ref_msg.m_vGridCenter.x, plSnapProvider::GetTranslationSnapValue() * 10);
-          ref_msg.m_vGridCenter.y = plMath::RoundToMultiple(ref_msg.m_vGridCenter.y, plSnapProvider::GetTranslationSnapValue() * 10);
+          msg.m_vGridCenter.x = plMath::RoundToMultiple(msg.m_vGridCenter.x, plSnapProvider::GetTranslationSnapValue() * 10);
+          msg.m_vGridCenter.y = plMath::RoundToMultiple(msg.m_vGridCenter.y, plSnapProvider::GetTranslationSnapValue() * 10);
           break;
       }
     }
@@ -208,16 +208,16 @@ void plTranslateGizmoEditTool::GetGridSettings(plGridSettingsMsgToEngine& ref_ms
     switch (translateGizmo.GetLastPlaneInteraction())
     {
       case plTranslateGizmo::PlaneInteraction::PlaneX:
-        ref_msg.m_vGridTangent1 = translateGizmo.GetTransformation().m_qRotation * plVec3(0, 1, 0);
-        ref_msg.m_vGridTangent2 = translateGizmo.GetTransformation().m_qRotation * plVec3(0, 0, 1);
+        msg.m_vGridTangent1 = translateGizmo.GetTransformation().m_qRotation * plVec3(0, 1, 0);
+        msg.m_vGridTangent2 = translateGizmo.GetTransformation().m_qRotation * plVec3(0, 0, 1);
         break;
       case plTranslateGizmo::PlaneInteraction::PlaneY:
-        ref_msg.m_vGridTangent1 = translateGizmo.GetTransformation().m_qRotation * plVec3(1, 0, 0);
-        ref_msg.m_vGridTangent2 = translateGizmo.GetTransformation().m_qRotation * plVec3(0, 0, 1);
+        msg.m_vGridTangent1 = translateGizmo.GetTransformation().m_qRotation * plVec3(1, 0, 0);
+        msg.m_vGridTangent2 = translateGizmo.GetTransformation().m_qRotation * plVec3(0, 0, 1);
         break;
       case plTranslateGizmo::PlaneInteraction::PlaneZ:
-        ref_msg.m_vGridTangent1 = translateGizmo.GetTransformation().m_qRotation * plVec3(1, 0, 0);
-        ref_msg.m_vGridTangent2 = translateGizmo.GetTransformation().m_qRotation * plVec3(0, 1, 0);
+        msg.m_vGridTangent1 = translateGizmo.GetTransformation().m_qRotation * plVec3(1, 0, 0);
+        msg.m_vGridTangent2 = translateGizmo.GetTransformation().m_qRotation * plVec3(0, 1, 0);
         break;
     }
   }
@@ -383,6 +383,7 @@ void plScaleGizmoEditTool::TransformationGizmoEventHandlerImpl(const plGizmoEven
   {
     case plGizmoEvent::Type::Interaction:
     {
+      auto pDocument = GetDocument();
       plTransform tNew;
 
       bool bCancel = false;

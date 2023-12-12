@@ -10,8 +10,10 @@ PLASMA_ALWAYS_INLINE plSimdBBoxSphere::plSimdBBoxSphere(const plSimdVec4f& vCent
 }
 
 inline plSimdBBoxSphere::plSimdBBoxSphere(const plSimdBBox& box, const plSimdBSphere& sphere)
+  : m_CenterAndRadius(box.GetCenter())
+  , m_BoxHalfExtents(m_CenterAndRadius - box.m_Min)
 {
-  *this = MakeFromBoxAndSphere(box, sphere);
+  m_CenterAndRadius.SetW(m_BoxHalfExtents.GetLength<3>().Min((sphere.GetCenter() - m_CenterAndRadius).GetLength<3>() + sphere.GetRadius()));
 }
 
 inline plSimdBBoxSphere::plSimdBBoxSphere(const plSimdBBox& box)
@@ -27,67 +29,6 @@ PLASMA_ALWAYS_INLINE plSimdBBoxSphere::plSimdBBoxSphere(const plSimdBSphere& sph
 {
 }
 
-PLASMA_ALWAYS_INLINE plSimdBBoxSphere plSimdBBoxSphere::MakeZero()
-{
-  plSimdBBoxSphere res;
-  res.m_CenterAndRadius = plSimdVec4f::MakeZero();
-  res.m_BoxHalfExtents = plSimdVec4f::MakeZero();
-  return res;
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBoxSphere plSimdBBoxSphere::MakeInvalid()
-{
-  plSimdBBoxSphere res;
-  res.m_CenterAndRadius.Set(0.0f, 0.0f, 0.0f, -plMath::SmallEpsilon<float>());
-  res.m_BoxHalfExtents.Set(-plMath::MaxValue<float>());
-  return res;
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBoxSphere plSimdBBoxSphere::MakeFromCenterExtents(const plSimdVec4f& vCenter, const plSimdVec4f& vBoxHalfExtents, const plSimdFloat& fSphereRadius)
-{
-  plSimdBBoxSphere res;
-  res.m_CenterAndRadius = vCenter;
-  res.m_BoxHalfExtents = vBoxHalfExtents;
-  res.m_CenterAndRadius.SetW(fSphereRadius);
-  return res;
-}
-
-inline plSimdBBoxSphere plSimdBBoxSphere::MakeFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /*= sizeof(plSimdVec4f)*/)
-{
-  const plSimdBBox box = plSimdBBox::MakeFromPoints(pPoints, uiNumPoints, uiStride);
-
-  plSimdBBoxSphere res;
-
-  res.m_CenterAndRadius = box.GetCenter();
-  res.m_BoxHalfExtents = res.m_CenterAndRadius - box.m_Min;
-
-  plSimdBSphere sphere(res.m_CenterAndRadius, plSimdFloat::MakeZero());
-  sphere.ExpandToInclude(pPoints, uiNumPoints, uiStride);
-
-  res.m_CenterAndRadius.SetW(sphere.GetRadius());
-
-  return res;
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBoxSphere plSimdBBoxSphere::MakeFromBox(const plSimdBBox& box)
-{
-  return plSimdBBoxSphere(box);
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBoxSphere plSimdBBoxSphere::MakeFromSphere(const plSimdBSphere& sphere)
-{
-  return plSimdBBoxSphere(sphere);
-}
-
-PLASMA_ALWAYS_INLINE plSimdBBoxSphere plSimdBBoxSphere::MakeFromBoxAndSphere(const plSimdBBox& box, const plSimdBSphere& sphere)
-{
-  plSimdBBoxSphere res;
-  res.m_CenterAndRadius = box.GetCenter();
-  res.m_BoxHalfExtents = res.m_CenterAndRadius - box.m_Min;
-  res.m_CenterAndRadius.SetW(res.m_BoxHalfExtents.GetLength<3>().Min((sphere.GetCenter() - res.m_CenterAndRadius).GetLength<3>() + sphere.GetRadius()));
-  return res;
-}
-
 PLASMA_ALWAYS_INLINE void plSimdBBoxSphere::SetInvalid()
 {
   m_CenterAndRadius.Set(0.0f, 0.0f, 0.0f, -plMath::SmallEpsilon<float>());
@@ -96,8 +37,8 @@ PLASMA_ALWAYS_INLINE void plSimdBBoxSphere::SetInvalid()
 
 PLASMA_ALWAYS_INLINE bool plSimdBBoxSphere::IsValid() const
 {
-  return m_CenterAndRadius.IsValid<4>() && m_CenterAndRadius.w() >= plSimdFloat::MakeZero() && m_BoxHalfExtents.IsValid<3>() &&
-         (m_BoxHalfExtents >= plSimdVec4f::MakeZero()).AllSet<3>();
+  return m_CenterAndRadius.IsValid<4>() && m_CenterAndRadius.w() >= plSimdFloat::Zero() && m_BoxHalfExtents.IsValid<3>() &&
+         (m_BoxHalfExtents >= plSimdVec4f::ZeroVector()).AllSet<3>();
 }
 
 inline bool plSimdBBoxSphere::IsNaN() const
@@ -105,14 +46,25 @@ inline bool plSimdBBoxSphere::IsNaN() const
   return m_CenterAndRadius.IsNaN<4>() || m_BoxHalfExtents.IsNaN<3>();
 }
 
-PLASMA_ALWAYS_INLINE void plSimdBBoxSphere::SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride)
+inline void plSimdBBoxSphere::SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride)
 {
-  *this = MakeFromPoints(pPoints, uiNumPoints, uiStride);
+  plSimdBBox box;
+  box.SetFromPoints(pPoints, uiNumPoints, uiStride);
+
+  m_CenterAndRadius = box.GetCenter();
+  m_BoxHalfExtents = m_CenterAndRadius - box.m_Min;
+
+  plSimdBSphere sphere(m_CenterAndRadius, plSimdFloat::Zero());
+  sphere.ExpandToInclude(pPoints, uiNumPoints, uiStride);
+
+  m_CenterAndRadius.SetW(sphere.GetRadius());
 }
 
 PLASMA_ALWAYS_INLINE plSimdBBox plSimdBBoxSphere::GetBox() const
 {
-  return plSimdBBox::MakeFromCenterAndHalfExtents(m_CenterAndRadius, m_BoxHalfExtents);
+  plSimdBBox box;
+  box.SetCenterAndHalfExtents(m_CenterAndRadius, m_BoxHalfExtents);
+  return box;
 }
 
 PLASMA_ALWAYS_INLINE plSimdBSphere plSimdBBoxSphere::GetSphere() const

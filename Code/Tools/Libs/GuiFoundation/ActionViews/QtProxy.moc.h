@@ -37,18 +37,14 @@ public:
   /// \brief Converts the QKeyEvent into a shortcut and tries to find a matching action in the document and global action list.
   ///
   /// Document actions are not mapped as ShortcutContext::WindowShortcut because docking allows for multiple documents to be mapped into the same window. Instead, ShortcutContext::WidgetWithChildrenShortcut is used to prevent ambiguous action shortcuts and the actions are executed manually via filtering QEvent::ShortcutOverride at the dock widget level.
-  /// The function always has to be called two times:
-  /// A: QEvent::ShortcutOverride: Only check with bTestOnly = true that we want to override the shortcut. This will instruct Qt to send the event as a regular key press event to the widget that accepted the override.
-  /// B: QEvent::keyPressEvent: Execute the actual action with bTestOnly = false;
   ///
   /// \param pDocument The document for which matching actions should be searched for. If null, only global actions are searched.
-  /// \param pEvent The key event that should be converted into a shortcut.
-  /// \param bTestOnly Accept the event and return true but don't execute the action. Use this inside QEvent::ShortcutOverride.
+  /// \param event The key event that should be converted into a shortcut.
   /// \return Whether the key event was consumed and an action executed.
-  static bool TriggerDocumentAction(plDocument* pDocument, QKeyEvent* pEvent, bool bTestOnly);
+  static bool TriggerDocumentAction(plDocument* pDocument, QKeyEvent* event);
 
   static plRttiMappedObjectFactory<plQtProxy>& GetFactory();
-  static QSharedPointer<plQtProxy> GetProxy(plActionContext& ref_context, plActionDescriptorHandle hAction);
+  static QSharedPointer<plQtProxy> GetProxy(plActionContext& context, plActionDescriptorHandle hAction);
 
 protected:
   PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(GuiFoundation, QtProxies);
@@ -161,7 +157,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtLabeledSlider : public QWidget
   Q_OBJECT
 
 public:
-  plQtLabeledSlider(QWidget* pParent);
+  plQtLabeledSlider(QWidget* parent);
 
   QLabel* m_pLabel;
   QSlider* m_pSlider;
@@ -173,7 +169,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtSliderWidgetAction : public QWidgetAction
   Q_OBJECT
 
 public:
-  plQtSliderWidgetAction(QWidget* pParent);
+  plQtSliderWidgetAction(QWidget* parent);
   void setMinimum(int value);
   void setMaximum(int value);
   void setValue(int value);

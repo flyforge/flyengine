@@ -4,15 +4,12 @@
 #include <GuiFoundation/PropertyGrid/Implementation/PropertyWidget.moc.h>
 #include <QLineEdit>
 
-class plQtFileLineEdit;
-
 class PLASMA_EDITORFRAMEWORK_DLL plQtFilePropertyWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
 public:
   plQtFilePropertyWidget();
-  bool IsValidFileReference(plStringView sFile) const;
 
 private Q_SLOTS:
   void on_BrowseFile_clicked();
@@ -29,8 +26,8 @@ protected:
   virtual void InternalSetValue(const plVariant& value) override;
 
 protected:
-  QHBoxLayout* m_pLayout = nullptr;
-  plQtFileLineEdit* m_pWidget = nullptr;
-  QToolButton* m_pButton = nullptr;
+  QHBoxLayout* m_pLayout;
+  QLineEdit* m_pWidget;
+  QToolButton* m_pButton;
 };
 

@@ -43,19 +43,19 @@ plSceneObjectManager::plSceneObjectManager()
 {
 }
 
-void plSceneObjectManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const
+void plSceneObjectManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const
 {
-  ref_types.PushBack(plGetStaticRTTI<plGameObject>());
+  Types.PushBack(plGetStaticRTTI<plGameObject>());
 
   plRTTI::ForEachDerivedType<plComponent>(
-    [&](const plRTTI* pRtti) { ref_types.PushBack(pRtti); },
+    [&](const plRTTI* pRtti) { Types.PushBack(pRtti); },
     plRTTI::ForEachOptions::ExcludeAbstract);
 }
 
 plStatus plSceneObjectManager::InternalCanAdd(
-  const plRTTI* pRtti, const plDocumentObject* pParent, plStringView sParentProperty, const plVariant& index) const
+  const plRTTI* pRtti, const plDocumentObject* pParent, const char* szParentProperty, const plVariant& index) const
 {
-  if (IsUnderRootProperty("Children", pParent, sParentProperty))
+  if (IsUnderRootProperty("Children", pParent, szParentProperty))
   {
     if (pParent == nullptr)
     {
@@ -94,7 +94,7 @@ plStatus plSceneObjectManager::InternalCanAdd(
 }
 
 plStatus plSceneObjectManager::InternalCanMove(
-  const plDocumentObject* pObject, const plDocumentObject* pNewParent, plStringView sParentProperty, const plVariant& index) const
+  const plDocumentObject* pObject, const plDocumentObject* pNewParent, const char* szParentProperty, const plVariant& index) const
 {
   // code to disallow attaching nodes to a prefab node
   // if (pNewParent != nullptr)
@@ -133,12 +133,12 @@ namespace
       : plGraphPatch("plSceneDocumentSettings", 2)
     {
     }
-    virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+    virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
     {
       // Previously, plSceneDocumentSettings only contained prefab settings. As these only apply to prefab documents, we switch the old version to prefab.
-      ref_context.RenameClass("plPrefabDocumentSettings", 1);
+      context.RenameClass("plPrefabDocumentSettings", 1);
       plVersionKey bases[] = {{"plSceneDocumentSettingsBase", 1}, {"plReflectedClass", 1}};
-      ref_context.ChangeBaseClass(bases);
+      context.ChangeBaseClass(bases);
     }
   };
   plSceneDocumentSettings_1_2 g_plSceneDocumentSettings_1_2;

@@ -9,7 +9,6 @@
 #include <Foundation/Threading/TaskSystem.h>
 #include <Foundation/Threading/Thread.h>
 #include <Foundation/Types/UniquePtr.h>
-#include <ToolsFoundation/FileSystem/DataDirPath.h>
 #include <atomic>
 
 struct plAssetCuratorEvent;
@@ -69,19 +68,19 @@ private:
   void StartProcess();
   void EventHandlerIPC(const plProcessCommunicationChannel::Event& e);
 
-  bool GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, plDataDirPath& out_path);
-  bool GetNextAssetToProcess(plUuid& out_guid, plDataDirPath& out_path);
+  bool GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, plStringBuilder& out_sAbsPath, plStringBuilder& out_sRelPath);
+  bool GetNextAssetToProcess(plUuid& out_guid, plStringBuilder& out_sAbsPath, plStringBuilder& out_sRelPath);
   void OnProcessCrashed();
 
 
   plUuid m_AssetGuid;
   plUInt64 m_uiAssetHash = 0;
   plUInt64 m_uiThumbHash = 0;
-  plDataDirPath m_AssetPath;
-  plEditorProcessCommunicationChannel* m_pIPC;
-  bool m_bProcessShouldBeRunning = false;
-  bool m_bProcessCrashed = false;
-  bool m_bWaiting = false;
+  plStringBuilder m_sAssetPath;
+  PlasmaEditorProcessCommunicationChannel* m_pIPC;
+  bool m_bProcessShouldBeRunning;
+  bool m_bProcessCrashed;
+  bool m_bWaiting;
   plTransformStatus m_Status;
   plDynamicArray<plLogEntry> m_LogEntries;
   plDynamicArray<plString> m_TransitiveHull;
@@ -129,7 +128,7 @@ private:
   plAssetProcessorLog m_CuratorLog;
 
   // Process thread and its state
-  plUniquePtr<plProcessThread> m_pThread;
+  plUniquePtr<plProcessThread> m_Thread;
   std::atomic<bool> m_bForceStop = false; ///< If set, background processes will be killed when stopping without waiting for their current task to finish.
 
   // Locks writes to m_ProcessTaskState to make sure the state machine does not go from running to stopped before having fired stopping.

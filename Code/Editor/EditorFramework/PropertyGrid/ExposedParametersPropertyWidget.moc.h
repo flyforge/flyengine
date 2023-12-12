@@ -12,7 +12,7 @@ class QAction;
 class PLASMA_EDITORFRAMEWORK_DLL plExposedParameterCommandAccessor : public plObjectProxyAccessor
 {
 public:
-  plExposedParameterCommandAccessor(plObjectAccessorBase* pSource, const plAbstractProperty* pParameterProp, const plAbstractProperty* pM_pParameterSourceProp);
+  plExposedParameterCommandAccessor(plObjectAccessorBase* pSource, const plAbstractProperty* pParameterProp, const plAbstractProperty* m_pParameterSourceProp);
 
   virtual plStatus GetValue(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant& out_value, plVariant index = plVariant()) override;
   virtual plStatus SetValue(const plDocumentObject* pObject, const plAbstractProperty* pProp, const plVariant& newValue, plVariant index = plVariant()) override;

@@ -60,7 +60,7 @@ public:
   static void ClearApplicationPreferences();
 
   //// \brief Fills the list with all currently known preferences
-  static void GatherAllPreferences(plHybridArray<plPreferences*, 16>& out_allPreferences);
+  static void GatherAllPreferences(plHybridArray<plPreferences*, 16>& out_AllPreferences);
 
   /// \brief Whether the preferences are app, project or document specific
   Domain GetDomain() const { return m_Domain; }

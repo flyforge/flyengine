@@ -8,12 +8,12 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plImageDataAssetDocument, 1, plRTTINoAllocat
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plImageDataAssetDocument::plImageDataAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plImageDataAssetProperties>(sDocumentPath, plAssetDocEngineConnection::None)
+plImageDataAssetDocument::plImageDataAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plImageDataAssetProperties>(szDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-plTransformStatus plImageDataAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plImageDataAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   const bool bUpdateThumbnail = pAssetProfile == plAssetCurator::GetSingleton()->GetDevelopmentAssetProfile();
 

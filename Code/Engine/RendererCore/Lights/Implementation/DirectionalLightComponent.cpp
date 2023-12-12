@@ -117,7 +117,10 @@ void plDirectionalLightComponent::OnMsgExtractRenderData(plMsgExtractRenderData&
 
   pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
   pRenderData->m_LightColor = m_LightColor;
+  pRenderData->m_fSpecularMultiplier = m_fSpecularMultiplier;
+  pRenderData->m_fVolumetricIntensity = m_fVolumetricIntensity;
   pRenderData->m_fIntensity = m_fIntensity;
+  pRenderData->m_fTemperature = m_fTemperature;
   pRenderData->m_uiShadowDataOffset = m_bCastShadows ? plShadowPool::AddDirectionalLight(this, msg.m_pView) : plInvalidIndex;
 
   pRenderData->FillBatchIdAndSortingKey(1.0f);

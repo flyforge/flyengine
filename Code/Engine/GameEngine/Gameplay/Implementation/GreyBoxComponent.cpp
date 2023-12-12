@@ -41,7 +41,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plGreyBoxComponent, 5, plComponentMode::Static)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction"),
+    new plCategoryAttribute("General"),
+    new plColorAttribute(plColorScheme::Construction),
     new plNonUniformBoxManipulatorAttribute("SizeNegX", "SizePosX", "SizeNegY", "SizePosY", "SizeNegZ", "SizePosZ"),
   }
   PLASMA_END_ATTRIBUTES;
@@ -180,7 +181,7 @@ void plGreyBoxComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) con
 
     plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(GetOwner());
     {
-      //pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
+      pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
       pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
       pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
       pRenderData->m_hMesh = m_hMesh;
@@ -285,7 +286,7 @@ void plGreyBoxComponent::SetDetail(plUInt32 uiDetail)
 
 void plGreyBoxComponent::SetCurvature(plAngle curvature)
 {
-  m_Curvature = plAngle::MakeFromDegree(plMath::RoundToMultiple(curvature.GetDegree(), 5.0f));
+  m_Curvature = plAngle::Degree(plMath::RoundToMultiple(curvature.GetDegree(), 5.0f));
   InvalidateMesh();
 }
 
@@ -436,22 +437,10 @@ void plGreyBoxComponent::InvalidateMesh()
 
 void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> shape, bool bOnlyRoughDetails) const
 {
-
-
-  plGeometry::GeoOptions opt;
-  opt.m_Color = m_Color;
-
   plVec3 size;
   size.x = m_fSizeNegX + m_fSizePosX;
   size.y = m_fSizeNegY + m_fSizePosY;
   size.z = m_fSizeNegZ + m_fSizePosZ;
-
-  if (size.x == 0 || size.y == 0 || size.z == 0)
-  {
-    // create a tiny dummy box, so that we have valid geometry
-    geom.AddBox(plVec3(0.01f), true, opt);
-    return;
-  }
 
   plVec3 offset(0);
   offset.x = (m_fSizePosX - m_fSizeNegX) * 0.5f;
@@ -460,7 +449,9 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
 
   plMat4 t2, t3;
 
-  opt.m_Transform = plMat4::MakeTranslation(offset);
+  plGeometry::GeoOptions opt;
+  opt.m_Color = m_Color;
+  opt.m_Transform.SetTranslationMatrix(offset);
 
   switch (shape)
   {
@@ -474,7 +465,7 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
 
     case plGreyBoxShape::RampY:
       plMath::Swap(size.x, size.y);
-      opt.m_Transform = plMat4::MakeRotationZ(plAngle::MakeFromDegree(-90.0f));
+      opt.m_Transform.SetRotationMatrixZ(plAngle::Degree(-90.0f));
       opt.m_Transform.SetTranslationVector(offset);
       geom.AddTexturedRamp(size, opt);
       break;
@@ -490,7 +481,7 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
 
     case plGreyBoxShape::StairsY:
       plMath::Swap(size.x, size.y);
-      opt.m_Transform = plMat4::MakeRotationZ(plAngle::MakeFromDegree(-90.0f));
+      opt.m_Transform.SetRotationMatrixZ(plAngle::Degree(-90.0f));
       opt.m_Transform.SetTranslationVector(offset);
       geom.AddStairs(size, m_uiDetail, m_Curvature, m_bSlopedTop, opt);
       break;
@@ -501,8 +492,8 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
       size.z = size.x;
       size.x = size.y;
       size.y = tmp;
-      opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(-90));
-      t2 = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
+      opt.m_Transform.SetRotationMatrixY(plAngle::Degree(-90));
+      t2.SetRotationMatrixX(plAngle::Degree(90));
       opt.m_Transform = t2 * opt.m_Transform;
       opt.m_Transform.SetTranslationVector(offset);
       geom.AddArch(size, m_uiDetail, m_fThickness, m_Curvature, false, false, false, !bOnlyRoughDetails, opt);
@@ -511,9 +502,9 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
 
     case plGreyBoxShape::ArchY:
     {
-      opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(-90));
-      t2 = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
-      t3 = plMat4::MakeRotationZ(plAngle::MakeFromDegree(90));
+      opt.m_Transform.SetRotationMatrixY(plAngle::Degree(-90));
+      t2.SetRotationMatrixX(plAngle::Degree(90));
+      t3.SetRotationMatrixZ(plAngle::Degree(90));
       plMath::Swap(size.y, size.z);
       opt.m_Transform = t3 * t2 * opt.m_Transform;
       opt.m_Transform.SetTranslationVector(offset);

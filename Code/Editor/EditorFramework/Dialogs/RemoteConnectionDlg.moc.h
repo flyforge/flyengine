@@ -21,7 +21,7 @@ public:
   };
 
 public:
-  plQtRemoteConnectionDlg(QWidget* pParent);
+  plQtRemoteConnectionDlg(QWidget* parent);
   ~plQtRemoteConnectionDlg();
 
   Address m_UsedAddress;

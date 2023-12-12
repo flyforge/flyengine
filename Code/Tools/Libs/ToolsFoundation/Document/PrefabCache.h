@@ -25,7 +25,7 @@ private:
 
   struct PrefabData
   {
-    PrefabData() = default;
+    PrefabData() {}
 
     plUuid m_documentGuid;
     plString m_sAbsPath;

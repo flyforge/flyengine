@@ -5,7 +5,7 @@
 #include <Foundation/Configuration/CVar.h>
 #include <Foundation/Serialization/AbstractObjectGraph.h>
 #include <Foundation/Time/Stopwatch.h>
-#include <Recast.h>
+#include <Recast/Recast.h>
 #include <RecastPlugin/Components/RecastNavMeshComponent.h>
 #include <RecastPlugin/NavMeshBuilder/NavMeshBuilder.h>
 #include <RecastPlugin/Resources/RecastNavMeshResource.h>
@@ -22,7 +22,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plRcComponent, 1)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("AI/Recast"),
-    new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
+    new plColorAttribute(plColorScheme::Ai),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -58,23 +58,23 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRcNavMeshComponent, 2, plComponentMode::Static)
 PLASMA_END_COMPONENT_TYPE
 // clang-format on
 
-plRcNavMeshComponent::plRcNavMeshComponent() = default;
-plRcNavMeshComponent::~plRcNavMeshComponent() = default;
+plRcNavMeshComponent::plRcNavMeshComponent() {}
+plRcNavMeshComponent::~plRcNavMeshComponent() {}
 
-void plRcNavMeshComponent::SerializeComponent(plWorldWriter& inout_stream) const
+void plRcNavMeshComponent::SerializeComponent(plWorldWriter& stream) const
 {
-  SUPER::SerializeComponent(inout_stream);
-  plStreamWriter& s = inout_stream.GetStream();
+  SUPER::SerializeComponent(stream);
+  plStreamWriter& s = stream.GetStream();
 
   s << m_bShowNavMesh;
   s << m_hNavMesh;
 }
 
-void plRcNavMeshComponent::DeserializeComponent(plWorldReader& inout_stream)
+void plRcNavMeshComponent::DeserializeComponent(plWorldReader& stream)
 {
-  SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = inout_stream.GetStream();
+  SUPER::DeserializeComponent(stream);
+  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
+  plStreamReader& s = stream.GetStream();
 
   s >> m_bShowNavMesh;
 
@@ -101,7 +101,8 @@ void plRcNavMeshComponent::Update()
   VisualizePointsOfInterest();
 }
 
-PLASMA_ALWAYS_INLINE static plVec3 GetNavMeshVertex(const rcPolyMesh* pMesh, plUInt16 uiVertex, const plVec3& vMeshOrigin, float fCellSize, float fCellHeight)
+PLASMA_ALWAYS_INLINE static plVec3 GetNavMeshVertex(
+  const rcPolyMesh* pMesh, plUInt16 uiVertex, const plVec3& vMeshOrigin, float fCellSize, float fCellHeight)
 {
   const plUInt16* v = &pMesh->verts[uiVertex * 3];
   const float x = vMeshOrigin.x + v[0] * fCellSize;
@@ -269,7 +270,7 @@ void plRcNavMeshComponent::VisualizePointsOfInterest()
 
 plRcNavMeshComponentManager::plRcNavMeshComponentManager(plWorld* pWorld)
   : SUPER(pWorld)
-
+  , m_pWorldModule(nullptr)
 {
 }
 

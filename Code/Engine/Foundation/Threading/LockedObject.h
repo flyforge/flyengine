@@ -45,10 +45,6 @@ public:
   /// \brief Whether the encapsulated object exists at all or is nullptr
   PLASMA_ALWAYS_INLINE bool isValid() const { return m_pObject != nullptr; }
 
-  O* Borrow() { return m_pObject; }
-
-  const O* Borrow() const { return m_pObject; }
-
   O* operator->() { return m_pObject; }
 
   const O* operator->() const { return m_pObject; }

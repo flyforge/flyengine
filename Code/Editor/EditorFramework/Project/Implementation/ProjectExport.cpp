@@ -1,6 +1,5 @@
 #include <Core/Configuration/PlatformProfile.h>
 #include <EditorFramework/Assets/AssetCurator.h>
-#include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <EditorFramework/Project/ProjectExport.h>
 #include <Foundation/Application/Config/FileSystemConfig.h>
 #include <Foundation/Containers/HybridArray.h>
@@ -75,7 +74,7 @@ plResult plProjectExport::ScanFolder(plSet<plString>& out_Files, const char* szF
         // redirect to asset output
         plAssetDocumentManager* pAssetMan = plStaticCast<plAssetDocumentManager*>(asset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_pManager);
 
-        sRelFilePath = pAssetMan->GetRelativeOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, sRootFolder, asset->m_pAssetInfo->m_Path, nullptr, pPlatformProfile);
+        sRelFilePath = pAssetMan->GetRelativeOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, sRootFolder, asset->m_pAssetInfo->m_sAbsolutePath, nullptr, pPlatformProfile);
 
         sRelFilePath.Prepend("AssetCache/");
         out_Files.Insert(sRelFilePath);
@@ -87,7 +86,7 @@ plResult plProjectExport::ScanFolder(plSet<plString>& out_Files, const char* szF
 
         for (const plString& outputTag : asset->m_pAssetInfo->m_Info->m_Outputs)
         {
-          sRelFilePath = pAssetMan->GetRelativeOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, sRootFolder, asset->m_pAssetInfo->m_Path, outputTag, pPlatformProfile);
+          sRelFilePath = pAssetMan->GetRelativeOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, sRootFolder, asset->m_pAssetInfo->m_sAbsolutePath, outputTag, pPlatformProfile);
 
           sRelFilePath.Prepend("AssetCache/");
           out_Files.Insert(sRelFilePath);
@@ -150,7 +149,7 @@ plResult plProjectExport::GatherGeneratedAssetManagerFiles(plSet<plString>& out_
   {
     if (auto pAssMan = plDynamicCast<plAssetDocumentManager*>(pMan))
     {
-      pAssMan->GetAdditionalOutputs(addFiles).AssertSuccess();
+      pAssMan->GetAdditionalOutputs(addFiles).IgnoreResult();
 
       for (const auto& file : addFiles)
       {
@@ -446,36 +445,6 @@ plResult plProjectExport::ExportProject(const char* szTargetDirectory, const plP
 
   // 3
   {
-    // by default all DLLs are excluded by CommonBinaries.plExportFilter
-    // we want to override this for all the runtime DLLs and indirect DLL dependencies
-    // so we add those to the 'include filter'
-
-    for (auto it : plQtEditorApp::GetSingleton()->GetPluginBundles().m_Plugins)
-    {
-      if (!it.Value().m_bSelected)
-        continue;
-
-      for (const auto& dep : it.Value().m_PackageDependencies)
-      {
-        binariesFilter.AddFilter(dep, true);
-      }
-
-      for (const auto& dep : it.Value().m_RuntimePlugins)
-      {
-        plStringBuilder tmp = dep;
-
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-        tmp.Append(".dll");
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-        tmp.Append(".so");
-#else
-#  error "Platform not implemented"
-#endif
-
-        binariesFilter.AddFilter(tmp, true);
-      }
-    }
-
     mainProgress.BeginNextStep("Gathering binaries");
     PLASMA_SUCCEED_OR_RETURN(plProjectExport::GatherBinaries(fileList, binariesFilter));
   }

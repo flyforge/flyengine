@@ -29,12 +29,9 @@ plTaskGroupID plTaskSystem::StartSingleTask(
 void plTaskSystem::TaskHasFinished(plSharedPtr<plTask>&& pTask, plTaskGroup* pGroup)
 {
   // call task finished callback and deallocate the task (if last reference)
-  if (pTask && pTask->m_iRemainingRuns == 0)
+  if (pTask && pTask->m_OnTaskFinished.IsValid() && pTask->m_iRemainingRuns == 0)
   {
-    if (pTask->m_OnTaskFinished.IsValid())
-    {
-      pTask->m_OnTaskFinished(pTask);
-    }
+    pTask->m_OnTaskFinished(pTask);
 
     // make sure to clear the task sharedptr BEFORE we mark the task (group) as finished,
     // so that if this is the last reference, the task gets deallocated first
@@ -58,20 +55,20 @@ void plTaskSystem::TaskHasFinished(plSharedPtr<plTask>&& pTask, plTaskGroup* pGr
       pGroup->m_uiGroupCounter += 2;
     }
 
+    // wake up all threads that are waiting for this group
+    pGroup->m_CondVarGroupFinished.SignalAll();
+
     {
       PLASMA_LOCK(s_TaskSystemMutex);
-
-      // unless an outside reference is held onto a task, this will deallocate the tasks
-      pGroup->m_Tasks.Clear();
 
       for (plUInt32 dep = 0; dep < pGroup->m_OthersDependingOnMe.GetCount(); ++dep)
       {
         DependencyHasFinished(pGroup->m_OthersDependingOnMe[dep].m_pTaskGroup);
       }
-    }
 
-    // wake up all threads that are waiting for this group
-    pGroup->m_CondVarGroupFinished.SignalAll();
+      // unless an outside reference is held onto a task, this will deallocate the tasks
+      pGroup->m_Tasks.Clear();
+    }
 
     if (pGroup->m_OnFinishedCallback.IsValid())
     {
@@ -184,13 +181,13 @@ plResult plTaskSystem::CancelTask(const plSharedPtr<plTask>& pTask, plOnTaskRunn
         {
           if (it->m_pTask == pTask)
           {
+            s_pState->m_Tasks[i].Remove(it);
+
             // we set the task to finished, even though it was not executed
             pTask->m_iRemainingRuns = 0;
 
             // tell the system that one task of that group is 'finished', to ensure its dependencies will get scheduled
             TaskHasFinished(std::move(it->m_pTask), it->m_pBelongsToGroup);
-
-            s_pState->m_Tasks[i].Remove(it);
             return PLASMA_SUCCESS;
           }
 
@@ -338,7 +335,7 @@ void plTaskSystem::ExecuteSomeFrameTasks(plTime smoothFrameTime)
     // therefore at some point we will start executing these tasks, no matter how low the frame rate is
     //
     // this gives us some buffer to smooth out performance drops
-    s_FrameTimeThreshold += plTime::MakeFromMilliseconds(0.2);
+    s_FrameTimeThreshold += plTime::Milliseconds(0.2);
   }
 
   // if the queue is really full, we have to guarantee more progress
@@ -396,7 +393,7 @@ void plTaskSystem::FinishFrameTasks()
     const plTime tDiff = tNow - s_LastFrameUpdate;
 
     // prevent division by zero (inside ComputeThreadUtilization)
-    if (tDiff > plTime::MakeFromSeconds(0.0))
+    if (tDiff > plTime::Seconds(0.0))
     {
       s_LastFrameUpdate = tNow;
 

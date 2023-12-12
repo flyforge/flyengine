@@ -26,6 +26,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltConstraintComponent, 1)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Constraints"),
+    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -214,7 +215,7 @@ void plJoltConstraintComponent::SerializeComponent(plWorldWriter& inout_stream) 
 void plJoltConstraintComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
 
   auto& s = inout_stream.GetStream();
@@ -311,7 +312,7 @@ void plJoltConstraintComponent::ApplySettings()
   }
 }
 
-void plJoltConstraintComponent::OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& ref_msg)
+void plJoltConstraintComponent::OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& msg)
 {
   BreakConstraint();
 }
@@ -362,14 +363,13 @@ plResult plJoltConstraintComponent::FindParentBody(plUInt32& out_uiJoltBodyID, p
     }
     else
     {
-      PLASMA_ASSERT_DEBUG(pObject != nullptr, "pRbComp and pObject should always be valid together");
       if (GetUserFlag(0) == true)
       {
         plTransform globalFrame = m_LocalFrameA;
 
         // m_localFrameA is already valid
         // assume it was in global space and move it into local space of the found parent
-        m_LocalFrameA = plTransform::MakeLocalTransform(pRbComp->GetOwner()->GetGlobalTransform(), globalFrame);
+        m_LocalFrameA.SetLocalTransform(pRbComp->GetOwner()->GetGlobalTransform(), globalFrame);
         m_LocalFrameA.m_vPosition = m_LocalFrameA.m_vPosition.CompMul(pObject->GetGlobalScaling());
       }
     }
@@ -391,7 +391,7 @@ plResult plJoltConstraintComponent::FindParentBody(plUInt32& out_uiJoltBodyID, p
   {
     // m_localFrameA is now valid
     SetUserFlag(0, true);
-    m_LocalFrameA = plTransform::MakeLocalTransform(pObject->GetGlobalTransform(), GetOwner()->GetGlobalTransform());
+    m_LocalFrameA.SetLocalTransform(pObject->GetGlobalTransform(), GetOwner()->GetGlobalTransform());
     m_LocalFrameA.m_vPosition = m_LocalFrameA.m_vPosition.CompMul(pObject->GetGlobalScaling());
   }
 
@@ -457,7 +457,7 @@ plResult plJoltConstraintComponent::FindChildBody(plUInt32& out_uiJoltBodyID, pl
 
     // m_localFrameB is now valid
     SetUserFlag(1, true);
-    m_LocalFrameB = plTransform::MakeLocalTransform(pObject->GetGlobalTransform(), pAnchorObject->GetGlobalTransform());
+    m_LocalFrameB.SetLocalTransform(pObject->GetGlobalTransform(), pAnchorObject->GetGlobalTransform());
     m_LocalFrameB.m_vPosition = m_LocalFrameB.m_vPosition.CompMul(pObject->GetGlobalScaling());
   }
 
@@ -472,7 +472,7 @@ plTransform plJoltConstraintComponent::ComputeParentBodyGlobalFrame() const
     if (GetWorld()->TryGetObject(m_hActorA, pObject))
     {
       plTransform res;
-      res = plTransform::MakeGlobalTransform(pObject->GetGlobalTransform(), m_LocalFrameA);
+      res.SetGlobalTransform(pObject->GetGlobalTransform(), m_LocalFrameA);
       return res;
     }
   }
@@ -488,7 +488,7 @@ plTransform plJoltConstraintComponent::ComputeChildBodyGlobalFrame() const
     if (GetWorld()->TryGetObject(m_hActorB, pObject))
     {
       plTransform res;
-      res = plTransform::MakeGlobalTransform(pObject->GetGlobalTransform(), m_LocalFrameB);
+      res.SetGlobalTransform(pObject->GetGlobalTransform(), m_LocalFrameB);
       return res;
     }
   }

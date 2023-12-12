@@ -11,22 +11,22 @@
 class plObjectSelectionMsgToEngine;
 class plRenderContext;
 
-class PLASMA_ENGINEPLUGINASSETS_DLL plTextureCubeContext : public plEngineProcessDocumentContext
+class PLASMA_ENGINEPLUGINASSETS_DLL plTextureCubeContext : public PlasmaEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureCubeContext, plEngineProcessDocumentContext);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureCubeContext, PlasmaEngineProcessDocumentContext);
 
 public:
   plTextureCubeContext();
 
-  virtual void HandleMessage(const plEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
 
   const plTextureCubeResourceHandle& GetTexture() const { return m_hTexture; }
 
 protected:
   virtual void OnInitialize() override;
 
-  virtual plEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
+  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
 
 private:
   void OnResourceEvent(const plResourceEvent& e);

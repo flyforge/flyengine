@@ -62,7 +62,7 @@ plQtCurve1DAssetDocumentWindow::plQtCurve1DAssetDocumentWindow(plDocument* pDocu
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("Curve1DAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Curve1D Properties");
+    pPropertyPanel->setWindowTitle("CURVE1D PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -128,43 +128,43 @@ void plQtCurve1DAssetDocumentWindow::onInsertCpAt(plUInt32 uiCurveIdx, plInt64 t
 
     plAddObjectCommand cmdAddCurve;
     cmdAddCurve.m_Parent = pDoc->GetPropertyObject()->GetGuid();
-    cmdAddCurve.m_NewObjectGuid = plUuid::MakeUuid();
+    cmdAddCurve.m_NewObjectGuid.CreateNewUuid();
     cmdAddCurve.m_sParentProperty = "Curves";
     cmdAddCurve.m_pType = plGetStaticRTTI<plSingleCurveData>();
     cmdAddCurve.m_Index = -1;
 
-    history->AddCommand(cmdAddCurve).AssertSuccess();
+    history->AddCommand(cmdAddCurve).IgnoreResult();
   }
 
   const plVariant curveGuid = pDoc->GetPropertyObject()->GetTypeAccessor().GetValue("Curves", uiCurveIdx);
 
   plAddObjectCommand cmdAdd;
   cmdAdd.m_Parent = curveGuid.Get<plUuid>();
-  cmdAdd.m_NewObjectGuid = plUuid::MakeUuid();
+  cmdAdd.m_NewObjectGuid.CreateNewUuid();
   cmdAdd.m_sParentProperty = "ControlPoints";
   cmdAdd.m_pType = plGetStaticRTTI<plCurveControlPointData>();
   cmdAdd.m_Index = -1;
 
-  history->AddCommand(cmdAdd).AssertSuccess();
+  history->AddCommand(cmdAdd).IgnoreResult();
 
   plSetObjectPropertyCommand cmdSet;
   cmdSet.m_Object = cmdAdd.m_NewObjectGuid;
 
   cmdSet.m_sProperty = "Tick";
   cmdSet.m_NewValue = tickX;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Value";
   cmdSet.m_NewValue = clickPosY;
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "LeftTangent";
   cmdSet.m_NewValue = plVec2(-0.1f, 0.0f);
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "RightTangent";
   cmdSet.m_NewValue = plVec2(+0.1f, 0.0f);
-  history->AddCommand(cmdSet).AssertSuccess();
+  history->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtCurve1DAssetDocumentWindow::onCurveCpMoved(plUInt32 curveIdx, plUInt32 cpIdx, plInt64 iTickX, double newPosY)
@@ -184,11 +184,11 @@ void plQtCurve1DAssetDocumentWindow::onCurveCpMoved(plUInt32 curveIdx, plUInt32 
 
   cmdSet.m_sProperty = "Tick";
   cmdSet.m_NewValue = iTickX;
-  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 
   cmdSet.m_sProperty = "Value";
   cmdSet.m_NewValue = newPosY;
-  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtCurve1DAssetDocumentWindow::onCurveCpDeleted(plUInt32 curveIdx, plUInt32 cpIdx)
@@ -206,7 +206,7 @@ void plQtCurve1DAssetDocumentWindow::onCurveCpDeleted(plUInt32 curveIdx, plUInt3
 
   plRemoveObjectCommand cmdSet;
   cmdSet.m_Object = cpGuid.Get<plUuid>();
-  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtCurve1DAssetDocumentWindow::onCurveTangentMoved(plUInt32 curveIdx, plUInt32 cpIdx, float newPosX, float newPosY, bool rightTangent)
@@ -230,7 +230,7 @@ void plQtCurve1DAssetDocumentWindow::onCurveTangentMoved(plUInt32 curveIdx, plUI
 
   cmdSet.m_sProperty = rightTangent ? "RightTangent" : "LeftTangent";
   cmdSet.m_NewValue = plVec2(newPosX, newPosY);
-  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtCurve1DAssetDocumentWindow::onLinkCurveTangents(plUInt32 curveIdx, plUInt32 cpIdx, bool bLink)
@@ -247,7 +247,7 @@ void plQtCurve1DAssetDocumentWindow::onLinkCurveTangents(plUInt32 curveIdx, plUI
   cmdLink.m_Object = cpGuid.Get<plUuid>();
   cmdLink.m_sProperty = "Linked";
   cmdLink.m_NewValue = bLink;
-  GetDocument()->GetCommandHistory()->AddCommand(cmdLink).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmdLink).IgnoreResult();
 
   if (bLink)
   {
@@ -272,7 +272,7 @@ void plQtCurve1DAssetDocumentWindow::onCurveTangentModeChanged(plUInt32 curveIdx
   cmd.m_Object = cpGuid.Get<plUuid>();
   cmd.m_sProperty = rightTangent ? "RightTangentMode" : "LeftTangentMode";
   cmd.m_NewValue = mode;
-  GetDocument()->GetCommandHistory()->AddCommand(cmd).AssertSuccess();
+  GetDocument()->GetCommandHistory()->AddCommand(cmd).IgnoreResult();
 
   // sync current curve back
   if (false)
@@ -322,7 +322,7 @@ void plQtCurve1DAssetDocumentWindow::StructureEventHandler(const plDocumentObjec
 
 void plQtCurve1DAssetDocumentWindow::SendLiveResourcePreview()
 {
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   plResourceUpdateMsgToEngine msg;
@@ -351,7 +351,7 @@ void plQtCurve1DAssetDocumentWindow::SendLiveResourcePreview()
   pDoc->WriteResource(memoryWriter);
   msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtCurve1DAssetDocumentWindow::RestoreResource()
@@ -362,5 +362,5 @@ void plQtCurve1DAssetDocumentWindow::RestoreResource()
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }

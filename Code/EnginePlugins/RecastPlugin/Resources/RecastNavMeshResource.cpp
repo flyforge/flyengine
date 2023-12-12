@@ -1,10 +1,10 @@
 #include <RecastPlugin/RecastPluginPCH.h>
 
 #include <Core/Assets/AssetFileHeader.h>
-#include <DetourNavMesh.h>
 #include <Foundation/IO/ChunkStream.h>
-#include <Recast.h>
-#include <RecastAlloc.h>
+#include <Recast/DetourNavMesh.h>
+#include <Recast/Recast.h>
+#include <Recast/RecastAlloc.h>
 #include <RecastPlugin/Resources/RecastNavMeshResource.h>
 
 // clang-format off
@@ -43,13 +43,13 @@ void plRecastNavMeshResourceDescriptor::Clear()
 
 //////////////////////////////////////////////////////////////////////////
 
-plResult plRecastNavMeshResourceDescriptor::Serialize(plStreamWriter& inout_stream) const
+plResult plRecastNavMeshResourceDescriptor::Serialize(plStreamWriter& stream) const
 {
-  inout_stream.WriteVersion(1);
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_DetourNavmeshData));
+  stream.WriteVersion(1);
+  PLASMA_SUCCEED_OR_RETURN(stream.WriteArray(m_DetourNavmeshData));
 
   const bool hasPolygons = m_pNavMeshPolygons != nullptr;
-  inout_stream << hasPolygons;
+  stream << hasPolygons;
 
   if (hasPolygons)
   {
@@ -57,43 +57,42 @@ plResult plRecastNavMeshResourceDescriptor::Serialize(plStreamWriter& inout_stre
 
     const auto& mesh = *m_pNavMeshPolygons;
 
-    inout_stream << (int)mesh.nverts;
-    inout_stream << (int)mesh.npolys;
-    inout_stream << (int)mesh.npolys; // do not use mesh.maxpolys
-    inout_stream << (int)mesh.nvp;
-    inout_stream << (float)mesh.bmin[0];
-    inout_stream << (float)mesh.bmin[1];
-    inout_stream << (float)mesh.bmin[2];
-    inout_stream << (float)mesh.bmax[0];
-    inout_stream << (float)mesh.bmax[1];
-    inout_stream << (float)mesh.bmax[2];
-    inout_stream << (float)mesh.cs;
-    inout_stream << (float)mesh.ch;
-    inout_stream << (int)mesh.borderSize;
-    inout_stream << (float)mesh.maxEdgeError;
+    stream << (int)mesh.nverts;
+    stream << (int)mesh.npolys;
+    stream << (int)mesh.npolys; // do not use mesh.maxpolys
+    stream << (int)mesh.nvp;
+    stream << (float)mesh.bmin[0];
+    stream << (float)mesh.bmin[1];
+    stream << (float)mesh.bmin[2];
+    stream << (float)mesh.bmax[0];
+    stream << (float)mesh.bmax[1];
+    stream << (float)mesh.bmax[2];
+    stream << (float)mesh.cs;
+    stream << (float)mesh.ch;
+    stream << (int)mesh.borderSize;
+    stream << (float)mesh.maxEdgeError;
 
     PLASMA_ASSERT_DEBUG(mesh.maxpolys >= mesh.npolys, "Invalid navmesh polygon count");
 
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(mesh.verts, sizeof(plUInt16) * mesh.nverts * 3));
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(mesh.polys, sizeof(plUInt16) * mesh.npolys * mesh.nvp * 2));
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(mesh.regs, sizeof(plUInt16) * mesh.npolys));
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(mesh.flags, sizeof(plUInt16) * mesh.npolys));
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(mesh.areas, sizeof(plUInt8) * mesh.npolys));
+    PLASMA_SUCCEED_OR_RETURN(stream.WriteBytes(mesh.verts, sizeof(plUInt16) * mesh.nverts * 3));
+    PLASMA_SUCCEED_OR_RETURN(stream.WriteBytes(mesh.polys, sizeof(plUInt16) * mesh.npolys * mesh.nvp * 2));
+    PLASMA_SUCCEED_OR_RETURN(stream.WriteBytes(mesh.regs, sizeof(plUInt16) * mesh.npolys));
+    PLASMA_SUCCEED_OR_RETURN(stream.WriteBytes(mesh.flags, sizeof(plUInt16) * mesh.npolys));
+    PLASMA_SUCCEED_OR_RETURN(stream.WriteBytes(mesh.areas, sizeof(plUInt8) * mesh.npolys));
   }
 
   return PLASMA_SUCCESS;
 }
 
-plResult plRecastNavMeshResourceDescriptor::Deserialize(plStreamReader& inout_stream)
+plResult plRecastNavMeshResourceDescriptor::Deserialize(plStreamReader& stream)
 {
   Clear();
 
-  const plTypeVersion version = inout_stream.ReadVersion(1);
-  PLASMA_IGNORE_UNUSED(version);
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_DetourNavmeshData));
+  const plTypeVersion version = stream.ReadVersion(1);
+  PLASMA_SUCCEED_OR_RETURN(stream.ReadArray(m_DetourNavmeshData));
 
   bool hasPolygons = false;
-  inout_stream >> hasPolygons;
+  stream >> hasPolygons;
 
   if (hasPolygons)
   {
@@ -103,20 +102,20 @@ plResult plRecastNavMeshResourceDescriptor::Deserialize(plStreamReader& inout_st
 
     auto& mesh = *m_pNavMeshPolygons;
 
-    inout_stream >> mesh.nverts;
-    inout_stream >> mesh.npolys;
-    inout_stream >> mesh.maxpolys;
-    inout_stream >> mesh.nvp;
-    inout_stream >> mesh.bmin[0];
-    inout_stream >> mesh.bmin[1];
-    inout_stream >> mesh.bmin[2];
-    inout_stream >> mesh.bmax[0];
-    inout_stream >> mesh.bmax[1];
-    inout_stream >> mesh.bmax[2];
-    inout_stream >> mesh.cs;
-    inout_stream >> mesh.ch;
-    inout_stream >> mesh.borderSize;
-    inout_stream >> mesh.maxEdgeError;
+    stream >> mesh.nverts;
+    stream >> mesh.npolys;
+    stream >> mesh.maxpolys;
+    stream >> mesh.nvp;
+    stream >> mesh.bmin[0];
+    stream >> mesh.bmin[1];
+    stream >> mesh.bmin[2];
+    stream >> mesh.bmax[0];
+    stream >> mesh.bmax[1];
+    stream >> mesh.bmax[2];
+    stream >> mesh.cs;
+    stream >> mesh.ch;
+    stream >> mesh.borderSize;
+    stream >> mesh.maxEdgeError;
 
     PLASMA_ASSERT_DEBUG(mesh.maxpolys >= mesh.npolys, "Invalid navmesh polygon count");
 
@@ -125,11 +124,11 @@ plResult plRecastNavMeshResourceDescriptor::Deserialize(plStreamReader& inout_st
     mesh.regs = (plUInt16*)rcAlloc(sizeof(plUInt16) * mesh.maxpolys, RC_ALLOC_PERM);
     mesh.areas = (plUInt8*)rcAlloc(sizeof(plUInt8) * mesh.maxpolys, RC_ALLOC_PERM);
 
-    inout_stream.ReadBytes(mesh.verts, sizeof(plUInt16) * mesh.nverts * 3);
-    inout_stream.ReadBytes(mesh.polys, sizeof(plUInt16) * mesh.maxpolys * mesh.nvp * 2);
-    inout_stream.ReadBytes(mesh.regs, sizeof(plUInt16) * mesh.maxpolys);
-    inout_stream.ReadBytes(mesh.flags, sizeof(plUInt16) * mesh.maxpolys);
-    inout_stream.ReadBytes(mesh.areas, sizeof(plUInt8) * mesh.maxpolys);
+    stream.ReadBytes(mesh.verts, sizeof(plUInt16) * mesh.nverts * 3);
+    stream.ReadBytes(mesh.polys, sizeof(plUInt16) * mesh.maxpolys * mesh.nvp * 2);
+    stream.ReadBytes(mesh.regs, sizeof(plUInt16) * mesh.maxpolys);
+    stream.ReadBytes(mesh.flags, sizeof(plUInt16) * mesh.maxpolys);
+    stream.ReadBytes(mesh.areas, sizeof(plUInt8) * mesh.maxpolys);
   }
 
   return PLASMA_SUCCESS;
@@ -157,7 +156,6 @@ plResourceLoadDesc plRecastNavMeshResource::UnloadData(Unload WhatToUnload)
   res.m_State = plResourceState::Unloaded;
 
   m_DetourNavmeshData.Clear();
-  m_DetourNavmeshData.Compact();
   PLASMA_DEFAULT_DELETE(m_pNavMesh);
   PLASMA_DEFAULT_DELETE(m_pNavMeshPolygons);
 

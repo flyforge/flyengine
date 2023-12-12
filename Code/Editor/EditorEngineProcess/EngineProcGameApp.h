@@ -6,21 +6,20 @@
 #include <Foundation/Application/Config/PluginConfig.h>
 #include <Foundation/Types/UniquePtr.h>
 #include <GameEngine/GameApplication/GameApplication.h>
-#include <Foundation/Logging/HTMLWriter.h>
 
-class plEditorEngineProcessApp;
+class PlasmaEditorEngineProcessApp;
 class plDocumentOpenMsgToEngine;
-class plEngineProcessDocumentContext;
+class PlasmaEngineProcessDocumentContext;
 class plResourceUpdateMsgToEngine;
 class plRestoreResourceMsgToEngine;
 
-class plEngineProcessGameApplication : public plGameApplication
+class PlasmaEngineProcessGameApplication : public plGameApplication
 {
 public:
-  using SUPER = plGameApplication;
+  typedef plGameApplication SUPER;
 
-  plEngineProcessGameApplication();
-  ~plEngineProcessGameApplication();
+  PlasmaEngineProcessGameApplication();
+  ~PlasmaEngineProcessGameApplication();
 
   virtual plResult BeforeCoreSystemsStartup() override;
   virtual void AfterCoreSystemsStartup() override;
@@ -36,7 +35,7 @@ protected:
   virtual void Deinit_ShutdownLogging() override;
   virtual void Init_FileSystem_ConfigureDataDirs() override;
   virtual bool Run_ProcessApplicationInput() override;
-  virtual plUniquePtr<plEditorEngineProcessApp> CreateEngineProcessApp();
+  virtual plUniquePtr<PlasmaEditorEngineProcessApp> CreateEngineProcessApp();
 
   virtual void ActivateGameStateAtStartup() override
   { /* do nothing */
@@ -46,14 +45,11 @@ private:
   void ConnectToHost();
   void DisableErrorReport();
   void WaitForDebugger();
-  static bool EditorAssertHandler(const char* szSourceFile, plUInt32 uiLine, const char* szFunction, const char* szExpression, const char* szAssertMsg);
-  void AddEditorAssertHandler();
-  void RemoveEditorAssertHandler();
 
   bool ProcessIPCMessages(bool bPendingOpInProgress);
   void SendProjectReadyMessage();
   void SendReflectionInformation();
-  void EventHandlerIPC(const plEngineProcessCommunicationChannel::Event& e);
+  void EventHandlerIPC(const PlasmaEngineProcessCommunicationChannel::Event& e);
   void EventHandlerCVar(const plCVarEvent& e);
   void EventHandlerCVarPlugin(const plPluginEvent& e);
   void TransmitCVar(const plCVar* pCVar);
@@ -61,7 +57,7 @@ private:
   void HandleResourceUpdateMsg(const plResourceUpdateMsgToEngine& msg);
   void HandleResourceRestoreMsg(const plRestoreResourceMsgToEngine& msg);
 
-  plEngineProcessDocumentContext* CreateDocumentContext(const plDocumentOpenMsgToEngine* pMsg);
+  PlasmaEngineProcessDocumentContext* CreateDocumentContext(const plDocumentOpenMsgToEngine* pMsg);
 
   virtual void Init_LoadProjectPlugins() override;
 
@@ -70,10 +66,9 @@ private:
   plString m_sProjectDirectory;
   plApplicationFileSystemConfig m_CustomFileSystemConfig;
   plApplicationPluginConfig m_CustomPluginConfig;
-  plEngineProcessCommunicationChannel m_IPC;
-  plUniquePtr<plEditorEngineProcessApp> m_pApp;
+  PlasmaEngineProcessCommunicationChannel m_IPC;
+  plUniquePtr<PlasmaEditorEngineProcessApp> m_pApp;
   plLongOpWorkerManager m_LongOpWorkerManager;
-  plLogWriter::HTML m_LogHTML;
 
   plUInt32 m_uiRedrawCountReceived = 0;
   plUInt32 m_uiRedrawCountExecuted = 0;

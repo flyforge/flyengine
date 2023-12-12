@@ -18,7 +18,7 @@ public:
     plString m_sDisplayName;
   };
 
-  plQtPickDocumentObjectDlg(QWidget* pParent, const plArrayPtr<Element>& objects, const plUuid& currentObject);
+  plQtPickDocumentObjectDlg(QWidget* parent, const plArrayPtr<Element>& objects, const plUuid& currentObject);
 
   /// Stores the result that the user picked
   const plDocumentObject* m_pPickedObject = nullptr;

@@ -5,7 +5,7 @@
 
 struct PLASMA_RENDERERCORE_DLL plViewRenderMode
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -32,6 +32,7 @@ struct PLASMA_RENDERERCORE_DLL plViewRenderMode
     Depth,
     StaticVsDynamic,
     BoneWeights,
+    MotionVectors,
 
     ENUM_COUNT,
 

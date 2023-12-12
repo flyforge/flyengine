@@ -60,30 +60,30 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientAssetDocument, 1, plRTTINoAll
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-void plColorControlPoint::SetTickFromTime(plTime time, plInt64 iFps)
+void plColorControlPoint::SetTickFromTime(plTime time, plInt64 fps)
 {
-  const plUInt32 uiTicksPerStep = 4800 / iFps;
+  const plUInt32 uiTicksPerStep = 4800 / fps;
   m_iTick = (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-void plAlphaControlPoint::SetTickFromTime(plTime time, plInt64 iFps)
+void plAlphaControlPoint::SetTickFromTime(plTime time, plInt64 fps)
 {
-  const plUInt32 uiTicksPerStep = 4800 / iFps;
+  const plUInt32 uiTicksPerStep = 4800 / fps;
   m_iTick = (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-void plIntensityControlPoint::SetTickFromTime(plTime time, plInt64 iFps)
+void plIntensityControlPoint::SetTickFromTime(plTime time, plInt64 fps)
 {
-  const plUInt32 uiTicksPerStep = 4800 / iFps;
+  const plUInt32 uiTicksPerStep = 4800 / fps;
   m_iTick = (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-plColorGradientAssetDocument::plColorGradientAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plColorGradientAssetData>(sDocumentPath, plAssetDocEngineConnection::None)
+plColorGradientAssetDocument::plColorGradientAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plColorGradientAssetData>(szDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-void plColorGradientAssetDocument::WriteResource(plStreamWriter& inout_stream) const
+void plColorGradientAssetDocument::WriteResource(plStreamWriter& stream) const
 {
   const plColorGradientAssetData* pProp = GetProperties();
 
@@ -91,7 +91,7 @@ void plColorGradientAssetDocument::WriteResource(plStreamWriter& inout_stream) c
   pProp->FillGradientData(desc.m_Gradient);
   desc.m_Gradient.SortControlPoints();
 
-  desc.Save(inout_stream);
+  desc.Save(stream);
 }
 
 plInt64 plColorGradientAssetData::TickFromTime(plTime time)
@@ -102,21 +102,21 @@ plInt64 plColorGradientAssetData::TickFromTime(plTime time)
   return (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-void plColorGradientAssetData::FillGradientData(plColorGradient& out_result) const
+void plColorGradientAssetData::FillGradientData(plColorGradient& out_Result) const
 {
   for (const auto& cp : m_ColorCPs)
   {
-    out_result.AddColorControlPoint(cp.GetTickAsTime().GetSeconds(), plColorGammaUB(cp.m_Red, cp.m_Green, cp.m_Blue));
+    out_Result.AddColorControlPoint(cp.GetTickAsTime().GetSeconds(), plColorGammaUB(cp.m_Red, cp.m_Green, cp.m_Blue));
   }
 
   for (const auto& cp : m_AlphaCPs)
   {
-    out_result.AddAlphaControlPoint(cp.GetTickAsTime().GetSeconds(), cp.m_Alpha);
+    out_Result.AddAlphaControlPoint(cp.GetTickAsTime().GetSeconds(), cp.m_Alpha);
   }
 
   for (const auto& cp : m_IntensityCPs)
   {
-    out_result.AddIntensityControlPoint(cp.GetTickAsTime().GetSeconds(), cp.m_fIntensity);
+    out_Result.AddIntensityControlPoint(cp.GetTickAsTime().GetSeconds(), cp.m_fIntensity);
   }
 }
 
@@ -178,7 +178,7 @@ plColor plColorGradientAssetData::Evaluate(plInt64 iTick) const
   return color;
 }
 
-plTransformStatus plColorGradientAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plColorGradientAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   WriteResource(stream);
   return plStatus(PLASMA_SUCCESS);
@@ -260,7 +260,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Color CPs", "ColorCPs");
     pNode->RenameProperty("Alpha CPs", "AlphaCPs");
@@ -280,7 +280,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pPoint = pNode->FindProperty("Position");
     if (pPoint && pPoint->m_Value.IsA<float>())
@@ -303,7 +303,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pPoint = pNode->FindProperty("Position");
     if (pPoint && pPoint->m_Value.IsA<float>())
@@ -326,7 +326,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pPoint = pNode->FindProperty("Position");
     if (pPoint && pPoint->m_Value.IsA<float>())

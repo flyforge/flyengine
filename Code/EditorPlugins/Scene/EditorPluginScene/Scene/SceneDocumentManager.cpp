@@ -21,7 +21,6 @@ plSceneDocumentManager::plSceneDocumentManager()
     docTypeDesc.m_sDocumentTypeName = "Scene";
     docTypeDesc.m_sFileExtension = "plScene";
     docTypeDesc.m_sIcon = ":/AssetIcons/Scene.svg";
-    docTypeDesc.m_sAssetCategory = "Construction";
     docTypeDesc.m_pDocumentType = plGetStaticRTTI<plScene2Document>();
     docTypeDesc.m_pManager = this;
     docTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Scene");
@@ -37,7 +36,6 @@ plSceneDocumentManager::plSceneDocumentManager()
     docTypeDesc.m_sDocumentTypeName = "Prefab";
     docTypeDesc.m_sFileExtension = "plPrefab";
     docTypeDesc.m_sIcon = ":/AssetIcons/Prefab.svg";
-    docTypeDesc.m_sAssetCategory = "Construction";
     docTypeDesc.m_pDocumentType = plGetStaticRTTI<plSceneDocument>();
     docTypeDesc.m_pManager = this;
     docTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Prefab");
@@ -52,7 +50,6 @@ plSceneDocumentManager::plSceneDocumentManager()
     docTypeDesc.m_sDocumentTypeName = "Layer";
     docTypeDesc.m_sFileExtension = "plSceneLayer";
     docTypeDesc.m_sIcon = ":/AssetIcons/Layer.svg";
-    docTypeDesc.m_sAssetCategory = "Construction";
     docTypeDesc.m_pDocumentType = plGetStaticRTTI<plLayerDocument>();
     docTypeDesc.m_pManager = this;
     docTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Scene_Layer");
@@ -64,33 +61,33 @@ plSceneDocumentManager::plSceneDocumentManager()
   }
 }
 
-void plSceneDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plSceneDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  if (sDocumentTypeName.IsEqual("Scene"))
+  if (plStringUtils::IsEqual(szDocumentTypeName, "Scene"))
   {
-    out_pDocument = new plScene2Document(sPath);
+    out_pDocument = new plScene2Document(szPath);
 
     if (bCreateNewDocument)
     {
       SetupDefaultScene(out_pDocument);
     }
   }
-  else if (sDocumentTypeName.IsEqual("Prefab"))
+  else if (plStringUtils::IsEqual(szDocumentTypeName, "Prefab"))
   {
-    out_pDocument = new plSceneDocument(sPath, plSceneDocument::DocumentType::Prefab);
+    out_pDocument = new plSceneDocument(szPath, plSceneDocument::DocumentType::Prefab);
   }
-  else if (sDocumentTypeName.IsEqual("Layer"))
+  else if (plStringUtils::IsEqual(szDocumentTypeName, "Layer"))
   {
     if (pOpenContext == nullptr)
     {
       // Opened individually
-      out_pDocument = new plSceneDocument(sPath, plSceneDocument::DocumentType::Layer);
+      out_pDocument = new plSceneDocument(szPath, plSceneDocument::DocumentType::Layer);
     }
     else
     {
       // Opened via a parent scene document
       plScene2Document* pDoc = const_cast<plScene2Document*>(plDynamicCast<const plScene2Document*>(pOpenContext->GetDocumentObjectManager()->GetDocument()));
-      out_pDocument = new plLayerDocument(sPath, pDoc);
+      out_pDocument = new plLayerDocument(szPath, pDoc);
     }
   }
 }
@@ -103,9 +100,9 @@ void plSceneDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<co
   }
 }
 
-void plSceneDocumentManager::InternalCloneDocument(plStringView sPath, plStringView sClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* pHeader, plAbstractObjectGraph* pObjects, plAbstractObjectGraph* pTypes)
+void plSceneDocumentManager::InternalCloneDocument(const char* szPath, const char* szClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* pHeader, plAbstractObjectGraph* pObjects, plAbstractObjectGraph* pTypes)
 {
-  plAssetDocumentManager::InternalCloneDocument(sPath, sClonePath, documentId, seedGuid, cloneGuid, pHeader, pObjects, pTypes);
+  plAssetDocumentManager::InternalCloneDocument(szPath, szClonePath, documentId, seedGuid, cloneGuid, pHeader, pObjects, pTypes);
 
 
   auto pRoot = pObjects->GetNodeByName("ObjectTree");
@@ -116,50 +113,51 @@ void plSceneDocumentManager::InternalCloneDocument(plStringView sPath, plStringV
 
   // Fix up scene layers during cloning
   pObjects->ModifyNodeViaNativeCounterpart(pSettings, [&](void* pNativeObject, const plRTTI* pType) {
-      plSceneDocumentSettings* pObject = static_cast<plSceneDocumentSettings*>(pNativeObject);
+    plSceneDocumentSettings* pObject = static_cast<plSceneDocumentSettings*>(pNativeObject);
 
-      for (plSceneLayerBase* pLayerBase : pObject->m_Layers)
+    for (plSceneLayerBase* pLayerBase : pObject->m_Layers)
+    {
+      if (auto pLayer = plDynamicCast<plSceneLayer*>(pLayerBase))
       {
-        if (auto pLayer = plDynamicCast<plSceneLayer*>(pLayerBase))
+        if (pLayer->m_Layer == documentId)
         {
-          if (pLayer->m_Layer == documentId)
+          // Fix up main layer reference in layer list
+          pLayer->m_Layer = cloneGuid;
+        }
+        else
+        {
+          // Clone layer.
+          plStringBuilder sLayerPath;
           {
-            // Fix up main layer reference in layer list
-            pLayer->m_Layer = cloneGuid;
+            auto assetInfo = plAssetCurator::GetSingleton()->GetSubAsset(pLayer->m_Layer);
+            if (assetInfo.isValid())
+            {
+              sLayerPath = assetInfo->m_pAssetInfo->m_sAbsolutePath;
+            }
+            else
+            {
+              plLog::Error("Failed to resolve layer: {}. Cloned Layer will be invalid.");
+              pLayer->m_Layer.SetInvalid();
+            }
           }
-          else
+          if (!sLayerPath.IsEmpty())
           {
-            // Clone layer.
-            plStringBuilder sLayerPath;
-            {
-              auto assetInfo = plAssetCurator::GetSingleton()->GetSubAsset(pLayer->m_Layer);
-              if (assetInfo.isValid())
-              {
-                sLayerPath = assetInfo->m_pAssetInfo->m_Path;
-              }
-              else
-              {
-                plLog::Error("Failed to resolve layer: {}. Cloned Layer will be invalid.");
-                pLayer->m_Layer = plUuid::MakeInvalid();
-              }
-            }
-            if (!sLayerPath.IsEmpty())
-            {
-              plUuid newLayerGuid = pLayer->m_Layer;
-              newLayerGuid.CombineWithSeed(seedGuid);
+            plUuid newLayerGuid = pLayer->m_Layer;
+            newLayerGuid.CombineWithSeed(seedGuid);
 
-              plStringBuilder sLayerClonePath = sClonePath;
-              sLayerClonePath.RemoveFileExtension();
-              sLayerClonePath.Append("_data");
-              plStringBuilder sCloneFleName = plPathUtils::GetFileNameAndExtension(sLayerPath.GetData());
-              sLayerClonePath.AppendPath(sCloneFleName);
-              // We assume that all layers are handled by the same document manager, i.e. this.
-              CloneDocument(sLayerPath, sLayerClonePath, newLayerGuid).LogFailure();
-              pLayer->m_Layer = newLayerGuid;
-            }
+            plStringBuilder sLayerClonePath = szClonePath;
+            sLayerClonePath.RemoveFileExtension();
+            sLayerClonePath.Append("_data");
+            plStringBuilder sCloneFleName = plPathUtils::GetFileNameAndExtension(sLayerPath.GetData());
+            sLayerClonePath.AppendPath(sCloneFleName);
+            // We assume that all layers are handled by the same document manager, i.e. this.
+            CloneDocument(sLayerPath, sLayerClonePath, newLayerGuid).LogFailure();
+            pLayer->m_Layer = newLayerGuid;
           }
         }
-      } });
+      }
+    }
+  });
 }
 
 void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
@@ -167,13 +165,17 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
   auto history = pDocument->GetCommandHistory();
   history->StartTransaction("Initial Scene Setup");
 
-  const plUuid skyObjectGuid = plUuid::MakeUuid();
-  const plUuid lightObjectGuid = plUuid::MakeUuid();
-  const plUuid meshObjectGuid = plUuid::MakeUuid();
+  plUuid skyObjectGuid;
+  skyObjectGuid.CreateNewUuid();
+  plUuid lightObjectGuid;
+  lightObjectGuid.CreateNewUuid();
+  plUuid meshObjectGuid;
+  meshObjectGuid.CreateNewUuid();
 
   // Thumbnail Camera
   {
-    const plUuid objectGuid = plUuid::MakeUuid();
+    plUuid objectGuid;
+    objectGuid.CreateNewUuid();
 
     plAddObjectCommand cmd;
     cmd.m_Index = -1;
@@ -297,7 +299,8 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
     }
 
     {
-      plQuat qRot = plQuat::MakeFromEulerAngles(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(55), plAngle::MakeFromDegree(90));
+      plQuat qRot;
+      qRot.SetFromEulerAngles(plAngle::Degree(0), plAngle::Degree(55), plAngle::Degree(90));
 
       plSetObjectPropertyCommand propCmd;
       propCmd.m_Object = cmd.m_NewObjectGuid;

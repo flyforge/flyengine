@@ -42,7 +42,8 @@ plXRSpatialAnchorID plOpenXRSpatialAnchors::CreateAnchor(const plTransform& glob
       globalStageTransform = pStage->GetOwner()->GetGlobalTransform();
     }
   }
-  plTransform local = plTransform::MakeLocalTransform(globalStageTransform, globalTransform);
+  plTransform local;
+  local.SetLocalTransform(globalStageTransform, globalTransform);
 
   XrSpatialAnchorCreateInfoMSFT createInfo{XR_TYPE_SPATIAL_ANCHOR_CREATE_INFO_MSFT};
   createInfo.space = m_pOpenXR->GetBaseSpace();
@@ -57,7 +58,7 @@ plXRSpatialAnchorID plOpenXRSpatialAnchors::CreateAnchor(const plTransform& glob
 
   XrSpatialAnchorSpaceCreateInfoMSFT createSpaceInfo{XR_TYPE_SPATIAL_ANCHOR_SPACE_CREATE_INFO_MSFT};
   createSpaceInfo.anchor = anchor;
-  createSpaceInfo.poseInAnchorSpace = plOpenXR::ConvertTransform(plTransform::MakeIdentity());
+  createSpaceInfo.poseInAnchorSpace = plOpenXR::ConvertTransform(plTransform::IdentityTransform());
 
   XrSpace space;
   res = m_pOpenXR->m_extensions.pfn_xrCreateSpatialAnchorSpaceMSFT(m_pOpenXR->m_session, &createSpaceInfo, &space);
@@ -107,7 +108,7 @@ plResult plOpenXRSpatialAnchors::TryGetAnchorTransform(plXRSpatialAnchorID id, p
       }
     }
     plTransform local(plOpenXR::ConvertPosition(viewInScene.pose.position), plOpenXR::ConvertOrientation(viewInScene.pose.orientation));
-    out_globalTransform = plTransform::MakeGlobalTransform(globalStageTransform, local);
+    out_globalTransform.SetGlobalTransform(globalStageTransform, local);
 
     return PLASMA_SUCCESS;
   }

@@ -125,6 +125,7 @@ void plSampleAnimClipSequenceAnimNode::Clips_Remove(plUInt32 uiIndex)
 
 void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_Sequence");
   if (!m_OutPose.IsConnected())
     return;
 
@@ -132,7 +133,7 @@ void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, pl
 
   if ((!m_InStart.IsConnected() && pState->m_uiState == 0) || m_InStart.IsTriggered(ref_graph))
   {
-    pState->m_PlaybackTime = plTime::MakeZero();
+    pState->m_PlaybackTime = plTime::Zero();
     pState->m_uiState = 1;
   }
 
@@ -190,13 +191,13 @@ void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, pl
       }
 
       tCurDuration = pAnimClip->GetDescriptor().GetDuration();
-      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::MakeFromMilliseconds(5), "Too short clip");
+      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::Milliseconds(5), "Too short clip");
 
       if (pState->m_PlaybackTime >= tCurDuration)
       {
         // TODO: sample anim events of previous clip
         m_OutOnMiddleStarted.SetTriggered(ref_graph);
-        tPrevSamplePos = plTime::MakeZero();
+        tPrevSamplePos = plTime::Zero();
         pState->m_PlaybackTime -= tCurDuration;
         pState->m_uiState = 2;
 
@@ -235,12 +236,12 @@ void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, pl
       }
 
       tCurDuration = pAnimClip->GetDescriptor().GetDuration();
-      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::MakeFromMilliseconds(5), "Too short clip");
+      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::Milliseconds(5), "Too short clip");
 
       if (pState->m_PlaybackTime >= tCurDuration)
       {
         // TODO: sample anim events of previous clip
-        tPrevSamplePos = plTime::MakeZero();
+        tPrevSamplePos = plTime::Zero();
         pState->m_PlaybackTime -= tCurDuration;
 
         if (bLoop)
@@ -286,7 +287,7 @@ void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, pl
       }
 
       tCurDuration = pAnimClip->GetDescriptor().GetDuration();
-      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::MakeFromMilliseconds(5), "Too short clip");
+      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::Milliseconds(5), "Too short clip");
 
       if (pState->m_PlaybackTime >= tCurDuration)
       {

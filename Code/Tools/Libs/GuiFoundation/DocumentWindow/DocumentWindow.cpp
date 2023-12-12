@@ -47,7 +47,7 @@ void plQtDocumentWindow::Constructor()
   plQtMenuBarActionMapView* pMenuBar = new plQtMenuBarActionMapView(this);
   setMenuBar(pMenuBar);
 
-  plToolsProject::SuggestContainerWindow(m_pDocument);
+  plInt32 iContainerWindowIndex = plToolsProject::SuggestContainerWindow(m_pDocument);
   plQtContainerWindow* pContainer = plQtContainerWindow::GetContainerWindow();
   pContainer->AddDocumentWindow(this);
 
@@ -103,8 +103,6 @@ void plQtDocumentWindow::SetVisibleInContainer(bool bVisible)
   {
     // if the window is now visible, immediately do a redraw and trigger the timers
     SlotRedraw();
-    // Make sure the window gains focus as well when it becomes visible so that shortcuts will immediately work.
-    setFocus();
   }
 }
 
@@ -136,7 +134,7 @@ void plQtDocumentWindow::UIServicesTickEventHandler(const plQtUiServices::TickEv
 
     // if the application does not have focus, drastically reduce the update rate to limit CPU draw etc.
     if (QApplication::activeWindow() == nullptr)
-      iTargetFramerate = plMath::Max(10, iTargetFramerate / 4);
+      iTargetFramerate = plMath::Min(10, iTargetFramerate / 4);
 
     // We do not hit the requested framerate directly if the system framerate can't be evenly divided. We will chose the next higher framerate.
     if (iTargetFramerate < iSystemFramerate)
@@ -175,15 +173,6 @@ void plQtDocumentWindow::DocumentEventHandler(const plDocumentEvent& e)
 {
   switch (e.m_Type)
   {
-    case plDocumentEvent::Type::DocumentRenamed:
-    {
-      m_sUniqueName = m_pDocument->GetDocumentPath();
-      setObjectName(GetUniqueName());
-      plQtContainerWindow* pContainer = plQtContainerWindow::GetContainerWindow();
-      pContainer->DocumentWindowRenamed(this);
-
-      [[fallthrough]];
-    }
     case plDocumentEvent::Type::ModifiedChanged:
     {
       plQtDocumentWindowEvent dwe;
@@ -201,7 +190,7 @@ void plQtDocumentWindow::DocumentEventHandler(const plDocumentEvent& e)
 
     case plDocumentEvent::Type::DocumentStatusMsg:
     {
-      ShowTemporaryStatusBarMsg(e.m_sStatusMsg);
+      ShowTemporaryStatusBarMsg(e.m_szStatusMsg);
     }
     break;
 
@@ -297,35 +286,26 @@ void plQtDocumentWindow::hideEvent(QHideEvent* event)
 
 bool plQtDocumentWindow::eventFilter(QObject* obj, QEvent* e)
 {
-  if (e->type() == QEvent::ShortcutOverride || e->type() == QEvent::KeyPress)
+  if (e->type() == QEvent::ShortcutOverride)
   {
     // This filter is added by plQtContainerWindow::AddDocumentWindow as that ones is the ony code path that can connect dock container to their content.
     // This filter is necessary as clicking any action in a menu bar sets the focus to the parent CDockWidget at which point further shortcuts would stop working.
     if (qobject_cast<ads::CDockWidget*>(obj))
     {
       QKeyEvent* keyEvent = static_cast<QKeyEvent*>(e);
-      if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent, e->type() == QEvent::ShortcutOverride))
-        return true;
-    }
-
-    // Some central widgets consume the shortcut (or any key press for that matter) instead of passing it up the parent hierarchy. For example a QGraphicsView will forward any key-press to the QGraphicsScene which will consume every event. As a workaround, we overrule the central widget by default when it comes to shortcuts.
-    if (obj == centralWidget())
-    {
-      QKeyEvent* keyEvent = static_cast<QKeyEvent*>(e);
-      if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent, e->type() == QEvent::ShortcutOverride))
+      if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent))
         return true;
     }
   }
-
   return false;
 }
 
 bool plQtDocumentWindow::event(QEvent* event)
 {
-  if (event->type() == QEvent::ShortcutOverride || event->type() == QEvent::KeyPress)
+  if (event->type() == QEvent::ShortcutOverride)
   {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-    if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent, event->type() == QEvent::ShortcutOverride))
+    if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent))
       return true;
   }
   return QMainWindow::event(event);
@@ -333,9 +313,6 @@ bool plQtDocumentWindow::event(QEvent* event)
 
 void plQtDocumentWindow::FinishWindowCreation()
 {
-  if (centralWidget())
-    centralWidget()->installEventFilter(this);
-
   ScheduleRestoreWindowLayout();
 }
 
@@ -451,23 +428,23 @@ plStatus plQtDocumentWindow::SaveDocument()
   return plStatus(PLASMA_SUCCESS);
 }
 
-void plQtDocumentWindow::ShowTemporaryStatusBarMsg(const plFormatString& msg, plTime duration)
+void plQtDocumentWindow::ShowTemporaryStatusBarMsg(const plFormatString& sMsg, plTime duration)
 {
   plStringBuilder tmp;
-  statusBar()->showMessage(QString::fromUtf8(msg.GetTextCStr(tmp)), (int)duration.GetMilliseconds());
+  statusBar()->showMessage(QString::fromUtf8(sMsg.GetTextCStr(tmp)), (int)duration.GetMilliseconds());
 }
 
 
-void plQtDocumentWindow::SetPermanentStatusBarMsg(const plFormatString& text)
+void plQtDocumentWindow::SetPermanentStatusBarMsg(const plFormatString& sText)
 {
-  if (!text.IsEmpty())
+  if (!sText.IsEmpty())
   {
     // clear temporary message
     statusBar()->clearMessage();
   }
 
   plStringBuilder tmp;
-  m_pPermanentDocumentStatusText->setText(QString::fromUtf8(text.GetTextCStr(tmp)));
+  m_pPermanentDocumentStatusText->setText(QString::fromUtf8(sText.GetTextCStr(tmp)));
 }
 
 void plQtDocumentWindow::CreateImageCapture(const char* szOutputPath)
@@ -581,7 +558,7 @@ void plQtDocumentWindow::EnsureVisible()
   m_pContainerWindow->EnsureVisible(this).IgnoreResult();
 }
 
-void plQtDocumentWindow::RequestWindowTabContextMenu(const QPoint& globalPos)
+void plQtDocumentWindow::RequestWindowTabContextMenu(const QPoint& GlobalPos)
 {
   plQtMenuActionMapView menu(nullptr);
 
@@ -591,7 +568,7 @@ void plQtDocumentWindow::RequestWindowTabContextMenu(const QPoint& globalPos)
   context.m_pWindow = this;
   menu.SetActionContext(context);
 
-  menu.exec(globalPos);
+  menu.exec(GlobalPos);
 }
 
 plQtDocumentWindow* plQtDocumentWindow::FindWindowByDocument(const plDocument* pDocument)

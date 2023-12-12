@@ -45,20 +45,20 @@ plUInt32 plAssetCurator::GetNumAssetProfiles() const
   return m_AssetProfiles.GetCount();
 }
 
-const plPlatformProfile* plAssetCurator::GetAssetProfile(plUInt32 uiIndex) const
+const plPlatformProfile* plAssetCurator::GetAssetProfile(plUInt32 index) const
 {
-  if (uiIndex >= m_AssetProfiles.GetCount())
+  if (index >= m_AssetProfiles.GetCount())
     return m_AssetProfiles[0]; // fall back to default platform
 
-  return m_AssetProfiles[uiIndex];
+  return m_AssetProfiles[index];
 }
 
-plPlatformProfile* plAssetCurator::GetAssetProfile(plUInt32 uiIndex)
+plPlatformProfile* plAssetCurator::GetAssetProfile(plUInt32 index)
 {
-  if (uiIndex >= m_AssetProfiles.GetCount())
+  if (index >= m_AssetProfiles.GetCount())
     return m_AssetProfiles[0]; // fall back to default platform
 
-  return m_AssetProfiles[uiIndex];
+  return m_AssetProfiles[index];
 }
 
 plPlatformProfile* plAssetCurator::CreateAssetProfile()
@@ -96,17 +96,17 @@ plResult plAssetCurator::DeleteAssetProfile(plPlatformProfile* pProfile)
   return PLASMA_FAILURE;
 }
 
-void plAssetCurator::SetActiveAssetProfileByIndex(plUInt32 uiIndex, bool bForceReevaluation /*= false*/)
+void plAssetCurator::SetActiveAssetProfileByIndex(plUInt32 index, bool bForceReevaluation /*= false*/)
 {
-  if (uiIndex >= m_AssetProfiles.GetCount())
-    uiIndex = 0; // fall back to default platform
+  if (index >= m_AssetProfiles.GetCount())
+    index = 0; // fall back to default platform
 
-  if (!bForceReevaluation && m_uiActiveAssetProfile == uiIndex)
+  if (!bForceReevaluation && m_uiActiveAssetProfile == index)
     return;
 
-  PLASMA_LOG_BLOCK("Switch Active Asset Platform", m_AssetProfiles[uiIndex]->GetConfigName());
+  PLASMA_LOG_BLOCK("Switch Active Asset Platform", m_AssetProfiles[index]->GetConfigName());
 
-  m_uiActiveAssetProfile = uiIndex;
+  m_uiActiveAssetProfile = index;
 
   CheckFileSystem();
 
@@ -120,7 +120,7 @@ void plAssetCurator::SetActiveAssetProfileByIndex(plUInt32 uiIndex, bool bForceR
     plSimpleConfigMsgToEngine msg;
     msg.m_sWhatToDo = "ChangeActivePlatform";
     msg.m_sPayload = GetActiveAssetProfile()->GetConfigName();
-    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 }
 
@@ -153,7 +153,7 @@ plResult plAssetCurator::SaveAssetProfiles()
     ddl.BeginObject("Config", pCfg->m_sName);
 
     // make sure to create the same GUID every time, otherwise the serialized file changes all the time
-    const plUuid guid = plUuid::MakeStableUuidFromString(pCfg->GetConfigName());
+    const plUuid guid = plUuid::StableUuidForString(pCfg->GetConfigName());
 
     plReflectionSerializer::WriteObjectToDDL(ddl, pCfg->GetDynamicRTTI(), pCfg, guid);
 

@@ -101,10 +101,36 @@ void plGALRenderCommandEncoder::DrawInstancedIndirect(plGALBufferHandle hIndirec
   CountDrawCall();
 }
 
+void plGALRenderCommandEncoder::DrawAuto()
+{
+  AssertRenderingThread();
+  /// \todo Assert for draw auto support
+
+  m_RenderImpl.DrawAutoPlatform();
+
+  CountDrawCall();
+}
+
+void plGALRenderCommandEncoder::BeginStreamOut()
+{
+  AssertRenderingThread();
+  /// \todo Assert for streamout support
+
+  m_RenderImpl.BeginStreamOutPlatform();
+}
+
+void plGALRenderCommandEncoder::EndStreamOut()
+{
+  AssertRenderingThread();
+
+  m_RenderImpl.EndStreamOutPlatform();
+}
+
 void plGALRenderCommandEncoder::SetIndexBuffer(plGALBufferHandle hIndexBuffer)
 {
   if (m_RenderState.m_hIndexBuffer == hIndexBuffer)
   {
+    CountRedundantStateChange();
     return;
   }
 
@@ -115,12 +141,14 @@ void plGALRenderCommandEncoder::SetIndexBuffer(plGALBufferHandle hIndexBuffer)
   m_RenderImpl.SetIndexBufferPlatform(pBuffer);
 
   m_RenderState.m_hIndexBuffer = hIndexBuffer;
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetVertexBuffer(plUInt32 uiSlot, plGALBufferHandle hVertexBuffer)
 {
   if (m_RenderState.m_hVertexBuffers[uiSlot] == hVertexBuffer)
   {
+    CountRedundantStateChange();
     return;
   }
 
@@ -131,6 +159,7 @@ void plGALRenderCommandEncoder::SetVertexBuffer(plUInt32 uiSlot, plGALBufferHand
   m_RenderImpl.SetVertexBufferPlatform(uiSlot, pBuffer);
 
   m_RenderState.m_hVertexBuffers[uiSlot] = hVertexBuffer;
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetPrimitiveTopology(plGALPrimitiveTopology::Enum topology)
@@ -139,12 +168,15 @@ void plGALRenderCommandEncoder::SetPrimitiveTopology(plGALPrimitiveTopology::Enu
 
   if (m_RenderState.m_Topology == topology)
   {
+    CountRedundantStateChange();
     return;
   }
 
   m_RenderImpl.SetPrimitiveTopologyPlatform(topology);
 
   m_RenderState.m_Topology = topology;
+
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetVertexDeclaration(plGALVertexDeclarationHandle hVertexDeclaration)
@@ -153,6 +185,7 @@ void plGALRenderCommandEncoder::SetVertexDeclaration(plGALVertexDeclarationHandl
 
   if (m_RenderState.m_hVertexDeclaration == hVertexDeclaration)
   {
+    CountRedundantStateChange();
     return;
   }
 
@@ -162,6 +195,8 @@ void plGALRenderCommandEncoder::SetVertexDeclaration(plGALVertexDeclarationHandl
   m_RenderImpl.SetVertexDeclarationPlatform(pVertexDeclaration);
 
   m_RenderState.m_hVertexDeclaration = hVertexDeclaration;
+
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetBlendState(plGALBlendStateHandle hBlendState, const plColor& blendFactor, plUInt32 uiSampleMask)
@@ -170,6 +205,7 @@ void plGALRenderCommandEncoder::SetBlendState(plGALBlendStateHandle hBlendState,
 
   if (m_RenderState.m_hBlendState == hBlendState && m_RenderState.m_BlendFactor.IsEqualRGBA(blendFactor, 0.001f) && m_RenderState.m_uiSampleMask == uiSampleMask)
   {
+    CountRedundantStateChange();
     return;
   }
 
@@ -180,6 +216,8 @@ void plGALRenderCommandEncoder::SetBlendState(plGALBlendStateHandle hBlendState,
   m_RenderState.m_hBlendState = hBlendState;
   m_RenderState.m_BlendFactor = blendFactor;
   m_RenderState.m_uiSampleMask = uiSampleMask;
+
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetDepthStencilState(plGALDepthStencilStateHandle hDepthStencilState, plUInt8 uiStencilRefValue /*= 0xFFu*/)
@@ -188,6 +226,7 @@ void plGALRenderCommandEncoder::SetDepthStencilState(plGALDepthStencilStateHandl
 
   if (m_RenderState.m_hDepthStencilState == hDepthStencilState && m_RenderState.m_uiStencilRefValue == uiStencilRefValue)
   {
+    CountRedundantStateChange();
     return;
   }
 
@@ -197,6 +236,8 @@ void plGALRenderCommandEncoder::SetDepthStencilState(plGALDepthStencilStateHandl
 
   m_RenderState.m_hDepthStencilState = hDepthStencilState;
   m_RenderState.m_uiStencilRefValue = uiStencilRefValue;
+
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetRasterizerState(plGALRasterizerStateHandle hRasterizerState)
@@ -205,6 +246,7 @@ void plGALRenderCommandEncoder::SetRasterizerState(plGALRasterizerStateHandle hR
 
   if (m_RenderState.m_hRasterizerState == hRasterizerState)
   {
+    CountRedundantStateChange();
     return;
   }
 
@@ -213,6 +255,8 @@ void plGALRenderCommandEncoder::SetRasterizerState(plGALRasterizerStateHandle hR
   m_RenderImpl.SetRasterizerStatePlatform(pRasterizerState);
 
   m_RenderState.m_hRasterizerState = hRasterizerState;
+
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetViewport(const plRectFloat& rect, float fMinDepth, float fMaxDepth)
@@ -221,6 +265,7 @@ void plGALRenderCommandEncoder::SetViewport(const plRectFloat& rect, float fMinD
 
   if (m_RenderState.m_ViewPortRect == rect && m_RenderState.m_fViewPortMinDepth == fMinDepth && m_RenderState.m_fViewPortMaxDepth == fMaxDepth)
   {
+    CountRedundantStateChange();
     return;
   }
 
@@ -229,6 +274,8 @@ void plGALRenderCommandEncoder::SetViewport(const plRectFloat& rect, float fMinD
   m_RenderState.m_ViewPortRect = rect;
   m_RenderState.m_fViewPortMinDepth = fMinDepth;
   m_RenderState.m_fViewPortMaxDepth = fMaxDepth;
+
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetScissorRect(const plRectU32& rect)
@@ -237,12 +284,22 @@ void plGALRenderCommandEncoder::SetScissorRect(const plRectU32& rect)
 
   if (m_RenderState.m_ScissorRect == rect)
   {
+    CountRedundantStateChange();
     return;
   }
 
   m_RenderImpl.SetScissorRectPlatform(rect);
 
   m_RenderState.m_ScissorRect = rect;
+
+  CountStateChange();
+}
+
+void plGALRenderCommandEncoder::SetStreamOutBuffer(plUInt32 uiSlot, plGALBufferHandle hBuffer, plUInt32 uiOffset)
+{
+  PLASMA_ASSERT_NOT_IMPLEMENTED;
+
+  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::ClearStatisticsCounters()

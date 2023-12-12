@@ -7,7 +7,7 @@
 #include <RendererCore/Material/MaterialResource.h>
 #include <RendererCore/Meshes/MeshResource.h>
 
-using plBeamComponentManager = plComponentManagerSimple<class plBeamComponent, plComponentUpdateType::Always>;
+typedef plComponentManagerSimple<class plBeamComponent, plComponentUpdateType::Always> plBeamComponentManager;
 
 struct plMsgExtractRenderData;
 class plGeometry;
@@ -75,8 +75,8 @@ protected:
   // State
   plMeshResourceHandle m_hMesh;
 
-  plVec3 m_vLastOwnerPosition = plVec3::MakeZero();
-  plVec3 m_vLastTargetPosition = plVec3::MakeZero();
+  plVec3 m_vLastOwnerPosition = plVec3::ZeroVector();
+  plVec3 m_vLastTargetPosition = plVec3::ZeroVector();
 
   void CreateMeshes();
   void BuildMeshResourceFromGeometry(plGeometry& Geometry, plMeshResourceDescriptor& MeshDesc) const;

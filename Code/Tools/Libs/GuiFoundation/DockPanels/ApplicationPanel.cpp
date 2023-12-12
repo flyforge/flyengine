@@ -19,8 +19,8 @@ plQtApplicationPanel::plQtApplicationPanel(const char* szPanelName)
 {
   plStringBuilder sPanel("AppPanel_", szPanelName);
 
-  setObjectName(plMakeQString(sPanel));
-  setWindowTitle(plMakeQString(plTranslate(szPanelName)));
+  setObjectName(QString::fromUtf8(sPanel.GetData()));
+  setWindowTitle(QString::fromUtf8(plTranslate(szPanelName)).toUpper());
 
   s_AllApplicationPanels.PushBack(this);
 
@@ -73,13 +73,13 @@ void plQtApplicationPanel::ToolsProjectEventHandler(const plToolsProjectEvent& e
   }
 }
 
-bool plQtApplicationPanel::event(QEvent* pEvent)
+bool plQtApplicationPanel::event(QEvent* event)
 {
-  if (pEvent->type() == QEvent::ShortcutOverride || pEvent->type() == QEvent::KeyPress)
+  if (event->type() == QEvent::ShortcutOverride)
   {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(pEvent);
-    if (plQtProxy::TriggerDocumentAction(nullptr, keyEvent, pEvent->type() == QEvent::ShortcutOverride))
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+    if (plQtProxy::TriggerDocumentAction(nullptr, keyEvent))
       return true;
   }
-  return ads::CDockWidget::event(pEvent);
+  return ads::CDockWidget::event(event);
 }

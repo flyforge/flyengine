@@ -124,12 +124,6 @@ void plKrautRenderer::FillPerInstanceData(const plVec3& vLodCamPos, plArrayPtr<p
     auto& perInstanceData = instanceData[uiCurrentIndex];
     perInstanceData.ObjectToWorld = objectToWorld;
 
-//#if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-//    plMat4 lastObjectToWorld = pRenderData->m_LastGlobalTransform.GetAsMat4();
-//    perInstanceData.LastObjectToWorld = lastObjectToWorld;
-//#endif
-
-
     // always assumes uniform-scale only
     perInstanceData.ObjectToWorldNormal = objectToWorld;
     perInstanceData.GameObjectID = pRenderData->m_uiUniqueID;

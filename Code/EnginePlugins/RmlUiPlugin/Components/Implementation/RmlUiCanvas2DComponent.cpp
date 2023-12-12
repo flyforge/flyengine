@@ -20,7 +20,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRmlUiCanvas2DComponent, 2, plComponentMode::Static
     PLASMA_ACCESSOR_PROPERTY("RmlFile", GetRmlFile, SetRmlFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Rml_UI")),
     PLASMA_ACCESSOR_PROPERTY("AnchorPoint", GetAnchorPoint, SetAnchorPoint)->AddAttributes(new plClampValueAttribute(plVec2(0), plVec2(1))),
     PLASMA_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plSuffixAttribute("px"), new plMinValueTextAttribute("Auto")),
-    PLASMA_ACCESSOR_PROPERTY("Offset", GetOffset, SetOffset)->AddAttributes(new plDefaultValueAttribute(plVec2::MakeZero()), new plSuffixAttribute("px")),
+    PLASMA_ACCESSOR_PROPERTY("Offset", GetOffset, SetOffset)->AddAttributes(new plDefaultValueAttribute(plVec2::ZeroVector()), new plSuffixAttribute("px")),
     PLASMA_ACCESSOR_PROPERTY("PassInput", GetPassInput, SetPassInput)->AddAttributes(new plDefaultValueAttribute(true)),
     PLASMA_ACCESSOR_PROPERTY("AutobindBlackboards", GetAutobindBlackboards, SetAutobindBlackboards)->AddAttributes(new plDefaultValueAttribute(true)),
   }
@@ -34,6 +34,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRmlUiCanvas2DComponent, 2, plComponentMode::Static
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gui/RmlUi"),
+    new plColorAttribute(plColorScheme::UI),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -377,7 +378,7 @@ void plRmlUiCanvas2DComponent::UpdateCachedValues()
         [hComponent = GetHandle(), pWorld = GetWorld()](const plResourceEvent& e) {
           if (e.m_Type == plResourceEvent::Type::ResourceContentUnloading)
           {
-            pWorld->PostMessage(hComponent, plMsgRmlUiReload(), plTime::MakeZero());
+            pWorld->PostMessage(hComponent, plMsgRmlUiReload(), plTime::Zero());
           }
         },
         m_ResourceEventUnsubscriber);

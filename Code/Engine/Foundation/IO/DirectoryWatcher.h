@@ -84,11 +84,11 @@ public:
   ///   If waitUpToMilliseconds is greater than 0, blocks until either a change was observed or the timelimit is reached.
   ///
   /// \note There might be multiple changes on the same file reported.
-  void EnumerateChanges(EnumerateChangesFunction func, plTime waitUpTo = plTime::MakeZero());
+  void EnumerateChanges(EnumerateChangesFunction func, plTime waitUpTo = plTime::Zero());
 
   /// \brief
   ///   Same as the other EnumerateChanges function, but enumerates multiple watchers.
-  static void EnumerateChanges(plArrayPtr<plDirectoryWatcher*> watchers, EnumerateChangesFunction func, plTime waitUpTo = plTime::MakeZero());
+  static void EnumerateChanges(plArrayPtr<plDirectoryWatcher*> watchers, EnumerateChangesFunction func, plTime waitUpTo = plTime::Zero());
 
 private:
   plString m_sDirectoryPath;

@@ -54,7 +54,7 @@ PLASMA_END_STATIC_REFLECTED_TYPE;
 plWorld::plWorld(plWorldDesc& ref_desc)
   : m_Data(ref_desc)
 {
-  m_pUpdateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "WorldUpdate", plTaskNesting::Never, plMakeDelegate(&plWorld::UpdateFromThread, this));
+  m_pUpdateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "", plMakeDelegate(&plWorld::UpdateFromThread, this));
   m_Data.m_pCoordinateSystemProvider->m_pOwnerWorld = this;
 
   plStringBuilder sb = ref_desc.m_sName.GetString();
@@ -206,13 +206,13 @@ plGameObjectHandle plWorld::CreateObject(const plGameObjectDesc& desc, plGameObj
   pTransformationData->m_localPosition = plSimdConversion::ToVec3(desc.m_LocalPosition);
   pTransformationData->m_localRotation = plSimdConversion::ToQuat(desc.m_LocalRotation);
   pTransformationData->m_localScaling = plSimdConversion::ToVec4(desc.m_LocalScaling.GetAsVec4(desc.m_LocalUniformScaling));
-  pTransformationData->m_globalTransform = plSimdTransform::MakeIdentity();
+  pTransformationData->m_globalTransform.SetIdentity();
 #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-  pTransformationData->m_lastGlobalTransform = plSimdTransform::MakeIdentity();
+  pTransformationData->m_lastGlobalTransform.SetIdentity();
   pTransformationData->m_uiLastGlobalTransformUpdateCounter = plInvalidIndex;
 #endif
   pTransformationData->m_localBounds.SetInvalid();
-  pTransformationData->m_localBounds.m_BoxHalfExtents.SetW(plSimdFloat::MakeZero());
+  pTransformationData->m_localBounds.m_BoxHalfExtents.SetW(plSimdFloat::Zero());
   pTransformationData->m_globalBounds = pTransformationData->m_localBounds;
   pTransformationData->m_hSpatialData.Invalidate();
   pTransformationData->m_uiSpatialDataCategoryBitmask = 0;
@@ -315,7 +315,7 @@ void plWorld::DeleteObjectDelayed(const plGameObjectHandle& hObject, bool bAlsoD
 {
   plMsgDeleteGameObject msg;
   msg.m_bDeleteEmptyParents = bAlsoDeleteEmptyParents;
-  PostMessage(hObject, msg, plTime::MakeZero());
+  PostMessage(hObject, msg, plTime::Zero());
 }
 
 plComponentInitBatchHandle plWorld::CreateComponentInitBatch(plStringView sBatchName, bool bMustFinishWithinOneFrame /*= true*/)

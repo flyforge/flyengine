@@ -1,21 +1,29 @@
 #pragma once
 
-#include "ConstantBufferMacros.h"
 #include "Platforms.h"
+#include "ConstantBufferMacros.h"
 
 struct PLASMA_SHADER_STRUCT plPerInstanceData
 {
   TRANSFORM(ObjectToWorld);
   TRANSFORM(ObjectToWorldNormal);
+
+  TRANSFORM(LastObjectToWorld);
+  TRANSFORM(LastObjectToWorldNormal);
+
   FLOAT1(BoundingSphereRadius);
   UINT1(GameObjectID);
   UINT1(VertexColorAccessData);
-
   INT1(Reserved);
+
   COLOR4F(Color);
+
+  FLOAT3(Wind);
+  FLOAT1(UnusedPadding);
 };
 
 #if PLASMA_ENABLED(PLATFORM_SHADER)
+
 StructuredBuffer<plPerInstanceData> perInstanceData;
 
 #  if defined(USE_SKINNING)
@@ -28,15 +36,14 @@ Buffer<uint> perInstanceVertexColors;
 
 PLASMA_DEFINE_AS_POD_TYPE(plPerInstanceData);
 
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plPerInstanceData) == 128);
+PLASMA_CHECK_AT_COMPILETIME(sizeof(plPerInstanceData) == 240);
+
 #endif
 
 CONSTANT_BUFFER(plObjectConstants, 2)
 {
   UINT1(InstanceDataOffset);
 };
-
-
 
 #if PLASMA_ENABLED(PLATFORM_SHADER)
 

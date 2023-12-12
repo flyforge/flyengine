@@ -82,7 +82,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plImageDataAssetProperties"}
 		u3 %TypeVersion{1}

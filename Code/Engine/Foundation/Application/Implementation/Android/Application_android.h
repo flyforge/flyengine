@@ -14,7 +14,7 @@ struct AInputEvent;
 class plAndroidApplication
 {
 public:
-  plAndroidApplication(struct android_app* pApp, plApplication* pPlasmaApp);
+  plAndroidApplication(struct android_app* pApp, plApplication* pEzApp);
   ~plAndroidApplication();
   void AndroidRun();
   void HandleCmd(int32_t cmd);
@@ -23,7 +23,7 @@ public:
 
 private:
   struct android_app* m_pApp;
-  plApplication* m_pPlasmaApp;
+  plApplication* m_pEzApp;
 };
 
 #endif

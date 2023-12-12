@@ -15,7 +15,10 @@ void plGALCommandEncoder::SetShader(plGALShaderHandle hShader)
   /// \todo Assert for shader capabilities (supported shader stages etc.)
 
   if (m_State.m_hShader == hShader)
+  {
+    CountRedundantStateChange();
     return;
+  }
 
   const plGALShader* pShader = m_Device.GetShader(hShader);
   PLASMA_ASSERT_DEV(pShader != nullptr, "The given shader handle isn't valid, this may be a use after destroy!");
@@ -23,44 +26,181 @@ void plGALCommandEncoder::SetShader(plGALShaderHandle hShader)
   m_CommonImpl.SetShaderPlatform(pShader);
 
   m_State.m_hShader = hShader;
+  CountStateChange();
 }
 
-void plGALCommandEncoder::SetConstantBuffer(const plShaderResourceBinding& binding, plGALBufferHandle hBuffer)
+void plGALCommandEncoder::SetConstantBuffer(plUInt32 uiSlot, plGALBufferHandle hBuffer)
 {
   AssertRenderingThread();
-  PLASMA_ASSERT_RELEASE(binding.m_iSlot < PLASMA_GAL_MAX_CONSTANT_BUFFER_COUNT, "Constant buffer slot index too big!");
+  PLASMA_ASSERT_RELEASE(uiSlot < PLASMA_GAL_MAX_CONSTANT_BUFFER_COUNT, "Constant buffer slot index too big!");
+
+  if (m_State.m_hConstantBuffers[uiSlot] == hBuffer)
+  {
+    CountRedundantStateChange();
+    return;
+  }
 
   const plGALBuffer* pBuffer = m_Device.GetBuffer(hBuffer);
   PLASMA_ASSERT_DEV(pBuffer == nullptr || pBuffer->GetDescription().m_BufferType == plGALBufferType::ConstantBuffer, "Wrong buffer type");
 
-  m_CommonImpl.SetConstantBufferPlatform(binding, pBuffer);
+  m_CommonImpl.SetConstantBufferPlatform(uiSlot, pBuffer);
+
+  m_State.m_hConstantBuffers[uiSlot] = hBuffer;
+
+  CountStateChange();
 }
 
-void plGALCommandEncoder::SetSamplerState(const plShaderResourceBinding& binding, plGALSamplerStateHandle hSamplerState)
+void plGALCommandEncoder::SetSamplerState(plGALShaderStage::Enum stage, plUInt32 uiSlot, plGALSamplerStateHandle hSamplerState)
 {
   AssertRenderingThread();
-  PLASMA_ASSERT_RELEASE(binding.m_iSlot < PLASMA_GAL_MAX_SAMPLER_COUNT, "Sampler state slot index too big!");
+  PLASMA_ASSERT_RELEASE(uiSlot < PLASMA_GAL_MAX_SAMPLER_COUNT, "Sampler state slot index too big!");
+
+  if (m_State.m_hSamplerStates[stage][uiSlot] == hSamplerState)
+  {
+    CountRedundantStateChange();
+    return;
+  }
 
   const plGALSamplerState* pSamplerState = m_Device.GetSamplerState(hSamplerState);
 
-  m_CommonImpl.SetSamplerStatePlatform(binding, pSamplerState);
+  m_CommonImpl.SetSamplerStatePlatform(stage, uiSlot, pSamplerState);
+
+  m_State.m_hSamplerStates[stage][uiSlot] = hSamplerState;
+
+  CountStateChange();
 }
 
-void plGALCommandEncoder::SetResourceView(const plShaderResourceBinding& binding, plGALResourceViewHandle hResourceView)
+void plGALCommandEncoder::SetResourceView(plGALShaderStage::Enum stage, plUInt32 uiSlot, plGALResourceViewHandle hResourceView)
 {
   AssertRenderingThread();
+
+  /// \todo Check if the device supports the stage / the slot index
+
+  auto& boundResourceViews = m_State.m_hResourceViews[stage];
+  if (uiSlot < boundResourceViews.GetCount() && boundResourceViews[uiSlot] == hResourceView)
+  {
+    CountRedundantStateChange();
+    return;
+  }
 
   const plGALResourceView* pResourceView = m_Device.GetResourceView(hResourceView);
+  if (pResourceView != nullptr && pResourceView->ShouldUnsetUAV())
+  {
+    if (UnsetUnorderedAccessViews(pResourceView->GetResource()))
+    {
+      m_CommonImpl.FlushPlatform();
+    }
+  }
 
-  m_CommonImpl.SetResourceViewPlatform(binding, pResourceView);
+  m_CommonImpl.SetResourceViewPlatform(stage, uiSlot, pResourceView);
+
+  boundResourceViews.EnsureCount(uiSlot + 1);
+  boundResourceViews[uiSlot] = hResourceView;
+
+  auto& boundResources = m_State.m_pResourcesForResourceViews[stage];
+  boundResources.EnsureCount(uiSlot + 1);
+  boundResources[uiSlot] = pResourceView != nullptr ? pResourceView->GetResource()->GetParentResource() : nullptr;
+
+  CountStateChange();
 }
 
-void plGALCommandEncoder::SetUnorderedAccessView(const plShaderResourceBinding& binding, plGALUnorderedAccessViewHandle hUnorderedAccessView)
+void plGALCommandEncoder::SetUnorderedAccessView(plUInt32 uiSlot, plGALUnorderedAccessViewHandle hUnorderedAccessView)
 {
   AssertRenderingThread();
 
+  /// \todo Check if the device supports the stage / the slot index
+
+  if (uiSlot < m_State.m_hUnorderedAccessViews.GetCount() && m_State.m_hUnorderedAccessViews[uiSlot] == hUnorderedAccessView)
+  {
+    CountRedundantStateChange();
+    return;
+  }
+
   const plGALUnorderedAccessView* pUnorderedAccessView = m_Device.GetUnorderedAccessView(hUnorderedAccessView);
-  m_CommonImpl.SetUnorderedAccessViewPlatform(binding, pUnorderedAccessView);
+  if (pUnorderedAccessView != nullptr && pUnorderedAccessView->ShouldUnsetResourceView())
+  {
+    if (UnsetResourceViews(pUnorderedAccessView->GetResource()))
+    {
+      m_CommonImpl.FlushPlatform();
+    }
+  }
+
+  m_CommonImpl.SetUnorderedAccessViewPlatform(uiSlot, pUnorderedAccessView);
+
+  m_State.m_hUnorderedAccessViews.EnsureCount(uiSlot + 1);
+  m_State.m_hUnorderedAccessViews[uiSlot] = hUnorderedAccessView;
+
+  m_State.m_pResourcesForUnorderedAccessViews.EnsureCount(uiSlot + 1);
+  m_State.m_pResourcesForUnorderedAccessViews[uiSlot] = pUnorderedAccessView != nullptr ? pUnorderedAccessView->GetResource()->GetParentResource() : nullptr;
+
+  CountStateChange();
+}
+
+bool plGALCommandEncoder::UnsetResourceViews(const plGALResourceBase* pResource)
+{
+  PLASMA_ASSERT_DEV(pResource->GetParentResource() == pResource, "No proxies allowed");
+
+  bool bResult = false;
+
+  for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+  {
+    for (plUInt32 uiSlot = 0; uiSlot < m_State.m_pResourcesForResourceViews[stage].GetCount(); ++uiSlot)
+    {
+      if (m_State.m_pResourcesForResourceViews[stage][uiSlot] == pResource)
+      {
+        m_CommonImpl.SetResourceViewPlatform((plGALShaderStage::Enum)stage, uiSlot, nullptr);
+
+        m_State.m_hResourceViews[stage][uiSlot].Invalidate();
+        m_State.m_pResourcesForResourceViews[stage][uiSlot] = nullptr;
+
+        bResult = true;
+      }
+    }
+  }
+
+  return bResult;
+}
+
+bool plGALCommandEncoder::UnsetResourceViews(plGALResourceViewHandle hResourceView)
+{
+  if (const plGALResourceView* pResourceView = m_Device.GetResourceView(hResourceView); pResourceView != nullptr)
+  {
+    return UnsetResourceViews(pResourceView->GetResource());
+  }
+
+  return false;
+}
+
+bool plGALCommandEncoder::UnsetUnorderedAccessViews(const plGALResourceBase* pResource)
+{
+  PLASMA_ASSERT_DEV(pResource->GetParentResource() == pResource, "No proxies allowed");
+
+  bool bResult = false;
+
+  for (plUInt32 uiSlot = 0; uiSlot < m_State.m_pResourcesForUnorderedAccessViews.GetCount(); ++uiSlot)
+  {
+    if (m_State.m_pResourcesForUnorderedAccessViews[uiSlot] == pResource)
+    {
+      m_CommonImpl.SetUnorderedAccessViewPlatform(uiSlot, nullptr);
+
+      m_State.m_hUnorderedAccessViews[uiSlot].Invalidate();
+      m_State.m_pResourcesForUnorderedAccessViews[uiSlot] = nullptr;
+
+      bResult = true;
+    }
+  }
+
+  return bResult;
+}
+
+bool plGALCommandEncoder::UnsetUnorderedAccessViews(plGALUnorderedAccessViewHandle hUnorderedAccessView)
+{
+  if (const plGALUnorderedAccessView* pUnorderedAccessView = m_Device.GetUnorderedAccessView(hUnorderedAccessView); pUnorderedAccessView != nullptr)
+  {
+    return UnsetUnorderedAccessViews(pUnorderedAccessView->GetResource());
+  }
+
+  return false;
 }
 
 void plGALCommandEncoder::BeginQuery(plGALQueryHandle hQuery)
@@ -171,7 +311,8 @@ void plGALCommandEncoder::CopyBufferRegion(
   }
 }
 
-void plGALCommandEncoder::UpdateBuffer(plGALBufferHandle hDest, plUInt32 uiDestOffset, plArrayPtr<const plUInt8> sourceData, plGALUpdateMode::Enum updateMode)
+void plGALCommandEncoder::UpdateBuffer(
+  plGALBufferHandle hDest, plUInt32 uiDestOffset, plArrayPtr<const plUInt8> sourceData, plGALUpdateMode::Enum updateMode)
 {
   AssertRenderingThread();
 
@@ -347,6 +488,9 @@ void plGALCommandEncoder::InsertEventMarker(const char* szMarker)
 
 void plGALCommandEncoder::ClearStatisticsCounters()
 {
+  // Reset counters for various statistics
+  m_uiStateChanges = 0;
+  m_uiRedundantStateChanges = 0;
 }
 
 plGALCommandEncoder::plGALCommandEncoder(plGALDevice& device, plGALCommandEncoderState& state, plGALCommandEncoderCommonPlatformInterface& commonImpl)

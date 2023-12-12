@@ -17,36 +17,36 @@ void plSceneExportModifier::CreateModifiers(plHybridArray<plSceneExportModifier*
     plRTTI::ForEachOptions::ExcludeNonAllocatable);
 }
 
-void plSceneExportModifier::DestroyModifiers(plHybridArray<plSceneExportModifier*, 8>& ref_modifiers)
+void plSceneExportModifier::DestroyModifiers(plHybridArray<plSceneExportModifier*, 8>& modifiers)
 {
-  for (auto pMod : ref_modifiers)
+  for (auto pMod : modifiers)
   {
     pMod->GetDynamicRTTI()->GetAllocator()->Deallocate(pMod);
   }
 
-  ref_modifiers.Clear();
+  modifiers.Clear();
 }
 
-void plSceneExportModifier::ApplyAllModifiers(plWorld& ref_world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport)
+void plSceneExportModifier::ApplyAllModifiers(plWorld& world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport)
 {
   plHybridArray<plSceneExportModifier*, 8> modifiers;
   CreateModifiers(modifiers);
 
   for (auto pMod : modifiers)
   {
-    pMod->ModifyWorld(ref_world, sDocumentType, documentGuid, bForExport);
+    pMod->ModifyWorld(world, sDocumentType, documentGuid, bForExport);
   }
 
   DestroyModifiers(modifiers);
 
-  CleanUpWorld(ref_world);
+  CleanUpWorld(world);
 }
 
-void VisitObject(plWorld& ref_world, plGameObject* pObject)
+void VisitObject(plWorld& world, plGameObject* pObject)
 {
   for (auto it = pObject->GetChildren(); it.IsValid(); it.Next())
   {
-    VisitObject(ref_world, it);
+    VisitObject(world, it);
   }
 
   if (pObject->GetChildCount() > 0)
@@ -61,27 +61,24 @@ void VisitObject(plWorld& ref_world, plGameObject* pObject)
   if (!pObject->GetGlobalKey().IsEmpty())
     return;
 
-  ref_world.DeleteObjectDelayed(pObject->GetHandle(), false);
+  world.DeleteObjectDelayed(pObject->GetHandle(), false);
 }
 
-void plSceneExportModifier::CleanUpWorld(plWorld& ref_world)
+void plSceneExportModifier::CleanUpWorld(plWorld& world)
 {
-  PLASMA_LOCK(ref_world.GetWriteMarker());
+  PLASMA_LOCK(world.GetWriteMarker());
 
-  // Don't do this (for now), as we would also delete objects that are referenced by other components,
-  // and currently we can't know which ones are important to keep.
+//  for (auto it = world.GetObjects(); it.IsValid(); it.Next())
+//  {
+//    // only visit objects without parents, those are the root objects
+//    if (it->GetParent() != nullptr)
+//      continue;
+//
+//    VisitObject(world, it);
+//  }
 
-  // for (auto it = world.GetObjects(); it.IsValid(); it.Next())
-  //{
-  //   // only visit objects without parents, those are the root objects
-  //   if (it->GetParent() != nullptr)
-  //     continue;
-
-  //  VisitObject(world, it);
-  //}
-
-  const bool bSim = ref_world.GetWorldSimulationEnabled();
-  ref_world.SetWorldSimulationEnabled(false);
-  ref_world.Update();
-  ref_world.SetWorldSimulationEnabled(bSim);
+  const bool bSim = world.GetWorldSimulationEnabled();
+  world.SetWorldSimulationEnabled(false);
+  world.Update();
+  world.SetWorldSimulationEnabled(bSim);
 }

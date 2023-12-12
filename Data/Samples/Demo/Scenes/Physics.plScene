@@ -11,13 +11,12 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{16033299415433335720,5748835052109362040}}
-		u4 %Hash{16374021379625420033}
+		u4 %Hash{12617486125485491970}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
 		{
 			s{"{ 0af8fc54-92ce-464e-b825-661c83f34a3a }"}
-			s{"{ 0b202e08-a64f-465d-b38e-15b81d161822 }"}
 			s{"{ 0de9da9e-70a6-4471-b887-2dcde70302dd }"}
 			s{"{ 1036c0f2-0008-448f-8b9a-c5aa1069a394 }"}
 			s{"{ 2a5d16b1-6867-4b5b-89b2-8436f11381cb }"}
@@ -4311,7 +4310,6 @@ o
 		{
 			Uuid{u4{1377023503152179345,5611782642857704400}}
 			Uuid{u4{18158644783344028828,5145048891365706276}}
-			Uuid{u4{9520276982924474556,5067844615313723500}}
 			Uuid{u4{17939392660679484351,5396453880199510710}}
 		}
 		s %GlobalKey{""}
@@ -5953,30 +5951,6 @@ o
 }
 o
 {
-	Uuid %id{u4{11935150521421597363,4787266470685282001}}
-	s %t{"plPointLightComponent"}
-	u3 %v{2}
-	p
-	{
-		b %Active{1}
-		b %CastShadows{0}
-		f %ConstantBias{0xCDCCCC3D}
-		f %Falloff{0x0000803F}
-		f %Intensity{0x0000C844}
-		f %Length{0}
-		ColorGamma %LightColor{u1{255,255,255,255}}
-		s %LightUnit{"plLightUnit::Lumen"}
-		f %PenumbraSize{0xCDCCCC3D}
-		f %Range{0x6866E640}
-		f %Size{0}
-		f %SlopeBias{0x0000803E}
-		f %SpecularMultiplier{0x0000803F}
-		f %Temperature{0x00B0CC45}
-		f %VolumetricIntensity{0x0000803F}
-	}
-}
-o
-{
 	Uuid %id{u4{3326895753902193803,4790789176880284122}}
 	s %t{"plJoltShapeCapsuleComponent"}
 	u3 %v{1}
@@ -7541,14 +7515,16 @@ o
 	p
 	{
 		b %Active{1}
-		f %Aperture{0x00008041}
+		f %Aperture{0x0000803F}
 		s %CameraRenderPipeline{""}
 		f %Dimensions{0x00002041}
+		f %EV100{0}
 		i1 %EditorShortcut{0}
 		VarArray %ExcludeTags{}
 		f %ExposureCompensation{0}
 		f %FOV{0x00007042}
 		f %FarPlane{0x00007A44}
+		f %FinalExposure{0}
 		f %FocusDistance{0xCDCC4C3E}
 		f %ISO{0x0000C842}
 		VarArray %IncludeTags{}
@@ -7558,7 +7534,7 @@ o
 		Vec2 %RenderTargetOffset{f{0,0}}
 		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
 		b %ShowStats{0}
-		Time %ShutterTime{d{0x7B14AE47E17A743F}}
+		Time %ShutterTime{d{0x000000000000F03F}}
 		s %UsageHint{"plCameraUsageHint::None"}
 	}
 }
@@ -8343,29 +8319,6 @@ o
 }
 o
 {
-	Uuid %id{u4{9520276982924474556,5067844615313723500}}
-	s %t{"plSkyLightComponent"}
-	u3 %v{3}
-	p
-	{
-		b %Active{0}
-		s %CubeMap{""}
-		VarArray %ExcludeTags{}
-		f %FarPlane{0x0000C842}
-		VarArray %IncludeTags
-		{
-			s{"SkyLight"}
-		}
-		f %Intensity{0x9A99993E}
-		f %NearPlane{0}
-		s %ReflectionProbeMode{"plReflectionProbeMode::Dynamic"}
-		f %Saturation{0x9A99993E}
-		b %ShowDebugInfo{0}
-		b %ShowMipMaps{0}
-	}
-}
-o
-{
 	Uuid %id{u4{3037366625564403328,5070570061327241893}}
 	s %t{"plJoltDynamicActorComponent"}
 	u3 %v{3}
@@ -8385,32 +8338,6 @@ o
 		s %OnContact{""}
 		b %StartAsleep{0}
 		s %Surface{""}
-	}
-}
-o
-{
-	Uuid %id{u4{11061446819188648064,5077023334882960277}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{13624844552939450255,5744221393958580068}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0xCD6ACAC1,0x288D37C2,0x7D0EF03F}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-		}
 	}
 }
 o
@@ -8908,7 +8835,7 @@ o
 	{
 		b %Active{1}
 		ColorGamma %BottomColor{u1{89,89,108,255}}
-		f %Intensity{0x00401C46}
+		f %Intensity{0x0000803F}
 		ColorGamma %TopColor{u1{124,124,149,255}}
 	}
 }
@@ -9004,14 +8931,16 @@ o
 	p
 	{
 		b %Active{1}
-		f %Aperture{0x00008041}
+		f %Aperture{0x0000803F}
 		s %CameraRenderPipeline{""}
 		f %Dimensions{0x00002041}
+		f %EV100{0}
 		i1 %EditorShortcut{1}
 		VarArray %ExcludeTags{}
 		f %ExposureCompensation{0}
 		f %FOV{0x00007042}
 		f %FarPlane{0x00007A44}
+		f %FinalExposure{0}
 		f %FocusDistance{0xCDCC4C3E}
 		f %ISO{0x0000C842}
 		VarArray %IncludeTags{}
@@ -9021,7 +8950,7 @@ o
 		Vec2 %RenderTargetOffset{f{0,0}}
 		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
 		b %ShowStats{0}
-		Time %ShutterTime{d{0x7B14AE47E17A743F}}
+		Time %ShutterTime{d{0x000000000000F03F}}
 		s %UsageHint{"plCameraUsageHint::Thumbnail"}
 	}
 }
@@ -10103,32 +10032,6 @@ o
 		{
 			s{"CastShadow"}
 		}
-	}
-}
-o
-{
-	Uuid %id{u4{10277813083714324618,5294093235408218744}}
-	s %t{"plSpotLightComponent"}
-	u3 %v{2}
-	p
-	{
-		b %Active{1}
-		b %CastShadows{0}
-		f %ConstantBias{0xCDCCCC3D}
-		f %Falloff{0x0000803F}
-		Angle %InnerSpotAngle{f{0x673BD43F}}
-		f %Intensity{0x0000C844}
-		f %Length{0}
-		ColorGamma %LightColor{u1{255,255,255,255}}
-		s %LightUnit{"plLightUnit::Lumen"}
-		Angle %OuterSpotAngle{f{0x970A0640}}
-		f %PenumbraSize{0xCDCCCC3D}
-		f %Range{0x52B8BA41}
-		f %Size{0}
-		f %SlopeBias{0x0000803E}
-		f %SpecularMultiplier{0x0000803F}
-		f %Temperature{0x00B0CC45}
-		f %VolumetricIntensity{0x0000803F}
 	}
 }
 o
@@ -12761,7 +12664,7 @@ o
 		b %CastShadows{1}
 		f %ConstantBias{0xCDCCCC3D}
 		f %FadeOutStart{0xCDCC4C3F}
-		f %Intensity{0x0050C347}
+		f %Intensity{0x00002041}
 		ColorGamma %LightColor{u1{255,255,255,255}}
 		s %LightUnit{"plLightUnit::Lumen"}
 		f %MinShadowRange{0x00004842}
@@ -12772,7 +12675,7 @@ o
 		f %SpecularMultiplier{0x0000803F}
 		f %SplitModeWeight{0x3333333F}
 		f %Temperature{0x00D09D45}
-		f %VolumetricIntensity{0xCCCCCC3E}
+		f %VolumetricIntensity{0}
 	}
 }
 o
@@ -12955,32 +12858,6 @@ o
 	{
 		b %Active{1}
 		Vec3 %HalfExtents{f{0x0000003F,0x0000003F,0x0000003F}}
-	}
-}
-o
-{
-	Uuid %id{u4{13119022921252029357,5638132506276898717}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{11935150521421597363,4787266470685282001}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0x6189C2C1,0xA7EE39C2,0x763E2540}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-		}
 	}
 }
 o
@@ -13418,21 +13295,6 @@ o
 }
 o
 {
-	Uuid %id{u4{1132496036963258277,5704873252973894874}}
-	s %t{"plSkyBoxComponent"}
-	u3 %v{4}
-	p
-	{
-		b %Active{1}
-		s %CubeMap{"{ 0b202e08-a64f-465d-b38e-15b81d161822 }"}
-		f %ExposureBias{0}
-		b %InverseTonemap{0}
-		b %UseFog{1}
-		f %VirtualDistance{0x00007A44}
-	}
-}
-o
-{
 	Uuid %id{u4{12170750595662081953,5705495748048694190}}
 	s %t{"plJoltHingeConstraintComponent"}
 	u3 %v{1}
@@ -13741,35 +13603,6 @@ o
 }
 o
 {
-	Uuid %id{u4{13624844552939450255,5744221393958580068}}
-	s %t{"plCameraComponent"}
-	u3 %v{11}
-	p
-	{
-		b %Active{1}
-		f %Aperture{0x00008041}
-		s %CameraRenderPipeline{""}
-		f %Dimensions{0x00002041}
-		i1 %EditorShortcut{-1}
-		VarArray %ExcludeTags{}
-		f %ExposureCompensation{0}
-		f %FOV{0x00007042}
-		f %FarPlane{0x00007A44}
-		f %FocusDistance{0xCDCC4C3E}
-		f %ISO{0x0000C843}
-		VarArray %IncludeTags{}
-		s %Mode{"plCameraMode::PerspectiveFixedFovY"}
-		f %NearPlane{0x0000803E}
-		s %RenderTarget{""}
-		Vec2 %RenderTargetOffset{f{0,0}}
-		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
-		b %ShowStats{1}
-		Time %ShutterTime{d{0x7B14AE47E17A743F}}
-		s %UsageHint{"plCameraUsageHint::EditorView"}
-	}
-}
-o
-{
 	Uuid %id{u4{1149355789182784443,5746038194455271312}}
 	s %t{"plJoltPointConstraintComponent"}
 	u3 %v{1}
@@ -13782,34 +13615,6 @@ o
 		s %ChildActorAnchor{""}
 		b %PairCollision{0}
 		s %ParentActor{"{ 1fdb4b29-ec28-c1cf-4d4c-29cbbd0279ce }"}
-	}
-}
-o
-{
-	Uuid %id{u4{5645514703857992853,5746048108495037991}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{1132496036963258277,5704873252973894874}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0,0x0000803F}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-			s{"AutoColMesh"}
-			s{"SkyLight"}
-		}
 	}
 }
 o
@@ -14551,7 +14356,6 @@ o
 		{
 			Uuid{u4{4571308331243103908,4670223957156564199}}
 			Uuid{u4{1574542424891590816,4934785444043847285}}
-			Uuid{u4{5645514703857992853,5746048108495037991}}
 			Uuid{u4{4364524368742340543,4621356167221899837}}
 			Uuid{u4{2498293686895390537,10384201137436998687}}
 			Uuid{u4{18015203693568410537,5244151211994291075}}
@@ -14626,10 +14430,7 @@ o
 			Uuid{u4{11199600404750658204,5291641336822379212}}
 			Uuid{u4{311488343710421314,10283124862910323554}}
 			Uuid{u4{4289765386179009416,4817228140018202353}}
-			Uuid{u4{13119022921252029357,5638132506276898717}}
 			Uuid{u4{8239598183107394443,5369469773508687415}}
-			Uuid{u4{11061446819188648064,5077023334882960277}}
-			Uuid{u4{10717623412529100652,10308840892521943692}}
 		}
 		Uuid %Settings{u4{17165472681167466672,5590908592681332920}}
 	}
@@ -18851,32 +18652,6 @@ o
 		{
 			s{"CastShadow"}
 			s{"AutoColMesh"}
-		}
-	}
-}
-o
-{
-	Uuid %id{u4{10717623412529100652,10308840892521943692}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{10277813083714324618,5294093235408218744}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0x885F7BC1,0xA7EE39C2,0x853DCF3F}}
-		Quat %LocalRotation{f{0,0xE54D483E,0,0xF70D7B3F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
 		}
 	}
 }
@@ -37567,6 +37342,23 @@ o
 }
 o
 {
+	Uuid %id{u4{5029820202441089334,225222788418309325}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBoxManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{2189974221573536380,234044946219702461}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -37596,6 +37388,23 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
 		s %Name{"PairCollision"}
 		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{11538464635628493600,530491051274225601}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDirectionVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -37755,23 +37564,6 @@ o
 }
 o
 {
-	Uuid %id{u4{14599521077569759636,1486681757022313888}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plLightComponent"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plSpotLightComponent"}
-		u3 %TypeVersion{2}
-	}
-}
-o
-{
 	Uuid %id{u4{7451308248938934944,1546964158675832097}}
 	s %t{"plScriptableFunctionAttribute"}
 	u3 %v{1}
@@ -37793,6 +37585,23 @@ o
 	s %t{"plGameObjectReferenceAttribute"}
 	u3 %v{1}
 	p{}
+}
+o
+{
+	Uuid %id{u4{3416879416083425985,1722761173089536188}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plConeVisualizerAttribute"}
+		u3 %TypeVersion{1}
+	}
 }
 o
 {
@@ -37890,23 +37699,6 @@ o
 	{
 		Angle %Max{f{0x147A4340}}
 		Angle %Min{f{0}}
-	}
-}
-o
-{
-	Uuid %id{u4{4966385278310489566,2248469418069360609}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plSettingsComponent"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plSkyLightComponent"}
-		u3 %TypeVersion{3}
 	}
 }
 o
@@ -38190,6 +37982,23 @@ o
 }
 o
 {
+	Uuid %id{u4{12223204493048157076,3316158501449178400}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Bitflags|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plBitflagsBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualizerAnchor"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{4166896946117797251,3528888323670374316}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -38218,6 +38027,23 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
 		s %Name{"plJoltConstraintDriveMode::DrivePosition"}
 		s %Type{"plInt8"}
+	}
+}
+o
+{
+	Uuid %id{u4{12485413893421258756,3989414361314950576}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBoxVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -38418,6 +38244,23 @@ o
 }
 o
 {
+	Uuid %id{u4{8351431977533639674,5063311031373884206}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{5466979977915011090,5066853109628745746}}
 	s %t{"plScriptableFunctionAttribute"}
 	u3 %v{1}
@@ -38425,6 +38268,23 @@ o
 	{
 		VarArray %ArgNames{}
 		VarArray %ArgTypes{}
+	}
+}
+o
+{
+	Uuid %id{u4{974555555213735133,5204571497945009174}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plTransformManipulatorAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -38635,6 +38495,23 @@ o
 		s %PluginName{"plasmaJoltPlugin"}
 		VarArray %Properties{}
 		s %TypeName{"plJoltFixedConstraintComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{2490466214221766975,5839995135696447901}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plColorAttribute"}
 		u3 %TypeVersion{1}
 	}
 }
@@ -38854,6 +38731,40 @@ o
 }
 o
 {
+	Uuid %id{u4{1044895776969024829,7120721283990820986}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSphereManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{3294892078126623227,7172327487756919129}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plNonUniformBoxManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{9580096196045823659,7216228792848163350}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -39003,23 +38914,6 @@ o
 }
 o
 {
-	Uuid %id{u4{4407333650372156328,8017407265912346190}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plRenderComponent"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plSkyBoxComponent"}
-		u3 %TypeVersion{4}
-	}
-}
-o
-{
 	Uuid %id{u4{10388511383183736092,8510614072758724354}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -39077,6 +38971,23 @@ o
 	{
 		s %Flags{""}
 		s %Type{""}
+	}
+}
+o
+{
+	Uuid %id{u4{13593399947534819651,8810410798093967671}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -39577,6 +39488,23 @@ o
 }
 o
 {
+	Uuid %id{u4{14209585135339028478,11308263336862562356}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plPropertyAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{2350106596034883728,11532140854007368447}}
 	s %t{"plDynamicEnumAttribute"}
 	u3 %v{1}
@@ -39641,6 +39569,23 @@ o
 	{
 		Invalid %Max{}
 		f %Min{0}
+	}
+}
+o
+{
+	Uuid %id{u4{9629695892559144654,11770613391892697039}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plConeAngleManipulatorAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -39873,18 +39818,18 @@ o
 }
 o
 {
-	Uuid %id{u4{18280810740528026191,13632423690753413415}}
+	Uuid %id{u4{13985915862957499096,13667540031100479129}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
 	{
 		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
-		s %ParentTypeName{"plEnumBase"}
+		s %ParentTypeName{"plVisualizerAttribute"}
 		s %PluginName{"Static"}
 		VarArray %Properties{}
-		s %TypeName{"plReflectionProbeMode"}
+		s %TypeName{"plCameraVisualizerAttribute"}
 		u3 %TypeVersion{1}
 	}
 }
@@ -39915,6 +39860,23 @@ o
 	{
 		Invalid %Max{}
 		f %Min{0}
+	}
+}
+o
+{
+	Uuid %id{u4{17778042581324502634,13790417346762092445}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSphereVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -39980,23 +39942,6 @@ o
 	p
 	{
 		s %Suffix{" kg"}
-	}
-}
-o
-{
-	Uuid %id{u4{4961047493127433753,14505568851468341346}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plLightComponent"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plPointLightComponent"}
-		u3 %TypeVersion{2}
 	}
 }
 o
@@ -40151,6 +40096,23 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plAmbientLightComponent"}
 		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{3351054477311475377,15504064184053016110}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCapsuleManipulatorAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -40344,6 +40306,23 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
 		s %Name{"LowerLimit"}
 		s %Type{"plAngle"}
+	}
+}
+o
+{
+	Uuid %id{u4{6853598190348858983,16453551367257532047}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCategoryAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -40571,6 +40550,23 @@ o
 		s %Name{"AddAngularForce"}
 		Uuid %ReturnValue{u4{16257002769518150159,4770033385605486225}}
 		s %Type{"plFunctionType::Member"}
+	}
+}
+o
+{
+	Uuid %id{u4{2396020895937527054,17189275590588014591}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCapsuleVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o

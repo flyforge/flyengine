@@ -4,25 +4,6 @@
 #include <Foundation/Strings/StringUtils.h>
 #include <Foundation/Strings/StringView.h>
 
-
-plStringView::plStringView(const std::string_view& rhs)
-{
-  if (!rhs.empty())
-  {
-    m_pStart = rhs.data();
-    m_pEnd = rhs.data() + rhs.size();
-  }
-}
-
-plStringView::plStringView(const std::string& rhs)
-{
-  if (!rhs.empty())
-  {
-    m_pStart = rhs.data();
-    m_pEnd = rhs.data() + rhs.size();
-  }
-}
-
 plUInt32 plStringView::GetCharacter() const
 {
   if (!IsValid())
@@ -270,16 +251,6 @@ bool plStringView::IsRootedPath() const
 plStringView plStringView::GetRootedPathRootName() const
 {
   return plPathUtils::GetRootedPathRootName(*this);
-}
-
-std::string_view plStringView::GetAsStdView() const
-{
-  return std::string_view(GetStartPointer(), static_cast<size_t>(GetElementCount()));
-}
-
-plStringView::operator std::string_view() const
-{
-  return GetAsStdView();
 }
 
 PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_StringView);

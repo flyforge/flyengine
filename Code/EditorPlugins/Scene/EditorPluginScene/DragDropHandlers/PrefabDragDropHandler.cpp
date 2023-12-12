@@ -57,7 +57,7 @@ void plPrefabComponentDragDropHandler::CreatePrefab(const plVec3& vPosition, con
   PasteCmd.m_CreateFromPrefab = AssetGuid;
   PasteCmd.m_Index = iInsertChildIndex;
   PasteCmd.m_sBasePrefabGraph = plPrefabCache::GetSingleton()->GetCachedPrefabDocument(AssetGuid);
-  PasteCmd.m_RemapGuid = plUuid::MakeUuid();
+  PasteCmd.m_RemapGuid.CreateNewUuid();
 
   if (PasteCmd.m_sBasePrefabGraph.IsEmpty())
     return; // error
@@ -66,7 +66,7 @@ void plPrefabComponentDragDropHandler::CreatePrefab(const plVec3& vPosition, con
 
   if (PasteCmd.m_CreatedRootObject.IsValid())
   {
-    MoveObjectToPosition(PasteCmd.m_CreatedRootObject, vPos, plQuat::MakeIdentity());
+    MoveObjectToPosition(PasteCmd.m_CreatedRootObject, vPos, plQuat::IdentityQuaternion());
 
     m_DraggedObjects.PushBack(PasteCmd.m_CreatedRootObject);
   }

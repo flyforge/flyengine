@@ -25,22 +25,23 @@ public:
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
   virtual void OnTransformationChanged(const plTransform& transform) override;
 
-  plEngineGizmoHandle m_hBobble;
-  plEngineGizmoHandle m_hAlignPX;
-  plEngineGizmoHandle m_hAlignNX;
-  plEngineGizmoHandle m_hAlignPY;
-  plEngineGizmoHandle m_hAlignNY;
-  plEngineGizmoHandle m_hAlignPZ;
-  plEngineGizmoHandle m_hAlignNZ;
+  PlasmaEngineGizmoHandle m_hBobble;
+  PlasmaEngineGizmoHandle m_hAlignPX;
+  PlasmaEngineGizmoHandle m_hAlignNX;
+  PlasmaEngineGizmoHandle m_hAlignPY;
+  PlasmaEngineGizmoHandle m_hAlignNY;
+  PlasmaEngineGizmoHandle m_hAlignPZ;
+  PlasmaEngineGizmoHandle m_hAlignNZ;
 
+  bool m_bUseExperimentalGizmo = false;
   bool m_bModifiesRotation;
   plTime m_LastInteraction;
   plVec3 m_vStartPosition;

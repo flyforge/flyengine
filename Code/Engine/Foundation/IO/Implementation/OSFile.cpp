@@ -5,9 +5,7 @@
 plString64 plOSFile::s_sApplicationPath;
 plString64 plOSFile::s_sUserDataPath;
 plString64 plOSFile::s_sTempDataPath;
-plString64 plOSFile::s_sUserDocumentsPath;
 plAtomicInteger32 plOSFile::s_iFileCounter;
-
 plOSFile::Event plOSFile::s_FileEvents;
 
 plFileStats::plFileStats() = default;
@@ -278,29 +276,6 @@ bool plOSFile::ExistsDirectory(plStringView sDirectory)
   s_FileEvents.Broadcast(e);
 
   return bRes;
-}
-
-void plOSFile::FindFreeFilename(plStringBuilder& inout_sPath, plStringView sSuffix /*= {}*/)
-{
-  PLASMA_ASSERT_DEV(!inout_sPath.IsEmpty() && inout_sPath.IsAbsolutePath(), "Invalid input path.");
-
-  if (!plOSFile::ExistsFile(inout_sPath))
-    return;
-
-  const plString orgName = inout_sPath.GetFileName();
-
-  plStringBuilder newName;
-
-  for (plUInt32 i = 1; i < 100000; ++i)
-  {
-    newName.Format("{}{}{}", orgName, sSuffix, i);
-
-    inout_sPath.ChangeFileName(newName);
-    if (!plOSFile::ExistsFile(inout_sPath))
-      return;
-  }
-
-  PLASMA_REPORT_FAILURE("Something went wrong.");
 }
 
 plResult plOSFile::DeleteFile(plStringView sFile)

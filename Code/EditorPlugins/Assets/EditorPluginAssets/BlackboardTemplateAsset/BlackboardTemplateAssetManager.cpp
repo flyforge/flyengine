@@ -14,7 +14,6 @@ plBlackboardTemplateAssetDocumentManager::plBlackboardTemplateAssetDocumentManag
   m_DocTypeDesc.m_sDocumentTypeName = "BlackboardTemplate";
   m_DocTypeDesc.m_sFileExtension = "plBlackboardTemplateAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/BlackboardTemplate.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Logic";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plBlackboardTemplateAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_BlackboardTemplate");
@@ -48,9 +47,9 @@ void plBlackboardTemplateAssetDocumentManager::OnDocumentManagerEvent(const plDo
   }
 }
 
-void plBlackboardTemplateAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plBlackboardTemplateAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plBlackboardTemplateAssetDocument(sPath);
+  out_pDocument = new plBlackboardTemplateAssetDocument(szPath);
 }
 
 void plBlackboardTemplateAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

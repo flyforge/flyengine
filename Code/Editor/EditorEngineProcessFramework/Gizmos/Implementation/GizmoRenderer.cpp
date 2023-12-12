@@ -19,15 +19,15 @@ float plGizmoRenderer::s_fGizmoScale = 1.0f;
 plGizmoRenderer::plGizmoRenderer() = default;
 plGizmoRenderer::~plGizmoRenderer() = default;
 
-void plGizmoRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& inout_types) const
+void plGizmoRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
 {
-  inout_types.PushBack(plGetStaticRTTI<plGizmoRenderData>());
+  types.PushBack(plGetStaticRTTI<plGizmoRenderData>());
 }
 
-void plGizmoRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& inout_categories) const
+void plGizmoRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const
 {
-  inout_categories.PushBack(plDefaultRenderDataCategories::SimpleOpaque);
-  inout_categories.PushBack(plDefaultRenderDataCategories::SimpleForeground);
+  categories.PushBack(plDefaultRenderDataCategories::SimpleOpaque);
+  categories.PushBack(plDefaultRenderDataCategories::SimpleForeground);
 }
 
 void plGizmoRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const

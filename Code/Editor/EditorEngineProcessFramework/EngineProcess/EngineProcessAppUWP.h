@@ -2,11 +2,11 @@
 
 #include <EditorEngineProcessFramework/EngineProcess/EngineProcessApp.h>
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEditorEngineProcessAppUWP : public plEditorEngineProcessApp
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEditorEngineProcessAppUWP : public PlasmaEditorEngineProcessApp
 {
 public:
-  plEditorEngineProcessAppUWP();
-  ~plEditorEngineProcessAppUWP();
+  PlasmaEditorEngineProcessAppUWP();
+  ~PlasmaEditorEngineProcessAppUWP();
 
   virtual plViewHandle CreateRemoteWindowAndView(plCamera* pCamera) override;
 

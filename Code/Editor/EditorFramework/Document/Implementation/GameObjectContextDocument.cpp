@@ -13,8 +13,8 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plGameObjectContextDocument::plGameObjectContextDocument(
-  plStringView sDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType)
-  : plGameObjectDocument(sDocumentPath, pObjectManager, engineConnectionType)
+  const char* szDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType)
+  : plGameObjectDocument(szDocumentPath, pObjectManager, engineConnectionType)
 {
 }
 
@@ -118,7 +118,7 @@ void plGameObjectContextDocument::ClearContext()
   m_ContextObject = plUuid();
   plDocumentObject* pRoot = GetObjectManager()->GetRootObject();
   plHybridArray<plVariant, 16> values;
-  GetObjectAccessor()->GetValues(pRoot, "TempObjects", values).AssertSuccess();
+  GetObjectAccessor()->GetValues(pRoot, "TempObjects", values).IgnoreResult();
   for (plInt32 i = (plInt32)values.GetCount() - 1; i >= 0; --i)
   {
     plDocumentObject* pChild = GetObjectManager()->GetObject(values[i].Get<plUuid>());

@@ -14,7 +14,7 @@ struct plRenderWorldRenderEvent;
 struct plMsgExtractRenderData;
 struct plReflectionProbeDesc;
 class plReflectionProbeRenderData;
-using plReflectionProbeId = plGenericId<24, 8>;
+typedef plGenericId<24, 8> plReflectionProbeId;
 class plReflectionProbeComponentBase;
 class plSkyLightComponent;
 

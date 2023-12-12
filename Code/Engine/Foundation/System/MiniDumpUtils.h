@@ -37,12 +37,12 @@ struct PLASMA_FOUNDATION_DLL plMiniDumpUtils
   /// \brief Windows-specific implementation for writing a mini-dump of another process.
   ///
   /// \sa WriteProcessMiniDump()
-  static plStatus WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess);
+  static plStatus WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE pProcess);
 
   /// \brief Windows-specific implementation for writing a mini-dump of the running process.
   ///
   /// \note On Windows: If the command line option '-fullcrashdumps' is specified, a crash-dump with a full memory capture is made.
-  static plStatus WriteProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess, struct _EXCEPTION_POINTERS* pExceptionInfo);
+  static plStatus WriteProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE pProcess, struct _EXCEPTION_POINTERS* pExceptionInfo);
 
 #endif
 };

@@ -170,43 +170,43 @@ namespace
     return pType;
   }
 
-  void AddAttributes(plShaderParser::ParameterDefinition& ref_def, const plRTTI* pType, plHybridArray<const plPropertyAttribute*, 2>& ref_attributes)
+  void AddAttributes(plShaderParser::ParameterDefinition& def, const plRTTI* pType, plHybridArray<const plPropertyAttribute*, 2>& attributes)
   {
-    if (ref_def.m_sType.StartsWith_NoCase("texture"))
+    if (def.m_sType.StartsWith_NoCase("texture"))
     {
-      if (ref_def.m_sType.IsEqual("Texture2D"))
+      if (def.m_sType.IsEqual("Texture2D"))
       {
-        ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture 2D"));
-        ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_2D"));
+        attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture 2D"));
+        attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_2D"));
       }
-      else if (ref_def.m_sType.IsEqual("Texture3D"))
+      else if (def.m_sType.IsEqual("Texture3D"))
       {
-        ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture 3D"));
-        ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_3D"));
+        attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture 3D"));
+        attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_3D"));
       }
-      else if (ref_def.m_sType.IsEqual("TextureCube"))
+      else if (def.m_sType.IsEqual("TextureCube"))
       {
-        ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture Cube"));
-        ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_Cube"));
+        attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture Cube"));
+        attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_Cube"));
       }
     }
-    else if (ref_def.m_sType.StartsWith_NoCase("permutation"))
+    else if (def.m_sType.StartsWith_NoCase("permutation"))
     {
-      ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Permutation"));
+      attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Permutation"));
     }
     else
     {
-      ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Constant"));
+      attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Constant"));
     }
 
-    for (auto& attributeDef : ref_def.m_Attributes)
+    for (auto& attributeDef : def.m_Attributes)
     {
       if (attributeDef.m_sType.IsEqual("Default") && attributeDef.m_Values.GetCount() >= 1)
       {
         if (pType == plGetStaticRTTI<plColor>())
         {
           // always expose the alpha channel for color properties
-          ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plExposeColorAlphaAttribute));
+          attributes.PushBack(PLASMA_DEFAULT_NEW(plExposeColorAlphaAttribute));
 
           // patch default type, VSE writes float4 instead of color
           if (attributeDef.m_Values[0].GetType() == plVariantType::Vector4)
@@ -216,21 +216,21 @@ namespace
           }
         }
 
-        ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plDefaultValueAttribute, attributeDef.m_Values[0]));
+        attributes.PushBack(PLASMA_DEFAULT_NEW(plDefaultValueAttribute, attributeDef.m_Values[0]));
       }
       else if (attributeDef.m_sType.IsEqual("Clamp") && attributeDef.m_Values.GetCount() >= 2)
       {
-        ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plClampValueAttribute, attributeDef.m_Values[0], attributeDef.m_Values[1]));
+        attributes.PushBack(PLASMA_DEFAULT_NEW(plClampValueAttribute, attributeDef.m_Values[0], attributeDef.m_Values[1]));
       }
       else if (attributeDef.m_sType.IsEqual("Group"))
       {
         if (attributeDef.m_Values.GetCount() >= 1 && attributeDef.m_Values[0].CanConvertTo<plString>())
         {
-          ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plGroupAttribute, attributeDef.m_Values[0].ConvertTo<plString>()));
+          attributes.PushBack(PLASMA_DEFAULT_NEW(plGroupAttribute, attributeDef.m_Values[0].ConvertTo<plString>()));
         }
         else
         {
-          ref_attributes.PushBack(PLASMA_DEFAULT_NEW(plGroupAttribute));
+          attributes.PushBack(PLASMA_DEFAULT_NEW(plGroupAttribute));
         }
       }
     }
@@ -398,7 +398,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode*) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode*) const override
   {
     plString sDescTypeName = plGetStaticRTTI<plReflectedTypeDescriptor>()->GetTypeName();
 
@@ -436,7 +436,7 @@ public:
       desc.m_Flags = plTypeFlags::Phantom | plTypeFlags::Abstract | plTypeFlags::Class;
       desc.m_uiTypeVersion = 1;
 
-      context.RegisterObject(plUuid::MakeStableUuidFromString(desc.m_sTypeName.GetData()), plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
+      context.RegisterObject(plUuid::StableUuidForString(desc.m_sTypeName.GetData()), plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
       rttiConverter.AddObjectToGraph(plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
     }
   }
@@ -453,21 +453,21 @@ public:
   {
   }
 
-  static void FixEnumString(plStringBuilder& ref_sValue, const char* szName)
+  static void FixEnumString(plStringBuilder& sValue, const char* szName)
   {
-    if (ref_sValue.StartsWith(szName))
-      ref_sValue.Shrink(plStringUtils::GetCharacterCount(szName), 0);
+    if (sValue.StartsWith(szName))
+      sValue.Shrink(plStringUtils::GetCharacterCount(szName), 0);
 
-    if (ref_sValue.StartsWith("::"))
-      ref_sValue.Shrink(2, 0);
+    if (sValue.StartsWith("::"))
+      sValue.Shrink(2, 0);
 
-    if (ref_sValue.StartsWith(szName))
-      ref_sValue.Shrink(plStringUtils::GetCharacterCount(szName), 0);
+    if (sValue.StartsWith(szName))
+      sValue.Shrink(plStringUtils::GetCharacterCount(szName), 0);
 
-    if (ref_sValue.StartsWith("_"))
-      ref_sValue.Shrink(1, 0);
+    if (sValue.StartsWith("_"))
+      sValue.Shrink(1, 0);
 
-    ref_sValue.PrependFormat("{0}::{0}_", szName);
+    sValue.PrependFormat("{0}::{0}_", szName);
   }
 
   void FixEnum(plAbstractObjectNode* pNode, const char* szEnum) const
@@ -480,7 +480,7 @@ public:
     }
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     FixEnum(pNode, "SHADING_MODE");
     FixEnum(pNode, "BLEND_MODE");

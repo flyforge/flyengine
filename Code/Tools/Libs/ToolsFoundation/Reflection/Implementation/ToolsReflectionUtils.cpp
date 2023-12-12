@@ -81,14 +81,14 @@ namespace
   template <>
   void GetVariantFunc::operator()<plAngle>()
   {
-    m_Value = plAngle::MakeFromDegree((float)m_fValue);
+    m_Value = plAngle::Degree((float)m_fValue);
     m_bValid = true;
   }
 
   template <>
   void GetVariantFunc::operator()<plTime>()
   {
-    m_Value = plTime::MakeFromSeconds(m_fValue);
+    m_Value = plTime::Seconds(m_fValue);
     m_bValid = true;
   }
 } // namespace

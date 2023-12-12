@@ -29,7 +29,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSampleBlendSpace2DAnimNode, 1, plRTTIDefau
       PLASMA_MEMBER_PROPERTY("Loop", m_bLoop)->AddAttributes(new plDefaultValueAttribute(true)),
       PLASMA_MEMBER_PROPERTY("PlaybackSpeed", m_fPlaybackSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, {})),
       PLASMA_MEMBER_PROPERTY("ApplyRootMotion", m_bApplyRootMotion),
-      PLASMA_MEMBER_PROPERTY("InputResponse", m_InputResponse)->AddAttributes(new plDefaultValueAttribute(plTime::MakeFromMilliseconds(100))),
+      PLASMA_MEMBER_PROPERTY("InputResponse", m_InputResponse)->AddAttributes(new plDefaultValueAttribute(plTime::Milliseconds(100))),
     PLASMA_ACCESSOR_PROPERTY("CenterClip", GetCenterClipFile, SetCenterClipFile)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
       PLASMA_ARRAY_MEMBER_PROPERTY("Clips", m_Clips),
 
@@ -146,6 +146,7 @@ const char* plSampleBlendSpace2DAnimNode::GetCenterClipFile() const
 
 void plSampleBlendSpace2DAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_Blendspace2D");
   if (!m_OutPose.IsConnected() || (!m_InCoordX.IsConnected() && !m_InCoordY.IsConnected()) || m_Clips.IsEmpty())
     return;
 
@@ -153,7 +154,7 @@ void plSampleBlendSpace2DAnimNode::Step(plAnimController& ref_controller, plAnim
 
   if ((!m_InStart.IsConnected() && !pState->m_bPlaying) || m_InStart.IsTriggered(ref_graph))
   {
-    pState->m_CenterPlaybackTime = plTime::MakeZero();
+    pState->m_CenterPlaybackTime = plTime::Zero();
     pState->m_fOtherPlaybackPosNorm = 0.0f;
     pState->m_bPlaying = true;
 
@@ -299,12 +300,12 @@ void plSampleBlendSpace2DAnimNode::PlayClips(plAnimController& ref_controller, c
   const bool bLoop = m_InLoop.GetBool(ref_graph, m_bLoop);
   const float fSpeed = static_cast<float>(m_InSpeed.GetNumber(ref_graph, m_fPlaybackSpeed));
 
-  plTime tAvgDuration = plTime::MakeZero();
+  plTime tAvgDuration = plTime::Zero();
 
   plHybridArray<plAnimPoseGeneratorCommandSampleTrack*, 8> pSampleTrack;
   pSampleTrack.SetCountUninitialized(clips.GetCount());
 
-  plVec3 vRootMotion = plVec3::MakeZero();
+  plVec3 vRootMotion = plVec3::ZeroVector();
   plUInt32 uiNumAvgClips = 0;
 
   for (plUInt32 i = 0; i < clips.GetCount(); ++i)
@@ -337,7 +338,7 @@ void plSampleBlendSpace2DAnimNode::PlayClips(plAnimController& ref_controller, c
     tAvgDuration = tAvgDuration / uiNumAvgClips;
   }
 
-  tAvgDuration = plMath::Max(tAvgDuration, plTime::MakeFromMilliseconds(16));
+  tAvgDuration = plMath::Max(tAvgDuration, plTime::Milliseconds(16));
 
   const plTime fPrevCenterPlaybackPos = pState->m_CenterPlaybackTime;
   const float fPrevPlaybackPosNorm = pState->m_fOtherPlaybackPosNorm;
@@ -363,7 +364,6 @@ void plSampleBlendSpace2DAnimNode::PlayClips(plAnimController& ref_controller, c
       pState->m_fOtherPlaybackPosNorm = 1.0f;
       pState->m_bPlaying = false;
       m_OutOnFinished.SetTriggered(ref_graph);
-      break;
     }
   }
 

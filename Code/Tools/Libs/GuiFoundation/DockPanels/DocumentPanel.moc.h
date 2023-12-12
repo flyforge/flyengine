@@ -12,12 +12,12 @@ public:
   Q_OBJECT
 
 public:
-  plQtDocumentPanel(QWidget* pParent, plDocument* pDocument);
+  plQtDocumentPanel(QWidget* parent, plDocument* pDocument);
   ~plQtDocumentPanel();
 
   // prevents closing of the dockwidget, even with Alt+F4
   virtual void closeEvent(QCloseEvent* e) override;
-  virtual bool event(QEvent* pEvent) override;
+  virtual bool event(QEvent* event) override;
 
   static const plDynamicArray<plQtDocumentPanel*>& GetAllDocumentPanels() { return s_AllDocumentPanels; }
 

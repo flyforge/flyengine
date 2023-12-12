@@ -114,12 +114,9 @@ plResult plArchiveUtils::WriteEntry(
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
     case plArchiveCompressionMode::Compressed_zstd:
-    {
-      constexpr plUInt32 uiMaxNumWorkerThreads = 12u;
-      zstdWriter.SetOutputStream(&inout_stream, uiMaxNumWorkerThreads, (plCompressedStreamWriterZstd::Compression)iCompressionLevel);
+      zstdWriter.SetOutputStream(&inout_stream, (plCompressedStreamWriterZstd::Compression)iCompressionLevel);
       pWriter = &zstdWriter;
-    }
-    break;
+      break;
 #endif
 
     default:
@@ -244,7 +241,7 @@ plUniquePtr<plStreamReader> plArchiveUtils::CreateEntryReader(const plArchiveEnt
 
 void plArchiveUtils::ConfigureRawMemoryStreamReader(const plArchiveEntry& entry, const void* pStartOfArchiveData, plRawMemoryStreamReader& ref_memReader)
 {
-  ref_memReader.Reset(plMemoryUtils::AddByteOffset(pStartOfArchiveData, static_cast<std::ptrdiff_t>(entry.m_uiDataStartOffset)), entry.m_uiStoredDataSize);
+  ref_memReader.Reset(plMemoryUtils::AddByteOffset(pStartOfArchiveData, static_cast<ptrdiff_t>(entry.m_uiDataStartOffset)), entry.m_uiStoredDataSize);
 }
 
 static const char* szEndMarker = "PLASMAARCHIVE-END";

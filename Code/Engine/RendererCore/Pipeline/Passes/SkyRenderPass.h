@@ -11,6 +11,11 @@ public:
   plSkyRenderPass(const char* szName = "SkyRenderPass");
   ~plSkyRenderPass();
 
+
 protected:
+  virtual void SetupPermutationVars(const plRenderViewContext& renderViewContext) override;
+
   virtual void RenderObjects(const plRenderViewContext& renderViewContext) override;
+
+  bool m_bWriteDepth;
 };

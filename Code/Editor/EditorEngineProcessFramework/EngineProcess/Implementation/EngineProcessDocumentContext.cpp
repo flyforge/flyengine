@@ -16,19 +16,19 @@
 #include <RendererFoundation/Resources/Texture.h>
 #include <Texture/Image/ImageUtils.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEngineProcessDocumentContext, 1, plRTTINoAllocator)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEngineProcessDocumentContext, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plHashTable<plUuid, plEngineProcessDocumentContext*> plEngineProcessDocumentContext::s_DocumentContexts;
+plHashTable<plUuid, PlasmaEngineProcessDocumentContext*> PlasmaEngineProcessDocumentContext::s_DocumentContexts;
 
-plEngineProcessDocumentContext* plEngineProcessDocumentContext::GetDocumentContext(plUuid guid)
+PlasmaEngineProcessDocumentContext* PlasmaEngineProcessDocumentContext::GetDocumentContext(plUuid guid)
 {
-  plEngineProcessDocumentContext* pResult = nullptr;
+  PlasmaEngineProcessDocumentContext* pResult = nullptr;
   s_DocumentContexts.TryGetValue(guid, pResult);
   return pResult;
 }
 
-void plEngineProcessDocumentContext::AddDocumentContext(plUuid guid, const plVariant& metaData, plEngineProcessDocumentContext* pContext, plEngineProcessCommunicationChannel* pIPC, plStringView sDocumentType)
+void PlasmaEngineProcessDocumentContext::AddDocumentContext(plUuid guid, const plVariant& metaData, PlasmaEngineProcessDocumentContext* pContext, PlasmaEngineProcessCommunicationChannel* pIPC, plStringView sDocumentType)
 {
   PLASMA_ASSERT_DEV(!s_DocumentContexts.Contains(guid), "Cannot add a view with an index that already exists");
   s_DocumentContexts[guid] = pContext;
@@ -36,7 +36,7 @@ void plEngineProcessDocumentContext::AddDocumentContext(plUuid guid, const plVar
   pContext->Initialize(guid, metaData, pIPC, sDocumentType);
 }
 
-bool plEngineProcessDocumentContext::PendingOperationsInProgress()
+bool PlasmaEngineProcessDocumentContext::PendingOperationsInProgress()
 {
   for (auto it = s_DocumentContexts.GetIterator(); it.IsValid(); ++it)
   {
@@ -46,7 +46,7 @@ bool plEngineProcessDocumentContext::PendingOperationsInProgress()
   return false;
 }
 
-void plEngineProcessDocumentContext::UpdateDocumentContexts()
+void PlasmaEngineProcessDocumentContext::UpdateDocumentContexts()
 {
   PLASMA_PROFILE_SCOPE("UpdateDocumentContexts");
   for (auto it = s_DocumentContexts.GetIterator(); it.IsValid(); ++it)
@@ -55,9 +55,9 @@ void plEngineProcessDocumentContext::UpdateDocumentContexts()
   }
 }
 
-void plEngineProcessDocumentContext::DestroyDocumentContext(plUuid guid)
+void PlasmaEngineProcessDocumentContext::DestroyDocumentContext(plUuid guid)
 {
-  plEngineProcessDocumentContext* pContext = nullptr;
+  PlasmaEngineProcessDocumentContext* pContext = nullptr;
   if (s_DocumentContexts.Remove(guid, &pContext))
   {
     pContext->Deinitialize();
@@ -65,9 +65,10 @@ void plEngineProcessDocumentContext::DestroyDocumentContext(plUuid guid)
   }
 }
 
-plBoundingBoxSphere plEngineProcessDocumentContext::GetWorldBounds(plWorld* pWorld)
+plBoundingBoxSphere PlasmaEngineProcessDocumentContext::GetWorldBounds(plWorld* pWorld)
 {
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   {
     PLASMA_LOCK(pWorld->GetReadMarker());
@@ -87,27 +88,27 @@ plBoundingBoxSphere plEngineProcessDocumentContext::GetWorldBounds(plWorld* pWor
   }
 
   if (!bounds.IsValid())
-    bounds = plBoundingBoxSphere::MakeFromCenterExtents(plVec3::MakeZero(), plVec3(1, 1, 1), 2);
+    bounds = plBoundingBoxSphere(plVec3::ZeroVector(), plVec3(1, 1, 1), 2);
 
   return bounds;
 }
 
-plEngineProcessDocumentContext::plEngineProcessDocumentContext(plBitflags<plEngineProcessDocumentContextFlags> flags)
+PlasmaEngineProcessDocumentContext::PlasmaEngineProcessDocumentContext(plBitflags<PlasmaEngineProcessDocumentContextFlags> flags)
   : m_Flags(flags)
 {
-  GetContext().m_Events.AddEventHandler(plMakeDelegate(&plEngineProcessDocumentContext::WorldRttiConverterContextEventHandler, this));
+  m_Context.m_Events.AddEventHandler(plMakeDelegate(&PlasmaEngineProcessDocumentContext::WorldRttiConverterContextEventHandler, this));
 }
 
-plEngineProcessDocumentContext::~plEngineProcessDocumentContext()
+PlasmaEngineProcessDocumentContext::~PlasmaEngineProcessDocumentContext()
 {
-  PLASMA_ASSERT_DEV(m_pWorld == nullptr, "World has not been deleted! Call 'plEngineProcessDocumentContext::DestroyDocumentContext'");
+  PLASMA_ASSERT_DEV(m_pWorld == nullptr, "World has not been deleted! Call 'PlasmaEngineProcessDocumentContext::DestroyDocumentContext'");
 
-  GetContext().m_Events.RemoveEventHandler(plMakeDelegate(&plEngineProcessDocumentContext::WorldRttiConverterContextEventHandler, this));
+  m_Context.m_Events.RemoveEventHandler(plMakeDelegate(&PlasmaEngineProcessDocumentContext::WorldRttiConverterContextEventHandler, this));
 }
 
-void plEngineProcessDocumentContext::Initialize(const plUuid& documentGuid, const plVariant& metaData, plEngineProcessCommunicationChannel* pIPC, plStringView sDocumentType)
+void PlasmaEngineProcessDocumentContext::Initialize(const plUuid& DocumentGuid, const plVariant& metaData, PlasmaEngineProcessCommunicationChannel* pIPC, plStringView sDocumentType)
 {
-  m_DocumentGuid = documentGuid;
+  m_DocumentGuid = DocumentGuid;
   m_MetaData = metaData;
   m_pIPC = pIPC;
 
@@ -116,55 +117,55 @@ void plEngineProcessDocumentContext::Initialize(const plUuid& documentGuid, cons
     m_sDocumentType = sDocumentType;
   }
 
-  if (m_Flags.IsSet(plEngineProcessDocumentContextFlags::CreateWorld))
+  if (m_Flags.IsSet(PlasmaEngineProcessDocumentContextFlags::CreateWorld))
   {
     plStringBuilder tmp;
     plWorldDesc desc(plConversionUtils::ToString(m_DocumentGuid, tmp));
     desc.m_bReportErrorWhenStaticObjectMoves = false;
 
     m_pWorld = PLASMA_DEFAULT_NEW(plWorld, desc);
-    m_pWorld->SetGameObjectReferenceResolver(plMakeDelegate(&plEngineProcessDocumentContext::ResolveStringToGameObjectHandle, this));
+    m_pWorld->SetGameObjectReferenceResolver(plMakeDelegate(&PlasmaEngineProcessDocumentContext::ResolveStringToGameObjectHandle, this));
 
-    GetContext().m_pWorld = m_pWorld;
-    m_Mirror.InitReceiver(&GetContext());
+    m_Context.m_pWorld = m_pWorld;
+    m_Mirror.InitReceiver(&m_Context);
   }
   OnInitialize();
 }
 
-void plEngineProcessDocumentContext::Deinitialize()
+void PlasmaEngineProcessDocumentContext::Deinitialize()
 {
   OnDeinitialize();
 
   ClearViewContexts();
   m_Mirror.Clear();
   m_Mirror.DeInit();
-  GetContext().Clear();
+  m_Context.Clear();
 
   CleanUpContextSyncObjects();
-  if (m_Flags.IsSet(plEngineProcessDocumentContextFlags::CreateWorld))
+  if (m_Flags.IsSet(PlasmaEngineProcessDocumentContextFlags::CreateWorld))
   {
     PLASMA_DEFAULT_DELETE(m_pWorld);
   }
   m_pWorld = nullptr;
 }
 
-void plEngineProcessDocumentContext::SendProcessMessage(plProcessMessage* pMsg)
+void PlasmaEngineProcessDocumentContext::SendProcessMessage(plProcessMessage* pMsg)
 {
   m_pIPC->SendMessage(pMsg);
 }
 
-void plEngineProcessDocumentContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
+void PlasmaEngineProcessDocumentContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   PLASMA_LOCK(m_pWorld->GetWriteMarker());
 
-  const bool bIsRemoteProcess = plEditorEngineProcessApp::GetSingleton()->IsRemoteMode();
+  const bool bIsRemoteProcess = PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode();
 
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plEntityMsgToEngine>())
   {
     const plEntityMsgToEngine* pMsg2 = static_cast<const plEntityMsgToEngine*>(pMsg);
     m_Mirror.ApplyOp(const_cast<plObjectChange&>(pMsg2->m_change));
 
-    plRttiConverterObject target = GetContext().GetObjectByGUID(pMsg2->m_change.m_Root);
+    plRttiConverterObject target = m_Context.GetObjectByGUID(pMsg2->m_change.m_Root);
 
     if (target.m_pType == nullptr || target.m_pObject == nullptr)
       return;
@@ -186,9 +187,9 @@ void plEngineProcessDocumentContext::HandleMessage(const plEditorEngineDocumentM
       }
     }
   }
-  else if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plEditorEngineSyncObjectMsg>())
+  else if (pMsg->GetDynamicRTTI()->IsDerivedFrom<PlasmaEditorEngineSyncObjectMsg>())
   {
-    const plEditorEngineSyncObjectMsg* pMsg2 = static_cast<const plEditorEngineSyncObjectMsg*>(pMsg);
+    const PlasmaEditorEngineSyncObjectMsg* pMsg2 = static_cast<const PlasmaEditorEngineSyncObjectMsg*>(pMsg);
 
     ProcessEditorEngineSyncObjectMsg(*pMsg2);
   }
@@ -234,14 +235,14 @@ void plEngineProcessDocumentContext::HandleMessage(const plEditorEngineDocumentM
     // the data is send back as a response.
     CreateThumbnailViewContext(pMsg2);
   }
-  else if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plEditorEngineViewMsg>())
+  else if (pMsg->GetDynamicRTTI()->IsDerivedFrom<PlasmaEditorEngineViewMsg>())
   {
     if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plViewRedrawMsgToEngine>())
     {
       UpdateSyncObjects();
     }
 
-    const plEditorEngineViewMsg* pViewMsg = static_cast<const plEditorEngineViewMsg*>(pMsg);
+    const PlasmaEditorEngineViewMsg* pViewMsg = static_cast<const PlasmaEditorEngineViewMsg*>(pMsg);
     PLASMA_ASSERT_DEV(pViewMsg->m_uiViewID < 0xFFFFFFFF, "Invalid view ID in '{0}'", pMsg->GetDynamicRTTI()->GetTypeName());
 
     m_ViewContexts.EnsureCount(pViewMsg->m_uiViewID + 1);
@@ -264,7 +265,7 @@ void plEngineProcessDocumentContext::HandleMessage(const plEditorEngineDocumentM
     {
       if (m_ViewContexts[pViewMsg->m_uiViewID] == nullptr)
       {
-        if (!plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+        if (!PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
         {
           m_ViewContexts[pViewMsg->m_uiViewID] = CreateViewContext();
         }
@@ -289,31 +290,31 @@ void plEngineProcessDocumentContext::HandleMessage(const plEditorEngineDocumentM
 
     const plViewHighlightMsgToEngine* pMsg2 = static_cast<const plViewHighlightMsgToEngine*>(pMsg);
 
-    GetContext().m_uiHighlightID = GetContext().m_ComponentPickingMap.GetHandle(pMsg2->m_HighlightObject);
+    m_Context.m_uiHighlightID = m_Context.m_ComponentPickingMap.GetHandle(pMsg2->m_HighlightObject);
 
-    if (GetContext().m_uiHighlightID == 0)
-      GetContext().m_uiHighlightID = GetContext().m_OtherPickingMap.GetHandle(pMsg2->m_HighlightObject);
+    if (m_Context.m_uiHighlightID == 0)
+      m_Context.m_uiHighlightID = m_Context.m_OtherPickingMap.GetHandle(pMsg2->m_HighlightObject);
   }
 }
 
-void plEngineProcessDocumentContext::AddSyncObject(plEditorEngineSyncObject* pSync)
+void PlasmaEngineProcessDocumentContext::AddSyncObject(PlasmaEditorEngineSyncObject* pSync)
 {
-  pSync->Configure(m_DocumentGuid, [this](plEditorEngineSyncObject* pSync) { RemoveSyncObject(pSync); });
+  pSync->Configure(m_DocumentGuid, [this](PlasmaEditorEngineSyncObject* pSync) { RemoveSyncObject(pSync); });
 
   m_SyncObjects[pSync->GetGuid()] = pSync;
 }
 
-void plEngineProcessDocumentContext::RemoveSyncObject(plEditorEngineSyncObject* pSync)
+void PlasmaEngineProcessDocumentContext::RemoveSyncObject(PlasmaEditorEngineSyncObject* pSync)
 {
   m_SyncObjects.Remove(pSync->GetGuid());
 }
 
-plEditorEngineSyncObject* plEngineProcessDocumentContext::FindSyncObject(const plUuid& guid)
+PlasmaEditorEngineSyncObject* PlasmaEngineProcessDocumentContext::FindSyncObject(const plUuid& guid)
 {
   return m_SyncObjects.GetValueOrDefault(guid, nullptr);
 }
 
-void plEngineProcessDocumentContext::ClearViewContexts()
+void PlasmaEngineProcessDocumentContext::ClearViewContexts()
 {
   for (auto* pContext : m_ViewContexts)
   {
@@ -324,7 +325,7 @@ void plEngineProcessDocumentContext::ClearViewContexts()
 }
 
 
-void plEngineProcessDocumentContext::CleanUpContextSyncObjects()
+void PlasmaEngineProcessDocumentContext::CleanUpContextSyncObjects()
 {
   while (!m_SyncObjects.IsEmpty())
   {
@@ -333,7 +334,7 @@ void plEngineProcessDocumentContext::CleanUpContextSyncObjects()
   }
 }
 
-void plEngineProcessDocumentContext::ProcessEditorEngineSyncObjectMsg(const plEditorEngineSyncObjectMsg& msg)
+void PlasmaEngineProcessDocumentContext::ProcessEditorEngineSyncObjectMsg(const PlasmaEditorEngineSyncObjectMsg& msg)
 {
   auto it = m_SyncObjects.Find(msg.m_ObjectGuid);
 
@@ -349,7 +350,7 @@ void plEngineProcessDocumentContext::ProcessEditorEngineSyncObjectMsg(const plEd
   }
 
   const plRTTI* pRtti = plRTTI::FindTypeByName(msg.m_sObjectType);
-  plEditorEngineSyncObject* pSyncObject = nullptr;
+  PlasmaEditorEngineSyncObject* pSyncObject = nullptr;
   bool bSetOwner = false;
 
   if (pRtti == nullptr)
@@ -364,7 +365,7 @@ void plEngineProcessDocumentContext::ProcessEditorEngineSyncObjectMsg(const plEd
     PLASMA_ASSERT_DEV(pRtti->GetAllocator() != nullptr, "Sync object of type '{0}' does not have a default allocator", msg.m_sObjectType);
     void* pObject = pRtti->GetAllocator()->Allocate<void>();
 
-    pSyncObject = static_cast<plEditorEngineSyncObject*>(pObject);
+    pSyncObject = static_cast<PlasmaEditorEngineSyncObject*>(pObject);
     bSetOwner = true;
   }
   else
@@ -384,7 +385,7 @@ void plEngineProcessDocumentContext::ProcessEditorEngineSyncObjectMsg(const plEd
   pSyncObject->SetModified(true);
 }
 
-void plEngineProcessDocumentContext::Reset()
+void PlasmaEngineProcessDocumentContext::Reset()
 {
   plUuid guid = m_DocumentGuid;
   auto ipc = m_pIPC;
@@ -394,23 +395,23 @@ void plEngineProcessDocumentContext::Reset()
   Initialize(guid, m_MetaData, ipc, m_sDocumentType);
 }
 
-void plEngineProcessDocumentContext::ClearExistingObjects()
+void PlasmaEngineProcessDocumentContext::ClearExistingObjects()
 {
-  GetContext().DeleteExistingObjects();
+  m_Context.DeleteExistingObjects();
 }
 
-void plEngineProcessDocumentContext::OnInitialize() {}
-void plEngineProcessDocumentContext::OnDeinitialize() {}
+void PlasmaEngineProcessDocumentContext::OnInitialize() {}
+void PlasmaEngineProcessDocumentContext::OnDeinitialize() {}
 
-bool plEngineProcessDocumentContext::PendingOperationInProgress() const
+bool PlasmaEngineProcessDocumentContext::PendingOperationInProgress() const
 {
   auto pState = plGameApplicationBase::GetGameApplicationBaseInstance()->GetActiveGameStateLinkedToWorld(GetWorld());
   return m_pThumbnailViewContext != nullptr || pState != nullptr;
 }
 
-void plEngineProcessDocumentContext::UpdateDocumentContext()
+void PlasmaEngineProcessDocumentContext::UpdateDocumentContext()
 {
-  if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
   {
     // in remote mode simply redraw all all views every time a context is updated
     for (auto pView : m_ViewContexts)
@@ -504,15 +505,15 @@ void plEngineProcessDocumentContext::UpdateDocumentContext()
   }
 }
 
-plStatus plEngineProcessDocumentContext::ExportDocument(const plExportDocumentMsgToEngine* pMsg)
+plStatus PlasmaEngineProcessDocumentContext::ExportDocument(const plExportDocumentMsgToEngine* pMsg)
 {
   return plStatus(plFmt("Export document not implemented for '{0}'", GetDynamicRTTI()->GetTypeName()));
 }
 
 
-void plEngineProcessDocumentContext::CreateThumbnailViewContext(const plCreateThumbnailMsgToEngine* pMsg)
+void PlasmaEngineProcessDocumentContext::CreateThumbnailViewContext(const plCreateThumbnailMsgToEngine* pMsg)
 {
-  PLASMA_ASSERT_DEV(!plEditorEngineProcessApp::GetSingleton()->IsRemoteMode(), "Wrong mode for thumbnail creation");
+  PLASMA_ASSERT_DEV(!PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode(), "Wrong mode for thumbnail creation");
   PLASMA_ASSERT_DEV(m_pThumbnailViewContext == nullptr, "Thumbnail rendering already in progress.");
   PLASMA_CHECK_AT_COMPILETIME_MSG((ThumbnailSuperscaleFactor & (ThumbnailSuperscaleFactor - 1)) == 0, "ThumbnailSuperscaleFactor must be power of 2.");
   m_uiThumbnailConvergenceFrames = 0;
@@ -577,7 +578,7 @@ void plEngineProcessDocumentContext::CreateThumbnailViewContext(const plCreateTh
   OnThumbnailViewContextCreated();
 }
 
-void plEngineProcessDocumentContext::DestroyThumbnailViewContext()
+void PlasmaEngineProcessDocumentContext::DestroyThumbnailViewContext()
 {
   OnDestroyThumbnailViewContext();
 
@@ -601,18 +602,18 @@ void plEngineProcessDocumentContext::DestroyThumbnailViewContext()
   m_pWorld->SetWorldSimulationEnabled(m_bWorldSimStateBeforeThumbnail);
 }
 
-bool plEngineProcessDocumentContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool PlasmaEngineProcessDocumentContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   plLog::Error("UpdateThumbnailViewContext not implemented for '{0}'", GetDynamicRTTI()->GetTypeName());
   return true;
 }
 
-void plEngineProcessDocumentContext::OnThumbnailViewContextCreated() {}
-void plEngineProcessDocumentContext::OnDestroyThumbnailViewContext() {}
+void PlasmaEngineProcessDocumentContext::OnThumbnailViewContextCreated() {}
+void PlasmaEngineProcessDocumentContext::OnDestroyThumbnailViewContext() {}
 
-void plEngineProcessDocumentContext::SetTagOnObject(const plUuid& object, const char* szTag, bool bSet, bool recursive)
+void PlasmaEngineProcessDocumentContext::SetTagOnObject(const plUuid& object, const char* szTag, bool bSet, bool recursive)
 {
-  plGameObjectHandle hObject = GetContext().m_GameObjectMap.GetHandle(object);
+  plGameObjectHandle hObject = m_Context.m_GameObjectMap.GetHandle(object);
 
   const plTag& tag = plTagRegistry::GetGlobalRegistry().RegisterTag(szTag);
 
@@ -636,7 +637,7 @@ void plEngineProcessDocumentContext::SetTagOnObject(const plUuid& object, const 
   }
 }
 
-void plEngineProcessDocumentContext::SetTagRecursive(plGameObject* pObject, const plTag& tag)
+void PlasmaEngineProcessDocumentContext::SetTagRecursive(plGameObject* pObject, const plTag& tag)
 {
   pObject->SetTag(tag);
 
@@ -647,7 +648,7 @@ void plEngineProcessDocumentContext::SetTagRecursive(plGameObject* pObject, cons
   }
 }
 
-void plEngineProcessDocumentContext::ClearTagRecursive(plGameObject* pObject, const plTag& tag)
+void PlasmaEngineProcessDocumentContext::ClearTagRecursive(plGameObject* pObject, const plTag& tag)
 {
   pObject->RemoveTag(tag);
 
@@ -657,7 +658,7 @@ void plEngineProcessDocumentContext::ClearTagRecursive(plGameObject* pObject, co
   }
 }
 
-void plEngineProcessDocumentContext::WorldRttiConverterContextEventHandler(const plWorldRttiConverterContext::Event& e)
+void PlasmaEngineProcessDocumentContext::WorldRttiConverterContextEventHandler(const plWorldRttiConverterContext::Event& e)
 {
   if (e.m_Type == plWorldRttiConverterContext::Event::Type::GameObjectCreated)
   {
@@ -676,7 +677,7 @@ void plEngineProcessDocumentContext::WorldRttiConverterContextEventHandler(const
         continue;
 
       // check whether the object that references the new object is already known (may be dead or not yet created as well)
-      plComponentHandle hRefComp = GetContext().m_ComponentMap.GetHandle(compGuid);
+      plComponentHandle hRefComp = m_Context.m_ComponentMap.GetHandle(compGuid);
 
       if (hRefComp.IsInvalidated())
         continue;
@@ -691,7 +692,7 @@ void plEngineProcessDocumentContext::WorldRttiConverterContextEventHandler(const
         // so we can just re-apply the reference (by setting the property again)
         // and thus trigger that the other object updates/fixes its internal state
 
-        const plAbstractProperty* pAbsProp = pRefComp->GetDynamicRTTI()->FindPropertyByName(ref.m_sComponentProperty);
+        auto pAbsProp = pRefComp->GetDynamicRTTI()->FindPropertyByName(ref.m_sComponentProperty);
         if (pAbsProp == nullptr)
           continue;
 
@@ -729,14 +730,14 @@ void plEngineProcessDocumentContext::WorldRttiConverterContextEventHandler(const
 ///
 /// There are two different use cases:
 ///
-///  1) hThis is invalid and szComponentProperty is null:
+///  1) hThis is invalid and sComponentProperty is null:
 ///
 ///     This is used by plPrefabReferenceComponent::SerializeComponent() to check whether a string represents a game object reference.
 ///     It may be any arbitrary string and thus must not assert.
 ///     In this case a reference is always a stringyfied GUID.
 ///     Since this is only used for scene export, only the lookup shall be done and nothing else.
 ///
-///  2) hThis and szComponentProperty represent a valid component+property combination:
+///  2) hThis and sComponentProperty represent a valid component+property combination:
 ///
 ///     This is called at edit time whenever a reference property is queried, which also happens whenever a reference is modified.
 ///     In this case we need to maintain two maps:
@@ -745,11 +746,11 @@ void plEngineProcessDocumentContext::WorldRttiConverterContextEventHandler(const
 ///     These are needed to fix up references during undo/redo when objects get deleted and recreated.
 ///     Ie. when an object that has references or is referenced gets deleted and then undo restores it, the references should appear as well.
 ///
-plGameObjectHandle plEngineProcessDocumentContext::ResolveStringToGameObjectHandle(const void* pData, plComponentHandle hThis, plStringView sComponentProperty) const
+plGameObjectHandle PlasmaEngineProcessDocumentContext::ResolveStringToGameObjectHandle(const void* pData, plComponentHandle hThis, plStringView sComponentProperty) const
 {
   const char* szTargetGuid = reinterpret_cast<const char*>(pData);
 
-  if (hThis.IsInvalidated() && sComponentProperty.IsEmpty())
+  if (hThis.IsInvalidated() && sComponentProperty == nullptr)
   {
     // This code path is used by plPrefabReferenceComponent::SerializeComponent() to check whether an arbitrary string may
     // represent a game object reference. References will always be stringyfied GUIDs.
@@ -758,12 +759,12 @@ plGameObjectHandle plEngineProcessDocumentContext::ResolveStringToGameObjectHand
       return plGameObjectHandle();
 
     // convert string to GUID and check if references a known object
-    return GetContext().m_GameObjectMap.GetHandle(plConversionUtils::ConvertStringToUuid(szTargetGuid));
+    return m_Context.m_GameObjectMap.GetHandle(plConversionUtils::ConvertStringToUuid(szTargetGuid));
   }
 
 
 
-  plUuid srcComponentGuid = GetContext().m_ComponentMap.GetGuid(hThis);
+  plUuid srcComponentGuid = m_Context.m_ComponentMap.GetGuid(hThis);
   if (!srcComponentGuid.IsValid())
   {
     // if we do not know hThis, it is usually a component that was created by a prefab instance
@@ -780,7 +781,7 @@ plGameObjectHandle plEngineProcessDocumentContext::ResolveStringToGameObjectHand
     // search the parents for a known game object
     while (pOwner)
     {
-      srcComponentGuid = GetContext().m_GameObjectMap.GetGuid(pOwner->GetHandle());
+      srcComponentGuid = m_Context.m_GameObjectMap.GetGuid(pOwner->GetHandle());
 
       if (srcComponentGuid.IsValid())
         break;
@@ -797,7 +798,7 @@ plGameObjectHandle plEngineProcessDocumentContext::ResolveStringToGameObjectHand
     plPrefabReferenceComponent* pPrefabComponent;
     if (pOwner->TryGetComponentOfBaseType(pPrefabComponent))
     {
-      srcComponentGuid = GetContext().m_ComponentMap.GetGuid(pPrefabComponent->GetHandle());
+      srcComponentGuid = m_Context.m_ComponentMap.GetGuid(pPrefabComponent->GetHandle());
       PLASMA_ASSERT_DEV(srcComponentGuid.IsValid(), "");
 
       // tag this reference as being special
@@ -828,7 +829,7 @@ plGameObjectHandle plEngineProcessDocumentContext::ResolveStringToGameObjectHand
 
   if (sComponentProperty.IsEmpty())
   {
-    return GetContext().m_GameObjectMap.GetHandle(newTargetGuid);
+    return m_Context.m_GameObjectMap.GetHandle(newTargetGuid);
   }
 
   // overview for the steps below:
@@ -841,7 +842,7 @@ plGameObjectHandle plEngineProcessDocumentContext::ResolveStringToGameObjectHand
 
 
 
-  // update which object this component+property map to
+  // update which object this component+property map toG
   {
     auto& referencesTo = m_GoRef_ReferencesTo[srcComponentGuid];
 
@@ -922,10 +923,10 @@ ref_to_is_updated:
   if (!newTargetGuid.IsValid())
     return plGameObjectHandle();
 
-  return GetContext().m_GameObjectMap.GetHandle(newTargetGuid);
+  return m_Context.m_GameObjectMap.GetHandle(newTargetGuid);
 }
 
-void plEngineProcessDocumentContext::UpdateSyncObjects()
+void PlasmaEngineProcessDocumentContext::UpdateSyncObjects()
 {
   for (auto it : m_SyncObjects)
   {
@@ -938,10 +939,10 @@ void plEngineProcessDocumentContext::UpdateSyncObjects()
 
       PLASMA_LOCK(m_pWorld->GetWriteMarker());
 
-      if (pSyncObject->SetupForEngine(m_pWorld, GetContext().m_uiNextComponentPickingID))
+      if (pSyncObject->SetupForEngine(m_pWorld, m_Context.m_uiNextComponentPickingID))
       {
-        GetContext().m_OtherPickingMap.RegisterObject(pSyncObject->GetGuid(), GetContext().m_uiNextComponentPickingID);
-        ++GetContext().m_uiNextComponentPickingID;
+        m_Context.m_OtherPickingMap.RegisterObject(pSyncObject->GetGuid(), m_Context.m_uiNextComponentPickingID);
+        ++m_Context.m_uiNextComponentPickingID;
       }
 
       pSyncObject->UpdateForEngine(m_pWorld);

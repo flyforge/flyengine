@@ -131,36 +131,36 @@ void plSelectionManager::SetSelection(const plDocumentObject* pSingleObject)
   SetSelection(objs);
 }
 
-void plSelectionManager::SetSelection(const plDeque<const plDocumentObject*>& selection)
+void plSelectionManager::SetSelection(const plDeque<const plDocumentObject*>& Selection)
 {
-  if (selection.IsEmpty())
+  if (Selection.IsEmpty())
   {
     Clear();
     return;
   }
 
-  if (m_pSelectionStorage->m_SelectionList == selection)
+  if (m_pSelectionStorage->m_SelectionList == Selection)
     return;
 
   m_pSelectionStorage->m_SelectionList.Clear();
   m_pSelectionStorage->m_SelectionSet.Clear();
 
-  m_pSelectionStorage->m_SelectionList.Reserve(selection.GetCount());
+  m_pSelectionStorage->m_SelectionList.Reserve(Selection.GetCount());
 
-  for (plUInt32 i = 0; i < selection.GetCount(); ++i)
+  for (plUInt32 i = 0; i < Selection.GetCount(); ++i)
   {
-    if (selection[i] != nullptr)
+    if (Selection[i] != nullptr)
     {
-      PLASMA_ASSERT_DEV(selection[i]->GetDocumentObjectManager() == m_pSelectionStorage->m_pObjectManager, "Passed in object does not belong to same object manager.");
-      plStatus res = m_pSelectionStorage->m_pObjectManager->CanSelect(selection[i]);
+      PLASMA_ASSERT_DEV(Selection[i]->GetDocumentObjectManager() == m_pSelectionStorage->m_pObjectManager, "Passed in object does not belong to same object manager.");
+      plStatus res = m_pSelectionStorage->m_pObjectManager->CanSelect(Selection[i]);
       if (res.m_Result.Failed())
       {
         plLog::Error("{0}", res.m_sMessage);
         continue;
       }
       // actually == nullptr should never happen, unless we have an error somewhere else
-      m_pSelectionStorage->m_SelectionList.PushBack(selection[i]);
-      m_pSelectionStorage->m_SelectionSet.Insert(selection[i]->GetGuid());
+      m_pSelectionStorage->m_SelectionList.PushBack(Selection[i]);
+      m_pSelectionStorage->m_SelectionSet.Insert(Selection[i]->GetGuid());
     }
   }
 
@@ -232,9 +232,9 @@ plSharedPtr<plSelectionManager::Storage> plSelectionManager::SwapStorage(plShare
 struct plObjectHierarchyComparor
 {
   using Tree = plHybridArray<const plDocumentObject*, 4>;
-  plObjectHierarchyComparor(plDeque<const plDocumentObject*>& ref_items)
+  plObjectHierarchyComparor(plDeque<const plDocumentObject*>& items)
   {
-    for (const plDocumentObject* pObject : ref_items)
+    for (const plDocumentObject* pObject : items)
     {
       Tree& tree = lookup[pObject];
       while (pObject)

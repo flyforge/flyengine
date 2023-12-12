@@ -30,7 +30,7 @@ private Q_SLOTS:
 
 private:
   void LogWriter(const plLoggingEventData& e);
-  void EngineProcessMsgHandler(const plEditorEngineProcessConnection::Event& e);
+  void EngineProcessMsgHandler(const PlasmaEditorEngineProcessConnection::Event& e);
   void UiServiceEventHandler(const plQtUiServices::Event& e);
 
   plUInt32 m_uiIgnoredNumErrors = 0;

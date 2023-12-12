@@ -72,7 +72,7 @@ void plAnimationGraphNodeManager::InternalCreatePins(const plDocumentObject* pOb
 
   plHybridArray<plString, 16> pinNames;
 
-  for (auto pProp : properties)
+  for (const plAbstractProperty* pProp : properties)
   {
     if (!pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphPin>())
       continue;
@@ -259,13 +259,13 @@ bool plAnimationGraphNodeManager::InternalIsDynamicPinProperty(const plDocumentO
   return pProp->GetAttributeByType<plDynamicPinAttribute>() != nullptr;
 }
 
-plAnimationGraphAssetDocument::plAnimationGraphAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plAnimationGraphAssetProperties>(PLASMA_DEFAULT_NEW(plAnimationGraphNodeManager), sDocumentPath, plAssetDocEngineConnection::None)
+plAnimationGraphAssetDocument::plAnimationGraphAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plAnimationGraphAssetProperties>(PLASMA_DEFAULT_NEW(plAnimationGraphNodeManager), szDocumentPath, plAssetDocEngineConnection::None)
 {
   m_pObjectAccessor = PLASMA_DEFAULT_NEW(plNodeCommandAccessor, GetCommandHistory());
 }
 
-plTransformStatus plAnimationGraphAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plAnimationGraphAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   const auto* pNodeManager = static_cast<const plDocumentNodeManager*>(GetObjectManager());
 
@@ -375,7 +375,7 @@ bool plAnimationGraphAssetDocument::CopySelectedObjects(plAbstractObjectGraph& o
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plAnimationGraphAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
+bool plAnimationGraphAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);

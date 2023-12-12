@@ -10,7 +10,7 @@
 class plJoltVisColMeshComponentManager : public plComponentManager<class plJoltVisColMeshComponent, plBlockStorageType::Compact>
 {
 public:
-  using SUPER = plComponentManager<plJoltVisColMeshComponent, plBlockStorageType::Compact>;
+  typedef plComponentManager<plJoltVisColMeshComponent, plBlockStorageType::Compact> SUPER;
 
   plJoltVisColMeshComponentManager(plWorld* pWorld)
     : SUPER(pWorld)

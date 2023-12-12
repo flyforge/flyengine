@@ -218,7 +218,7 @@ namespace plModelImporter2
       if (streams.uiNormals != plInvalidIndex && pMesh->HasNormals())
       {
         plVec3 normal = normalsTransform * ConvertAssimpType(pMesh->mNormals[vertIdx]);
-        normal.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
+        normal.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
 
         plMeshBufferUtils::EncodeNormal(normal, ref_mb.GetVertexData(streams.uiNormals, finalVertIdx), meshNormalsPrecision).IgnoreResult();
       }
@@ -255,9 +255,9 @@ namespace plModelImporter2
         plVec3 tangent = normalsTransform * ConvertAssimpType(pMesh->mTangents[vertIdx]);
         plVec3 bitangent = normalsTransform * ConvertAssimpType(pMesh->mBitangents[vertIdx]);
 
-        normal.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
-        tangent.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
-        bitangent.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
+        normal.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+        tangent.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+        bitangent.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
 
         const float fBitangentSign = plMath::Abs(tangent.CrossRH(bitangent).Dot(normal));
 

@@ -957,7 +957,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plComponent"}
-		s %PluginName{"plasmaEnginePluginScene"}
+		s %PluginName{"PlasmaEnginePluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plShapeIconComponent"}
 		u3 %TypeVersion{1}

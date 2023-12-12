@@ -34,7 +34,7 @@ struct plPrefabInstantiationOptions
   RandomSeedMode m_RandomSeedMode = RandomSeedMode::DeterministicFromParent;
   plUInt32 m_uiCustomRandomSeedRootValue = 0;
 
-  plTime m_MaxStepTime = plTime::MakeZero();
+  plTime m_MaxStepTime = plTime::Zero();
 
   plProgress* m_pProgress = nullptr;
 };
@@ -98,7 +98,7 @@ public:
   ///
   /// If pProgress is a valid pointer it is used to track the progress of the instantiation. The plProgress object
   /// has to be valid as long as the instantiation is in progress.
-  plUniquePtr<InstantiationContextBase> InstantiateWorld(plWorld& world, const plUInt16* pOverrideTeamID = nullptr, plTime maxStepTime = plTime::MakeZero(), plProgress* pProgress = nullptr);
+  plUniquePtr<InstantiationContextBase> InstantiateWorld(plWorld& world, const plUInt16* pOverrideTeamID = nullptr, plTime maxStepTime = plTime::Zero(), plProgress* pProgress = nullptr);
 
   /// \brief Creates one instance of the world that was previously read by ReadWorldDescription().
   ///

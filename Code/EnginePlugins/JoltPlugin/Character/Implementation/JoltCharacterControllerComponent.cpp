@@ -26,13 +26,14 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltCharacterControllerComponent, 1)
     PLASMA_MEMBER_PROPERTY("PresenceCollisionLayer", m_uiPresenceCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
     PLASMA_ACCESSOR_PROPERTY("Mass", GetMass, SetMass)->AddAttributes(new plDefaultValueAttribute(70.0f), new plClampValueAttribute(0.1f, 10000.0f)),
     PLASMA_ACCESSOR_PROPERTY("Strength", GetStrength, SetStrength)->AddAttributes(new plDefaultValueAttribute(500.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("MaxClimbingSlope", GetMaxClimbingSlope, SetMaxClimbingSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(40))),
+    PLASMA_ACCESSOR_PROPERTY("MaxClimbingSlope", GetMaxClimbingSlope, SetMaxClimbingSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(40))),
     PLASMA_BITFLAGS_MEMBER_PROPERTY("DebugFlags", plJoltCharacterDebugFlags , m_DebugFlags),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Character"),
+    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -69,7 +70,7 @@ void plJoltCharacterControllerComponent::SerializeComponent(plWorldWriter& inout
 void plJoltCharacterControllerComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
   auto& s = inout_stream.GetStream();
 
   s >> m_DebugFlags;
@@ -200,7 +201,7 @@ void plJoltCharacterControllerComponent::RawMoveWithVelocity(const plVec3& vVelo
 //   const plVec3 vShapePos = plJoltConversionUtils::ToVec3(GetJoltCharacter()->GetCenterOfMassTransform().GetTranslation());
 //
 //   plHybridArray<ContactPoint, 32> contacts;
-//   CollectCastContacts(contacts, GetJoltCharacter()->GetShape(), vShapePos, plQuat::MakeIdentity(), vDirection /*+ vDirNormal*/);
+//   CollectCastContacts(contacts, GetJoltCharacter()->GetShape(), vShapePos, plQuat::IdentityQuaternion(), vDirection /*+ vDirNormal*/);
 //
 //   plDebugRenderer::DrawCross(GetWorld(), vShapePos, 0.2f, plColor::GreenYellow);
 //
@@ -236,8 +237,8 @@ void plJoltCharacterControllerComponent::RawMoveWithVelocity(const plVec3& vVelo
 //     //   // ignore contacts that we are moving away from or parallel to
 //     //   if (contact.m_vContactNormal.Dot(vDirNormal) >= 0.0f)
 //     //   {
-//     //     rot.SetShortestRotation(plVec3::MakeAxisX(), contact.m_vContactNormal);
-//     //     plDebugRenderer::DrawCylinder(GetWorld(), 0.0f, 0.05f, 0.1f, plColor::MakeZero(), plColor::DimGrey, plTransform(contact.m_vPosition, rot));
+//     //     rot.SetShortestRotation(plVec3::UnitXAxis(), contact.m_vContactNormal);
+//     //     plDebugRenderer::DrawCylinder(GetWorld(), 0.0f, 0.05f, 0.1f, plColor::ZeroColor(), plColor::DimGrey, plTransform(contact.m_vPosition, rot));
 //     //     continue;
 //     //   }
 //
@@ -245,8 +246,8 @@ void plJoltCharacterControllerComponent::RawMoveWithVelocity(const plVec3& vVelo
 //     fMoveDistance = plMath::Min((fMaxDistance /*+ 1.0f*/) * cont.m_fCastFraction, fMaxDistance) - fHypoth;
 //
 //     //  {
-//     //    rot.SetShortestRotation(plVec3::MakeAxisX(), contact.m_vContactNormal);
-//     //    plDebugRenderer::DrawCylinder(GetWorld(), 0.0f, 0.05f, 0.1f, plColor::MakeZero(), plColor::Black, plTransform(contact.m_vPosition, rot));
+//     //    rot.SetShortestRotation(plVec3::UnitXAxis(), contact.m_vContactNormal);
+//     //    plDebugRenderer::DrawCylinder(GetWorld(), 0.0f, 0.05f, 0.1f, plColor::ZeroColor(), plColor::Black, plTransform(contact.m_vPosition, rot));
 //     //  }
 //     //}
 //   }
@@ -384,7 +385,7 @@ void plJoltCharacterControllerComponent::CollectContacts(plDynamicArray<ContactP
 plVec3 plJoltCharacterControllerComponent::GetContactVelocityAndPushAway(const ContactPoint& contact, float fPushForce)
 {
   if (contact.m_BodyID.IsInvalid())
-    return plVec3::MakeZero();
+    return plVec3::ZeroVector();
 
   plJoltWorldModule* pModule = GetWorld()->GetModule<plJoltWorldModule>();
   auto pJoltSystem = pModule->GetJoltSystem();
@@ -392,7 +393,7 @@ plVec3 plJoltCharacterControllerComponent::GetContactVelocityAndPushAway(const C
   JPH::BodyLockWrite bodyLock(pJoltSystem->GetBodyLockInterface(), contact.m_BodyID);
 
   if (!bodyLock.Succeeded())
-    return plVec3::MakeZero();
+    return plVec3::ZeroVector();
 
   const JPH::Vec3 vGroundPos = plJoltConversionUtils::ToVec3(contact.m_vPosition);
 
@@ -404,7 +405,7 @@ plVec3 plJoltCharacterControllerComponent::GetContactVelocityAndPushAway(const C
     pJoltSystem->GetBodyInterfaceNoLock().ActivateBody(contact.m_BodyID);
   }
 
-  plVec3 vGroundVelocity = plVec3::MakeZero();
+  plVec3 vGroundVelocity = plVec3::ZeroVector();
 
   if (bodyLock.GetBody().IsKinematic())
   {
@@ -541,10 +542,10 @@ void plJoltCharacterControllerComponent::VisualizeContact(const ContactPoint& co
 {
   plTransform trans;
   trans.m_vPosition = contact.m_vPosition;
-  trans.m_qRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), contact.m_vContactNormal);
+  trans.m_qRotation.SetShortestRotation(plVec3::UnitXAxis(), contact.m_vContactNormal);
   trans.m_vScale.Set(1.0f);
 
-  plDebugRenderer::DrawCylinder(GetWorld(), 0, 0.05f, 0.1f, plColor::MakeZero(), color, trans);
+  plDebugRenderer::DrawCylinder(GetWorld(), 0, 0.05f, 0.1f, plColor::ZeroColor(), color, trans);
 }
 
 void plJoltCharacterControllerComponent::VisualizeContacts(const plDynamicArray<ContactPoint>& contacts, const plColor& color) const
@@ -572,6 +573,7 @@ void plJoltCharacterControllerComponent::CreatePresenceBody()
 
   auto* pSystem = pModule->GetJoltSystem();
   auto* pBodies = &pSystem->GetBodyInterface();
+  auto* pMaterial = plJoltCore::GetDefaultMaterial();
 
   JPH::BodyCreationSettings bodyCfg;
   bodyCfg.SetShape(m_pCharacter->GetShape());

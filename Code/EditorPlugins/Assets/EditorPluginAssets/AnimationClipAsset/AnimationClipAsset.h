@@ -54,15 +54,15 @@ class plAnimationClipAssetDocument : public plSimpleAssetDocument<plAnimationCli
   PLASMA_ADD_DYNAMIC_REFLECTION(plAnimationClipAssetDocument, plSimpleAssetDocument<plAnimationClipAssetProperties>);
 
 public:
-  plAnimationClipAssetDocument(plStringView sDocumentPath);
+  plAnimationClipAssetDocument(const char* szDocumentPath);
 
   virtual void SetCommonAssetUiState(plCommonAssetUiState::Enum state, double value) override;
   virtual double GetCommonAssetUiState(plCommonAssetUiState::Enum state) const override;
 
-  plUuid InsertEventTrackCpAt(plInt64 iTickX, const char* szValue);
+  plUuid InsertEventTrackCpAt(plInt64 tickX, const char* szValue);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
   virtual plTransformStatus InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo) override;
 
   // void ApplyCustomRootMotion(plAnimationClipResourceDescriptor& anim) const;
@@ -83,8 +83,9 @@ public:
   plAnimationClipAssetDocumentGenerator();
   ~plAnimationClipAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
+  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const override;
+  virtual plStatus Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
   virtual plStringView GetDocumentExtension() const override { return "plAnimationClipAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "AnimationClipGroup"; }
-  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
+  virtual plStringView GetNameSuffix() const override { return "clip"; }
 };

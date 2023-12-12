@@ -232,9 +232,9 @@ private:
 
   float m_fFovOrDim = 90.0f;
 
-  float m_fShutterSpeed = 0.005f;
+  float m_fShutterSpeed = 1.0f;
   float m_fExposure = 1.0f;
-  float m_fAperture = 16.0f;
+  float m_fAperture = 1.0f;
   float m_fISO = 100.0f;
   float m_fFocusDistance = 1.0f;
 

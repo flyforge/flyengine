@@ -28,7 +28,7 @@ public:
   /// Returns PLASMA_SUCCESS only if all processes have shut down.
   /// In all other cases, e.g. if the optional timeout is reached,
   /// PLASMA_FAILURE is returned.
-  plResult WaitToFinish(plTime timeout = plTime::MakeZero());
+  plResult WaitToFinish(plTime timeout = plTime::Zero());
 
   /// \brief Tries to kill all processes associated with this group.
   ///

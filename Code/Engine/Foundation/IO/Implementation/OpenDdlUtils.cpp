@@ -152,7 +152,7 @@ plResult plOpenDdlUtils::ConvertToTime(const plOpenDdlReaderElement* pElement, p
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
-    out_result = plTime::MakeFromSeconds(pValues[0]);
+    out_result = plTime::Seconds(pValues[0]);
 
     return PLASMA_SUCCESS;
   }
@@ -161,7 +161,7 @@ plResult plOpenDdlUtils::ConvertToTime(const plOpenDdlReaderElement* pElement, p
   {
     const double* pValues = pElement->GetPrimitivesDouble();
 
-    out_result = plTime::MakeFromSeconds(pValues[0]);
+    out_result = plTime::Seconds(pValues[0]);
 
     return PLASMA_SUCCESS;
   }
@@ -454,7 +454,7 @@ plResult plOpenDdlUtils::ConvertToMat3(const plOpenDdlReaderElement* pElement, p
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
-    out_mResult = plMat3::MakeFromColumnMajorArray(pValues);
+    out_mResult.SetFromArray(pValues, plMatrixLayout::ColumnMajor);
 
     return PLASMA_SUCCESS;
   }
@@ -483,7 +483,7 @@ plResult plOpenDdlUtils::ConvertToMat4(const plOpenDdlReaderElement* pElement, p
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
-    out_mResult = plMat4::MakeFromColumnMajorArray(pValues);
+    out_mResult.SetFromArray(pValues, plMatrixLayout::ColumnMajor);
 
     return PLASMA_SUCCESS;
   }
@@ -516,9 +516,9 @@ plResult plOpenDdlUtils::ConvertToTransform(const plOpenDdlReaderElement* pEleme
     out_result.m_vPosition.x = pValues[0];
     out_result.m_vPosition.y = pValues[1];
     out_result.m_vPosition.z = pValues[2];
-    out_result.m_qRotation.x = pValues[3];
-    out_result.m_qRotation.y = pValues[4];
-    out_result.m_qRotation.z = pValues[5];
+    out_result.m_qRotation.v.x = pValues[3];
+    out_result.m_qRotation.v.y = pValues[4];
+    out_result.m_qRotation.v.z = pValues[5];
     out_result.m_qRotation.w = pValues[6];
     out_result.m_vScale.x = pValues[7];
     out_result.m_vScale.y = pValues[8];
@@ -551,7 +551,7 @@ plResult plOpenDdlUtils::ConvertToQuat(const plOpenDdlReaderElement* pElement, p
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
-    out_qResult = plQuat(pValues[0], pValues[1], pValues[2], pValues[3]);
+    out_qResult.SetElements(pValues[0], pValues[1], pValues[2], pValues[3]);
 
     return PLASMA_SUCCESS;
   }
@@ -610,7 +610,7 @@ plResult plOpenDdlUtils::ConvertToAngle(const plOpenDdlReaderElement* pElement, 
     const float* pValues = pElement->GetPrimitivesFloat();
 
     // have to use radians to prevent precision loss
-    out_result = plAngle::MakeFromRadian(pValues[0]);
+    out_result = plAngle::Radian(pValues[0]);
 
     return PLASMA_SUCCESS;
   }
@@ -618,7 +618,7 @@ plResult plOpenDdlUtils::ConvertToAngle(const plOpenDdlReaderElement* pElement, 
   return PLASMA_FAILURE;
 }
 
-plResult plOpenDdlUtils::ConvertToHashedString(const plOpenDdlReaderElement* pElement, plHashedString& out_sResult)
+plResult plOpenDdlUtils::ConvertToHashedString(const plOpenDdlReaderElement* pElement, plHashedString& out_result)
 {
   if (pElement == nullptr)
     return PLASMA_FAILURE;
@@ -639,7 +639,7 @@ plResult plOpenDdlUtils::ConvertToHashedString(const plOpenDdlReaderElement* pEl
   {
     const plStringView* pValues = pElement->GetPrimitivesString();
 
-    out_sResult.Assign(pValues[0]);
+    out_result.Assign(pValues[0]);
 
     return PLASMA_SUCCESS;
   }
@@ -647,7 +647,7 @@ plResult plOpenDdlUtils::ConvertToHashedString(const plOpenDdlReaderElement* pEl
   return PLASMA_FAILURE;
 }
 
-plResult plOpenDdlUtils::ConvertToTempHashedString(const plOpenDdlReaderElement* pElement, plTempHashedString& out_sResult)
+plResult plOpenDdlUtils::ConvertToTempHashedString(const plOpenDdlReaderElement* pElement, plTempHashedString& out_result)
 {
   if (pElement == nullptr)
     return PLASMA_FAILURE;
@@ -668,7 +668,7 @@ plResult plOpenDdlUtils::ConvertToTempHashedString(const plOpenDdlReaderElement*
   {
     const plUInt64* pValues = pElement->GetPrimitivesUInt64();
 
-    out_sResult = plTempHashedString(pValues[0]);
+    out_result = plTempHashedString(pValues[0]);
 
     return PLASMA_SUCCESS;
   }
@@ -1235,9 +1235,9 @@ void plOpenDdlUtils::StoreTransform(plOpenDdlWriter& ref_writer, const plTransfo
     f[1] = value.m_vPosition.y;
     f[2] = value.m_vPosition.z;
 
-    f[3] = value.m_qRotation.x;
-    f[4] = value.m_qRotation.y;
-    f[5] = value.m_qRotation.z;
+    f[3] = value.m_qRotation.v.x;
+    f[4] = value.m_qRotation.v.y;
+    f[5] = value.m_qRotation.v.z;
     f[6] = value.m_qRotation.w;
 
     f[7] = value.m_vScale.x;
@@ -1255,7 +1255,7 @@ void plOpenDdlUtils::StoreQuat(plOpenDdlWriter& ref_writer, const plQuat& value,
   ref_writer.BeginObject("Quat", sName, bGlobalName, true);
   {
     ref_writer.BeginPrimitiveList(plOpenDdlPrimitiveType::Float);
-    ref_writer.WriteFloat(&value.x, 4);
+    ref_writer.WriteFloat(value.v.GetData(), 4);
     ref_writer.EndPrimitiveList();
   }
   ref_writer.EndObject();

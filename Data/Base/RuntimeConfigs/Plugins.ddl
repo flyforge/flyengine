@@ -1,24 +1,24 @@
 Plugin
 {
-	string %Path{"plasmaEnginePluginAssets"}
+	string %Path{"PlasmaEnginePluginAssets"}
 	bool %LoadCopy{false}
 	string %DependencyOf{"EditorPluginAssets"}
 }
 Plugin
 {
-	string %Path{"plasmaEnginePluginParticle"}
+	string %Path{"PlasmaEnginePluginParticle"}
 	bool %LoadCopy{false}
 	string %DependencyOf{"EditorPluginParticle"}
 }
 Plugin
 {
-	string %Path{"plasmaEnginePluginJolt"}
+	string %Path{"PlasmaEnginePluginJolt"}
 	bool %LoadCopy{false}
 	string %DependencyOf{"EditorPluginJolt"}
 }
 Plugin
 {
-	string %Path{"plasmaEnginePluginScene"}
+	string %Path{"PlasmaEnginePluginScene"}
 	bool %LoadCopy{false}
 	string %DependencyOf{"EditorPluginScene"}
 }

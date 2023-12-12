@@ -42,28 +42,26 @@ void plArchiveBuilder::AddFolder(plStringView sAbsFolderPath, plArchiveCompressi
             compression = plArchiveCompressionMode::Uncompressed;
             break;
 
-#  ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
           case InclusionMode::Compress_zstd_fastest:
             compression = plArchiveCompressionMode::Compressed_zstd;
-            iCompressionLevel = static_cast<plInt32>(plCompressedStreamWriterZstd::Compression::Fastest);
+            iCompressionLevel = plCompressedStreamWriterZstd::Compression::Fastest;
             break;
           case InclusionMode::Compress_zstd_fast:
             compression = plArchiveCompressionMode::Compressed_zstd;
-            iCompressionLevel = static_cast<plInt32>(plCompressedStreamWriterZstd::Compression::Fast);
+            iCompressionLevel = plCompressedStreamWriterZstd::Compression::Fast;
             break;
           case InclusionMode::Compress_zstd_average:
             compression = plArchiveCompressionMode::Compressed_zstd;
-            iCompressionLevel = static_cast<plInt32>(plCompressedStreamWriterZstd::Compression::Average);
+            iCompressionLevel = plCompressedStreamWriterZstd::Compression::Average;
             break;
           case InclusionMode::Compress_zstd_high:
             compression = plArchiveCompressionMode::Compressed_zstd;
-            iCompressionLevel = static_cast<plInt32>(plCompressedStreamWriterZstd::Compression::High);
+            iCompressionLevel = plCompressedStreamWriterZstd::Compression::High;
             break;
           case InclusionMode::Compress_zstd_highest:
             compression = plArchiveCompressionMode::Compressed_zstd;
-            iCompressionLevel = static_cast<plInt32>(plCompressedStreamWriterZstd::Compression::Highest);
+            iCompressionLevel = plCompressedStreamWriterZstd::Compression::Highest;
             break;
-#  endif
         }
       }
 

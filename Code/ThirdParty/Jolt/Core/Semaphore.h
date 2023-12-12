@@ -19,7 +19,7 @@ using std::condition_variable;
 
 /// Implements a semaphore
 /// When we switch to C++20 we can use counting_semaphore to unify this
-class JPH_EXPORT Semaphore
+class Semaphore
 {
 public:
 	/// Constructor

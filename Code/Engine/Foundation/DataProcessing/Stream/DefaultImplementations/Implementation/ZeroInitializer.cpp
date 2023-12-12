@@ -39,7 +39,7 @@ void plProcessingStreamSpawnerZeroInitialized::InitializeElements(plUInt64 uiSta
   for (plUInt64 i = uiStartIndex; i < uiStartIndex + uiNumElements; ++i)
   {
     plMemoryUtils::ZeroFill<plUInt8>(
-      static_cast<plUInt8*>(plMemoryUtils::AddByteOffset(m_pStream->GetWritableData(), static_cast<std::ptrdiff_t>(i * uiElementStride))),
+      static_cast<plUInt8*>(plMemoryUtils::AddByteOffset(m_pStream->GetWritableData(), static_cast<ptrdiff_t>(i * uiElementStride))),
       static_cast<size_t>(uiElementSize));
   }
 }

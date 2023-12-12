@@ -78,7 +78,7 @@ plQtParticleEffectAssetDocumentWindow::plQtParticleEffectAssetDocumentWindow(plA
   // Particle Systems Panel
   {
     pSystemsPanel->setObjectName("ParticleEffectAssetDockWidget_Systems");
-    pSystemsPanel->setWindowTitle("Systems");
+    pSystemsPanel->setWindowTitle("SYSTEMS");
     pSystemsPanel->show();
 
     QWidget* pMainWidget = new QWidget(pSystemsPanel);
@@ -136,7 +136,7 @@ plQtParticleEffectAssetDocumentWindow::plQtParticleEffectAssetDocumentWindow(plA
   // Effect Properties
   {
     pEffectPanel->setObjectName("ParticleEffectAssetDockWidget_Effect");
-    pEffectPanel->setWindowTitle("Effect");
+    pEffectPanel->setWindowTitle("EFFECT");
     pEffectPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pEffectPanel, pDocument, false);
@@ -153,7 +153,7 @@ plQtParticleEffectAssetDocumentWindow::plQtParticleEffectAssetDocumentWindow(plA
   // Event Reactions
   {
     pReactionsPanel->setObjectName("ParticleEffectAssetDockWidget_Reactions");
-    pReactionsPanel->setWindowTitle("Event Reactions");
+    pReactionsPanel->setWindowTitle("EVENT REACTIONS");
     pReactionsPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pReactionsPanel, pDocument, false);
@@ -170,7 +170,7 @@ plQtParticleEffectAssetDocumentWindow::plQtParticleEffectAssetDocumentWindow(plA
   // System Emitters
   {
     pEmitterPanel->setObjectName("ParticleEffectAssetDockWidget_Emitter");
-    pEmitterPanel->setWindowTitle("Emitter");
+    pEmitterPanel->setWindowTitle("EMITTER");
     pEmitterPanel->show();
 
     m_pPropertyGridEmitter = new plQtPropertyGridWidget(pEmitterPanel, pDocument, false);
@@ -183,7 +183,7 @@ plQtParticleEffectAssetDocumentWindow::plQtParticleEffectAssetDocumentWindow(plA
   // System Initializers
   {
     pInitializerPanel->setObjectName("ParticleEffectAssetDockWidget_Initializer");
-    pInitializerPanel->setWindowTitle("Initializers");
+    pInitializerPanel->setWindowTitle("INITIALIZERS");
     pInitializerPanel->show();
 
     m_pPropertyGridInitializer = new plQtPropertyGridWidget(pInitializerPanel, pDocument, false);
@@ -196,7 +196,7 @@ plQtParticleEffectAssetDocumentWindow::plQtParticleEffectAssetDocumentWindow(plA
   // System Behaviors
   {
     pBehaviorPanel->setObjectName("ParticleEffectAssetDockWidget_Behavior");
-    pBehaviorPanel->setWindowTitle("Behaviors");
+    pBehaviorPanel->setWindowTitle("BEHAVIOR");
     pBehaviorPanel->show();
 
     m_pPropertyGridBehavior = new plQtPropertyGridWidget(pBehaviorPanel, pDocument, false);
@@ -209,7 +209,7 @@ plQtParticleEffectAssetDocumentWindow::plQtParticleEffectAssetDocumentWindow(plA
   // System Types
   {
     pTypePanel->setObjectName("ParticleEffectAssetDockWidget_Type");
-    pTypePanel->setWindowTitle("Renderers");
+    pTypePanel->setWindowTitle("RENDERERS");
     pTypePanel->show();
 
     m_pPropertyGridType = new plQtPropertyGridWidget(pTypePanel, pDocument, false);
@@ -285,11 +285,7 @@ void plQtParticleEffectAssetDocumentWindow::SelectSystem(plDocumentObject* pObje
     m_pPropertyGridBehavior->ClearSelection();
     m_pPropertyGridType->ClearSelection();
 
-    if (m_pSystemsCombo->currentIndex() != -1)
-    {
-      // prevent infinite recursion
-      m_pSystemsCombo->setCurrentIndex(-1);
-    }
+    m_pSystemsCombo->setCurrentIndex(-1);
   }
   else
   {
@@ -351,10 +347,10 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
   }
 
   plDocumentObject* pRootObject = GetParticleDocument()->GetObjectManager()->GetRootObject()->GetChildren()[0];
-  plObjectAccessorBase* pAccessor = GetDocument()->GetObjectAccessor();
 
-  pAccessor->StartTransaction("Add Particle System");
-  plUuid systemGuid = plUuid::MakeUuid();
+  GetDocument()->GetObjectAccessor()->StartTransaction("Add Particle System");
+  plUuid systemGuid;
+  systemGuid.CreateNewUuid();
 
   {
     plAddObjectCommand cmd;
@@ -366,7 +362,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
     if (GetDocument()->GetCommandHistory()->AddCommand(cmd).Failed())
     {
-      pAccessor->CancelTransaction();
+      GetDocument()->GetObjectAccessor()->CancelTransaction();
       return;
     }
   }
@@ -382,14 +378,14 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
     if (GetDocument()->GetCommandHistory()->AddCommand(cmd).Failed())
     {
-      pAccessor->CancelTransaction();
+      GetDocument()->GetObjectAccessor()->CancelTransaction();
       return;
     }
   }
 
   // default system setup
   {
-    const plDocumentObject* pSystemObject = pAccessor->GetObject(systemGuid);
+    const plDocumentObject* pSystemObject = GetDocument()->GetObjectAccessor()->GetObject(systemGuid);
 
     // default life
     {
@@ -397,7 +393,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
       for (auto pChild : children)
       {
-        if (pChild->GetParentProperty() == "LifeTime"_plsv)
+        if (plStringUtils::IsEqual(pChild->GetParentProperty(), "LifeTime"))
         {
           plSetObjectPropertyCommand cmd;
           cmd.m_Object = pChild->GetGuid();
@@ -407,7 +403,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
           if (GetDocument()->GetCommandHistory()->AddCommand(cmd).Failed())
           {
-            pAccessor->CancelTransaction();
+            GetDocument()->GetObjectAccessor()->CancelTransaction();
             return;
           }
 
@@ -426,7 +422,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
       if (GetDocument()->GetCommandHistory()->AddCommand(cmd).Failed())
       {
-        pAccessor->CancelTransaction();
+        GetDocument()->GetObjectAccessor()->CancelTransaction();
         return;
       }
     }
@@ -441,11 +437,11 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
       if (GetDocument()->GetCommandHistory()->AddCommand(cmd).Failed())
       {
-        pAccessor->CancelTransaction();
+        GetDocument()->GetObjectAccessor()->CancelTransaction();
         return;
       }
 
-      const plDocumentObject* pConeObject = pAccessor->GetObject(cmd.m_NewObjectGuid);
+      const plDocumentObject* pConeObject = GetDocument()->GetObjectAccessor()->GetObject(cmd.m_NewObjectGuid);
 
       // default speed
       {
@@ -453,7 +449,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
         for (auto pChild : children)
         {
-          if (pChild->GetParentProperty() == "Speed"_plsv)
+          if (plStringUtils::IsEqual(pChild->GetParentProperty(), "Speed"))
           {
             plSetObjectPropertyCommand cmd2;
             cmd2.m_Object = pChild->GetGuid();
@@ -463,7 +459,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
             if (GetDocument()->GetCommandHistory()->AddCommand(cmd2).Failed())
             {
-              pAccessor->CancelTransaction();
+              GetDocument()->GetObjectAccessor()->CancelTransaction();
               return;
             }
 
@@ -483,7 +479,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
       if (GetDocument()->GetCommandHistory()->AddCommand(cmd).Failed())
       {
-        pAccessor->CancelTransaction();
+        GetDocument()->GetObjectAccessor()->CancelTransaction();
         return;
       }
 
@@ -496,7 +492,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
         if (GetDocument()->GetCommandHistory()->AddCommand(cmd2).Failed())
         {
-          pAccessor->CancelTransaction();
+          GetDocument()->GetObjectAccessor()->CancelTransaction();
           return;
         }
       }
@@ -510,7 +506,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
         if (GetDocument()->GetCommandHistory()->AddCommand(cmd2).Failed())
         {
-          pAccessor->CancelTransaction();
+          GetDocument()->GetObjectAccessor()->CancelTransaction();
           return;
         }
       }
@@ -526,7 +522,7 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
       if (GetDocument()->GetCommandHistory()->AddCommand(cmd).Failed())
       {
-        pAccessor->CancelTransaction();
+        GetDocument()->GetObjectAccessor()->CancelTransaction();
         return;
       }
     }
@@ -541,13 +537,13 @@ void plQtParticleEffectAssetDocumentWindow::onAddSystem(bool)
 
       if (GetDocument()->GetCommandHistory()->AddCommand(cmd).Failed())
       {
-        pAccessor->CancelTransaction();
+        GetDocument()->GetObjectAccessor()->CancelTransaction();
         return;
       }
     }
   }
 
-  pAccessor->FinishTransaction();
+  GetDocument()->GetObjectAccessor()->FinishTransaction();
 }
 
 void plQtParticleEffectAssetDocumentWindow::onRemoveSystem(bool)
@@ -557,6 +553,8 @@ void plQtParticleEffectAssetDocumentWindow::onRemoveSystem(bool)
     return;
 
   const plDocumentObject* pObject = static_cast<plDocumentObject*>(m_pSystemsCombo->itemData(index).value<void*>());
+
+  plDocumentObject* pRootObject = GetParticleDocument()->GetObjectManager()->GetRootObject()->GetChildren()[0];
 
   GetDocument()->GetObjectAccessor()->StartTransaction("Rename Particle System");
 
@@ -606,6 +604,8 @@ void plQtParticleEffectAssetDocumentWindow::onRenameSystem(bool)
     break;
   }
 
+  plDocumentObject* pRootObject = GetParticleDocument()->GetObjectManager()->GetRootObject()->GetChildren()[0];
+
   m_sSelectedSystem = sName.toUtf8().data();
 
   GetDocument()->GetObjectAccessor()->StartTransaction("Rename Particle System");
@@ -627,7 +627,7 @@ void plQtParticleEffectAssetDocumentWindow::onRenameSystem(bool)
 
 void plQtParticleEffectAssetDocumentWindow::SendLiveResourcePreview()
 {
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   plResourceUpdateMsgToEngine msg;
@@ -654,7 +654,7 @@ void plQtParticleEffectAssetDocumentWindow::SendLiveResourcePreview()
   GetParticleDocument()->WriteResource(memoryWriter);
   msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtParticleEffectAssetDocumentWindow::PropertyEventHandler(const plDocumentObjectPropertyEvent& e)
@@ -690,14 +690,14 @@ void plQtParticleEffectAssetDocumentWindow::ParticleEventHandler(const plParticl
   {
     case plParticleEffectAssetEvent::RestartEffect:
     {
-      plEditorEngineRestartSimulationMsg msg;
+      PlasmaEditorEngineRestartSimulationMsg msg;
       GetEditorEngineConnection()->SendMessage(&msg);
     }
     break;
 
     case plParticleEffectAssetEvent::AutoRestartChanged:
     {
-      plEditorEngineLoopAnimationMsg msg;
+      PlasmaEditorEngineLoopAnimationMsg msg;
       msg.m_bLoop = GetParticleDocument()->GetAutoRestart();
       GetEditorEngineConnection()->SendMessage(&msg);
     }
@@ -718,7 +718,7 @@ void plQtParticleEffectAssetDocumentWindow::UpdateSystemList()
 
   for (plDocumentObject* pChild : pRootObject->GetChildren())
   {
-    if (pChild->GetParentProperty() == "ParticleSystems"_plsv)
+    if (plStringUtils::IsEqual(pChild->GetParentProperty(), "ParticleSystems"))
     {
       s = pChild->GetTypeAccessor().GetValue("Name").ConvertTo<plString>();
       newParticleSystems[s] = pChild;
@@ -766,7 +766,7 @@ void plQtParticleEffectAssetDocumentWindow::UpdateSystemList()
 
 void plQtParticleEffectAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -775,7 +775,7 @@ void plQtParticleEffectAssetDocumentWindow::InternalRedraw()
 void plQtParticleEffectAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {
@@ -801,5 +801,5 @@ void plQtParticleEffectAssetDocumentWindow::RestoreResource()
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }

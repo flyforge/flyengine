@@ -45,6 +45,7 @@ PLASMA_END_SUBSYSTEM_DECLARATION;
 
 void plAssetProcessorLog::HandleLogMessage(const plLoggingEventData& le)
 {
+  const plLogMsgType::Enum ThisType = le.m_EventType;
   m_LoggingEvent.Broadcast(le);
 }
 
@@ -71,10 +72,10 @@ plAssetProcessor::plAssetProcessor()
 
 plAssetProcessor::~plAssetProcessor()
 {
-  if (m_pThread)
+  if (m_Thread)
   {
-    m_pThread->Join();
-    m_pThread.Clear();
+    m_Thread->Join();
+    m_Thread.Clear();
   }
   PLASMA_ASSERT_DEV(m_ProcessTaskState == ProcessTaskState::Stopped, "Call StopProcessTask first before destroying the plAssetProcessor.");
 }
@@ -88,10 +89,10 @@ void plAssetProcessor::StartProcessTask()
   }
 
   // Join old thread.
-  if (m_pThread)
+  if (m_Thread)
   {
-    m_pThread->Join();
-    m_pThread.Clear();
+    m_Thread->Join();
+    m_Thread.Clear();
   }
 
   m_ProcessTaskState = ProcessTaskState::Running;
@@ -105,8 +106,8 @@ void plAssetProcessor::StartProcessTask()
     m_ProcessTasks[idx].m_uiProcessorID = idx;
   }
 
-  m_pThread = PLASMA_DEFAULT_NEW(plProcessThread);
-  m_pThread->Start();
+  m_Thread = PLASMA_DEFAULT_NEW(plProcessThread);
+  m_Thread->Start();
 
   {
     plAssetProcessorEvent e;
@@ -144,8 +145,8 @@ void plAssetProcessor::StopProcessTask(bool bForce)
   if (bForce)
   {
     m_bForceStop = true;
-    m_pThread->Join();
-    m_pThread.Clear();
+    m_Thread->Join();
+    m_Thread.Clear();
     PLASMA_ASSERT_DEV(m_ProcessTaskState == ProcessTaskState::Stopped, "Process task shoul have set the state to stopped.");
   }
 }
@@ -175,7 +176,7 @@ void plAssetProcessor::Run()
         m_ProcessRunning[i] = m_ProcessTasks[i].BeginExecute();
       }
     }
-    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(100));
+    plThreadUtils::Sleep(plTime::Milliseconds(100));
   }
 
   while (true)
@@ -195,7 +196,7 @@ void plAssetProcessor::Run()
     }
 
     if (bAnyRunning)
-      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(100));
+      plThreadUtils::Sleep(plTime::Milliseconds(100));
     else
       break;
   }
@@ -218,9 +219,12 @@ void plAssetProcessor::Run()
 ////////////////////////////////////////////////////////////////////////
 
 plProcessTask::plProcessTask()
-  : m_Status(PLASMA_SUCCESS)
+  : m_bProcessShouldBeRunning(false)
+  , m_bProcessCrashed(false)
+  , m_bWaiting(false)
+  , m_Status(PLASMA_SUCCESS)
 {
-  m_pIPC = PLASMA_DEFAULT_NEW(plEditorProcessCommunicationChannel);
+  m_pIPC = PLASMA_DEFAULT_NEW(PlasmaEditorProcessCommunicationChannel);
   m_pIPC->m_Events.AddEventHandler(plMakeDelegate(&plProcessTask::EventHandlerIPC, this));
 }
 
@@ -281,12 +285,12 @@ void plProcessTask::EventHandlerIPC(const plProcessCommunicationChannel::Event& 
   }
 }
 
-bool plProcessTask::GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, plDataDirPath& out_path)
+bool plProcessTask::GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, plStringBuilder& out_sAbsPath, plStringBuilder& out_sRelPath)
 {
   bool bComplete = true;
 
   const plDocumentTypeDescriptor* pTypeDesc = nullptr;
-  if (plDocumentManager::FindDocumentTypeFromPath(pInfo->m_Path, false, pTypeDesc).Succeeded())
+  if (plDocumentManager::FindDocumentTypeFromPath(pInfo->m_sAbsolutePath, false, pTypeDesc).Succeeded())
   {
     auto flags = static_cast<const plAssetDocumentTypeDescriptor*>(pTypeDesc)->m_AssetDocumentFlags;
 
@@ -294,8 +298,8 @@ bool plProcessTask::GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, 
       return false;
   }
 
-  auto TestFunc = [this, &bComplete](const plSet<plString>& files) -> plAssetInfo* {
-    for (const auto& sFile : files)
+  auto TestFunc = [this, &bComplete](const plSet<plString>& Files) -> plAssetInfo* {
+    for (const auto& sFile : Files)
     {
       if (plAssetInfo* pFileInfo = plAssetCurator::GetSingleton()->GetAssetInfo(sFile))
       {
@@ -303,9 +307,8 @@ bool plProcessTask::GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, 
         {
           case plAssetInfo::TransformState::Unknown:
           case plAssetInfo::TransformState::TransformError:
-          case plAssetInfo::TransformState::MissingTransformDependency:
-          case plAssetInfo::TransformState::MissingThumbnailDependency:
-          case plAssetInfo::TransformState::CircularDependency:
+          case plAssetInfo::TransformState::MissingDependency:
+          case plAssetInfo::TransformState::MissingReference:
           {
             bComplete = false;
             continue;
@@ -330,31 +333,30 @@ bool plProcessTask::GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, 
     return nullptr;
   };
 
-  if (plAssetInfo* pDepInfo = TestFunc(pInfo->m_Info->m_TransformDependencies))
+  if (plAssetInfo* pDepInfo = TestFunc(pInfo->m_Info->m_AssetTransformDependencies))
   {
-    return GetNextAssetToProcess(pDepInfo, out_guid, out_path);
+    return GetNextAssetToProcess(pDepInfo, out_guid, out_sAbsPath, out_sRelPath);
   }
 
-  if (plAssetInfo* pDepInfo = TestFunc(pInfo->m_Info->m_ThumbnailDependencies))
+  if (plAssetInfo* pDepInfo = TestFunc(pInfo->m_Info->m_RuntimeDependencies))
   {
-    return GetNextAssetToProcess(pDepInfo, out_guid, out_path);
+    return GetNextAssetToProcess(pDepInfo, out_guid, out_sAbsPath, out_sRelPath);
   }
-
-  // not needed to go through package dependencies here
 
   if (bComplete && !plAssetCurator::GetSingleton()->m_Updating.Contains(pInfo->m_Info->m_DocumentID) &&
       !plAssetCurator::GetSingleton()->m_TransformStateStale.Contains(pInfo->m_Info->m_DocumentID))
   {
     plAssetCurator::GetSingleton()->m_Updating.Insert(pInfo->m_Info->m_DocumentID);
     out_guid = pInfo->m_Info->m_DocumentID;
-    out_path = pInfo->m_Path;
+    out_sAbsPath = pInfo->m_sAbsolutePath;
+    out_sRelPath = pInfo->m_sDataDirParentRelativePath;
     return true;
   }
 
   return false;
 }
 
-bool plProcessTask::GetNextAssetToProcess(plUuid& out_guid, plDataDirPath& out_path)
+bool plProcessTask::GetNextAssetToProcess(plUuid& out_guid, plStringBuilder& out_sAbsPath, plStringBuilder& out_sRelPath)
 {
   PLASMA_LOCK(plAssetCurator::GetSingleton()->m_CuratorMutex);
 
@@ -363,7 +365,7 @@ bool plProcessTask::GetNextAssetToProcess(plUuid& out_guid, plDataDirPath& out_p
     plAssetInfo* pInfo = plAssetCurator::GetSingleton()->GetAssetInfo(it.Key());
     if (pInfo)
     {
-      bool bRes = GetNextAssetToProcess(pInfo, out_guid, out_path);
+      bool bRes = GetNextAssetToProcess(pInfo, out_guid, out_sAbsPath, out_sRelPath);
       if (bRes)
         return true;
     }
@@ -374,7 +376,7 @@ bool plProcessTask::GetNextAssetToProcess(plUuid& out_guid, plDataDirPath& out_p
     plAssetInfo* pInfo = plAssetCurator::GetSingleton()->GetAssetInfo(it.Key());
     if (pInfo)
     {
-      bool bRes = GetNextAssetToProcess(pInfo, out_guid, out_path);
+      bool bRes = GetNextAssetToProcess(pInfo, out_guid, out_sAbsPath, out_sRelPath);
       if (bRes)
         return true;
     }
@@ -387,23 +389,25 @@ bool plProcessTask::GetNextAssetToProcess(plUuid& out_guid, plDataDirPath& out_p
 void plProcessTask::OnProcessCrashed()
 {
   m_Status = plStatus("Asset processor crashed");
-  plLogEntryDelegate logger([this](plLogEntry& ref_entry) { m_LogEntries.PushBack(std::move(ref_entry)); });
+  plLogEntryDelegate logger([this](plLogEntry& entry) { m_LogEntries.PushBack(std::move(entry)); });
   plLog::Error(&logger, "AssetProcessor crashed!");
   plLog::Error(&plAssetProcessor::GetSingleton()->m_CuratorLog, "AssetProcessor crashed!");
 }
 
 bool plProcessTask::BeginExecute()
 {
+  plStringBuilder sAssetRelPath;
+
   m_LogEntries.Clear();
   m_TransitiveHull.Clear();
   m_Status = plStatus(PLASMA_SUCCESS);
   {
     PLASMA_LOCK(plAssetCurator::GetSingleton()->m_CuratorMutex);
 
-    if (!GetNextAssetToProcess(m_AssetGuid, m_AssetPath))
+    if (!GetNextAssetToProcess(m_AssetGuid, m_sAssetPath, sAssetRelPath))
     {
       m_AssetGuid = plUuid();
-      m_AssetPath.Clear();
+      m_sAssetPath.Clear();
       m_bDidWork = false;
       return false;
     }
@@ -415,7 +419,7 @@ bool plProcessTask::BeginExecute()
     plSet<plString> dependencies;
 
     plStringBuilder sTemp;
-    plAssetCurator::GetSingleton()->GenerateTransitiveHull(plConversionUtils::ToString(m_AssetGuid, sTemp), dependencies, true, true);
+    plAssetCurator::GetSingleton()->GenerateTransitiveHull(plConversionUtils::ToString(m_AssetGuid, sTemp), &dependencies, &dependencies);
 
     m_TransitiveHull.Reserve(dependencies.GetCount());
     for (const plString& str : dependencies)
@@ -436,13 +440,13 @@ bool plProcessTask::BeginExecute()
   }
   else
   {
-    plLog::Info(&plAssetProcessor::GetSingleton()->m_CuratorLog, "Processing '{0}'", m_AssetPath.GetDataDirRelativePath());
+    plLog::Info(&plAssetProcessor::GetSingleton()->m_CuratorLog, "Processing '{0}'", sAssetRelPath);
     // Send and wait
     plProcessAssetMsg msg;
     msg.m_AssetGuid = m_AssetGuid;
     msg.m_AssetHash = m_uiAssetHash;
     msg.m_ThumbHash = m_uiThumbHash;
-    msg.m_sAssetPath = m_AssetPath;
+    msg.m_sAssetPath = m_sAssetPath;
     msg.m_DepRefHull.Swap(m_TransitiveHull);
     msg.m_sPlatform = plAssetCurator::GetSingleton()->GetActiveAssetProfile()->GetConfigName();
 
@@ -474,7 +478,7 @@ bool plProcessTask::FinishExecute()
   if (m_Status.Succeeded())
   {
     plAssetCurator::GetSingleton()->NotifyOfAssetChange(m_AssetGuid);
-    plAssetCurator::GetSingleton()->NeedsReloadResources(m_AssetGuid);
+    plAssetCurator::GetSingleton()->NeedsReloadResources();
   }
   else
   {

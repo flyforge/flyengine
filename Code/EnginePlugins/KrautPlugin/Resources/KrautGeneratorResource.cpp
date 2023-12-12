@@ -90,7 +90,7 @@ static void GenerateAmbientOcclusionSpheres(plDynamicOctree& ref_octree, const p
         const plVec3 pos = reinterpret_cast<const plVec3&>(branch.m_Nodes[n].m_vPosition);
 
         ++uiNumSpheres;
-        spheres.PushBack(plBoundingSphere::MakeFromCenterAndRadius(pos, fThickness * 1.5f));
+        spheres.PushBack(plBoundingSphere(pos, fThickness * 1.5f));
 
         ref_octree.InsertObject(pos, plVec3(fThickness * 2.0f), b, spheres.GetCount() - 1, nullptr, true).IgnoreResult();
 
@@ -242,7 +242,8 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
   GenerateExtraData(extraData, m_pDescriptor->m_TreeStructureDesc, treeStructure, uiRandomSeed, fWoodBendiness, fTwigBendiness);
 
   auto bbox = treeStructure.ComputeBoundingBox();
-  plBoundingBox bbox2 = plBoundingBox::MakeFromMinMax(ToPlasmaSwizzle(bbox.m_vMin), ToPlasmaSwizzle(bbox.m_vMax));
+  plBoundingBox bbox2;
+  bbox2.SetElements(ToPlasmaSwizzle(bbox.m_vMin), ToPlasmaSwizzle(bbox.m_vMax));
 
   // data for ambient occlusion computation
   plDynamicArray<plDynamicArray<plBoundingSphere>> occlusionSpheres;
@@ -527,7 +528,8 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
     // compute the leaf center
     if (lodIdx == 0)
     {
-      plBoundingBox leafBox = plBoundingBox::MakeInvalid();
+      plBoundingBox leafBox;
+      leafBox.SetInvalid();
 
       for (plUInt32 branchIdx = 0; branchIdx < mesh.m_BranchMeshes.size(); ++branchIdx)
       {

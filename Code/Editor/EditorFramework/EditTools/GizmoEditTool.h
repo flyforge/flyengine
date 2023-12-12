@@ -3,7 +3,7 @@
 #include <EditorFramework/EditTools/EditTool.h>
 #include <EditorFramework/EditorFrameworkDLL.h>
 
-struct plEngineWindowEvent;
+struct PlasmaEngineWindowEvent;
 struct plGameObjectEvent;
 struct plDocumentObjectStructureEvent;
 struct plManipulatorManagerEvent;
@@ -45,6 +45,6 @@ private:
   void CommandHistoryEventHandler(const plCommandHistoryEvent& e);
   void SelectionManagerEventHandler(const plSelectionManagerEvent& e);
   void ManipulatorManagerEventHandler(const plManipulatorManagerEvent& e);
-  void EngineWindowEventHandler(const plEngineWindowEvent& e);
+  void EngineWindowEventHandler(const PlasmaEngineWindowEvent& e);
   void ObjectStructureEventHandler(const plDocumentObjectStructureEvent& e);
 };

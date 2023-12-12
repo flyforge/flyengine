@@ -18,12 +18,12 @@ class PLASMA_GUIFOUNDATION_DLL plQtMenuActionMapView : public QMenu
   PLASMA_DISALLOW_COPY_AND_ASSIGN(plQtMenuActionMapView);
 
 public:
-  explicit plQtMenuActionMapView(QWidget* pParent);
+  explicit plQtMenuActionMapView(QWidget* parent);
   ~plQtMenuActionMapView();
 
   void SetActionContext(const plActionContext& context);
 
-  static void AddDocumentObjectToMenu(plHashTable<plUuid, QSharedPointer<plQtProxy>>& ref_proxies, plActionContext& ref_context, plActionMap* pActionMap,
+  static void AddDocumentObjectToMenu(plHashTable<plUuid, QSharedPointer<plQtProxy>>& Proxies, plActionContext& Context, plActionMap* pActionMap,
     QMenu* pCurrentRoot, const plActionMap::TreeNode* pObject);
 
 private:

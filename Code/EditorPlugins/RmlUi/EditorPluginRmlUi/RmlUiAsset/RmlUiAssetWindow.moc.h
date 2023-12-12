@@ -22,7 +22,7 @@ protected:
 private:
   void SendRedrawMsg();
 
-  plEngineViewConfig m_ViewConfig;
+  PlasmaEngineViewConfig m_ViewConfig;
   plQtEngineViewWidget* m_pViewWidget;
   plRmlUiAssetDocument* m_pAssetDoc;
 };

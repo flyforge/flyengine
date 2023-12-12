@@ -32,5 +32,5 @@ private:
   void Update();
 
   float m_fAmplitude = 1.0f;             // [ property ]
-  plAngle m_Speed = plAngle::MakeFromDegree(90); // [ property ]
+  plAngle m_Speed = plAngle::Degree(90); // [ property ]
 };

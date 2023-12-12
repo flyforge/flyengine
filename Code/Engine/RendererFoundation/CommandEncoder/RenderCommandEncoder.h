@@ -24,6 +24,10 @@ public:
   void DrawIndexedInstancedIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes);
   void DrawInstanced(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex);
   void DrawInstancedIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes);
+  void DrawAuto();
+
+  void BeginStreamOut();
+  void EndStreamOut();
 
   // State functions
 
@@ -40,6 +44,8 @@ public:
 
   void SetViewport(const plRectFloat& rect, float fMinDepth = 0.0f, float fMaxDepth = 1.0f);
   void SetScissorRect(const plRectU32& rect);
+
+  void SetStreamOutBuffer(plUInt32 uiSlot, plGALBufferHandle hBuffer, plUInt32 uiOffset);
 
   virtual void ClearStatisticsCounters() override;
 

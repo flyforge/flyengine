@@ -120,7 +120,7 @@ void plQtJoltProjectSettingsDlg::SetupTable()
   {
     m_IndexRemap[r] = m_Config.GetNamedGroupIndex(r);
 
-    headers.push_back(plMakeQString(m_Config.GetGroupName(m_IndexRemap[r])));
+    headers.push_back(QString::fromUtf8(m_Config.GetGroupName(m_IndexRemap[r])));
   }
 
   FilterTable->setVerticalHeaderLabels(headers);

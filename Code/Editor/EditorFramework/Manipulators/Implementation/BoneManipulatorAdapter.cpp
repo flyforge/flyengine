@@ -148,13 +148,13 @@ void plBoneManipulatorAdapter::RetrieveBones()
     PLASMA_ASSERT_DEV(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pAttrib->GetParametersSource(), m_pObject->GetType()->GetTypeName());
 
     plExposedParameterCommandAccessor proxy(pObjectAccessor, pProperty, pParameterSourceProp);
-    proxy.GetValues(m_pObject, pProperty, values).AssertSuccess();
-    proxy.GetKeys(m_pObject, pProperty, m_Keys).AssertSuccess();
+    proxy.GetValues(m_pObject, pProperty, values).IgnoreResult();
+    proxy.GetKeys(m_pObject, pProperty, m_Keys).IgnoreResult();
   }
   else
   {
-    pObjectAccessor->GetKeys(m_pObject, pProperty, m_Keys).AssertSuccess();
-    pObjectAccessor->GetValues(m_pObject, pProperty, values).AssertSuccess();
+    pObjectAccessor->GetKeys(m_pObject, pProperty, m_Keys).IgnoreResult();
+    pObjectAccessor->GetValues(m_pObject, pProperty, values).IgnoreResult();
   }
 
   m_RootTransform.SetIdentity();
@@ -275,7 +275,7 @@ void plBoneManipulatorAdapter::SetTransform(plUInt32 uiBone, const plTransform& 
   // for some reason the first command in plExposedParameterCommandAccessor returns failure 'the property X does not exist' and the insert
   // command than fails with 'the property X already exists' ???
 
-  proxy.SetValue(m_pObject, pProperty, var, m_Keys[uiBone]).AssertSuccess();
+  proxy.SetValue(m_pObject, pProperty, var, m_Keys[uiBone]).IgnoreResult();
 }
 
 plMat4 plBoneManipulatorAdapter::ComputeFullTransform(plUInt32 uiBone) const
@@ -300,5 +300,5 @@ plMat4 plBoneManipulatorAdapter::ComputeParentTransform(plUInt32 uiBone) const
     }
   }
 
-  return plMat4::MakeIdentity();
+  return plMat4::IdentityMatrix();
 }

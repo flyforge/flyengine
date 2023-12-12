@@ -24,8 +24,8 @@ public:
   const plUuid& GetLastSelectedAsset() const { return m_LastSelected; }
 
 private Q_SLOTS:
-  void SlotAssetChosen(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute, plUInt8 uiAssetBrowserItemFlags);
-  void SlotAssetSelected(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute, plUInt8 uiAssetBrowserItemFlags);
+  void SlotAssetChosen(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute);
+  void SlotAssetSelected(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute);
   void SlotAssetCleared();
 
 private:
@@ -33,6 +33,5 @@ private:
   void ProjectEvents(const plToolsProjectEvent& e);
 
   plUuid m_LastSelected;
-  QStatusBar* m_pStatusBar;
-  plQtCuratorControl* m_pCuratorControl;
 };
+

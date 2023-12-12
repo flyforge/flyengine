@@ -17,7 +17,8 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plExposedParameter, plNoBase, 2, plRTTIDefaul
 PLASMA_END_STATIC_REFLECTED_TYPE;
 
 plExposedParameter::plExposedParameter()
-= default;
+{
+}
 
 plExposedParameter::~plExposedParameter()
 {
@@ -38,7 +39,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plExposedParameters, 3, plRTTIDefaultAllocat
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExposedParameters::plExposedParameters() = default;
+plExposedParameters::plExposedParameters() {}
 
 plExposedParameters::~plExposedParameters()
 {
@@ -51,6 +52,6 @@ plExposedParameters::~plExposedParameters()
 const plExposedParameter* plExposedParameters::Find(const char* szParamName) const
 {
   const plExposedParameter* const* pParam =
-    std::find_if(cbegin(m_Parameters), cend(m_Parameters), [szParamName](const plExposedParameter* pParam) { return pParam->m_sName == szParamName; });
+    std::find_if(cbegin(m_Parameters), cend(m_Parameters), [szParamName](const plExposedParameter* param) { return param->m_sName == szParamName; });
   return pParam != cend(m_Parameters) ? *pParam : nullptr;
 }

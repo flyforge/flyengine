@@ -15,7 +15,7 @@ class plObjectAccessorBase;
 ///
 /// Typically visualizers are configured with plVisualizerAttribute's on component types.
 /// The adapter reads the attribute values and sets up the necessary code to render them in the engine.
-/// This is usually achieved by creating plEngineGizmoHandle objects (which get automatically synchronized
+/// This is usually achieved by creating PlasmaEngineGizmoHandle objects (which get automatically synchronized
 /// with the engine process).
 /// The adapter then reacts to editor side object changes and adjusts the engine side representation
 /// as needed.

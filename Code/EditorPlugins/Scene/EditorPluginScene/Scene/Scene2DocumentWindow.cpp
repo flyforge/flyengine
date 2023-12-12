@@ -16,7 +16,7 @@
 plQtScene2DocumentWindow::plQtScene2DocumentWindow(plScene2Document* pDocument)
   : plQtSceneDocumentWindowBase(pDocument)
 {
-  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, plEngineViewConfig* pConfig) -> plQtEngineViewWidget* {
+  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, PlasmaEngineViewConfig* pConfig) -> plQtEngineViewWidget* {
     plQtSceneViewWidget* pWidget = new plQtSceneViewWidget(nullptr, static_cast<plQtSceneDocumentWindowBase*>(pWindow), pConfig);
     pWindow->AddViewWidget(pWidget);
     return pWidget;

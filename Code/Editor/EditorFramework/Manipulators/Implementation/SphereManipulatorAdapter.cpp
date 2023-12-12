@@ -4,9 +4,9 @@
 #include <EditorFramework/Manipulators/SphereManipulatorAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plSphereManipulatorAdapter::plSphereManipulatorAdapter() = default;
+plSphereManipulatorAdapter::plSphereManipulatorAdapter() {}
 
-plSphereManipulatorAdapter::~plSphereManipulatorAdapter() = default;
+plSphereManipulatorAdapter::~plSphereManipulatorAdapter() {}
 
 void plSphereManipulatorAdapter::Finalize()
 {

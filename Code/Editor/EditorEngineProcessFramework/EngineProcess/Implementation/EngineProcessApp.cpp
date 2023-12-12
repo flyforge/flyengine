@@ -10,26 +10,26 @@
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Device/SwapChain.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plEditorEngineProcessApp);
+PLASMA_IMPLEMENT_SINGLETON(PlasmaEditorEngineProcessApp);
 
-plEditorEngineProcessApp::plEditorEngineProcessApp()
+PlasmaEditorEngineProcessApp::PlasmaEditorEngineProcessApp()
   : m_SingletonRegistrar(this)
 {
 }
 
-plEditorEngineProcessApp::~plEditorEngineProcessApp()
+PlasmaEditorEngineProcessApp::~PlasmaEditorEngineProcessApp()
 {
   DestroyRemoteWindow();
 }
 
-void plEditorEngineProcessApp::SetRemoteMode()
+void PlasmaEditorEngineProcessApp::SetRemoteMode()
 {
-  m_Mode = plEditorEngineProcessMode::Remote;
+  m_Mode = PlasmaEditorEngineProcessMode::Remote;
 
   CreateRemoteWindow();
 }
 
-void plEditorEngineProcessApp::CreateRemoteWindow()
+void PlasmaEditorEngineProcessApp::CreateRemoteWindow()
 {
   PLASMA_ASSERT_DEV(IsRemoteMode(), "Incorrect app mode");
 
@@ -45,7 +45,7 @@ void plEditorEngineProcessApp::CreateRemoteWindow()
 
     plWindowCreationDesc desc;
     desc.m_uiWindowNumber = 0;
-    desc.m_bClipMouseCursor = false;
+    desc.m_bClipMouseCursor = true;
     desc.m_bShowMouseCursor = true;
     desc.m_Resolution = plSizeU32(1024, 768);
     desc.m_WindowMode = plWindowMode::WindowFixedResolution;
@@ -62,7 +62,7 @@ void plEditorEngineProcessApp::CreateRemoteWindow()
   plActorManager::GetSingleton()->AddActor(std::move(pActor));
 }
 
-void plEditorEngineProcessApp::DestroyRemoteWindow()
+void PlasmaEditorEngineProcessApp::DestroyRemoteWindow()
 {
   if (!m_hRemoteView.IsInvalidated())
   {
@@ -78,19 +78,19 @@ void plEditorEngineProcessApp::DestroyRemoteWindow()
   m_pActor = nullptr;
 }
 
-plRenderPipelineResourceHandle plEditorEngineProcessApp::CreateDefaultMainRenderPipeline()
+plRenderPipelineResourceHandle PlasmaEditorEngineProcessApp::CreateDefaultMainRenderPipeline()
 {
   // EditorRenderPipeline.plRenderPipelineAsset
   return plResourceManager::LoadResource<plRenderPipelineResource>("{ da463c4d-c984-4910-b0b7-a0b3891d0448 }");
 }
 
-plRenderPipelineResourceHandle plEditorEngineProcessApp::CreateDefaultDebugRenderPipeline()
+plRenderPipelineResourceHandle PlasmaEditorEngineProcessApp::CreateDefaultDebugRenderPipeline()
 {
   // DebugRenderPipeline.plRenderPipelineAsset
   return plResourceManager::LoadResource<plRenderPipelineResource>("{ 0416eb3e-69c0-4640-be5b-77354e0e37d7 }");
 }
 
-plViewHandle plEditorEngineProcessApp::CreateRemoteWindowAndView(plCamera* pCamera)
+plViewHandle PlasmaEditorEngineProcessApp::CreateRemoteWindowAndView(plCamera* pCamera)
 {
   PLASMA_ASSERT_DEV(IsRemoteMode(), "Incorrect app mode");
 
@@ -98,6 +98,8 @@ plViewHandle plEditorEngineProcessApp::CreateRemoteWindowAndView(plCamera* pCame
 
   if (m_hRemoteView.IsInvalidated())
   {
+    plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
+
     plActorPluginWindowOwner* pWindowPlugin = m_pActor->GetPlugin<plActorPluginWindowOwner>();
 
     // create output target

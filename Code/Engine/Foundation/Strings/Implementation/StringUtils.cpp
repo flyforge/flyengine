@@ -433,8 +433,8 @@ plUInt32 plStringUtils::Copy(char* szDest, plUInt32 uiDstSize, const char* szSou
     {
       szUtf8StartByte--;
     }
-    std::ptrdiff_t isLength = szLastCharacterPos - szUtf8StartByte;
-    std::ptrdiff_t expectedLength = plUnicodeUtils::GetUtf8SequenceLength(*szUtf8StartByte);
+    ptrdiff_t isLength = szLastCharacterPos - szUtf8StartByte;
+    ptrdiff_t expectedLength = plUnicodeUtils::GetUtf8SequenceLength(*szUtf8StartByte);
     PLASMA_ASSERT_DEBUG(isLength == expectedLength, "The destination buffer was too small, so a utf-8 byte sequence got cut off. This function "
                                                 "is not designed to copy into buffers that are too small.");
   }

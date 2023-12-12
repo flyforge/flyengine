@@ -20,7 +20,7 @@ public:
 protected:
   plWorldSettingsMsgToEngine GetWorldSettings() const;
   plGridSettingsMsgToEngine GetGridSettings() const;
-  virtual void ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg) override;
+  virtual void ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg) override;
 
 private:
   void GameObjectEventHandler(const plGameObjectEvent& e);

@@ -3,8 +3,8 @@
 #include <Core/Interfaces/PhysicsWorldModule.h>
 #include <Core/WorldSerializer/WorldReader.h>
 #include <Core/WorldSerializer/WorldWriter.h>
-#include <DetourCrowd.h>
-#include <RecastPlugin/Components/AgentSteeringComponent.h>
+#include <GameEngine/AI/AgentSteeringComponent.h>
+#include <Recast/DetourCrowd.h>
 #include <RecastPlugin/Components/SoldierComponent.h>
 #include <RecastPlugin/WorldModule/RecastWorldModule.h>
 #include <RendererCore/Debug/DebugRenderer.h>
@@ -17,15 +17,15 @@ PLASMA_END_COMPONENT_TYPE
 plSoldierComponent::plSoldierComponent() = default;
 plSoldierComponent::~plSoldierComponent() = default;
 
-void plSoldierComponent::SerializeComponent(plWorldWriter& inout_stream) const
+void plSoldierComponent::SerializeComponent(plWorldWriter& stream) const
 {
-  SUPER::SerializeComponent(inout_stream);
+  SUPER::SerializeComponent(stream);
   // plStreamWriter& s = stream.GetStream();
 }
 
-void plSoldierComponent::DeserializeComponent(plWorldReader& inout_stream)
+void plSoldierComponent::DeserializeComponent(plWorldReader& stream)
 {
-  SUPER::DeserializeComponent(inout_stream);
+  SUPER::DeserializeComponent(stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
   // plStreamReader& s = stream.GetStream();
 }

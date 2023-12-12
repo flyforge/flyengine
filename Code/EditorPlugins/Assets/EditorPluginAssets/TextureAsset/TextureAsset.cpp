@@ -19,8 +19,8 @@ PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plTextureChannelMode, 1)
 PLASMA_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
-plTextureAssetDocument::plTextureAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plTextureAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple)
+plTextureAssetDocument::plTextureAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plTextureAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple)
 {
   m_iTextureLod = -1;
 }
@@ -351,16 +351,10 @@ void plTextureAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo)
 {
   SUPER::UpdateAssetDocumentInfo(pInfo);
 
-  if (!m_bIsRenderTarget)
-  {
-    // every 2D texture also generates a "-lowres" output, which is used to be embedded into materials for quick streaming
-    pInfo->m_Outputs.Insert("LOWRES");
-  }
-
   for (plUInt32 i = GetProperties()->GetNumInputFiles(); i < 4; ++i)
   {
     // remove unused dependencies
-    pInfo->m_TransformDependencies.Remove(GetProperties()->GetInputFile(i));
+    pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetInputFile(i));
   }
 }
 
@@ -373,21 +367,15 @@ void plTextureAssetDocument::InitializeAfterLoading(bool bFirstTimeCreation)
     if (GetProperties()->m_bIsRenderTarget == false)
     {
       GetCommandHistory()->StartTransaction("MakeRenderTarget");
-      GetObjectAccessor()->SetValue(GetPropertyObject(), "IsRenderTarget", true).AssertSuccess();
+      GetObjectAccessor()->SetValue(GetPropertyObject(), "IsRenderTarget", true).IgnoreResult();
       GetCommandHistory()->FinishTransaction();
       GetCommandHistory()->ClearUndoHistory();
     }
   }
 }
 
-plTransformStatus plTextureAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plTextureAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  if (sOutputTag.IsEqual("LOWRES"))
-  {
-    // no need to generate this file, it will be generated together with the main output
-    return plTransformStatus();
-  }
-
   // PLASMA_ASSERT_DEV(plStringUtils::IsEqual(szPlatform, "PC"), "Platform '{0}' is not supported", szPlatform);
 
   const auto* pAssetConfig = pAssetProfile->GetTypeConfig<plTextureAssetProfileConfig>();
@@ -511,22 +499,36 @@ plTransformStatus plTextureAssetDocument::InternalTransformAsset(const char* szT
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plTextureAssetDocumentGenerator>)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
+enum class TextureType
+{
+  Diffuse,
+  Normal,
+  Occlusion,
+  Roughness,
+  Metalness,
+  ORM,
+  Height,
+  HDR,
+  Linear,
+};
+
 plTextureAssetDocumentGenerator::plTextureAssetDocumentGenerator()
 {
   AddSupportedFileType("tga");
   AddSupportedFileType("dds");
   AddSupportedFileType("jpg");
   AddSupportedFileType("jpeg");
-  AddSupportedFileType("png");
   AddSupportedFileType("hdr");
-  AddSupportedFileType("exr");
+  AddSupportedFileType("png");
 }
 
 plTextureAssetDocumentGenerator::~plTextureAssetDocumentGenerator() = default;
 
-plTextureAssetDocumentGenerator::TextureType plTextureAssetDocumentGenerator::DetermineTextureType(plStringView sFile)
+void plTextureAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const
 {
-  plStringBuilder baseFilename = sFile.GetFileName();
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
+
+  plStringBuilder baseFilename = baseOutputFile.GetFileName();
 
   while (baseFilename.TrimWordEnd("_") ||
          baseFilename.TrimWordEnd("K") ||
@@ -545,88 +547,50 @@ plTextureAssetDocumentGenerator::TextureType plTextureAssetDocumentGenerator::De
   {
   }
 
-  if (sFile.HasExtension("hdr"))
+  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
+
+  TextureType tt = TextureType::Diffuse;
+
+  if (plPathUtils::HasExtension(sParentDirRelativePath, "hdr"))
   {
-    return TextureType::HDR;
-  }
-  else if (sFile.HasExtension("exr"))
-  {
-    return TextureType::HDR;
+    tt = TextureType::HDR;
   }
   else if (baseFilename.EndsWith_NoCase("_d") || baseFilename.EndsWith_NoCase("diffuse") || baseFilename.EndsWith_NoCase("diff") || baseFilename.EndsWith_NoCase("col") || baseFilename.EndsWith_NoCase("color"))
   {
-    return TextureType::Diffuse;
+    tt = TextureType::Diffuse;
   }
   else if (baseFilename.EndsWith_NoCase("_n") || baseFilename.EndsWith_NoCase("normal") || baseFilename.EndsWith_NoCase("normals") || baseFilename.EndsWith_NoCase("nrm") || baseFilename.EndsWith_NoCase("norm") || baseFilename.EndsWith_NoCase("_nor"))
   {
-    return TextureType::Normal;
+    tt = TextureType::Normal;
   }
   else if (baseFilename.EndsWith_NoCase("_arm") || baseFilename.EndsWith_NoCase("_orm"))
   {
-    return TextureType::ORM;
+    tt = TextureType::ORM;
   }
   else if (baseFilename.EndsWith_NoCase("_rough") || baseFilename.EndsWith_NoCase("roughness") || baseFilename.EndsWith_NoCase("_rgh"))
   {
-    return TextureType::Roughness;
+    tt = TextureType::Roughness;
   }
   else if (baseFilename.EndsWith_NoCase("_ao"))
   {
-    return TextureType::Occlusion;
+    tt = TextureType::Occlusion;
   }
   else if (baseFilename.EndsWith_NoCase("_height") || baseFilename.EndsWith_NoCase("_disp"))
   {
-    return TextureType::Height;
+    tt = TextureType::Height;
   }
   else if (baseFilename.EndsWith_NoCase("_metal") || baseFilename.EndsWith_NoCase("_met") || baseFilename.EndsWith_NoCase("metallic") || baseFilename.EndsWith_NoCase("metalness"))
   {
-    return TextureType::Metalness;
+    tt = TextureType::Metalness;
   }
   else if (baseFilename.EndsWith_NoCase("_alpha"))
   {
-    return TextureType::Linear;
+    tt = TextureType::Linear;
   }
 
-  return TextureType::Diffuse;
-}
-
-void plTextureAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
-{
-  if (sAbsInputFile.IsEmpty())
-  {
-    {
-      plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
-      info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
-      info2.m_sName = "TextureImport.Auto";
-      info2.m_sIcon = ":/AssetIcons/Texture_2D.svg";
-    }
-
-    //{
-    //  plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
-    //  info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
-    //  info2.m_sName = "TextureImport.Diffuse";
-    //  info2.m_sIcon = ":/AssetIcons/Texture_2D.svg";
-    //}
-
-    //{
-    //  plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
-    //  info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
-    //  info2.m_sName = "TextureImport.Linear";
-    //  info2.m_sIcon = ":/AssetIcons/Texture_Linear.svg";
-    //}
-
-    //{
-    //  plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
-    //  info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
-    //  info2.m_sName = "TextureImport.Normal";
-    //  info2.m_sIcon = ":/AssetIcons/Texture_Normals.svg";
-    //}
-    return;
-  }
-
-  const TextureType tt = DetermineTextureType(sAbsInputFile);
-
-  plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+  plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
   info.m_Priority = plAssetDocGeneratorPriority::DefaultPriority;
+  info.m_sOutputFileParentRelative = baseOutputFile;
 
   // first add the default option
   switch (tt)
@@ -699,117 +663,82 @@ void plTextureAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile,
 
   if (tt != TextureType::Diffuse)
   {
-    plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info2 = out_Modes.ExpandAndGetRef();
     info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
+    info2.m_sOutputFileParentRelative = baseOutputFile;
     info2.m_sName = "TextureImport.Diffuse";
     info2.m_sIcon = ":/AssetIcons/Texture_2D.svg";
   }
 
   if (tt != TextureType::Linear)
   {
-    plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info2 = out_Modes.ExpandAndGetRef();
     info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
+    info2.m_sOutputFileParentRelative = baseOutputFile;
     info2.m_sName = "TextureImport.Linear";
     info2.m_sIcon = ":/AssetIcons/Texture_Linear.svg";
   }
 
   if (tt != TextureType::Normal)
   {
-    plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info2 = out_Modes.ExpandAndGetRef();
     info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
+    info2.m_sOutputFileParentRelative = baseOutputFile;
     info2.m_sName = "TextureImport.Normal";
     info2.m_sIcon = ":/AssetIcons/Texture_Normals.svg";
   }
 
   if (tt != TextureType::Metalness)
   {
-    plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info2 = out_Modes.ExpandAndGetRef();
     info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
+    info2.m_sOutputFileParentRelative = baseOutputFile;
     info2.m_sName = "TextureImport.Metalness";
     info2.m_sIcon = ":/AssetIcons/Texture_Linear.svg";
   }
 
   if (tt != TextureType::Roughness)
   {
-    plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info2 = out_Modes.ExpandAndGetRef();
     info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
+    info2.m_sOutputFileParentRelative = baseOutputFile;
     info2.m_sName = "TextureImport.Roughness";
     info2.m_sIcon = ":/AssetIcons/Texture_Linear.svg";
   }
 
   if (tt != TextureType::Occlusion)
   {
-    plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info2 = out_Modes.ExpandAndGetRef();
     info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
+    info2.m_sOutputFileParentRelative = baseOutputFile;
     info2.m_sName = "TextureImport.Occlusion";
     info2.m_sIcon = ":/AssetIcons/Texture_Linear.svg";
   }
 
   if (tt != TextureType::ORM)
   {
-    plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info2 = out_Modes.ExpandAndGetRef();
     info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
+    info2.m_sOutputFileParentRelative = baseOutputFile;
     info2.m_sName = "TextureImport.ORM";
     info2.m_sIcon = ":/AssetIcons/Texture_Linear.svg";
   }
 
   if (tt != TextureType::Height)
   {
-    plAssetDocumentGenerator::ImportMode& info2 = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info2 = out_Modes.ExpandAndGetRef();
     info2.m_Priority = plAssetDocGeneratorPriority::LowPriority;
+    info2.m_sOutputFileParentRelative = baseOutputFile;
     info2.m_sName = "TextureImport.Height";
     info2.m_sIcon = ":/AssetIcons/Texture_Linear.svg";
   }
 }
 
-plStatus plTextureAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plTextureAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  if (sMode == "TextureImport.Auto")
-  {
-    const TextureType tt = DetermineTextureType(sInputFileAbs);
-
-    switch (tt)
-    {
-      case TextureType::Diffuse:
-        sMode = "TextureImport.Diffuse";
-        break;
-      case TextureType::Normal:
-        sMode = "TextureImport.Normal";
-        break;
-      case TextureType::Occlusion:
-        sMode = "TextureImport.Occlusion";
-        break;
-      case TextureType::Roughness:
-        sMode = "TextureImport.Roughness";
-        break;
-      case TextureType::Metalness:
-        sMode = "TextureImport.Metalness";
-        break;
-      case TextureType::ORM:
-        sMode = "TextureImport.ORM";
-        break;
-      case TextureType::Height:
-        sMode = "TextureImport.Height";
-        break;
-      case TextureType::HDR:
-        sMode = "TextureImport.HDR";
-        break;
-      case TextureType::Linear:
-        sMode = "TextureImport.Linear";
-        break;
-    }
-  }
-
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
 
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
@@ -818,46 +747,46 @@ plStatus plTextureAssetDocumentGenerator::Generate(plStringView sInputFileAbs, p
     return plStatus("Target document is not a valid plTextureAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("Input1", sInputFileRel.GetView());
+  accessor.SetValue("Input1", sDataDirRelativePath);
   accessor.SetValue("ChannelMapping", (int)plTexture2DChannelMappingEnum::RGB1);
   accessor.SetValue("Usage", (int)plTexConvUsage::Linear);
 
-  if (sMode == "TextureImport.Diffuse")
+  if (info.m_sName == "TextureImport.Diffuse")
   {
     accessor.SetValue("Usage", (int)plTexConvUsage::Color);
   }
-  else if (sMode == "TextureImport.Normal")
+  else if (info.m_sName == "TextureImport.Normal")
   {
     accessor.SetValue("Usage", (int)plTexConvUsage::NormalMap);
   }
-  else if (sMode == "TextureImport.HDR")
+  else if (info.m_sName == "TextureImport.HDR")
   {
     accessor.SetValue("Usage", (int)plTexConvUsage::Hdr);
   }
-  else if (sMode == "TextureImport.Linear")
+  else if (info.m_sName == "TextureImport.Linear")
   {
   }
-  else if (sMode == "TextureImport.Occlusion")
+  else if (info.m_sName == "TextureImport.Occlusion")
   {
     accessor.SetValue("ChannelMapping", (int)plTexture2DChannelMappingEnum::R1);
     accessor.SetValue("TextureFilter", (int)plTextureFilterSetting::LowestQuality);
   }
-  else if (sMode == "TextureImport.Height")
+  else if (info.m_sName == "TextureImport.Height")
   {
     accessor.SetValue("ChannelMapping", (int)plTexture2DChannelMappingEnum::R1);
     accessor.SetValue("TextureFilter", (int)plTextureFilterSetting::LowQuality);
   }
-  else if (sMode == "TextureImport.Roughness")
+  else if (info.m_sName == "TextureImport.Roughness")
   {
     accessor.SetValue("ChannelMapping", (int)plTexture2DChannelMappingEnum::R1);
     accessor.SetValue("TextureFilter", (int)plTextureFilterSetting::LowQuality);
   }
-  else if (sMode == "TextureImport.Metalness")
+  else if (info.m_sName == "TextureImport.Metalness")
   {
     accessor.SetValue("ChannelMapping", (int)plTexture2DChannelMappingEnum::R1);
     accessor.SetValue("TextureFilter", (int)plTextureFilterSetting::LowQuality);
   }
-  else if (sMode == "TextureImport.ORM")
+  else if (info.m_sName == "TextureImport.ORM")
   {
     accessor.SetValue("ChannelMapping", (int)plTexture2DChannelMappingEnum::RGB1);
     accessor.SetValue("TextureFilter", (int)plTextureFilterSetting::LowQuality);

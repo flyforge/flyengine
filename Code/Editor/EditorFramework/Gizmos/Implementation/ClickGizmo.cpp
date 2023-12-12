@@ -12,10 +12,10 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plClickGizmo::plClickGizmo()
 {
-  m_hShape.ConfigureHandle(this, plEngineGizmoHandleType::Sphere, plColor::White, plGizmoFlags::Pickable);
+  m_hShape.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Sphere, plColor::White, plGizmoFlags::Pickable);
 
   SetVisible(false);
-  SetTransformation(plTransform::MakeIdentity());
+  SetTransformation(plTransform::IdentityTransform());
 }
 
 void plClickGizmo::SetColor(const plColor& color)
@@ -44,16 +44,16 @@ void plClickGizmo::DoFocusLost(bool bCancel)
   GetOwnerWindow()->GetEditorEngineConnection()->SendHighlightObjectMessage(&msg);
 }
 
-plEditorInput plClickGizmo::DoMousePressEvent(QMouseEvent* e)
+PlasmaEditorInput plClickGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (m_pInteractionGizmoHandle != &m_hShape)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -61,16 +61,16 @@ plEditorInput plClickGizmo::DoMousePressEvent(QMouseEvent* e)
 
   SetActiveInputContext(this);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plClickGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+PlasmaEditorInput plClickGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   plGizmoEvent ev;
   ev.m_pGizmo = this;
@@ -80,5 +80,5 @@ plEditorInput plClickGizmo::DoMouseReleaseEvent(QMouseEvent* e)
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }

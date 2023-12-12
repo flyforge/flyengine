@@ -18,9 +18,6 @@ public:
 
   plSimdVec4i(plInternal::QuadInt v); // [tested]
 
-  /// \brief Creates an plSimdVec4i that is initialized to zero.
-  [[nodiscard]] static plSimdVec4i MakeZero(); // [tested]
-
   void Set(plInt32 iXyzw); // [tested]
 
   void Set(plInt32 x, plInt32 y, plInt32 z, plInt32 w); // [tested]
@@ -39,7 +36,7 @@ public:
 public:
   plSimdVec4f ToFloat() const; // [tested]
 
-  [[nodiscard]] static plSimdVec4i Truncate(const plSimdVec4f& f); // [tested]
+  static plSimdVec4i Truncate(const plSimdVec4f& f); // [tested]
 
 public:
   template <int N>
@@ -54,22 +51,22 @@ public:
   plSimdVec4i Get() const; // [tested]
 
 public:
-  [[nodiscard]] plSimdVec4i operator-() const;                     // [tested]
-  [[nodiscard]] plSimdVec4i operator+(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4i operator-(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i operator-() const;                     // [tested]
+  plSimdVec4i operator+(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i operator-(const plSimdVec4i& v) const; // [tested]
 
-  [[nodiscard]] plSimdVec4i CompMul(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4i CompDiv(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i CompMul(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i CompDiv(const plSimdVec4i& v) const; // [tested]
 
-  [[nodiscard]] plSimdVec4i operator|(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4i operator&(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4i operator^(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4i operator~() const;                     // [tested]
+  plSimdVec4i operator|(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i operator&(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i operator^(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i operator~() const;                     // [tested]
 
-  [[nodiscard]] plSimdVec4i operator<<(plUInt32 uiShift) const;     // [tested]
-  [[nodiscard]] plSimdVec4i operator>>(plUInt32 uiShift) const;     // [tested]
-  [[nodiscard]] plSimdVec4i operator<<(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4i operator>>(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i operator<<(plUInt32 uiShift) const; // [tested]
+  plSimdVec4i operator>>(plUInt32 uiShift) const; // [tested]
+  plSimdVec4i operator<<(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i operator>>(const plSimdVec4i& v) const; // [tested]
 
   plSimdVec4i& operator+=(const plSimdVec4i& v); // [tested]
   plSimdVec4i& operator-=(const plSimdVec4i& v); // [tested]
@@ -81,18 +78,20 @@ public:
   plSimdVec4i& operator<<=(plUInt32 uiShift); // [tested]
   plSimdVec4i& operator>>=(plUInt32 uiShift); // [tested]
 
-  [[nodiscard]] plSimdVec4i CompMin(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4i CompMax(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4i Abs() const;                         // [tested]
+  plSimdVec4i CompMin(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i CompMax(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4i Abs() const;                         // [tested]
 
-  [[nodiscard]] plSimdVec4b operator==(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4b operator!=(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4b operator<=(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4b operator<(const plSimdVec4i& v) const;  // [tested]
-  [[nodiscard]] plSimdVec4b operator>=(const plSimdVec4i& v) const; // [tested]
-  [[nodiscard]] plSimdVec4b operator>(const plSimdVec4i& v) const;  // [tested]
+  plSimdVec4b operator==(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4b operator!=(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4b operator<=(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4b operator<(const plSimdVec4i& v) const;  // [tested]
+  plSimdVec4b operator>=(const plSimdVec4i& v) const; // [tested]
+  plSimdVec4b operator>(const plSimdVec4i& v) const;  // [tested]
 
-  [[nodiscard]] static plSimdVec4i Select(const plSimdVec4b& vCmp, const plSimdVec4i& vTrue, const plSimdVec4i& vFalse); // [tested]
+  static plSimdVec4i ZeroVector(); // [tested]
+
+  static plSimdVec4i Select(const plSimdVec4b& vCmp, const plSimdVec4i& vTrue, const plSimdVec4i& vFalse); // [tested]
 
 public:
   plInternal::QuadInt m_v;

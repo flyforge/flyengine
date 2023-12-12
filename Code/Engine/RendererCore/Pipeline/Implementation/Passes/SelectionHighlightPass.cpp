@@ -1,6 +1,5 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/GPUResourcePool/GPUResourcePool.h>
 #include <RendererCore/Pipeline/Passes/SelectionHighlightPass.h>
 #include <RendererCore/Pipeline/RenderPipeline.h>
@@ -125,22 +124,6 @@ void plSelectionHighlightPass::Execute(const plRenderViewContext& renderViewCont
   }
 }
 
-plResult plSelectionHighlightPass::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  inout_stream << m_HighlightColor;
-  inout_stream << m_fOverlayOpacity;
-  return PLASMA_SUCCESS;
-}
 
-plResult plSelectionHighlightPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  inout_stream >> m_HighlightColor;
-  inout_stream >> m_fOverlayOpacity;
-  return PLASMA_SUCCESS;
-}
 
 PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_SelectionHighlightPass);

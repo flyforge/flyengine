@@ -19,13 +19,13 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleContext::plParticleContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
 plParticleContext::~plParticleContext() = default;
 
-void plParticleContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
+void plParticleContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plSimulationSettingsMsgToEngine>())
   {
@@ -38,17 +38,17 @@ void plParticleContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
     return;
   }
 
-  if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plEditorEngineRestartSimulationMsg>())
+  if (pMsg->GetDynamicRTTI()->IsDerivedFrom<PlasmaEditorEngineRestartSimulationMsg>())
   {
     RestartEffect();
   }
 
-  if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plEditorEngineLoopAnimationMsg>())
+  if (pMsg->GetDynamicRTTI()->IsDerivedFrom<PlasmaEditorEngineLoopAnimationMsg>())
   {
-    SetAutoRestartEffect(((const plEditorEngineLoopAnimationMsg*)pMsg)->m_bLoop);
+    SetAutoRestartEffect(((const PlasmaEditorEngineLoopAnimationMsg*)pMsg)->m_bLoop);
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
 }
 
 void plParticleContext::OnInitialize()
@@ -162,7 +162,7 @@ void plParticleContext::OnInitialize()
     {
       plGameObject* pObj;
       obj.m_LocalPosition.Set(4, (float)x * 4, -2);
-      obj.m_LocalRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(45));
+      obj.m_LocalRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(45));
       pWorld->CreateObject(obj, pObj);
 
       plMeshComponent* pMesh;
@@ -176,22 +176,22 @@ void plParticleContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plParticleContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plParticleContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plParticleViewContext, this);
 }
 
-void plParticleContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plParticleContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
 void plParticleContext::OnThumbnailViewContextRequested()
 {
-  m_ThumbnailBoundingVolume = plBoundingBoxSphere::MakeInvalid();
+  m_ThumbnailBoundingVolume.SetInvalid();
 }
 
-bool plParticleContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plParticleContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   plParticleViewContext* pParticleViewContext = static_cast<plParticleViewContext*>(pThumbnailViewContext);
 
@@ -207,7 +207,7 @@ bool plParticleContext::UpdateThumbnailViewContext(plEngineProcessViewContext* p
       const auto onFinished = m_pComponent->m_OnFinishedAction;
       const double fClockSpeed = m_pWorld->GetClock().GetSpeed();
 
-      m_pComponent->m_MinRestartDelay = plTime::MakeZero();
+      m_pComponent->m_MinRestartDelay.SetZero();
       m_pComponent->m_OnFinishedAction = plOnComponentFinishedAction2::Restart;
 
       m_pWorld->SetWorldSimulationEnabled(true);

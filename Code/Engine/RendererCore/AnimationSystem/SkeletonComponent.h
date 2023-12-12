@@ -66,7 +66,7 @@ protected:
   plDebugRenderer::Line& AddLine(const plVec3& vStart, const plVec3& vEnd, const plColor& color);
 
   plSkeletonResourceHandle m_hSkeleton;
-  plTransform m_RootTransform = plTransform::MakeIdentity();
+  plTransform m_RootTransform = plTransform::IdentityTransform();
   plUInt32 m_uiSkeletonChangeCounter = 0;
   plString m_sBonesToHighlight;
 

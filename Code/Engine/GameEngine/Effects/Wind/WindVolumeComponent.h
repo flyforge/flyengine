@@ -181,5 +181,5 @@ private:
   void OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg);
 
   float m_fLength = 1.0f;
-  plAngle m_Angle = plAngle::MakeFromDegree(45);
+  plAngle m_Angle = plAngle::Degree(45);
 };

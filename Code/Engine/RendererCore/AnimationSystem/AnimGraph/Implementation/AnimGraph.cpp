@@ -44,6 +44,10 @@ void plAnimGraph::AddConnection(const plAnimGraphNode* pSrcNode, plStringView sS
 
   auto& to = m_From[pSrcNode].m_To.ExpandAndGetRef();
   to.m_sSrcPinName = sSrcPinName;
+  if (pDstNode == NULL)
+  {
+    PLASMA_DEBUG_BREAK;
+  }
   to.m_pDstNode = pDstNode;
   to.m_sDstPinName = sDstPinName;
   to.m_pSrcPin = (plAnimGraphPin*)pPinPropSrc->GetPropertyPointer(pSrcNode);
@@ -64,12 +68,16 @@ void plAnimGraph::AddConnection(const plAnimGraphNode* pSrcNode, plStringView sS
     plConversionUtils::StringToUInt(sIdx, uiIdx).AssertSuccess();
 
     to.m_pDstPin = (plAnimGraphPin*)pPinPropDst->GetValuePointer(pDstNode, uiIdx);
+    if (!to.m_pDstPin)
+      PLASMA_DEBUG_BREAK;
   }
   else
   {
     plAbstractMemberProperty* pPinPropDst = (plAbstractMemberProperty*)pDstNode->GetDynamicRTTI()->FindPropertyByName(sDstPinName);
 
     to.m_pDstPin = (plAnimGraphPin*)pPinPropDst->GetPropertyPointer(pDstNode);
+    if (!to.m_pDstPin)
+      PLASMA_DEBUG_BREAK;
   }
 }
 
@@ -192,6 +200,7 @@ void plAnimGraph::SortNodesByPriority()
 
 void plAnimGraph::PrepareForUse()
 {
+  PLASMA_PROFILE_SCOPE("AimGraph_Prepare");
   if (m_bPreparedForUse)
     return;
 

@@ -6,8 +6,8 @@
 
 plDynamicArray<plQtDocumentPanel*> plQtDocumentPanel::s_AllDocumentPanels;
 
-plQtDocumentPanel::plQtDocumentPanel(QWidget* pParent, plDocument* pDocument)
-  : QDockWidget(pParent)
+plQtDocumentPanel::plQtDocumentPanel(QWidget* parent, plDocument* pDocument)
+  : QDockWidget(parent)
 {
   m_pDocument = pDocument;
   s_AllDocumentPanels.PushBack(this);
@@ -27,13 +27,13 @@ void plQtDocumentPanel::closeEvent(QCloseEvent* e)
   e->ignore();
 }
 
-bool plQtDocumentPanel::event(QEvent* pEvent)
+bool plQtDocumentPanel::event(QEvent* event)
 {
-  if (pEvent->type() == QEvent::ShortcutOverride || pEvent->type() == QEvent::KeyPress)
+  if (event->type() == QEvent::ShortcutOverride)
   {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(pEvent);
-    if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent, pEvent->type() == QEvent::ShortcutOverride))
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+    if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent))
       return true;
   }
-  return QDockWidget::event(pEvent);
+  return QDockWidget::event(event);
 }

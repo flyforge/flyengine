@@ -18,12 +18,12 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltCollisionMeshContext::plJoltCollisionMeshContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_pMeshObject = nullptr;
 }
 
-void plJoltCollisionMeshContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
+void plJoltCollisionMeshContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocMsg)
 {
   if (auto pMsg = plDynamicCast<const plQuerySelectionBBoxMsgToEngine*>(pDocMsg))
   {
@@ -43,7 +43,7 @@ void plJoltCollisionMeshContext::HandleMessage(const plEditorEngineDocumentMsg* 
     }
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pDocMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pDocMsg);
 }
 
 void plJoltCollisionMeshContext::OnInitialize()
@@ -70,17 +70,17 @@ void plJoltCollisionMeshContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plJoltCollisionMeshContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plJoltCollisionMeshContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plJoltCollisionMeshViewContext, this);
 }
 
-void plJoltCollisionMeshContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plJoltCollisionMeshContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
-bool plJoltCollisionMeshContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plJoltCollisionMeshContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
@@ -89,12 +89,13 @@ bool plJoltCollisionMeshContext::UpdateThumbnailViewContext(plEngineProcessViewC
 }
 
 
-void plJoltCollisionMeshContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
+void plJoltCollisionMeshContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (m_pMeshObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   {
     PLASMA_LOCK(m_pWorld->GetWriteMarker());

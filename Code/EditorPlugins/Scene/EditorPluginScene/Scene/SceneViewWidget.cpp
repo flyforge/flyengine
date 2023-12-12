@@ -16,7 +16,7 @@
 
 bool plQtSceneViewWidget::s_bContextMenuInitialized = false;
 
-plQtSceneViewWidget::plQtSceneViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig)
+plQtSceneViewWidget::plQtSceneViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig)
   : plQtGameObjectViewWidget(pParent, pOwnerWindow, pViewConfig)
 {
   setAcceptDrops(true);
@@ -53,10 +53,10 @@ void plQtSceneViewWidget::OnOpenContextMenu(QPoint globalPos)
 
     plActionMapManager::RegisterActionMap("SceneViewContextMenu").IgnoreResult();
 
-    plGameObjectSelectionActions::MapViewContextMenuActions("SceneViewContextMenu");
-    plSelectionActions::MapViewContextMenuActions("SceneViewContextMenu");
-    plEditActions::MapViewContextMenuActions("SceneViewContextMenu");
-    plSceneActions::MapViewContextMenuActions("SceneViewContextMenu");
+    plGameObjectSelectionActions::MapViewContextMenuActions("SceneViewContextMenu", "");
+    plSelectionActions::MapViewContextMenuActions("SceneViewContextMenu", "");
+    plEditActions::MapViewContextMenuActions("SceneViewContextMenu", "");
+    plSceneActions::MapViewContextMenuActions("SceneViewContextMenu", "");
   }
 
   {

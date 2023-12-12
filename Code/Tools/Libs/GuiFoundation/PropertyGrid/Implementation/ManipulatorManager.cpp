@@ -43,14 +43,14 @@ plManipulatorManager::~plManipulatorManager()
 }
 
 const plManipulatorAttribute* plManipulatorManager::GetActiveManipulator(
-  const plDocument* pDoc, const plHybridArray<plPropertySelection, 8>*& out_pSelection) const
+  const plDocument* pDoc, const plHybridArray<plPropertySelection, 8>*& out_Selection) const
 {
-  out_pSelection = nullptr;
+  out_Selection = nullptr;
   auto it = m_ActiveManipulator.Find(pDoc);
 
   if (it.IsValid())
   {
-    out_pSelection = &(it.Value().m_Selection);
+    out_Selection = &(it.Value().m_Selection);
 
     return it.Value().m_pAttribute;
   }

@@ -55,7 +55,8 @@ void plSceneContext::DrawSelectionBounds(const plViewHandle& hView)
 
   for (const auto& obj : m_Selection)
   {
-    plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+    plBoundingBoxSphere bounds;
+    bounds.SetInvalid();
 
     plGameObject* pObj;
     if (!m_pWorld->TryGetObject(obj, pObj))
@@ -100,7 +101,7 @@ void plSceneContext::UpdateInvisibleLayerTags()
       }
     }
 
-    for (plEngineProcessViewContext* pView : m_ViewContexts)
+    for (PlasmaEngineProcessViewContext* pView : m_ViewContexts)
     {
       if (pView)
       {
@@ -112,7 +113,7 @@ void plSceneContext::UpdateInvisibleLayerTags()
 }
 
 plSceneContext::plSceneContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_bRenderSelectionOverlay = true;
   m_bRenderSelectionBoxes = true;
@@ -131,7 +132,7 @@ plSceneContext::~plSceneContext()
   plGameApplicationBase::GetGameApplicationBaseInstance()->m_ExecutionEvents.RemoveEventHandler(plMakeDelegate(&plSceneContext::GameApplicationEventHandler, this));
 }
 
-void plSceneContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
+void plSceneContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plWorldSettingsMsgToEngine>())
   {
@@ -218,7 +219,7 @@ void plSceneContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
     return;
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
 
   if (pMsg->IsInstanceOf<plEntityMsgToEngine>())
   {
@@ -301,8 +302,8 @@ void plSceneContext::AnswerObjectStatePullRequest(const plViewRedrawMsgToEngine*
     const plQuat localRot = pChild->GetLocalRotation();
 
     // now adjust the position
-    state.m_vPosition -= state.m_qRotation * localRot.GetInverse() * localPos;
-    state.m_qRotation = state.m_qRotation * localRot.GetInverse();
+    state.m_vPosition -= state.m_qRotation * -localRot * localPos;
+    state.m_qRotation = state.m_qRotation * -localRot;
   }
 
   // send a return message with the result
@@ -370,7 +371,7 @@ void plSceneContext::HandleGridSettingsMsg(const plGridSettingsMsgToEngine* pMsg
       mRot.SetColumn(0, pMsg->m_vGridTangent1);
       mRot.SetColumn(1, pMsg->m_vGridTangent2);
       mRot.SetColumn(2, pMsg->m_vGridTangent1.CrossRH(pMsg->m_vGridTangent2));
-      m_GridTransform.m_qRotation = plQuat::MakeFromMat3(mRot);
+      m_GridTransform.m_qRotation.SetFromMat3(mRot);
     }
   }
 }
@@ -404,12 +405,13 @@ void plSceneContext::HandleWorldSettingsMsg(const plWorldSettingsMsgToEngine* pM
     RemoveAmbientLight();
 }
 
-void plSceneContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
+void plSceneContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (m_Selection.IsEmpty())
     return;
 
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   {
     PLASMA_LOCK(m_pWorld->GetWriteMarker());
@@ -432,7 +434,7 @@ void plSceneContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
         if (!m_pWorld->TryGetObject(obj, pObj))
           continue;
 
-        bounds.ExpandToInclude(plBoundingBoxSphere::MakeFromCenterExtents(pObj->GetGlobalPosition(), plVec3(0.0f), 0.0f));
+        bounds.ExpandToInclude(plBoundingBoxSphere(pObj->GetGlobalPosition(), plVec3(0.0f), 0.0f));
       }
     }
   }
@@ -572,12 +574,12 @@ void plSceneContext::OnDeinitialize()
   }
 }
 
-plEngineProcessViewContext* plSceneContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plSceneContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plSceneViewContext, this);
 }
 
-void plSceneContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plSceneContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
@@ -715,7 +717,8 @@ void plSceneContext::HandleGameModeMsg(const plGameModeMsgToEngine* pMsg)
 
     if (pMsg->m_bUseStartPosition)
     {
-      plQuat qRot = plQuat::MakeShortestRotation(plVec3(1, 0, 0), pMsg->m_vStartDirection);
+      plQuat qRot;
+      qRot.SetShortestRotation(plVec3(1, 0, 0), pMsg->m_vStartDirection);
 
       plTransform tStart(pMsg->m_vStartPosition, qRot);
 
@@ -979,7 +982,7 @@ plGameObjectHandle plSceneContext::ResolveStringToGameObjectHandle(const void* p
   return plGameObjectHandle();
 }
 
-bool plSceneContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plSceneContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   const plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
@@ -1024,7 +1027,7 @@ void plSceneContext::AddAmbientLight(bool bSetEditorTag)
     plGameObjectDesc obj;
     obj.m_sName.Assign("Ambient Light");
 
-    obj.m_LocalRotation = plQuat::MakeFromEulerAngles(plAngle::MakeFromDegree(-14.510815f), plAngle::MakeFromDegree(43.07951f), plAngle::MakeFromDegree(93.223808f));
+    obj.m_LocalRotation.SetFromEulerAngles(plAngle::Degree(-14.510815f), plAngle::Degree(43.07951f), plAngle::Degree(93.223808f));
 
     if (bSetEditorTag)
     {
@@ -1060,7 +1063,7 @@ void plSceneContext::RemoveAmbientLight()
   }
 }
 
-const plEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext() const
+const PlasmaEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext() const
 {
   if (m_ActiveLayer == GetDocumentGuid())
   {
@@ -1079,9 +1082,9 @@ const plEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext()
   return this;
 }
 
-plEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext()
+PlasmaEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext()
 {
-  return const_cast<plEngineProcessDocumentContext*>(const_cast<const plSceneContext*>(this)->GetActiveDocumentContext());
+  return const_cast<PlasmaEngineProcessDocumentContext*>(const_cast<const plSceneContext*>(this)->GetActiveDocumentContext());
 }
 
 const plWorldRttiConverterContext& plSceneContext::GetActiveContext() const

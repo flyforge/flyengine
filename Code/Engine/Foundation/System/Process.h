@@ -119,11 +119,11 @@ public:
 
   /// \brief Waits the given amount of time for the previously launched process to finish.
   ///
-  /// Pass in plTime::MakeZero() to wait indefinitely.
+  /// Pass in plTime::Zero() to wait indefinitely.
   /// Returns PLASMA_FAILURE, if the process did not finish within the given time.
   ///
   /// \note Asserts that the plProcess instance was used to successfully launch a process before.
-  plResult WaitToFinish(plTime timeout = plTime::MakeZero());
+  plResult WaitToFinish(plTime timeout = plTime::Zero());
 
   /// \brief Kills the detached process, if possible.
   plResult Terminate();
@@ -162,6 +162,5 @@ private:
   plString m_sProcess;
   plDelegate<void(plStringView)> m_OnStdOut;
   plDelegate<void(plStringView)> m_OnStdError;
-  mutable plTime m_ProcessExited = plTime::MakeZero();
 };
 #endif

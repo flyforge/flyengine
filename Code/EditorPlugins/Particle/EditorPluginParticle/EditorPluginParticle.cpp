@@ -20,27 +20,26 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("ParticleEffectAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("ParticleEffectAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+      plStandardMenus::MapActions("ParticleEffectAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
       plProjectActions::MapActions("ParticleEffectAssetMenuBar");
-      plDocumentActions::MapMenuActions("ParticleEffectAssetMenuBar");
-      plAssetActions::MapMenuActions("ParticleEffectAssetMenuBar");
-      plCommandHistoryActions::MapActions("ParticleEffectAssetMenuBar");
+      plDocumentActions::MapActions("ParticleEffectAssetMenuBar", "Menu.File", false);
+      plCommandHistoryActions::MapActions("ParticleEffectAssetMenuBar", "Menu.Edit");
     }
-    
+
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("ParticleEffectAssetToolBar").IgnoreResult();
-      plDocumentActions::MapToolbarActions("ParticleEffectAssetToolBar");
+      plDocumentActions::MapActions("ParticleEffectAssetToolBar", "", true);
       plCommandHistoryActions::MapActions("ParticleEffectAssetToolBar", "");
       plAssetActions::MapToolBarActions("ParticleEffectAssetToolBar", true);
-      plParticleActions::MapActions("ParticleEffectAssetToolBar");
+      plParticleActions::MapActions("ParticleEffectAssetToolBar", "");
     }
 
     // View Tool Bar
     {
       plActionMapManager::RegisterActionMap("ParticleEffectAssetViewToolBar").IgnoreResult();
-      plViewActions::MapToolbarActions("ParticleEffectAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-      plViewLightActions::MapToolbarActions("ParticleEffectAssetViewToolBar");
+      plViewActions::MapActions("ParticleEffectAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+      plViewLightActions::MapActions("ParticleEffectAssetViewToolBar", "");
     }
 
     plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plParticleEffectAssetDocument::PropertyMetaStateEventHandler);

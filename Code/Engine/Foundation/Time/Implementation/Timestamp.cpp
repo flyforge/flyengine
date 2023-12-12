@@ -33,31 +33,25 @@ plInt64 plTimestamp::GetInt64(plSIUnitOfTime::Enum unitOfTime) const
   return PLASMA_INVALID_TIME_STAMP;
 }
 
-plTimestamp plTimestamp::MakeFromInt(plInt64 iTimeValue, plSIUnitOfTime::Enum unitOfTime)
+void plTimestamp::SetInt64(plInt64 iTimeValue, plSIUnitOfTime::Enum unitOfTime)
 {
   PLASMA_ASSERT_DEV(unitOfTime >= plSIUnitOfTime::Nanosecond && unitOfTime <= plSIUnitOfTime::Second, "Invalid plSIUnitOfTime value ({0})", unitOfTime);
-
-  plTimestamp ts;
 
   switch (unitOfTime)
   {
     case plSIUnitOfTime::Nanosecond:
-      ts.m_iTimestamp = iTimeValue / 1000LL;
+      m_iTimestamp = iTimeValue / 1000LL;
       break;
     case plSIUnitOfTime::Microsecond:
-      ts.m_iTimestamp = iTimeValue;
+      m_iTimestamp = iTimeValue;
       break;
     case plSIUnitOfTime::Millisecond:
-      ts.m_iTimestamp = iTimeValue * 1000LL;
+      m_iTimestamp = iTimeValue * 1000LL;
       break;
     case plSIUnitOfTime::Second:
-      ts.m_iTimestamp = iTimeValue * 1000000LL;
+      m_iTimestamp = iTimeValue * 1000000LL;
       break;
-
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
-
-  return ts;
 }
 
 bool plTimestamp::Compare(const plTimestamp& rhs, CompareMode::Enum mode) const
@@ -80,37 +74,22 @@ bool plTimestamp::Compare(const plTimestamp& rhs, CompareMode::Enum mode) const
   return false;
 }
 
-plDateTime::plDateTime() = default;
-plDateTime::~plDateTime() = default;
-
-plDateTime plDateTime::MakeFromTimestamp(plTimestamp timestamp)
+plDateTime::plDateTime()
+  : m_uiMicroseconds(0)
+  , m_iYear(0)
+  , m_uiMonth(0)
+  , m_uiDay(0)
+  , m_uiDayOfWeek(0)
+  , m_uiHour(0)
+  , m_uiMinute(0)
+  , m_uiSecond(0)
 {
-  plDateTime res;
-  res.SetFromTimestamp(timestamp).AssertSuccess("Invalid timestamp");
-  return res;
 }
 
-bool plDateTime::IsValid() const
+plDateTime::plDateTime(plTimestamp timestamp)
+  : plDateTime()
 {
-  if (m_uiMonth <= 0 || m_uiMonth > 12)
-    return false;
-
-  if (m_uiDay <= 0 || m_uiDay > 31)
-    return false;
-
-  if (m_uiDayOfWeek > 6)
-    return false;
-
-  if (m_uiHour > 23)
-    return false;
-
-  if (m_uiMinute > 59)
-    return false;
-
-  if (m_uiSecond > 59)
-    return false;
-
-  return true;
+  SetTimestamp(timestamp);
 }
 
 plStringView BuildString(char* szTmp, plUInt32 uiLength, const plDateTime& arg)

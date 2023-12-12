@@ -1,6 +1,6 @@
 #pragma once
 
-PLASMA_ALWAYS_INLINE plSimdVec4f::plSimdVec4f() = default;
+PLASMA_ALWAYS_INLINE plSimdVec4f::plSimdVec4f() {}
 
 PLASMA_ALWAYS_INLINE plSimdVec4f::plSimdVec4f(float xyzw)
 {
@@ -106,7 +106,7 @@ void plSimdVec4f::NormalizeIfNotZero(const plSimdFloat& fEpsilon)
 {
   plSimdFloat sqLength = GetLengthSquared<N>();
   m_v *= sqLength.GetInvSqrt<acc>();
-  m_v = sqLength > fEpsilon.m_v ? m_v : plVec4::MakeZero();
+  m_v = sqLength > fEpsilon.m_v ? m_v : plVec4::ZeroVector();
 }
 
 template <int N>
@@ -485,6 +485,12 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetOrthogonalVector() const
   {
     return plVec4(0.0f, m_v.z, -m_v.y, 0.0f);
   }
+}
+
+// static
+PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::ZeroVector()
+{
+  return plVec4::ZeroVector();
 }
 
 // static

@@ -13,7 +13,7 @@ class plQtJointAdapter : public plQtNamedAdapter
 public:
   plQtJointAdapter(const plSkeletonAssetDocument* pDocument);
   ~plQtJointAdapter();
-  virtual QVariant data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const override;
+  virtual QVariant data(const plDocumentObject* pObject, int row, int column, int role) const override;
 
 private:
   const plSkeletonAssetDocument* m_pDocument;

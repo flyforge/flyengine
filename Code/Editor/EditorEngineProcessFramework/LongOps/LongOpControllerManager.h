@@ -69,7 +69,7 @@ public:
   void CancelAndRemoveAllOpsForDocument(const plUuid& documentGuid);
 
   /// \brief Returns a pointer to the given long op, or null if the GUID does not exist.
-  ProxyOpInfo* GetOperation(const plUuid& opGuid);
+  ProxyOpInfo* GetOperation(const plUuid& guid);
 
   /// \brief Gives access to all currently available long ops. Make sure the lock m_Mutex (of the plLongOpManager base class) while accessing this.
   const plDynamicArray<plUniquePtr<ProxyOpInfo>>& GetOperations() const { return m_ProxyOps; }

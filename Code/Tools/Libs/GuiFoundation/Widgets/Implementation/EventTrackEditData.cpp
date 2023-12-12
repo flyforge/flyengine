@@ -31,9 +31,9 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEventTrackData, 3, plRTTIDefaultAllocator<
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-void plEventTrackControlPointData::SetTickFromTime(plTime time, plInt64 iFps)
+void plEventTrackControlPointData::SetTickFromTime(plTime time, plInt64 fps)
 {
-  const plUInt32 uiTicksPerStep = 4800 / iFps;
+  const plUInt32 uiTicksPerStep = 4800 / fps;
   m_iTick = (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
@@ -43,26 +43,26 @@ plInt64 plEventTrackData::TickFromTime(plTime time) const
   return (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-void plEventTrackData::ConvertToRuntimeData(plEventTrack& out_result) const
+void plEventTrackData::ConvertToRuntimeData(plEventTrack& out_Result) const
 {
-  out_result.Clear();
+  out_Result.Clear();
 
   for (const auto& cp : m_ControlPoints)
   {
-    out_result.AddControlPoint(cp.GetTickAsTime(), cp.m_sEvent);
+    out_Result.AddControlPoint(cp.GetTickAsTime(), cp.m_sEvent);
   }
 }
 
-void plEventSet::AddAvailableEvent(plStringView sEvent)
+void plEventSet::AddAvailableEvent(const char* szEvent)
 {
-  if (sEvent.IsEmpty())
+  if (plStringUtils::IsNullOrEmpty(szEvent))
     return;
 
-  if (m_AvailableEvents.Contains(sEvent))
+  if (m_AvailableEvents.Contains(szEvent))
     return;
 
   m_bModified = true;
-  m_AvailableEvents.Insert(sEvent);
+  m_AvailableEvents.Insert(szEvent);
 }
 
 plResult plEventSet::WriteToDDL(const char* szFile)
@@ -102,11 +102,13 @@ plResult plEventSet::ReadFromDDL(const char* szFile)
 
   auto* pRoot = ddl.GetRootElement();
 
+  plStringBuilder tmp;
+
   for (auto* pChild = pRoot->GetFirstChild(); pChild != nullptr; pChild = pChild->GetSibling())
   {
     if (pChild->IsCustomType("Event"))
     {
-      AddAvailableEvent(pChild->GetName());
+      AddAvailableEvent(pChild->GetName().GetData(tmp));
     }
   }
 

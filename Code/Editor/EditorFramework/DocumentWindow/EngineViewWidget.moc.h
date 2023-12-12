@@ -9,7 +9,7 @@
 #include <QWidget>
 
 class plQtEngineDocumentWindow;
-class plEditorInputContext;
+class PlasmaEditorInputContext;
 class QHBoxLayout;
 class QPushButton;
 class QVBoxLayout;
@@ -35,11 +35,11 @@ class PLASMA_EDITORFRAMEWORK_DLL plQtEngineViewWidget : public QWidget
   Q_OBJECT
 
 public:
-  plQtEngineViewWidget(QWidget* pParent, plQtEngineDocumentWindow* pDocumentWindow, plEngineViewConfig* pViewConfig);
+  plQtEngineViewWidget(QWidget* pParent, plQtEngineDocumentWindow* pDocumentWindow, PlasmaEngineViewConfig* pViewConfig);
   ~plQtEngineViewWidget();
 
   /// \brief Add input contexts in the order in which they are supposed to be processed
-  plHybridArray<plEditorInputContext*, 8> m_InputContexts;
+  plHybridArray<PlasmaEditorInputContext*, 8> m_InputContexts;
 
   /// \brief Returns the ID of this view
   plUInt32 GetViewID() const { return m_uiViewID; }
@@ -48,9 +48,9 @@ public:
   /// \brief Sends the redraw message to the engine
   virtual void SyncToEngine();
 
-  void GetCameraMatrices(plMat4& out_mViewMatrix, plMat4& out_mProjectionMatrix) const;
+  void GetCameraMatrices(plMat4& out_ViewMatrix, plMat4& out_ProjectionMatrix) const;
 
-  plEngineViewConfig* m_pViewConfig;
+  PlasmaEngineViewConfig* m_pViewConfig;
 
   /// \brief Called every frame to move the camera to its current target (focus on selection, etc.)
   void UpdateCameraInterpolation();
@@ -90,10 +90,10 @@ public:
   const plObjectPickingResult& PickObject(plUInt16 uiScreenPosX, plUInt16 uiScreenPosY) const;
 
   /// \brief Similar to PickObject, but computes the intersection with the given plane instead.
-  plResult PickPlane(plUInt16 uiScreenPosX, plUInt16 uiScreenPosY, const plPlane& plane, plVec3& out_vPosition) const;
+  plResult PickPlane(plUInt16 uiScreenPosX, plUInt16 uiScreenPosY, const plPlane& plane, plVec3& out_Position) const;
 
   /// \brief Processes incoming messages from the engine that are meant for this particular view. Mostly picking results.
-  void HandleViewMessage(const plEditorEngineViewMsg* pMsg);
+  void HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg);
 
   /// \brief Returns a plane that can be used for picking, when nothing else is available
   /// Orthographic views would typically return their projection planes, perspective views may return the ground plane
@@ -126,7 +126,7 @@ protected:
   virtual void dropEvent(QDropEvent* e) override;
 
 protected:
-  void EngineViewProcessEventHandler(const plEditorEngineProcessConnection::Event& e);
+  void EngineViewProcessEventHandler(const PlasmaEditorEngineProcessConnection::Event& e);
   void ShowRestartButton(bool bShow);
   virtual void OnOpenContextMenu(QPoint globalPos) {}
   virtual void HandleMarqueePickingResult(const plViewMarqueePickingResultMsgToEditor* pMsg) {}

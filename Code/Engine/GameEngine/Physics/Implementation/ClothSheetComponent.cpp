@@ -60,6 +60,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plClothSheetComponent, 1, plComponentMode::Static)
     PLASMA_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Effects/Cloth"),
+      new plColorAttribute(plColorScheme::Effects),
     }
     PLASMA_END_ATTRIBUTES;
     PLASMA_BEGIN_MESSAGEHANDLERS
@@ -139,7 +140,7 @@ void plClothSheetComponent::OnSimulationStarted()
 
 void plClothSheetComponent::SetupCloth()
 {
-  m_Bbox = plBoundingBox::MakeInvalid();
+  m_Bbox.SetInvalid();
 
   if (IsActiveAndSimulating())
   {
@@ -246,8 +247,8 @@ plResult plClothSheetComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool
   else
   {
     plBoundingBox box;
-    box = plBoundingBox::MakeInvalid();
-    box.ExpandToInclude(plVec3::MakeZero());
+    box.SetInvalid();
+    box.ExpandToInclude(plVec3::ZeroVector());
     box.ExpandToInclude(plVec3(m_vSize.x, 0, -0.1f));
     box.ExpandToInclude(plVec3(0, m_vSize.y, +0.1f));
     box.ExpandToInclude(plVec3(m_vSize.x, m_vSize.y, 0));
@@ -263,7 +264,7 @@ void plClothSheetComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
   auto pRenderData = plCreateRenderDataForThisFrame<plClothSheetRenderData>(GetOwner());
   pRenderData->m_uiUniqueID = GetUniqueIdForRendering();
   pRenderData->m_Color = m_Color;
-  //pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
+  pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
   pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
   pRenderData->m_uiBatchId = plHashingUtils::StringHashTo32(m_hMaterial.GetResourceIDHash());
   pRenderData->m_uiSortingKey = pRenderData->m_uiBatchId;
@@ -408,7 +409,7 @@ void plClothSheetComponent::Update()
     }
 
     // rotate the acceleration vector into the local simulation space
-    acc = GetOwner()->GetGlobalRotation().GetInverse() * acc;
+    acc = -GetOwner()->GetGlobalRotation() * acc;
 
     if (m_Simulator.m_vAcceleration != acc)
     {
@@ -502,10 +503,10 @@ void plClothSheetRenderer::RenderBatch(const plRenderViewContext& renderViewCont
     plUInt32 uiInstanceDataOffset = 0;
     plArrayPtr<plPerInstanceData> instanceData = pInstanceData->GetInstanceData(1, uiInstanceDataOffset);
 
-//    #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-//        instanceData[0].LastObjectToWorld = pRenderData->m_LastGlobalTransform;
-//        instanceData[0].LastObjectToWorldNormal = instanceData[0].LastObjectToWorld;
-//    #endif
+    #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+        instanceData[0].LastObjectToWorld = pRenderData->m_LastGlobalTransform;
+        instanceData[0].LastObjectToWorldNormal = instanceData[0].LastObjectToWorld;
+    #endif
 
     instanceData[0].ObjectToWorld = pRenderData->m_GlobalTransform;
     instanceData[0].ObjectToWorldNormal = instanceData[0].ObjectToWorld;
@@ -577,8 +578,8 @@ void plClothSheetRenderer::RenderBatch(const plRenderViewContext& renderViewCont
           {
             pVertexData[vidx].m_vPosition = pRenderData->m_Positions[vidx];
             pVertexData[vidx].m_vTexCoord = plVec2(x * fDivU, y * fDivY);
-            pVertexData[vidx].EncodeNormal(plVec3::MakeAxisZ());
-            pVertexData[vidx].EncodeTangent(plVec3::MakeAxisX(), 1.0f);
+            pVertexData[vidx].EncodeNormal(plVec3::UnitZAxis());
+            pVertexData[vidx].EncodeTangent(plVec3::UnitXAxis(), 1.0f);
           }
         }
       }

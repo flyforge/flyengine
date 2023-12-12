@@ -3,8 +3,6 @@
 #include <Foundation/Strings/HashedString.h>
 #include <RendererCore/Pipeline/RenderData.h>
 
-class plStreamWriter;
-
 class PLASMA_RENDERERCORE_DLL plExtractor : public plReflectedClass
 {
   PLASMA_ADD_DYNAMIC_REFLECTION(plExtractor, plReflectedClass);
@@ -23,9 +21,6 @@ public:
   virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData);
 
   virtual void PostSortAndBatch(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData);
-
-  virtual plResult Serialize(plStreamWriter& inout_stream) const;
-  virtual plResult Deserialize(plStreamReader& inout_stream);
 
 protected:
   /// \brief returns true if the given object should be filtered by view tags.
@@ -60,8 +55,6 @@ public:
   ~plVisibleObjectsExtractor();
 
   virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
-  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
-  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 };
 
 class PLASMA_RENDERERCORE_DLL plSelectedObjectsExtractorBase : public plExtractor
@@ -73,6 +66,7 @@ public:
   ~plSelectedObjectsExtractorBase();
 
   virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
+
   virtual const plDeque<plGameObjectHandle>* GetSelection() = 0;
 
   plRenderData::Category m_OverrideCategory;
@@ -116,8 +110,6 @@ public:
   ~plSelectedObjectsExtractor();
 
   virtual const plDeque<plGameObjectHandle>* GetSelection() override;
-  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
-  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   /// \brief The context is typically set through an plView, through plView::SetExtractorProperty("<name>", "SelectionContext", pointer);
   void SetSelectionContext(plSelectedObjectsContext* pSelectionContext) { m_pSelectionContext = pSelectionContext; } // [ property ]

@@ -51,6 +51,7 @@ plResult plRestPoseAnimNode::DeserializeNode(plStreamReader& stream)
 
 void plRestPoseAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_ResetPose");
   if (!m_OutPose.IsConnected())
     return;
 

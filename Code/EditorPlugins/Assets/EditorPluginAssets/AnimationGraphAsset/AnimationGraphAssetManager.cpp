@@ -14,7 +14,6 @@ plAnimationGraphAssetManager::plAnimationGraphAssetManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Animation Graph";
   m_DocTypeDesc.m_sFileExtension = "plAnimationGraphAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/AnimationGraph.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Animation";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plAnimationGraphAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Keyframe_Graph");
@@ -48,9 +47,9 @@ void plAnimationGraphAssetManager::OnDocumentManagerEvent(const plDocumentManage
   }
 }
 
-void plAnimationGraphAssetManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plAnimationGraphAssetManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plAnimationGraphAssetDocument(sPath);
+  out_pDocument = new plAnimationGraphAssetDocument(szPath);
 }
 
 void plAnimationGraphAssetManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

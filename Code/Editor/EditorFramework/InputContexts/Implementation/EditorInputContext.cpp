@@ -4,12 +4,12 @@
 #include <EditorFramework/InputContexts/EditorInputContext.h>
 #include <GuiFoundation/Widgets/WidgetUtils.h>
 
-plEditorInputContext* plEditorInputContext::s_pActiveInputContext = nullptr;
+PlasmaEditorInputContext* PlasmaEditorInputContext::s_pActiveInputContext = nullptr;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorInputContext, 1, plRTTINoAllocator)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorInputContext, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plEditorInputContext::plEditorInputContext()
+PlasmaEditorInputContext::PlasmaEditorInputContext()
 {
   m_pOwnerWindow = nullptr;
   m_pOwnerView = nullptr;
@@ -17,14 +17,14 @@ plEditorInputContext::plEditorInputContext()
   m_bJustWrappedMouse = false;
 }
 
-plEditorInputContext::~plEditorInputContext()
+PlasmaEditorInputContext::~PlasmaEditorInputContext()
 {
   if (s_pActiveInputContext == this)
     SetActiveInputContext(nullptr);
 }
 
 
-void plEditorInputContext::FocusLost(bool bCancel)
+void PlasmaEditorInputContext::FocusLost(bool bCancel)
 {
   DoFocusLost(bCancel);
 
@@ -34,30 +34,29 @@ void plEditorInputContext::FocusLost(bool bCancel)
   UpdateStatusBarText(GetOwnerWindow());
 }
 
-plEditorInput plEditorInputContext::DoKeyPressEvent(QKeyEvent* e)
+PlasmaEditorInput PlasmaEditorInputContext::DoKeyPressEvent(QKeyEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (e->key() == Qt::Key_Escape)
   {
     FocusLost(true);
     SetActiveInputContext(nullptr);
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
   }
 
-  return plEditorInput::MayBeHandledByOthers;
+  return PlasmaEditorInput::MayBeHandledByOthers;
 }
 
 
-plEditorInput plEditorInputContext::MouseMoveEvent(QMouseEvent* e)
+PlasmaEditorInput PlasmaEditorInputContext::MouseMoveEvent(QMouseEvent* e)
 {
   if (m_MouseMode != MouseMode::Normal)
   {
     if (m_bJustWrappedMouse)
     {
-      const QPoint mousePosition = e->globalPosition().toPoint();
-      const plVec2I32 curPos(mousePosition.x(), mousePosition.y());
+      const plVec2I32 curPos(e->globalX(), e->globalY());
       const plVec2I32 diffToOld = curPos - m_vMousePosBeforeWrap;
       const plVec2I32 diffToNew = curPos - m_vExpectedMousePosition;
 
@@ -65,7 +64,7 @@ plEditorInput plEditorInputContext::MouseMoveEvent(QMouseEvent* e)
       {
         // this is an invalid message, it was still in the message queue with old coordinates and should be discarded
 
-        return plEditorInput::WasExclusivelyHandled;
+        return PlasmaEditorInput::WasExclusivelyHandled;
       }
 
       m_bJustWrappedMouse = false;
@@ -75,7 +74,7 @@ plEditorInput plEditorInputContext::MouseMoveEvent(QMouseEvent* e)
   return DoMouseMoveEvent(e);
 }
 
-void plEditorInputContext::MakeActiveInputContext(bool bActive /*= true*/)
+void PlasmaEditorInputContext::MakeActiveInputContext(bool bActive /*= true*/)
 {
   if (bActive)
     s_pActiveInputContext = this;
@@ -83,18 +82,18 @@ void plEditorInputContext::MakeActiveInputContext(bool bActive /*= true*/)
     s_pActiveInputContext = nullptr;
 }
 
-void plEditorInputContext::UpdateActiveInputContext()
+void PlasmaEditorInputContext::UpdateActiveInputContext()
 {
   if (s_pActiveInputContext != nullptr)
     s_pActiveInputContext->UpdateContext();
 }
 
-bool plEditorInputContext::IsActiveInputContext() const
+bool PlasmaEditorInputContext::IsActiveInputContext() const
 {
   return s_pActiveInputContext == this;
 }
 
-void plEditorInputContext::SetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
+void PlasmaEditorInputContext::SetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
 {
   m_pOwnerWindow = pOwnerWindow;
   m_pOwnerView = pOwnerView;
@@ -102,13 +101,13 @@ void plEditorInputContext::SetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQt
   OnSetOwner(m_pOwnerWindow, m_pOwnerView);
 }
 
-plQtEngineDocumentWindow* plEditorInputContext::GetOwnerWindow() const
+plQtEngineDocumentWindow* PlasmaEditorInputContext::GetOwnerWindow() const
 {
   PLASMA_ASSERT_DEBUG(m_pOwnerWindow != nullptr, "Owner window pointer has not been set");
   return m_pOwnerWindow;
 }
 
-plQtEngineViewWidget* plEditorInputContext::GetOwnerView() const
+plQtEngineViewWidget* PlasmaEditorInputContext::GetOwnerView() const
 {
   plQtEngineViewWidget* pView = m_pOwnerView;
 
@@ -121,7 +120,7 @@ plQtEngineViewWidget* plEditorInputContext::GetOwnerView() const
   return pView;
 }
 
-plVec2I32 plEditorInputContext::SetMouseMode(MouseMode newMode)
+plVec2I32 PlasmaEditorInputContext::SetMouseMode(MouseMode newMode)
 {
   const QPoint curPos = QCursor::pos();
 
@@ -157,10 +156,9 @@ plVec2I32 plEditorInputContext::SetMouseMode(MouseMode newMode)
   return plVec2I32(curPos.x(), curPos.y());
 }
 
-plVec2I32 plEditorInputContext::UpdateMouseMode(QMouseEvent* e)
+plVec2I32 PlasmaEditorInputContext::UpdateMouseMode(QMouseEvent* e)
 {
-  const QPoint mousePosition = e->globalPosition().toPoint();
-  const plVec2I32 curPos(mousePosition.x(), mousePosition.y());
+  const plVec2I32 curPos(e->globalX(), e->globalY());
 
   if (m_MouseMode == MouseMode::Normal)
     return curPos;

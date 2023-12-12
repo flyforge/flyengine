@@ -53,9 +53,9 @@ void OnDocumentManagerEvent(const plDocumentManager::Event& e)
   }
 }
 
-void ToolsProjectEventHandler(const plEditorAppEvent& e)
+void ToolsProjectEventHandler(const PlasmaEditorAppEvent& e)
 {
-  if (e.m_Type == plEditorAppEvent::Type::BeforeApplyDataDirectories)
+  if (e.m_Type == PlasmaEditorAppEvent::Type::BeforeApplyDataDirectories)
   {
     // plQtEditorApp::GetSingleton()->AddPluginDataDirDependency(">sdk/Data/Base", "base");
   }
@@ -113,28 +113,27 @@ void OnLoadPlugin()
   const char* MenuBars[] = {"EditorPluginScene_DocumentMenuBar", "EditorPluginScene_Scene2MenuBar"};
   for (const char* szMenuBar : MenuBars)
   {
-    plActionMapManager::RegisterActionMap(szMenuBar).AssertSuccess();
-    plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::Default | plStandardMenuTypes::Edit | plStandardMenuTypes::Scene | plStandardMenuTypes::View);
+    plActionMapManager::RegisterActionMap(szMenuBar).IgnoreResult();
+    plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Scene | plStandardMenuTypes::Panels | plStandardMenuTypes::View | plStandardMenuTypes::Help);
     plProjectActions::MapActions(szMenuBar);
-    plDocumentActions::MapMenuActions(szMenuBar);
-    //plAssetActions::MapMenuActions(szMenuBar);
-    plDocumentActions::MapToolsActions(szMenuBar);
-    plCommandHistoryActions::MapActions(szMenuBar);
-    plTransformGizmoActions::MapMenuActions(szMenuBar);
-    plSceneGizmoActions::MapMenuActions(szMenuBar);
-    plGameObjectSelectionActions::MapActions(szMenuBar);
-    plSelectionActions::MapActions(szMenuBar);
-    plEditActions::MapActions(szMenuBar, true, true);
-    plTranslateGizmoAction::MapActions(szMenuBar);
-    plGameObjectDocumentActions::MapMenuActions(szMenuBar);
-    plGameObjectDocumentActions::MapMenuSimulationSpeed(szMenuBar);
+    plDocumentActions::MapActions(szMenuBar, "Menu.File", false);
+    plDocumentActions::MapToolsActions(szMenuBar, "Menu.Tools");
+    plCommandHistoryActions::MapActions(szMenuBar, "Menu.Edit");
+    plTransformGizmoActions::MapMenuActions(szMenuBar, "Menu.Edit");
+    plSceneGizmoActions::MapMenuActions(szMenuBar, "Menu.Edit");
+    plGameObjectSelectionActions::MapActions(szMenuBar, "Menu.Edit");
+    plSelectionActions::MapActions(szMenuBar, "Menu.Edit");
+    plEditActions::MapActions(szMenuBar, "Menu.Edit", true, true);
+    plTranslateGizmoAction::MapActions(szMenuBar, "Menu.Edit/Gizmo.Menu");
+    plGameObjectDocumentActions::MapMenuActions(szMenuBar, "Menu.View");
+    plGameObjectDocumentActions::MapMenuSimulationSpeed(szMenuBar, "Menu.Scene");
     plSceneActions::MapMenuActions(szMenuBar);
   }
   // Scene2 Menu bar adjustments
   {
     plActionMap* pMap = plActionMapManager::GetActionMap(MenuBars[1]);
-    pMap->UnmapAction(plDocumentActions::s_hSave, "G.File.Common").AssertSuccess();
-    pMap->MapAction(plLayerActions::s_hSaveActiveLayer, "G.File.Common", 6.5f);
+    pMap->UnmapAction(plDocumentActions::s_hSave, "Menu.File/SaveCategory").IgnoreResult();
+    pMap->MapAction(plLayerActions::s_hSaveActiveLayer, "Menu.File/SaveCategory", 1.0f);
   }
 
 
@@ -142,25 +141,19 @@ void OnLoadPlugin()
   const char* ToolBars[] = {"EditorPluginScene_DocumentToolBar", "EditorPluginScene_Scene2ToolBar"};
   for (const char* szToolBar : ToolBars)
   {
-    plActionMapManager::RegisterActionMap(szToolBar).AssertSuccess();
-    plDocumentActions::MapToolbarActions(szToolBar);
+    plActionMapManager::RegisterActionMap(szToolBar).IgnoreResult();
+    plDocumentActions::MapActions(szToolBar, "", true);
     plCommandHistoryActions::MapActions(szToolBar, "");
-    plTransformGizmoActions::MapToolbarActions(szToolBar);
-    plSceneGizmoActions::MapToolbarActions(szToolBar);
-    plGameObjectDocumentActions::MapToolbarActions(szToolBar);
     plSceneActions::MapToolbarActions(szToolBar);
   }
-  // Scene2 Tool bar adjustments
-  {
-    plActionMap* pMap = plActionMapManager::GetActionMap(ToolBars[1]);
-    pMap->UnmapAction(plDocumentActions::s_hSave, "SaveCategory").AssertSuccess();
-    pMap->MapAction(plLayerActions::s_hSaveActiveLayer, "SaveCategory", 1.0f);
-  }
-  
+
   // View Tool Bar
-  plActionMapManager::RegisterActionMap("EditorPluginScene_ViewToolBar").AssertSuccess();
-  plViewActions::MapToolbarActions("EditorPluginScene_ViewToolBar", plViewActions::PerspectiveMode | plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-  plQuadViewActions::MapToolbarActions("EditorPluginScene_ViewToolBar");
+  plActionMapManager::RegisterActionMap("EditorPluginScene_ViewToolBar").IgnoreResult();
+  plViewActions::MapActions("EditorPluginScene_ViewToolBar", "", plViewActions::PerspectiveMode | plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+  plQuadViewActions::MapActions("EditorPluginScene_ViewToolBar", "");
+  plTransformGizmoActions::MapToolbarActions("EditorPluginScene_ViewToolBar", "");
+  plSceneGizmoActions::MapToolbarActions("EditorPluginScene_ViewToolBar", "");
+  plGameObjectDocumentActions::MapToolbarActions("EditorPluginScene_ViewToolBar", "");
 
   // Visualizers
   plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plPointLightVisualizerAttribute>(), [](const plRTTI* pRtti) -> plVisualizerAdapter*
@@ -171,21 +164,19 @@ void OnLoadPlugin()
     { return PLASMA_DEFAULT_NEW(plBoxReflectionProbeVisualizerAdapter); });
 
   // SceneGraph Context Menu
-  plActionMapManager::RegisterActionMap("EditorPluginScene_ScenegraphContextMenu").AssertSuccess();
-  plGameObjectSelectionActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu");
-  plSelectionActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu");
-  plEditActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu");
+  plActionMapManager::RegisterActionMap("EditorPluginScene_ScenegraphContextMenu").IgnoreResult();
+  plGameObjectSelectionActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu", "");
+  plSelectionActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu", "");
+  plEditActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu", "");
 
   // Layer Context Menu
-  plActionMapManager::RegisterActionMap("EditorPluginScene_LayerContextMenu").AssertSuccess();
-  plLayerActions::MapContextMenuActions("EditorPluginScene_LayerContextMenu");
+  plActionMapManager::RegisterActionMap("EditorPluginScene_LayerContextMenu").IgnoreResult();
+  plLayerActions::MapContextMenuActions("EditorPluginScene_LayerContextMenu", "");
 
   // component property meta states
   plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plCameraComponent_PropertyMetaStateEventHandler);
   plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plSkyLightComponent_PropertyMetaStateEventHandler);
-  //plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plGreyBoxComponent_PropertyMetaStateEventHandler);
 }
-
 
 void OnUnloadPlugin()
 {

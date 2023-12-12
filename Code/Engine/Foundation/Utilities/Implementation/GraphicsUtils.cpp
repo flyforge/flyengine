@@ -159,8 +159,8 @@ void plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mProject
   const plVec3 bottomPlane = (row3 + row1).GetNormalized();
   const plVec3 topPlane = (row3 - row1).GetNormalized();
 
-  out_fovX = plAngle::MakeFromRadian(plMath::Pi<float>()) - plMath::ACos(leftPlane.Dot(rightPlane));
-  out_fovY = plAngle::MakeFromRadian(plMath::Pi<float>()) - plMath::ACos(topPlane.Dot(bottomPlane));
+  out_fovX = plAngle::Radian(plMath::Pi<float>()) - plMath::ACos(leftPlane.Dot(rightPlane));
+  out_fovY = plAngle::Radian(plMath::Pi<float>()) - plMath::ACos(topPlane.Dot(bottomPlane));
 }
 
 void plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mProjectionMatrix, plAngle& out_fovLeft, plAngle& out_fovRight, plAngle& out_fovBottom, plAngle& out_fovTop, plClipSpaceYMode::Enum range)
@@ -175,9 +175,9 @@ void plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mProject
   const plVec3 topPlane = (row3 - row1).GetNormalized();
 
   out_fovLeft = -plMath::ACos(leftPlane.Dot(plVec3(1.0f, 0, 0)));
-  out_fovRight = plAngle::MakeFromRadian(plMath::Pi<float>()) - plMath::ACos(rightPlane.Dot(plVec3(1.0f, 0, 0)));
+  out_fovRight = plAngle::Radian(plMath::Pi<float>()) - plMath::ACos(rightPlane.Dot(plVec3(1.0f, 0, 0)));
   out_fovBottom = -plMath::ACos(bottomPlane.Dot(plVec3(0, 1.0f, 0)));
-  out_fovTop = plAngle::MakeFromRadian(plMath::Pi<float>()) - plMath::ACos(topPlane.Dot(plVec3(0, 1.0f, 0)));
+  out_fovTop = plAngle::Radian(plMath::Pi<float>()) - plMath::ACos(topPlane.Dot(plVec3(0, 1.0f, 0)));
 
   if (range == plClipSpaceYMode::Flipped)
     plMath::Swap(out_fovBottom, out_fovTop);
@@ -461,7 +461,7 @@ plMat3 plGraphicsUtils::CreateLookAtViewMatrix(const plVec3& vTarget, const plVe
   PLASMA_ASSERT_DEBUG(!vTarget.IsZero(), "The target must not be at the origin.");
 
   plVec3 vLookDir = vTarget;
-  vLookDir.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
+  vLookDir.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
 
   plVec3 vNormalizedUpDir = vUpDir.GetNormalized();
 
@@ -489,7 +489,7 @@ plMat3 plGraphicsUtils::CreateInverseLookAtViewMatrix(const plVec3& vTarget, con
   PLASMA_ASSERT_DEBUG(!vTarget.IsZero(), "The target must not be at the origin.");
 
   plVec3 vLookDir = vTarget;
-  vLookDir.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
+  vLookDir.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
 
   plVec3 vNormalizedUpDir = vUpDir.GetNormalized();
 

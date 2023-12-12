@@ -5,13 +5,13 @@
 
 class plSceneContext;
 
-class plEditorShapeIconsExtractor : public plExtractor
+class PlasmaEditorShapeIconsExtractor : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditorShapeIconsExtractor, plExtractor);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorShapeIconsExtractor, plExtractor);
 
 public:
-  plEditorShapeIconsExtractor(const char* szName = "EditorShapeIconsExtractor");
-  ~plEditorShapeIconsExtractor();
+  PlasmaEditorShapeIconsExtractor(const char* szName = "EditorShapeIconsExtractor");
+  ~PlasmaEditorShapeIconsExtractor();
 
   virtual void Extract(
     const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData) override;

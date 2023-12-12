@@ -1,20 +1,5 @@
 Plugin
 {
-	string %Path{"plasmaAiPlugin"}
-	bool %LoadCopy{false}
-}
-Plugin
-{
-	string %Path{"plasmaAmplitudeAudioPlugin"}
-	bool %LoadCopy{false}
-}
-Plugin
-{
-	string %Path{"plasmaAudioSystemPlugin"}
-	bool %LoadCopy{false}
-}
-Plugin
-{
 	string %Path{"plasmaJoltPlugin"}
 	bool %LoadCopy{false}
 }

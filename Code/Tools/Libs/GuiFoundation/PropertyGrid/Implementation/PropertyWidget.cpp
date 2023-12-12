@@ -28,6 +28,7 @@ plQtPropertyEditorCheckboxWidget::plQtPropertyEditorCheckboxWidget()
 
   m_pWidget = new QCheckBox(this);
   m_pWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+  m_pWidget->setLayoutDirection(Qt::RightToLeft);
   m_pLayout->addWidget(m_pWidget);
 
   PLASMA_VERIFY(connect(m_pWidget, SIGNAL(stateChanged(int)), this, SLOT(on_StateChanged_triggered(int))) != nullptr, "signal/slot connection failed");
@@ -87,12 +88,24 @@ plQtPropertyEditorDoubleSpinboxWidget::plQtPropertyEditorDoubleSpinboxWidget(plI
 
   for (plInt32 c = 0; c < m_iNumComponents; ++c)
   {
+    if (m_iNumComponents > 1)
+    {
+      m_pWidgetLabel[c] = new QLabel(this);
+      m_pWidgetLabel[c]->setText(QString(m_cAxisNames[c]));
+      m_pLayout->addWidget(m_pWidgetLabel[c]);
+    }
+
     m_pWidget[c] = new plQtDoubleSpinBox(this);
     m_pWidget[c]->installEventFilter(this);
     m_pWidget[c]->setMinimum(-plMath::Infinity<double>());
     m_pWidget[c]->setMaximum(plMath::Infinity<double>());
+    m_pWidget[c]->findChild<QLineEdit *>()->setAlignment(Qt::AlignCenter);
     m_pWidget[c]->setSingleStep(0.1f);
     m_pWidget[c]->setAccelerated(true);
+    if (m_iNumComponents > 1)
+      m_pWidget[c]->setStyleSheet(QString("background-color: %1;border: 0.5px solid transparent;border-radius: 5px;").arg(m_pWidgetLabelColors[c]));
+    else
+      m_pWidget[c]->setStyleSheet(QString("border: 0.5px solid transparent;border-radius: 5px;"));
 
     policy.setHorizontalStretch(2);
     m_pWidget[c]->setSizePolicy(policy);
@@ -364,10 +377,12 @@ plQtPropertyEditorTimeWidget::plQtPropertyEditorTimeWidget()
     m_pWidget = new plQtDoubleSpinBox(this);
     m_pWidget->installEventFilter(this);
     m_pWidget->setDisplaySuffix(" sec");
+    m_pWidget->findChild<QLineEdit *>()->setAlignment(Qt::AlignCenter);
     m_pWidget->setMinimum(-plMath::Infinity<double>());
     m_pWidget->setMaximum(plMath::Infinity<double>());
     m_pWidget->setSingleStep(0.1f);
     m_pWidget->setAccelerated(true);
+    m_pWidget->setStyleSheet(QString("border: 0.5px solid transparent;border-radius: 5px;"));
 
     policy.setHorizontalStretch(2);
     m_pWidget->setSizePolicy(policy);
@@ -418,7 +433,7 @@ void plQtPropertyEditorTimeWidget::SlotValueChanged()
 
   m_bTemporaryCommand = true;
 
-  BroadcastValueChanged(plTime::MakeFromSeconds(m_pWidget->value()));
+  BroadcastValueChanged(plTime::Seconds(m_pWidget->value()));
 }
 
 
@@ -441,11 +456,13 @@ plQtPropertyEditorAngleWidget::plQtPropertyEditorAngleWidget()
     m_pWidget = new plQtDoubleSpinBox(this);
     m_pWidget->installEventFilter(this);
     m_pWidget->setDisplaySuffix(plStringUtf8(L"\u00B0").GetData());
+    m_pWidget->findChild<QLineEdit *>()->setAlignment(Qt::AlignCenter);
     m_pWidget->setMinimum(-plMath::Infinity<double>());
     m_pWidget->setMaximum(plMath::Infinity<double>());
     m_pWidget->setSingleStep(0.1f);
     m_pWidget->setAccelerated(true);
     m_pWidget->setDecimals(1);
+    m_pWidget->setStyleSheet(QString("border: 0.5px solid transparent;border-radius: 5px;"));
 
     policy.setHorizontalStretch(2);
     m_pWidget->setSizePolicy(policy);
@@ -508,7 +525,7 @@ void plQtPropertyEditorAngleWidget::SlotValueChanged()
 
   m_bTemporaryCommand = true;
 
-  BroadcastValueChanged(plAngle::MakeFromDegree(m_pWidget->value()));
+  BroadcastValueChanged(plAngle::Degree(m_pWidget->value()));
 }
 
 /// *** INT SPINBOX ***
@@ -532,8 +549,10 @@ plQtPropertyEditorIntSpinboxWidget::plQtPropertyEditorIntSpinboxWidget(plInt8 iN
     m_pWidget[c]->installEventFilter(this);
     m_pWidget[c]->setMinimum(iMinValue);
     m_pWidget[c]->setMaximum(iMaxValue);
+    m_pWidget[c]->findChild<QLineEdit *>()->setAlignment(Qt::AlignCenter);
     m_pWidget[c]->setSingleStep(1);
     m_pWidget[c]->setAccelerated(true);
+    m_pWidget[c]->setStyleSheet(QString("border: 0.5px solid transparent;border-radius: 5px;"));
 
     m_pWidget[c]->setSizePolicy(policy);
 
@@ -837,13 +856,20 @@ plQtPropertyEditorQuaternionWidget::plQtPropertyEditorQuaternionWidget()
 
   for (plInt32 c = 0; c < 3; ++c)
   {
+    m_pWidgetLabel[c] = new QLabel(this);
+    m_pWidgetLabel[c]->setText(QString(m_cAxisNames[c]));
+    m_pLayout->addWidget(m_pWidgetLabel[c]);
+
     m_pWidget[c] = new plQtDoubleSpinBox(this);
     m_pWidget[c]->installEventFilter(this);
+    m_pWidget[c]->findChild<QLineEdit *>()->setAlignment(Qt::AlignCenter);
     m_pWidget[c]->setMinimum(-plMath::Infinity<double>());
     m_pWidget[c]->setMaximum(plMath::Infinity<double>());
     m_pWidget[c]->setSingleStep(1.0);
     m_pWidget[c]->setAccelerated(true);
+    m_pWidget[c]->findChild<QLineEdit *>()->setAlignment(Qt::AlignCenter);
     m_pWidget[c]->setDisplaySuffix("\xC2\xB0");
+    m_pWidget[c]->setStyleSheet(QString("background-color: %1;border: 0.5px solid transparent;border-radius: 5px;").arg(m_pWidgetLabelColors[c]));
 
     policy.setHorizontalStretch(2);
     m_pWidget[c]->setSizePolicy(policy);
@@ -899,11 +925,12 @@ void plQtPropertyEditorQuaternionWidget::SlotValueChanged()
 
   m_bTemporaryCommand = true;
 
-  plAngle x = plAngle::MakeFromDegree(m_pWidget[0]->value());
-  plAngle y = plAngle::MakeFromDegree(m_pWidget[1]->value());
-  plAngle z = plAngle::MakeFromDegree(m_pWidget[2]->value());
+  plAngle x = plAngle::Degree(m_pWidget[0]->value());
+  plAngle y = plAngle::Degree(m_pWidget[1]->value());
+  plAngle z = plAngle::Degree(m_pWidget[2]->value());
 
-  plQuat qRot = plQuat::MakeFromEulerAngles(x, y, z);
+  plQuat qRot;
+  qRot.SetFromEulerAngles(x, y, z);
 
   BroadcastValueChanged(qRot);
 }
@@ -919,8 +946,10 @@ plQtPropertyEditorLineEditWidget::plQtPropertyEditorLineEditWidget()
 
   m_pWidget = new QLineEdit(this);
   m_pWidget->installEventFilter(this);
+  m_pWidget->setAlignment(Qt::AlignCenter);
   m_pWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
   m_pWidget->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
+  m_pWidget->setStyleSheet(QString("border: 0.5px solid transparent;border-radius: 5px;"));
   setFocusProxy(m_pWidget);
 
   m_pLayout->addWidget(m_pWidget);
@@ -969,6 +998,7 @@ void plQtPropertyEditorLineEditWidget::on_TextFinished_triggered()
 {
   BroadcastValueChanged(plVariant(m_pWidget->text().toUtf8().data()).ConvertTo(m_OriginalType));
 }
+
 
 
 /// *** COLOR ***
@@ -1141,7 +1171,7 @@ void plQtPropertyEditorEnumWidget::OnInit()
 
     const plAbstractConstantProperty* pConstant = static_cast<const plAbstractConstantProperty*>(pProp);
 
-    m_pWidget->addItem(plMakeQString(plTranslate(pConstant->GetPropertyName())), pConstant->GetConstant().ConvertTo<plInt64>());
+    m_pWidget->addItem(QString::fromUtf8(plTranslate(pConstant->GetPropertyName())), pConstant->GetConstant().ConvertTo<plInt64>());
   }
 }
 
@@ -1179,6 +1209,7 @@ plQtPropertyEditorBitflagsWidget::plQtPropertyEditorBitflagsWidget()
 
   m_pWidget = new QPushButton(this);
   m_pWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+  m_pMenu = nullptr;
   m_pMenu = new QMenu(m_pWidget);
   m_pWidget->setMenu(m_pMenu);
   m_pLayout->addWidget(m_pWidget);
@@ -1189,8 +1220,11 @@ plQtPropertyEditorBitflagsWidget::plQtPropertyEditorBitflagsWidget()
 
 plQtPropertyEditorBitflagsWidget::~plQtPropertyEditorBitflagsWidget()
 {
+  m_Constants.Clear();
   m_pWidget->setMenu(nullptr);
+
   delete m_pMenu;
+  m_pMenu = nullptr;
 }
 
 void plQtPropertyEditorBitflagsWidget::OnInit()
@@ -1211,30 +1245,13 @@ void plQtPropertyEditorBitflagsWidget::OnInit()
     const plAbstractConstantProperty* pConstant = static_cast<const plAbstractConstantProperty*>(pProp);
 
     QWidgetAction* pAction = new QWidgetAction(m_pMenu);
-    QCheckBox* pCheckBox = new QCheckBox(plMakeQString(plTranslate(pConstant->GetPropertyName())), m_pMenu);
+    QCheckBox* pCheckBox = new QCheckBox(QString::fromUtf8(plTranslate(pConstant->GetPropertyName())), m_pMenu);
     pCheckBox->setCheckable(true);
     pCheckBox->setCheckState(Qt::Unchecked);
     pAction->setDefaultWidget(pCheckBox);
 
     m_Constants[pConstant->GetConstant().ConvertTo<plInt64>()] = pCheckBox;
     m_pMenu->addAction(pAction);
-  }
-
-  // sets all bits to clear or set
-  {
-    QWidgetAction* pAllAction = new QWidgetAction(m_pMenu);
-    m_pAllButton = new QPushButton(QString::fromUtf8("All"), m_pMenu);
-    connect(m_pAllButton, &QPushButton::clicked, this, [this](bool bChecked)
-      { SetAllChecked(true); });
-    pAllAction->setDefaultWidget(m_pAllButton);
-    m_pMenu->addAction(pAllAction);
-
-    QWidgetAction* pClearAction = new QWidgetAction(m_pMenu);
-    m_pClearButton = new QPushButton(QString::fromUtf8("Clear"), m_pMenu);
-    connect(m_pClearButton, &QPushButton::clicked, this, [this](bool bChecked)
-      { SetAllChecked(false); });
-    pClearAction->setDefaultWidget(m_pClearButton);
-    m_pMenu->addAction(pClearAction);
   }
 }
 
@@ -1258,14 +1275,6 @@ void plQtPropertyEditorBitflagsWidget::InternalSetValue(const plVariant& value)
     sText = sText.left(sText.size() - 1);
 
   m_pWidget->setText(sText);
-}
-
-void plQtPropertyEditorBitflagsWidget::SetAllChecked(bool bChecked)
-{
-  for (auto& pCheckBox : m_Constants)
-  {
-    pCheckBox.Value()->setCheckState(bChecked ? Qt::Checked : Qt::Unchecked);
-  }
 }
 
 void plQtPropertyEditorBitflagsWidget::on_Menu_aboutToShow()
@@ -1313,7 +1322,7 @@ plQtCurve1DButtonWidget::plQtCurve1DButtonWidget(QWidget* pParent)
 void plQtCurve1DButtonWidget::UpdatePreview(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pCurveObject, QColor color, double fLowerExtents, bool bLowerFixed, double fUpperExtents, bool bUpperFixed, double fDefaultValue, double fLowerRange, double fUpperRange)
 {
   plInt32 iNumPoints = 0;
-  pObjectAccessor->GetCount(pCurveObject, "ControlPoints", iNumPoints).AssertSuccess();
+  pObjectAccessor->GetCount(pCurveObject, "ControlPoints", iNumPoints).IgnoreResult();
 
   plVariant v;
   plHybridArray<plVec2d, 32> points;
@@ -1331,10 +1340,10 @@ void plQtCurve1DButtonWidget::UpdatePreview(plObjectAccessorBase* pObjectAccesso
 
     plVec2d p;
 
-    pObjectAccessor->GetValue(pPoint, "Tick", v).AssertSuccess();
+    pObjectAccessor->GetValue(pPoint, "Tick", v).IgnoreResult();
     p.x = v.ConvertTo<double>();
 
-    pObjectAccessor->GetValue(pPoint, "Value", v).AssertSuccess();
+    pObjectAccessor->GetValue(pPoint, "Value", v).IgnoreResult();
     p.y = v.ConvertTo<double>();
 
     points.PushBack(p);

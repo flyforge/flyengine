@@ -25,7 +25,7 @@ public:
 
 protected:
   virtual void InternalRedraw() override;
-  virtual void ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg) override;
+  virtual void ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg) override;
 
   virtual void CommonAssetUiEventHandler(const plCommonAssetUiState& e) override;
   void CommandHistoryEventHandler(const plCommandHistoryEvent& e);
@@ -49,7 +49,7 @@ private:
   void UpdateEventTrackEditor();
 
   plClock m_Clock;
-  plEngineViewConfig m_ViewConfig;
+  PlasmaEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget = nullptr;
   plQtTimeScrubberWidget* m_pTimeScrubber = nullptr;
   plTime m_ClipDuration;
@@ -58,3 +58,4 @@ private:
   plQtDocumentPanel* m_pEventTrackPanel = nullptr;
   plQtEventTrackEditorWidget* m_pEventTrackEditor = nullptr;
 };
+

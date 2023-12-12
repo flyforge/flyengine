@@ -723,7 +723,7 @@ public:
           // part such that it will reference all the other files
           if (sFileContent.FindSubString("PLASMA_STATICLINK_LIBRARY"))
           {
-            plLog::Info("Found macro 'PLASMA_STATICLINK_LIBRARY' in file '{0}'.", &sFile.GetData()[m_sSearchDir.GetElementCount() + 1]);
+            plLog::Info("Found macro 'PLASMA_STATICLINK_LIBRARY' in file '{0}'.", &sFile[m_sSearchDir.GetElementCount() + 1]);
 
             if (!m_sRefPointGroupFile.IsEmpty())
               plLog::Error("The macro 'PLASMA_STATICLINK_LIBRARY' was already found in file '{0}' before. You cannot have this macro twice in the same library!", m_sRefPointGroupFile);

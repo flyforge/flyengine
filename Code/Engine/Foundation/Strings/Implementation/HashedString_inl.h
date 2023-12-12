@@ -29,6 +29,8 @@ inline plHashedString::~plHashedString()
     m_Data.Value().m_iRefCount.Decrement();
   }
 }
+#else
+PLASMA_FORCE_INLINE plHashedString::~plHashedString() = default;
 #endif
 
 inline void plHashedString::operator=(const plHashedString& rhs)

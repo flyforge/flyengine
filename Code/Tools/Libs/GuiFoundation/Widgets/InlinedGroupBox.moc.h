@@ -9,7 +9,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtInlinedGroupBox : public plQtGroupBoxBase
 public:
   explicit plQtInlinedGroupBox(QWidget* pParent);
 
-  virtual void SetTitle(plStringView sTitle) override;
+  virtual void SetTitle(const char* szTitle) override;
   virtual void SetIcon(const QIcon& icon) override;
   virtual void SetFillColor(const QColor& color) override;
 

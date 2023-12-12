@@ -416,7 +416,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
       for (const CPUScope& e : sortedScopes)
       {
         writer.BeginObject();
-        writer.AddVariableString("name", static_cast<const char*>(e.m_szName));
+        writer.AddVariableString("name", e.m_szName);
         writer.AddVariableUInt32("pid", m_uiProcessID);
         writer.AddVariableUInt64("tid", uiThreadId);
         writer.AddVariableUInt64("ts", static_cast<plUInt64>(e.m_BeginTime.GetMicroseconds()));
@@ -434,7 +434,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
         if (e.m_EndTime.IsPositive())
         {
           writer.BeginObject();
-          writer.AddVariableString("name", static_cast<const char*>(e.m_szName));
+          writer.AddVariableString("name", e.m_szName);
           writer.AddVariableUInt32("pid", m_uiProcessID);
           writer.AddVariableUInt64("tid", uiThreadId);
           writer.AddVariableUInt64("ts", static_cast<plUInt64>(e.m_EndTime.GetMicroseconds()));
@@ -499,7 +499,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
           const auto& e = sortedGpuScopes[i];
 
           writer.BeginObject();
-          writer.AddVariableString("name", static_cast<const char*>(e.m_szName));
+          writer.AddVariableString("name", e.m_szName);
           writer.AddVariableUInt32("pid", m_uiProcessID);
           writer.AddVariableUInt64("tid", gpuIndex);
           writer.AddVariableUInt64("ts", static_cast<plUInt64>(e.m_BeginTime.GetMicroseconds()));
@@ -507,7 +507,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
           writer.EndObject();
 
           writer.BeginObject();
-          writer.AddVariableString("name", static_cast<const char*>(e.m_szName));
+          writer.AddVariableString("name", e.m_szName);
           writer.AddVariableUInt32("pid", m_uiProcessID);
           writer.AddVariableUInt64("tid", gpuIndex);
           writer.AddVariableUInt64("ts", static_cast<plUInt64>(e.m_EndTime.GetMicroseconds()));
@@ -680,7 +680,7 @@ void plProfilingSystem::AddCPUScope(plStringView sName, const char* szFunctionNa
   const plTime duration = endTime - beginTime;
 
   // discard?
-  if (duration < plTime::MakeFromMilliseconds(cvar_ProfilingDiscardThresholdMS))
+  if (duration < plTime::Milliseconds(cvar_ProfilingDiscardThresholdMS))
     return;
 
   ::CpuScopesBufferBase* pScopes = s_CpuScopes;
@@ -821,7 +821,7 @@ void plProfilingSystem::InitializeGPUData(plUInt32 uiGpuCount)
 void plProfilingSystem::AddGPUScope(plStringView sName, plTime beginTime, plTime endTime, plUInt32 uiGpuIndex)
 {
   // discard?
-  if (endTime - beginTime < plTime::MakeFromMilliseconds(cvar_ProfilingDiscardThresholdMS))
+  if (endTime - beginTime < plTime::Milliseconds(cvar_ProfilingDiscardThresholdMS))
     return;
 
   if (!s_GPUScopes[uiGpuIndex]->CanAppend())
@@ -870,8 +870,8 @@ plProfilingListScope::plProfilingListScope(plStringView sListName, plStringView 
 plProfilingListScope::~plProfilingListScope()
 {
   plTime now = plTime::Now();
-  plProfilingSystem::AddCPUScope(m_sCurSectionName, nullptr, m_CurSectionBeginTime, now, plTime::MakeZero());
-  plProfilingSystem::AddCPUScope(m_sListName, m_szListFunction, m_ListBeginTime, now, plTime::MakeZero());
+  plProfilingSystem::AddCPUScope(m_sCurSectionName, nullptr, m_CurSectionBeginTime, now, plTime::Zero());
+  plProfilingSystem::AddCPUScope(m_sListName, m_szListFunction, m_ListBeginTime, now, plTime::Zero());
 
   s_pCurrentList = m_pPreviousList;
 }
@@ -882,7 +882,7 @@ void plProfilingListScope::StartNextSection(plStringView sNextSectionName)
   plProfilingListScope* pCurScope = s_pCurrentList;
 
   plTime now = plTime::Now();
-  plProfilingSystem::AddCPUScope(pCurScope->m_sCurSectionName, nullptr, pCurScope->m_CurSectionBeginTime, now, plTime::MakeZero());
+  plProfilingSystem::AddCPUScope(pCurScope->m_sCurSectionName, nullptr, pCurScope->m_CurSectionBeginTime, now, plTime::Zero());
 
   pCurScope->m_sCurSectionName = sNextSectionName;
   pCurScope->m_CurSectionBeginTime = now;

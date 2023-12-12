@@ -5,8 +5,8 @@
 #include <QClipboard>
 #include <QKeyEvent>
 
-plQtLogWidget::plQtLogWidget(QWidget* pParent)
-  : QWidget(pParent)
+plQtLogWidget::plQtLogWidget(QWidget* parent)
+  : QWidget(parent)
 {
   setupUi(this);
 
@@ -14,7 +14,7 @@ plQtLogWidget::plQtLogWidget(QWidget* pParent)
   ListViewLog->setModel(m_pLog);
   ListViewLog->setUniformItemSizes(true);
   ListViewLog->installEventFilter(this);
-  connect(m_pLog, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex& parent, int iFirst, int iLast) { ScrollToBottomIfAtEnd(iFirst); });
+  connect(m_pLog, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) { ScrollToBottomIfAtEnd(first); });
 
   const int logIndex = ((int)plLogMsgType::All - (int)plLogMsgType::InfoMsg);
   ComboFilter->setCurrentIndex(logIndex);
@@ -22,11 +22,11 @@ plQtLogWidget::plQtLogWidget(QWidget* pParent)
 
 plQtLogWidget::~plQtLogWidget() = default;
 
-void plQtLogWidget::ShowControls(bool bShow)
+void plQtLogWidget::ShowControls(bool show)
 {
-  ButtonClearLog->setVisible(bShow);
-  ComboFilter->setVisible(bShow);
-  Search->setVisible(bShow);
+  ButtonClearLog->setVisible(show);
+  ComboFilter->setVisible(show);
+  Search->setVisible(show);
 }
 
 plQtLogModel* plQtLogWidget::GetLog()

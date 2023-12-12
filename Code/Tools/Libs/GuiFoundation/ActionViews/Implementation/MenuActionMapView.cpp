@@ -5,7 +5,7 @@
 #include <GuiFoundation/ActionViews/MenuActionMapView.moc.h>
 #include <GuiFoundation/ActionViews/QtProxy.moc.h>
 
-plQtMenuActionMapView::plQtMenuActionMapView(QWidget* pParent)
+plQtMenuActionMapView::plQtMenuActionMapView(QWidget* parent)
 {
   setToolTipsVisible(true);
 }
@@ -32,7 +32,7 @@ void plQtMenuActionMapView::ClearView()
   m_Proxies.Clear();
 }
 
-void plQtMenuActionMapView::AddDocumentObjectToMenu(plHashTable<plUuid, QSharedPointer<plQtProxy>>& ref_proxies, plActionContext& ref_context,
+void plQtMenuActionMapView::AddDocumentObjectToMenu(plHashTable<plUuid, QSharedPointer<plQtProxy>>& Proxies, plActionContext& Context,
   plActionMap* pActionMap, QMenu* pCurrentRoot, const plActionMap::TreeNode* pObject)
 {
   if (pObject == nullptr)
@@ -41,8 +41,8 @@ void plQtMenuActionMapView::AddDocumentObjectToMenu(plHashTable<plUuid, QSharedP
   for (auto pChild : pObject->GetChildren())
   {
     auto pDesc = pActionMap->GetDescriptor(pChild);
-    QSharedPointer<plQtProxy> pProxy = plQtProxy::GetProxy(ref_context, pDesc->m_hAction);
-    ref_proxies[pChild->GetGuid()] = pProxy;
+    QSharedPointer<plQtProxy> pProxy = plQtProxy::GetProxy(Context, pDesc->m_hAction);
+    Proxies[pChild->GetGuid()] = pProxy;
 
     switch (pDesc->m_hAction.GetDescriptor()->m_Type)
     {
@@ -57,7 +57,7 @@ void plQtMenuActionMapView::AddDocumentObjectToMenu(plHashTable<plUuid, QSharedP
       {
         pCurrentRoot->addSeparator();
 
-        AddDocumentObjectToMenu(ref_proxies, ref_context, pActionMap, pCurrentRoot, pChild);
+        AddDocumentObjectToMenu(Proxies, Context, pActionMap, pCurrentRoot, pChild);
 
         pCurrentRoot->addSeparator();
       }
@@ -67,7 +67,7 @@ void plQtMenuActionMapView::AddDocumentObjectToMenu(plHashTable<plUuid, QSharedP
       {
         QMenu* pQtMenu = static_cast<plQtMenuProxy*>(pProxy.data())->GetQMenu();
         pCurrentRoot->addMenu(pQtMenu);
-        AddDocumentObjectToMenu(ref_proxies, ref_context, pActionMap, pQtMenu, pChild);
+        AddDocumentObjectToMenu(Proxies, Context, pActionMap, pQtMenu, pChild);
       }
       break;
 
@@ -77,7 +77,7 @@ void plQtMenuActionMapView::AddDocumentObjectToMenu(plHashTable<plUuid, QSharedP
         QMenu* pQtMenu = static_cast<plQtDynamicActionAndMenuProxy*>(pProxy.data())->GetQMenu();
         pCurrentRoot->addAction(pQtAction);
         pCurrentRoot->addMenu(pQtMenu);
-        AddDocumentObjectToMenu(ref_proxies, ref_context, pActionMap, pQtMenu, pChild);
+        AddDocumentObjectToMenu(Proxies, Context, pActionMap, pQtMenu, pChild);
       }
       break;
     }

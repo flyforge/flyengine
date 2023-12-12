@@ -37,7 +37,7 @@ plTextureAssetDocumentManager::plTextureAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Texture 2D";
   m_DocTypeDesc.m_sFileExtension = "plTextureAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Texture_2D.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Rendering";
+  //m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plTextureAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_sResourceFileExtension = "plTexture2D";
@@ -47,7 +47,7 @@ plTextureAssetDocumentManager::plTextureAssetDocumentManager()
   m_DocTypeDesc2.m_sDocumentTypeName = "Render Target";
   m_DocTypeDesc2.m_sFileExtension = "plRenderTargetAsset";
   m_DocTypeDesc2.m_sIcon = ":/AssetIcons/Render_Target.svg";
-  m_DocTypeDesc2.m_sAssetCategory = "Rendering";
+  //m_DocTypeDesc2.m_sAssetCategory = "Rendering";
   m_DocTypeDesc2.m_pDocumentType = plGetStaticRTTI<plTextureAssetDocument>();
   m_DocTypeDesc2.m_pManager = this;
   m_DocTypeDesc2.m_sResourceFileExtension = "plRenderTarget";
@@ -86,12 +86,12 @@ void plTextureAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
   }
 }
 
-void plTextureAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plTextureAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  plTextureAssetDocument* pDoc = new plTextureAssetDocument(sPath);
+  plTextureAssetDocument* pDoc = new plTextureAssetDocument(szPath);
   out_pDocument = pDoc;
 
-  if (sDocumentTypeName.IsEqual("Render Target"))
+  if (plStringUtils::IsEqual(szDocumentTypeName, "Render Target"))
   {
     pDoc->m_bIsRenderTarget = true;
   }
@@ -103,17 +103,17 @@ void plTextureAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicA
   inout_DocumentTypes.PushBack(&m_DocTypeDesc2);
 }
 
-plString plTextureAssetDocumentManager::GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDescriptor, plStringView sDataDirectory, plStringView sDocumentPath, plStringView sOutputTag, const plPlatformProfile* pAssetProfile) const
+plString plTextureAssetDocumentManager::GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDescriptor, const char* szDataDirectory, const char* szDocumentPath, const char* szOutputTag, const plPlatformProfile* pAssetProfile) const
 {
-  if (sOutputTag.IsEqual("LOWRES"))
+  if (plStringUtils::IsEqual(szOutputTag, "LOWRES"))
   {
-    plStringBuilder sRelativePath(sDocumentPath);
-    sRelativePath.MakeRelativeTo(sDataDirectory).IgnoreResult();
+    plStringBuilder sRelativePath(szDocumentPath);
+    sRelativePath.MakeRelativeTo(szDataDirectory).IgnoreResult();
     sRelativePath.RemoveFileExtension();
     sRelativePath.Append("-lowres");
     plAssetDocumentManager::GenerateOutputFilename(sRelativePath, pAssetProfile, "plTexture2D", true);
     return sRelativePath;
   }
 
-  return SUPER::GetRelativeOutputFileName(pTypeDescriptor, sDataDirectory, sDocumentPath, sOutputTag, pAssetProfile);
+  return SUPER::GetRelativeOutputFileName(pTypeDescriptor, szDataDirectory, szDocumentPath, szOutputTag, pAssetProfile);
 }

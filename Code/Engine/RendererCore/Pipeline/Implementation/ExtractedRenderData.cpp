@@ -3,7 +3,7 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <RendererCore/Pipeline/ExtractedRenderData.h>
 
-plExtractedRenderData::plExtractedRenderData() = default;
+plExtractedRenderData::plExtractedRenderData() {}
 
 void plExtractedRenderData::AddRenderData(const plRenderData* pRenderData, plRenderData::Category category)
 {

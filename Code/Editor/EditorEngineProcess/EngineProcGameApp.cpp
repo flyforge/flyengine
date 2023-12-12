@@ -14,33 +14,15 @@
 #include <RendererCore/RenderContext/RenderContext.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-#  include <shellscalingapi.h>
-#endif
-#include <Foundation/Profiling/ProfilingUtils.h>
-
-// Will forward assert messages and crash handler messages to the log system and then to the editor.
-// Note that this is unsafe as in some crash situation allocating memory will not be possible but it's better to have some logs compared to none.
-void EditorPrintFunction(const char* szText)
+PlasmaEngineProcessGameApplication::PlasmaEngineProcessGameApplication()
+  : plGameApplication("PlasmaEditorEngineProcess", nullptr)
 {
-  plLog::Info("{}", szText);
-}
-
-static plAssertHandler g_PreviousAssertHandler = nullptr;
-
-plEngineProcessGameApplication::plEngineProcessGameApplication()
-  : plGameApplication("plEditorEngineProcess", nullptr)
-{
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-  SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-#endif
-
   m_LongOpWorkerManager.Startup(&m_IPC);
 }
 
-plEngineProcessGameApplication::~plEngineProcessGameApplication() = default;
+PlasmaEngineProcessGameApplication::~PlasmaEngineProcessGameApplication() = default;
 
-plResult plEngineProcessGameApplication::BeforeCoreSystemsStartup()
+plResult PlasmaEngineProcessGameApplication::BeforeCoreSystemsStartup()
 {
   m_pApp = CreateEngineProcessApp();
   plStartup::AddApplicationTag("editorengineprocess");
@@ -50,11 +32,10 @@ plResult plEngineProcessGameApplication::BeforeCoreSystemsStartup()
   plCommandLineUtils::GetGlobalInstance()->InjectCustomArgument("-fs_off");
 #endif
 
-  AddEditorAssertHandler();
   return SUPER::BeforeCoreSystemsStartup();
 }
 
-void plEngineProcessGameApplication::AfterCoreSystemsStartup()
+void PlasmaEngineProcessGameApplication::AfterCoreSystemsStartup()
 {
   // skip project creation at this point
   // SUPER::AfterCoreSystemsStartup();
@@ -62,12 +43,12 @@ void plEngineProcessGameApplication::AfterCoreSystemsStartup()
 #if PLASMA_DISABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP) && PLASMA_DISABLED(PLASMA_PLATFORM_LINUX)
   {
     // on all 'mobile' platforms, we assume we are in remote mode
-    plEditorEngineProcessApp::GetSingleton()->SetRemoteMode();
+    PlasmaEditorEngineProcessApp::GetSingleton()->SetRemoteMode();
   }
 #else
   if (plCommandLineUtils::GetGlobalInstance()->GetBoolOption("-remote", false))
   {
-    plEditorEngineProcessApp::GetSingleton()->SetRemoteMode();
+    PlasmaEditorEngineProcessApp::GetSingleton()->SetRemoteMode();
   }
 #endif
 
@@ -75,23 +56,23 @@ void plEngineProcessGameApplication::AfterCoreSystemsStartup()
 
   DisableErrorReport();
 
-  plTaskSystem::SetTargetFrameTime(plTime::MakeFromSeconds(1.0 / 20.0));
+  plTaskSystem::SetTargetFrameTime(plTime::Seconds(1.0 / 20.0));
 
   ConnectToHost();
 }
 
 
-void plEngineProcessGameApplication::ConnectToHost()
+void PlasmaEngineProcessGameApplication::ConnectToHost()
 {
   PLASMA_VERIFY(m_IPC.ConnectToHostProcess().Succeeded(), "Could not connect to host");
 
-  m_IPC.m_Events.AddEventHandler(plMakeDelegate(&plEngineProcessGameApplication::EventHandlerIPC, this));
+  m_IPC.m_Events.AddEventHandler(plMakeDelegate(&PlasmaEngineProcessGameApplication::EventHandlerIPC, this));
 
   // wait indefinitely (not necessary anymore, should work regardless)
   // m_IPC.WaitForMessage(plGetStaticRTTI<plSetupProjectMsgToEngine>(), plTime());
 }
 
-void plEngineProcessGameApplication::DisableErrorReport()
+void PlasmaEngineProcessGameApplication::DisableErrorReport()
 {
 #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
   // Setting this flags prevents Windows from showing a dialog when the Engine process crashes
@@ -101,75 +82,46 @@ void plEngineProcessGameApplication::DisableErrorReport()
 #endif
 }
 
-void plEngineProcessGameApplication::WaitForDebugger()
+void PlasmaEngineProcessGameApplication::WaitForDebugger()
 {
-  if (plCommandLineUtils::GetGlobalInstance()->GetBoolOption("-WaitForDebugger"))
+  if (plCommandLineUtils::GetGlobalInstance()->GetBoolOption("-debug"))
   {
     while (!plSystemInformation::IsDebuggerAttached())
     {
-      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
+      plThreadUtils::Sleep(plTime::Milliseconds(10));
     }
   }
 }
 
-bool plEngineProcessGameApplication::EditorAssertHandler(const char* szSourceFile, plUInt32 uiLine, const char* szFunction, const char* szExpression, const char* szAssertMsg)
+void PlasmaEngineProcessGameApplication::BeforeCoreSystemsShutdown()
 {
-  plLog::Error("*** Assertion ***:\nFile: \"{}\",\nLine: \"{}\",\nFunction: \"{}\",\nExpression: \"{}\",\nMessage: \"{}\"", szSourceFile, uiLine, szFunction, szExpression, szAssertMsg);
-  // Wait for flush of IPC messages
-  plThreadUtils::Sleep(plTime::MakeFromMilliseconds(500));
-
-  if (g_PreviousAssertHandler)
-    return g_PreviousAssertHandler(szSourceFile, uiLine, szFunction, szExpression, szAssertMsg);
-
-  return true;
-}
-
-void plEngineProcessGameApplication::AddEditorAssertHandler()
-{
-  g_PreviousAssertHandler = plGetAssertHandler();
-  plSetAssertHandler(EditorAssertHandler);
-}
-
-void plEngineProcessGameApplication::RemoveEditorAssertHandler()
-{
-  plSetAssertHandler(g_PreviousAssertHandler);
-  g_PreviousAssertHandler = nullptr;
-}
-
-void plEngineProcessGameApplication::BeforeCoreSystemsShutdown()
-{
-  RemoveEditorAssertHandler();
-
   m_pApp = nullptr;
 
   m_LongOpWorkerManager.Shutdown();
 
-  m_IPC.m_Events.RemoveEventHandler(plMakeDelegate(&plEngineProcessGameApplication::EventHandlerIPC, this));
+  m_IPC.m_Events.RemoveEventHandler(plMakeDelegate(&PlasmaEngineProcessGameApplication::EventHandlerIPC, this));
 
   SUPER::BeforeCoreSystemsShutdown();
 }
 
-plApplication::Execution plEngineProcessGameApplication::Run()
+plApplication::Execution PlasmaEngineProcessGameApplication::Run()
 {
+  plRenderWorld::ClearMainViews();
   bool bPendingOpInProgress = false;
   do
   {
-    bPendingOpInProgress = plEngineProcessDocumentContext::PendingOperationsInProgress();
+    bPendingOpInProgress = PlasmaEngineProcessDocumentContext::PendingOperationsInProgress();
     if (ProcessIPCMessages(bPendingOpInProgress))
     {
-      plEngineProcessDocumentContext::UpdateDocumentContexts();
+      PlasmaEngineProcessDocumentContext::UpdateDocumentContexts();
     }
   } while (!bPendingOpInProgress && m_uiRedrawCountExecuted == m_uiRedrawCountReceived);
 
   m_uiRedrawCountExecuted = m_uiRedrawCountReceived;
-
-  // Normally rendering is done in EventHandlerIPC as a response to plSyncWithProcessMsgToEngine. However, when playing or when pending operations are in progress we need to render even if we didn't receive a draw request.
-  plApplication::Execution res = SUPER::Run();
-  plRenderWorld::ClearMainViews();
-  return res;
+  return SUPER::Run();
 }
 
-void plEngineProcessGameApplication::LogWriter(const plLoggingEventData& e)
+void PlasmaEngineProcessGameApplication::LogWriter(const plLoggingEventData& e)
 {
   plLogMsgToEditor msg;
   msg.m_Entry = plLogEntry(e);
@@ -192,7 +144,7 @@ static bool EmptyAssertHandler(const char* szSourceFile, plUInt32 uiLine, const 
   return false;
 }
 
-bool plEngineProcessGameApplication::ProcessIPCMessages(bool bPendingOpInProgress)
+bool PlasmaEngineProcessGameApplication::ProcessIPCMessages(bool bPendingOpInProgress)
 {
   PLASMA_PROFILE_SCOPE("ProcessIPCMessages");
 
@@ -218,7 +170,7 @@ bool plEngineProcessGameApplication::ProcessIPCMessages(bool bPendingOpInProgres
   {
     // if an operation is still pending or this process is a remote process, we do NOT want to block
     // remote processes shall run as fast as they can
-    if (bPendingOpInProgress || plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+    if (bPendingOpInProgress || PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
     {
       m_IPC.ProcessMessages();
     }
@@ -232,20 +184,21 @@ bool plEngineProcessGameApplication::ProcessIPCMessages(bool bPendingOpInProgres
   }
 }
 
-void plEngineProcessGameApplication::SendProjectReadyMessage()
+void PlasmaEngineProcessGameApplication::SendProjectReadyMessage()
 {
   plProjectReadyMsgToEditor msg;
   m_IPC.SendMessage(&msg);
 }
 
-void plEngineProcessGameApplication::SendReflectionInformation()
+void PlasmaEngineProcessGameApplication::SendReflectionInformation()
 {
-  if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
     return;
 
   plSet<const plRTTI*> types;
   plRTTI::ForEachType(
-    [&](const plRTTI* pRtti) {
+    [&](const plRTTI* pRtti)
+    {
       if (pRtti->GetTypeFlags().IsSet(plTypeFlags::StandardType) == false)
       {
         types.Insert(pRtti);
@@ -263,18 +216,13 @@ void plEngineProcessGameApplication::SendReflectionInformation()
   }
 }
 
-void plEngineProcessGameApplication::EventHandlerIPC(const plEngineProcessCommunicationChannel::Event& e)
+void PlasmaEngineProcessGameApplication::EventHandlerIPC(const PlasmaEngineProcessCommunicationChannel::Event& e)
 {
   if (const auto* pMsg = plDynamicCast<const plSyncWithProcessMsgToEngine*>(e.m_pMessage))
   {
     plSyncWithProcessMsgToEditor msg;
     msg.m_uiRedrawCount = pMsg->m_uiRedrawCount;
     m_uiRedrawCountReceived = msg.m_uiRedrawCount;
-
-    // We must clear the main views after rendering so that if the editor runs in lock step with the engine we don't render a view twice or request update again without rendering being done.
-    RunOneFrame();
-    plRenderWorld::ClearMainViews();
-
     m_IPC.SendMessage(&msg);
     return;
   }
@@ -283,7 +231,7 @@ void plEngineProcessGameApplication::EventHandlerIPC(const plEngineProcessCommun
   {
     // in non-remote mode, the process needs to be properly killed, to prevent error messages
     // this is taken care of by the editor process
-    if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+    if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
       RequestQuit();
 
     return;
@@ -337,16 +285,6 @@ void plEngineProcessGameApplication::EventHandlerIPC(const plEngineProcessCommun
     SendProjectReadyMessage();
     return;
   }
-  else if (const auto* pMsg1 = plDynamicCast<const plReloadResourceMsgToEngine*>(e.m_pMessage))
-  {
-    PLASMA_PROFILE_SCOPE("ReloadResource");
-
-    const plRTTI* pType = plResourceManager::FindResourceForAssetType(pMsg1->m_sResourceType);
-    if (auto hResource = plResourceManager::GetExistingResourceByType(pType, pMsg1->m_sResourceID); hResource.IsValid())
-    {
-      plResourceManager::ReloadResource(pType, hResource, false);
-    }
-  }
   else if (const auto* pMsg1 = plDynamicCast<const plSimpleConfigMsgToEngine*>(e.m_pMessage))
   {
     if (pMsg1->m_sWhatToDo == "ChangeActivePlatform")
@@ -369,15 +307,23 @@ void plEngineProcessGameApplication::EventHandlerIPC(const plEngineProcessCommun
     }
     else if (pMsg1->m_sWhatToDo == "ReloadResources")
     {
-      if (pMsg1->m_sPayload == "ReloadAllResources")
-      {
-        plResourceManager::ReloadAllResources(false);
-      }
+      plResourceManager::ReloadAllResources(false);
       plRenderWorld::DeleteAllCachedRenderData();
     }
     else if (pMsg1->m_sWhatToDo == "SaveProfiling")
     {
-      plProfilingUtils::SaveProfilingCapture(pMsg1->m_sPayload).IgnoreResult();
+      plProfilingSystem::ProfilingData profilingData;
+      plProfilingSystem::Capture(profilingData);
+      plFileWriter fileWriter;
+      if (fileWriter.Open(pMsg1->m_sPayload) == PLASMA_SUCCESS)
+      {
+        profilingData.Write(fileWriter).IgnoreResult();
+        plLog::Info("Engine profiling capture saved to '{0}'.", fileWriter.GetFilePathAbsolute().GetData());
+      }
+      else
+      {
+        plLog::Error("Could not write profiling capture to '{0}'.", pMsg1->m_sPayload);
+      }
 
       plSaveProfilingResponseToEditor response;
       plStringBuilder sAbsPath;
@@ -460,12 +406,12 @@ void plEngineProcessGameApplication::EventHandlerIPC(const plEngineProcessCommun
   }
 
   // Document Messages:
-  if (!e.m_pMessage->GetDynamicRTTI()->IsDerivedFrom<plEditorEngineDocumentMsg>())
+  if (!e.m_pMessage->GetDynamicRTTI()->IsDerivedFrom<PlasmaEditorEngineDocumentMsg>())
     return;
 
-  const plEditorEngineDocumentMsg* pDocMsg = (const plEditorEngineDocumentMsg*)e.m_pMessage;
+  const PlasmaEditorEngineDocumentMsg* pDocMsg = (const PlasmaEditorEngineDocumentMsg*)e.m_pMessage;
 
-  plEngineProcessDocumentContext* pDocumentContext = plEngineProcessDocumentContext::GetDocumentContext(pDocMsg->m_DocumentGuid);
+  PlasmaEngineProcessDocumentContext* pDocumentContext = PlasmaEngineProcessDocumentContext::GetDocumentContext(pDocMsg->m_DocumentGuid);
 
   if (const auto* pMsg5 = plDynamicCast<const plDocumentOpenMsgToEngine*>(e.m_pMessage)) // Document was opened or closed
   {
@@ -476,7 +422,7 @@ void plEngineProcessGameApplication::EventHandlerIPC(const plEngineProcessCommun
     }
     else
     {
-      plEngineProcessDocumentContext::DestroyDocumentContext(pDocMsg->m_DocumentGuid);
+      PlasmaEngineProcessDocumentContext::DestroyDocumentContext(pDocMsg->m_DocumentGuid);
     }
 
     return;
@@ -484,7 +430,7 @@ void plEngineProcessGameApplication::EventHandlerIPC(const plEngineProcessCommun
 
   if (const auto* pMsg6 = plDynamicCast<const plDocumentClearMsgToEngine*>(e.m_pMessage))
   {
-    pDocumentContext = plEngineProcessDocumentContext::GetDocumentContext(pMsg6->m_DocumentGuid);
+    pDocumentContext = PlasmaEngineProcessDocumentContext::GetDocumentContext(pMsg6->m_DocumentGuid);
 
     if (pDocumentContext)
     {
@@ -500,22 +446,22 @@ void plEngineProcessGameApplication::EventHandlerIPC(const plEngineProcessCommun
   }
 }
 
-plEngineProcessDocumentContext* plEngineProcessGameApplication::CreateDocumentContext(const plDocumentOpenMsgToEngine* pMsg)
+PlasmaEngineProcessDocumentContext* PlasmaEngineProcessGameApplication::CreateDocumentContext(const plDocumentOpenMsgToEngine* pMsg)
 {
   plDocumentOpenResponseMsgToEditor m;
   m.m_DocumentGuid = pMsg->m_DocumentGuid;
-  plEngineProcessDocumentContext* pDocumentContext = plEngineProcessDocumentContext::GetDocumentContext(pMsg->m_DocumentGuid);
+  PlasmaEngineProcessDocumentContext* pDocumentContext = PlasmaEngineProcessDocumentContext::GetDocumentContext(pMsg->m_DocumentGuid);
 
   if (pDocumentContext == nullptr)
   {
-    plRTTI::ForEachDerivedType<plEngineProcessDocumentContext>(
+    plRTTI::ForEachDerivedType<PlasmaEngineProcessDocumentContext>(
       [&](const plRTTI* pRtti) {
         auto* pProp = pRtti->FindPropertyByName("DocumentType");
         if (pProp && pProp->GetCategory() == plPropertyCategory::Constant)
         {
           const plStringBuilder sDocTypes(";", static_cast<const plAbstractConstantProperty*>(pProp)->GetConstant().ConvertTo<plString>(), ";");
           const plStringBuilder sRequestedType(";", pMsg->m_sDocumentType, ";");
-
+          
           if (sDocTypes.FindSubString(sRequestedType) != nullptr)
           {
             plLog::Dev("Created Context of type '{0}' for '{1}'", pRtti->GetTypeName(), pMsg->m_sDocumentType);
@@ -527,9 +473,9 @@ plEngineProcessDocumentContext* plEngineProcessGameApplication::CreateDocumentCo
                 plHybridArray<plVariant, 1> params;
                 params.PushBack(pMsg);
                 pFunc->Execute(nullptr, params, res);
-                if (res.IsA<plEngineProcessDocumentContext*>())
+                if (res.IsA<PlasmaEngineProcessDocumentContext*>())
                 {
-                  pDocumentContext = res.Get<plEngineProcessDocumentContext*>();
+                  pDocumentContext = res.Get<PlasmaEngineProcessDocumentContext*>();
                 }
                 else
                 {
@@ -540,10 +486,10 @@ plEngineProcessDocumentContext* plEngineProcessGameApplication::CreateDocumentCo
 
             if (!pDocumentContext)
             {
-              pDocumentContext = pRtti->GetAllocator()->Allocate<plEngineProcessDocumentContext>();
+              pDocumentContext = pRtti->GetAllocator()->Allocate<PlasmaEngineProcessDocumentContext>();
             }
 
-            plEngineProcessDocumentContext::AddDocumentContext(pMsg->m_DocumentGuid, pMsg->m_DocumentMetaData, pDocumentContext, &m_IPC, pMsg->m_sDocumentType);
+            PlasmaEngineProcessDocumentContext::AddDocumentContext(pMsg->m_DocumentGuid, pMsg->m_DocumentMetaData, pDocumentContext, &m_IPC, pMsg->m_sDocumentType);
           }
         }
       });
@@ -557,7 +503,7 @@ plEngineProcessDocumentContext* plEngineProcessGameApplication::CreateDocumentCo
   return pDocumentContext;
 }
 
-void plEngineProcessGameApplication::Init_LoadProjectPlugins()
+void PlasmaEngineProcessGameApplication::Init_LoadProjectPlugins()
 {
   m_CustomPluginConfig.m_Plugins.Sort([](const plApplicationPluginConfig::PluginConfig& lhs, const plApplicationPluginConfig::PluginConfig& rhs) -> bool {
     const bool isEnginePluginLhs = lhs.m_sAppDirRelativePath.FindSubString_NoCase("EnginePlugin") != nullptr;
@@ -577,15 +523,15 @@ void plEngineProcessGameApplication::Init_LoadProjectPlugins()
   m_CustomPluginConfig.Apply();
 }
 
-plString plEngineProcessGameApplication::FindProjectDirectory() const
+plString PlasmaEngineProcessGameApplication::FindProjectDirectory() const
 {
   return m_sProjectDirectory;
 }
 
-void plEngineProcessGameApplication::Init_FileSystem_ConfigureDataDirs()
+void PlasmaEngineProcessGameApplication::Init_FileSystem_ConfigureDataDirs()
 {
   plStringBuilder sAppDir = ">sdk/Data/Tools/EditorEngineProcess";
-  plStringBuilder sUserData = ">user/plEngine Project/EditorEngineProcess";
+  plStringBuilder sUserData = ">user/PlasmaEngine Project/EditorEngineProcess";
 
   // make sure these directories exist
   plFileSystem::CreateDirectoryStructure(sAppDir).IgnoreResult();
@@ -598,17 +544,9 @@ void plEngineProcessGameApplication::Init_FileSystem_ConfigureDataDirs()
   plFileSystem::AddDataDirectory(sUserData, "EngineProcess", "appdata", plFileSystem::AllowWrites).IgnoreResult();      // for writing app user data
 
   m_CustomFileSystemConfig.Apply();
-
-  {
-    // We need the file system before we can start the html logger.
-    plOsProcessID uiProcessID = plProcess::GetCurrentProcessID();
-    plStringBuilder sLogFile;
-    sLogFile.Format(":appdata/Log_{0}.htm", uiProcessID);
-    m_LogHTML.BeginLog(sLogFile, "EditorEngineProcess");
-  }
 }
 
-bool plEngineProcessGameApplication::Run_ProcessApplicationInput()
+bool PlasmaEngineProcessGameApplication::Run_ProcessApplicationInput()
 {
   // override the escape action to not shut down the app, but instead close the play-the-game window
   if (plInputManager::GetInputActionState("GameApp", "CloseApp") != plKeyState::Up)
@@ -626,40 +564,34 @@ bool plEngineProcessGameApplication::Run_ProcessApplicationInput()
   return true;
 }
 
-plUniquePtr<plEditorEngineProcessApp> plEngineProcessGameApplication::CreateEngineProcessApp()
+plUniquePtr<PlasmaEditorEngineProcessApp> PlasmaEngineProcessGameApplication::CreateEngineProcessApp()
 {
-  return PLASMA_DEFAULT_NEW(plEditorEngineProcessApp);
+  return PLASMA_DEFAULT_NEW(PlasmaEditorEngineProcessApp);
 }
 
-void plEngineProcessGameApplication::BaseInit_ConfigureLogging()
+void PlasmaEngineProcessGameApplication::BaseInit_ConfigureLogging()
 {
   SUPER::BaseInit_ConfigureLogging();
 
-  plGlobalLog::AddLogWriter(plMakeDelegate(&plEngineProcessGameApplication::LogWriter, this));
-  plGlobalLog::AddLogWriter(plLoggingEvent::Handler(&plLogWriter::HTML::LogMessageHandler, &m_LogHTML));
-
-  plLog::SetCustomPrintFunction(&EditorPrintFunction);
+  plGlobalLog::AddLogWriter(plMakeDelegate(&PlasmaEngineProcessGameApplication::LogWriter, this));
 
   // used for sending CVar changes over to the editor
-  plCVar::s_AllCVarEvents.AddEventHandler(plMakeDelegate(&plEngineProcessGameApplication::EventHandlerCVar, this));
-  plPlugin::Events().AddEventHandler(plMakeDelegate(&plEngineProcessGameApplication::EventHandlerCVarPlugin, this));
+  plCVar::s_AllCVarEvents.AddEventHandler(plMakeDelegate(&PlasmaEngineProcessGameApplication::EventHandlerCVar, this));
+  plPlugin::Events().AddEventHandler(plMakeDelegate(&PlasmaEngineProcessGameApplication::EventHandlerCVarPlugin, this));
 }
 
-void plEngineProcessGameApplication::Deinit_ShutdownLogging()
+void PlasmaEngineProcessGameApplication::Deinit_ShutdownLogging()
 {
-  plGlobalLog::RemoveLogWriter(plLoggingEvent::Handler(&plLogWriter::HTML::LogMessageHandler, &m_LogHTML));
-  m_LogHTML.EndLog();
-
-  plGlobalLog::RemoveLogWriter(plMakeDelegate(&plEngineProcessGameApplication::LogWriter, this));
+  plGlobalLog::RemoveLogWriter(plMakeDelegate(&PlasmaEngineProcessGameApplication::LogWriter, this));
 
   // used for sending CVar changes over to the editor
-  plCVar::s_AllCVarEvents.RemoveEventHandler(plMakeDelegate(&plEngineProcessGameApplication::EventHandlerCVar, this));
-  plPlugin::Events().RemoveEventHandler(plMakeDelegate(&plEngineProcessGameApplication::EventHandlerCVarPlugin, this));
+  plCVar::s_AllCVarEvents.RemoveEventHandler(plMakeDelegate(&PlasmaEngineProcessGameApplication::EventHandlerCVar, this));
+  plPlugin::Events().RemoveEventHandler(plMakeDelegate(&PlasmaEngineProcessGameApplication::EventHandlerCVarPlugin, this));
 
   SUPER::Deinit_ShutdownLogging();
 }
 
-void plEngineProcessGameApplication::EventHandlerCVar(const plCVarEvent& e)
+void PlasmaEngineProcessGameApplication::EventHandlerCVar(const plCVarEvent& e)
 {
   if (e.m_EventType == plCVarEvent::ValueChanged)
   {
@@ -677,7 +609,7 @@ void plEngineProcessGameApplication::EventHandlerCVar(const plCVarEvent& e)
   }
 }
 
-void plEngineProcessGameApplication::EventHandlerCVarPlugin(const plPluginEvent& e)
+void PlasmaEngineProcessGameApplication::EventHandlerCVarPlugin(const plPluginEvent& e)
 {
   if (e.m_EventType == plPluginEvent::Type::AfterLoadingBeforeInit)
   {
@@ -688,7 +620,7 @@ void plEngineProcessGameApplication::EventHandlerCVarPlugin(const plPluginEvent&
   }
 }
 
-void plEngineProcessGameApplication::TransmitCVar(const plCVar* pCVar)
+void PlasmaEngineProcessGameApplication::TransmitCVar(const plCVar* pCVar)
 {
   plCVarMsgToEditor msg;
   msg.m_sName = pCVar->GetName();
@@ -716,7 +648,7 @@ void plEngineProcessGameApplication::TransmitCVar(const plCVar* pCVar)
   m_IPC.SendMessage(&msg);
 }
 
-void plEngineProcessGameApplication::HandleResourceUpdateMsg(const plResourceUpdateMsgToEngine& msg)
+void PlasmaEngineProcessGameApplication::HandleResourceUpdateMsg(const plResourceUpdateMsgToEngine& msg)
 {
   const plRTTI* pRtti = plResourceManager::FindResourceForAssetType(msg.m_sResourceType);
 
@@ -746,7 +678,7 @@ void plEngineProcessGameApplication::HandleResourceUpdateMsg(const plResourceUpd
   }
 }
 
-void plEngineProcessGameApplication::HandleResourceRestoreMsg(const plRestoreResourceMsgToEngine& msg)
+void PlasmaEngineProcessGameApplication::HandleResourceRestoreMsg(const plRestoreResourceMsgToEngine& msg)
 {
   const plRTTI* pRtti = plResourceManager::FindResourceForAssetType(msg.m_sResourceType);
 

@@ -26,7 +26,7 @@ public:
   plManipulatorManager();
   ~plManipulatorManager();
 
-  const plManipulatorAttribute* GetActiveManipulator(const plDocument* pDoc, const plHybridArray<plPropertySelection, 8>*& out_pSelection) const;
+  const plManipulatorAttribute* GetActiveManipulator(const plDocument* pDoc, const plHybridArray<plPropertySelection, 8>*& out_Selection) const;
 
   void SetActiveManipulator(
     const plDocument* pDoc, const plManipulatorAttribute* pManipulator, const plHybridArray<plPropertySelection, 8>& selection);

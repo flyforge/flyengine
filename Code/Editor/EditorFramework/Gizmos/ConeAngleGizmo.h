@@ -15,14 +15,14 @@ public:
   void SetAngle(plAngle angle);
   plAngle GetAngle() const { return m_Angle; }
 
-  void SetRadius(float fRadius) { m_fRadius = fRadius; }
+  void SetRadius(float radius) { m_fRadius = radius; }
 
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
@@ -34,7 +34,7 @@ private:
 
   plVec2I32 m_vLastMousePos;
 
-  plEngineGizmoHandle m_hConeAngle;
+  PlasmaEngineGizmoHandle m_hConeAngle;
 
   enum class ManipulateMode
   {

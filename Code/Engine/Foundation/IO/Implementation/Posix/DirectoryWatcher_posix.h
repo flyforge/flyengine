@@ -421,7 +421,6 @@ void plDirectoryWatcher::EnumerateChanges(EnumerateChangesFunction func, plTime 
           tmpPath.AppendPath(event->name);
 
           const char* type = "file";
-          PLASMA_IGNORE_UNUSED(type);
           if (IsDirectory(event->mask))
           {
             type = "folder";

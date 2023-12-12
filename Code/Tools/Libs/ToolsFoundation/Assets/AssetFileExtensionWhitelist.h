@@ -11,11 +11,11 @@
 class PLASMA_TOOLSFOUNDATION_DLL plAssetFileExtensionWhitelist
 {
 public:
-  static void AddAssetFileExtension(plStringView sAssetType, plStringView sAllowedFileExtension);
+  static void AddAssetFileExtension(const char* szAssetType, const char* szAllowedFileExtension);
 
-  static bool IsFileOnAssetWhitelist(plStringView sAssetType, plStringView sFile);
+  static bool IsFileOnAssetWhitelist(const char* szAssetType, const char* szFile);
 
-  static const plSet<plString>& GetAssetFileExtensions(plStringView sAssetType);
+  static const plSet<plString>& GetAssetFileExtensions(const char* szAssetType);
 
 private:
   static plMap<plString, plSet<plString>> s_ExtensionWhitelist;

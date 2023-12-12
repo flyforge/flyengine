@@ -111,7 +111,7 @@ void plParticleTypeMesh::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNu
   {
     const plUInt64 uiElementIdx = uiStartIndex + i;
 
-    pAxis[uiElementIdx] = plVec3::MakeRandomDirection(rng);
+    pAxis[uiElementIdx] = plVec3::CreateRandomDirection(rng);
   }
 }
 
@@ -194,7 +194,7 @@ void plParticleTypeMesh::ExtractTypeRenderData(plMsgExtractRenderData& msg, cons
       const plUInt32 idx = p;
 
       plTransform trans;
-      trans.m_qRotation = plQuat::MakeFromAxisAndAngle(pAxis[p], plAngle::MakeFromRadian((float)(tCur.GetSeconds() * pRotationSpeed[idx]) + pRotationOffset[idx]));
+      trans.m_qRotation.SetFromAxisAndAngle(pAxis[p], plAngle::Radian((float)(tCur.GetSeconds() * pRotationSpeed[idx]) + pRotationOffset[idx]));
       trans.m_vPosition = pPosition[idx].GetAsVec3();
       trans.m_vScale.Set(pSize[idx]);
 

@@ -17,34 +17,33 @@ void OnLoadPlugin()
     // Menu Bar
     {
       const char* szMenuBar = "ProcGenAssetMenuBar";
-      
-      plActionMapManager::RegisterActionMap(szMenuBar).IgnoreResult();
-      plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
-      plProjectActions::MapActions(szMenuBar);
-      plDocumentActions::MapMenuActions(szMenuBar);
-      plAssetActions::MapMenuActions(szMenuBar);
-      plCommandHistoryActions::MapActions(szMenuBar);
 
-      plEditActions::MapActions("ProcGenAssetMenuBar", false, false);
-    }
+  plActionMapManager::RegisterActionMap(szMenuBar).IgnoreResult();
+  plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+  plProjectActions::MapActions(szMenuBar);
+  plDocumentActions::MapActions(szMenuBar, "Menu.File", false);
+  plCommandHistoryActions::MapActions(szMenuBar, "Menu.Edit");
 
-    // Tool Bar
-    {
-      const char* szToolBar = "ProcGenAssetToolBar";
-      plActionMapManager::RegisterActionMap(szToolBar).IgnoreResult();
-      plDocumentActions::MapToolbarActions(szToolBar);
-      plCommandHistoryActions::MapActions(szToolBar, "");
-      plAssetActions::MapToolBarActions(szToolBar, true);
-    }
-  }
+  plEditActions::MapActions("ProcGenAssetMenuBar", "Menu.Edit", false, false);
+}
 
-  // Scene
+// Tool Bar
+{
+  const char* szToolBar = "ProcGenAssetToolBar";
+  plActionMapManager::RegisterActionMap(szToolBar).IgnoreResult();
+  plDocumentActions::MapActions(szToolBar, "", true);
+  plCommandHistoryActions::MapActions(szToolBar, "");
+  plAssetActions::MapToolBarActions(szToolBar, true);
+}
+}
+
+// Scene
+{
+  // Menu Bar
   {
-    // Menu Bar
-    {
-      plProcGenActions::RegisterActions();
-      plProcGenActions::MapMenuActions();
-    }
+    plProcGenActions::RegisterActions();
+    plProcGenActions::MapMenuActions();
+  }
 
   // Tool Bar
   {

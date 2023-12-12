@@ -78,7 +78,7 @@ public:                                               // [ properties ]
   float GetStrength() const { return m_fStrength; } // [ property ]
 
 private:                                            // [ properties ]
-  plAngle m_MaxClimbingSlope = plAngle::MakeFromDegree(45); // [ property ]
+  plAngle m_MaxClimbingSlope = plAngle::Degree(45); // [ property ]
   float m_fMass = 70.0f;                            // [ property ]
   float m_fStrength = 500.0f;                       // [ property ]
 

@@ -9,7 +9,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Collision detection helper that casts a sphere vs one or more triangles
-class JPH_EXPORT CastSphereVsTriangles
+class CastSphereVsTriangles
 {
 public:
 	/// Constructor

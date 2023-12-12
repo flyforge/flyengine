@@ -12,61 +12,29 @@ inline plTransformTemplate<Type>::plTransformTemplate(const plVec3Template<Type>
 }
 
 template <typename Type>
-inline plTransformTemplate<Type> plTransformTemplate<Type>::Make(const plVec3Template<Type>& vPosition, const plQuatTemplate<Type>& qRotation /*= plQuatTemplate<Type>::IdentityQuaternion()*/, const plVec3Template<Type>& vScale /*= plVec3Template<Type>(1)*/)
-{
-  plTransformTemplate<Type> res;
-  res.m_vPosition = vPosition;
-  res.m_qRotation = qRotation;
-  res.m_vScale = vScale;
-  return res;
-}
-
-template <typename Type>
-inline plTransformTemplate<Type> plTransformTemplate<Type>::MakeIdentity()
-{
-  plTransformTemplate<Type> res;
-  res.m_vPosition.SetZero();
-  res.m_qRotation = plQuatTemplate<Type>::MakeIdentity();
-  res.m_vScale.Set(1.0f);
-  return res;
-}
-
-template <typename Type>
-plTransformTemplate<Type> plTransformTemplate<Type>::MakeFromMat4(const plMat4Template<Type>& mMat)
+void plTransformTemplate<Type>::SetFromMat4(const plMat4Template<Type>& mMat)
 {
   plMat3Template<Type> mRot = mMat.GetRotationalPart();
 
-  plTransformTemplate<Type> res;
-  res.m_vPosition = mMat.GetTranslationVector();
-  res.m_vScale = mRot.GetScalingFactors();
+  m_vPosition = mMat.GetTranslationVector();
+  m_vScale = mRot.GetScalingFactors();
   mRot.SetScalingFactors(plVec3Template<Type>(1)).IgnoreResult();
-  res.m_qRotation = plQuat::MakeFromMat3(mRot);
-  return res;
+  m_qRotation.SetFromMat3(mRot);
 }
 
 template <typename Type>
-plTransformTemplate<Type> plTransformTemplate<Type>::MakeLocalTransform(const plTransformTemplate& globalTransformParent, const plTransformTemplate& globalTransformChild)
+inline void plTransformTemplate<Type>::SetIdentity()
 {
-  const auto invRot = globalTransformParent.m_qRotation.GetInverse();
-  const auto invScale = plVec3Template<Type>(1).CompDiv(globalTransformParent.m_vScale);
-
-  plTransformTemplate<Type> res;
-  res.m_vPosition = (invRot * (globalTransformChild.m_vPosition - globalTransformParent.m_vPosition)).CompMul(invScale);
-  res.m_qRotation = invRot * globalTransformChild.m_qRotation;
-  res.m_vScale = invScale.CompMul(globalTransformChild.m_vScale);
-  return res;
+  m_vPosition.SetZero();
+  m_qRotation.SetIdentity();
+  m_vScale.Set(1);
 }
 
+// static
 template <typename Type>
-PLASMA_ALWAYS_INLINE plTransformTemplate<Type> plTransformTemplate<Type>::MakeGlobalTransform(const plTransformTemplate& globalTransformParent, const plTransformTemplate& localTransformChild)
+inline const plTransformTemplate<Type> plTransformTemplate<Type>::IdentityTransform()
 {
-  return globalTransformParent * localTransformChild;
-}
-
-template <typename Type>
-PLASMA_ALWAYS_INLINE void plTransformTemplate<Type>::SetIdentity()
-{
-  *this = MakeIdentity();
+  return plTransformTemplate<Type>(plVec3Template<Type>::ZeroVector(), plQuatTemplate<Type>::IdentityQuaternion(), plVec3Template<Type>(1));
 }
 
 template <typename Type>
@@ -102,6 +70,23 @@ inline bool plTransformTemplate<Type>::IsEqual(const plTransformTemplate<Type>& 
 }
 
 template <typename Type>
+inline void plTransformTemplate<Type>::SetLocalTransform(const plTransformTemplate<Type>& globalTransformParent, const plTransformTemplate<Type>& globalTransformChild)
+{
+  const auto invRot = -globalTransformParent.m_qRotation;
+  const auto invScale = plVec3Template<Type>(1).CompDiv(globalTransformParent.m_vScale);
+
+  m_vPosition = (invRot * (globalTransformChild.m_vPosition - globalTransformParent.m_vPosition)).CompMul(invScale);
+  m_qRotation = invRot * globalTransformChild.m_qRotation;
+  m_vScale = invScale.CompMul(globalTransformChild.m_vScale);
+}
+
+template <typename Type>
+inline void plTransformTemplate<Type>::SetGlobalTransform(const plTransformTemplate<Type>& globalTransformParent, const plTransformTemplate<Type>& localTransformChild)
+{
+  *this = globalTransformParent * localTransformChild;
+}
+
+template <typename Type>
 PLASMA_ALWAYS_INLINE const plMat4Template<Type> plTransformTemplate<Type>::GetAsMat4() const
 {
   auto result = m_qRotation.GetAsMat4();
@@ -127,13 +112,13 @@ PLASMA_ALWAYS_INLINE const plMat4Template<Type> plTransformTemplate<Type>::GetAs
 
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE void plTransformTemplate<Type>::operator+=(const plVec3Template<Type>& v)
+void plTransformTemplate<Type>::operator+=(const plVec3Template<Type>& v)
 {
   m_vPosition += v;
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE void plTransformTemplate<Type>::operator-=(const plVec3Template<Type>& v)
+void plTransformTemplate<Type>::operator-=(const plVec3Template<Type>& v)
 {
   m_vPosition -= v;
 }
@@ -229,7 +214,7 @@ PLASMA_ALWAYS_INLINE void plTransformTemplate<Type>::Invert()
 template <typename Type>
 inline const plTransformTemplate<Type> plTransformTemplate<Type>::GetInverse() const
 {
-  const auto invRot = m_qRotation.GetInverse();
+  const auto invRot = -m_qRotation;
   const auto invScale = plVec3Template<Type>(1).CompDiv(m_vScale);
   const auto invPos = invRot * (invScale.CompMul(-m_vPosition));
 

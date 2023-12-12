@@ -17,7 +17,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtMenuBarActionMapView : public QMenuBar
   PLASMA_DISALLOW_COPY_AND_ASSIGN(plQtMenuBarActionMapView);
 
 public:
-  explicit plQtMenuBarActionMapView(QWidget* pParent);
+  explicit plQtMenuBarActionMapView(QWidget* parent);
   ~plQtMenuBarActionMapView();
 
   void SetActionContext(const plActionContext& context);

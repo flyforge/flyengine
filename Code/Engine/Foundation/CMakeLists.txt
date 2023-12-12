@@ -13,6 +13,10 @@ if(PLASMA_CMAKE_PLATFORM_WINDOWS)
   )
 endif()
 
+if (MSVC)
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+endif()
+
 if (PLASMA_CMAKE_PLATFORM_LINUX)
   CHECK_INCLUDE_FILE_CXX("uuid/uuid.h" UUID_HEADER)
   if (NOT UUID_HEADER)
@@ -51,6 +55,12 @@ endif()
 if (PLASMA_3RDPARTY_ZSTD_SUPPORT)
 
   target_link_libraries(${PROJECT_NAME} PUBLIC zstd)
+
+endif()
+
+if(PLASMA_3RDPARTY_BROTLIG_SUPPORT)
+
+  target_link_libraries(${PROJECT_NAME} PUBLIC brotlig)
 
 endif()
 

@@ -1,7 +1,6 @@
 #include <EditorFramework/EditorFrameworkPCH.h>
 
 #include <EditorFramework/Assets/AssetCurator.h>
-#include <EditorFramework/EditorApp/CheckVersion.moc.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/IO/OSFile.h>
@@ -9,12 +8,11 @@
 #include <Foundation/IO/OpenDdlWriter.h>
 #include <GuiFoundation/UIServices/DynamicStringEnum.h>
 #include <GuiFoundation/UIServices/QtProgressbar.h>
-#include <QFileDialog>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
 PLASMA_IMPLEMENT_SINGLETON(plQtEditorApp);
 
-plEvent<const plEditorAppEvent&> plQtEditorApp::m_Events;
+plEvent<const PlasmaEditorAppEvent&> plQtEditorApp::m_Events;
 
 plQtEditorApp::plQtEditorApp()
   : m_SingletonRegistrar(this)
@@ -22,7 +20,6 @@ plQtEditorApp::plQtEditorApp()
   , m_RecentDocuments(100)
 {
   m_bSavePreferencesAfterOpenProject = false;
-  m_pVersionChecker = PLASMA_DEFAULT_NEW(plQtVersionChecker);
 
   m_pTimer = new QTimer(nullptr);
 }
@@ -45,8 +42,8 @@ void plQtEditorApp::SlotTimedUpdate()
 {
   if (plToolsProject::IsProjectOpen())
   {
-    if (plEditorEngineProcessConnection::GetSingleton())
-      plEditorEngineProcessConnection::GetSingleton()->Update();
+    if (PlasmaEditorEngineProcessConnection::GetSingleton())
+      PlasmaEditorEngineProcessConnection::GetSingleton()->Update();
 
     plAssetCurator::GetSingleton()->MainThreadTick(true);
   }
@@ -58,6 +55,16 @@ void plQtEditorApp::SlotTimedUpdate()
   Q_EMIT IdleEvent();
 
   RestartEngineProcessIfPluginsChanged(false);
+
+  if (m_bWroteCrashIndicatorFile)
+  {
+    m_bWroteCrashIndicatorFile = false;
+    QTimer::singleShot(2000, []() {
+        plStringBuilder sTemp = plOSFile::GetTempDataFolder("PlasmaEditor");
+        sTemp.AppendPath("PlasmaEditorCrashIndicator");
+        plOSFile::DeleteFile(sTemp).IgnoreResult();
+      });
+  }
 
   m_pTimer->start(1);
 }
@@ -74,34 +81,34 @@ void plQtEditorApp::SlotVersionCheckCompleted(bool bNewVersionReleased, bool bFo
 
   if (bForced || bNewVersionReleased)
   {
-    if (m_pVersionChecker->IsLatestNewer())
+    if (m_VersionChecker.IsLatestNewer())
     {
       plQtUiServices::GetSingleton()->MessageBoxInformation(
         plFmt("<html>A new version is available: {}<br><br>Your version is: {}<br><br>Please check the <A "
-              "href=\"https://github.com/plEngine/plEngine/releases\">Releases</A> for details.</html>",
-          m_pVersionChecker->GetKnownLatestVersion(), m_pVersionChecker->GetOwnVersion()));
+              "href=\"https://github.com/PlasmaEngine/PlasmaEngine/releases\">Releases</A> for details.</html>",
+          m_VersionChecker.GetKnownLatestVersion(), m_VersionChecker.GetOwnVersion()));
     }
     else
     {
       plStringBuilder tmp("You have the latest version: \n");
-      tmp.Append(m_pVersionChecker->GetOwnVersion());
+      tmp.Append(m_VersionChecker.GetOwnVersion());
 
       plQtUiServices::GetSingleton()->MessageBoxInformation(tmp);
     }
   }
 
-  if (m_pVersionChecker->IsLatestNewer())
+  if (m_VersionChecker.IsLatestNewer())
   {
     plQtUiServices::GetSingleton()->ShowGlobalStatusBarMessage(
-      plFmt("New version '{}' available, please update.", m_pVersionChecker->GetKnownLatestVersion()));
+      plFmt("New version '{}' available, please update.", m_VersionChecker.GetKnownLatestVersion()));
   }
 }
 
-void plQtEditorApp::EngineProcessMsgHandler(const plEditorEngineProcessConnection::Event& e)
+void plQtEditorApp::EngineProcessMsgHandler(const PlasmaEditorEngineProcessConnection::Event& e)
 {
   switch (e.m_Type)
   {
-    case plEditorEngineProcessConnection::Event::Type::ProcessMessage:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessMessage:
     {
       if (auto pTypeMsg = plDynamicCast<const plUpdateReflectionTypeMsgToEditor*>(e.m_pMsg))
       {
@@ -123,7 +130,7 @@ void plQtEditorApp::EngineProcessMsgHandler(const plEditorEngineProcessConnectio
     }
     break;
 
-    case plEditorEngineProcessConnection::Event::Type::ProcessRestarted:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessRestarted:
       StoreEnginePluginModificationTimes();
       break;
 
@@ -136,7 +143,7 @@ void plQtEditorApp::UiServicesEvents(const plQtUiServices::Event& e)
 {
   if (e.m_Type == plQtUiServices::Event::Type::CheckForUpdates)
   {
-    m_pVersionChecker->Check(true);
+    m_VersionChecker.Check(true);
   }
 }
 
@@ -156,7 +163,7 @@ void plQtEditorApp::SaveAllOpenDocuments()
       // There might be no window for this document.
       else
       {
-        pDoc->SaveDocument().LogFailure();
+        pDoc->SaveDocument().IgnoreResult();
       }
     }
   }
@@ -249,157 +256,6 @@ plResult plQtEditorApp::AddBundlesInOrder(plDynamicArray<plApplicationPluginConf
   return PLASMA_SUCCESS;
 }
 
-plStatus plQtEditorApp::MakeRemoteProjectLocal(plStringBuilder& inout_sFilePath)
-{
-  // already a local project?
-  if (inout_sFilePath.EndsWith_NoCase("plProject"))
-    return plStatus(PLASMA_SUCCESS);
-
-  {
-    plStringBuilder tmp = inout_sFilePath;
-    tmp.AppendPath("plProject");
-
-    if (plOSFile::ExistsFile(tmp))
-    {
-      inout_sFilePath = tmp;
-      return plStatus(PLASMA_SUCCESS);
-    }
-  }
-
-  PLASMA_LOG_BLOCK("Open Remote Project", inout_sFilePath.GetData());
-
-  plStringBuilder sRedirFile = plApplicationServices::GetSingleton()->GetProjectPreferencesFolder(inout_sFilePath);
-  sRedirFile.AppendPath("LocalCheckout.txt");
-
-  // read redirection file, if available
-  {
-    plOSFile file;
-    if (file.Open(sRedirFile, plFileOpenMode::Read).Succeeded())
-    {
-      plDataBuffer content;
-      file.ReadAll(content);
-
-      const plStringView sContent((const char*)content.GetData(), content.GetCount());
-
-      if (sContent.EndsWith_NoCase("plProject") && plOSFile::ExistsFile(sContent))
-      {
-        inout_sFilePath = sContent;
-        return plStatus(PLASMA_SUCCESS);
-      }
-    }
-  }
-
-  plString sName;
-  plString sType;
-  plString sUrl;
-  plString sProjectFile;
-
-  // read the info about the remote project from the OpenDDL config file
-  {
-    plOSFile file;
-    if (file.Open(inout_sFilePath, plFileOpenMode::Read).Failed())
-    {
-      return plStatus(plFmt("Remote project file '{}' doesn't exist.", inout_sFilePath));
-    }
-
-    plDataBuffer content;
-    file.ReadAll(content);
-
-    plMemoryStreamContainerWrapperStorage<plDataBuffer> storage(&content);
-    plMemoryStreamReader reader(&storage);
-
-    plOpenDdlReader ddl;
-    if (ddl.ParseDocument(reader).Failed())
-    {
-      return plStatus("Error in remote project DDL config file");
-    }
-
-    if (auto pRoot = ddl.GetRootElement())
-    {
-      if (auto pProject = pRoot->FindChildOfType("RemoteProject"))
-      {
-        if (auto pName = pProject->FindChildOfType(plOpenDdlPrimitiveType::String, "Name"))
-        {
-          sName = pName->GetPrimitivesString()[0];
-        }
-        if (auto pType = pProject->FindChildOfType(plOpenDdlPrimitiveType::String, "Type"))
-        {
-          sType = pType->GetPrimitivesString()[0];
-        }
-        if (auto pUrl = pProject->FindChildOfType(plOpenDdlPrimitiveType::String, "Url"))
-        {
-          sUrl = pUrl->GetPrimitivesString()[0];
-        }
-        if (auto pProjectFile = pProject->FindChildOfType(plOpenDdlPrimitiveType::String, "ProjectFile"))
-        {
-          sProjectFile = pProjectFile->GetPrimitivesString()[0];
-        }
-      }
-    }
-  }
-
-  if (sType.IsEmpty() || sName.IsEmpty())
-  {
-    return plStatus(plFmt("Remote project '{}' DDL configuration is invalid.", inout_sFilePath));
-  }
-
-  plQtUiServices::GetSingleton()->MessageBoxInformation("This is a 'remote' project, meaning the data is not yet available on your machine.\n\nPlease select a folder where the project should be downloaded to.");
-
-  static QString sPreviousFolder = plOSFile::GetUserDocumentsFolder().GetData();
-
-  QString sSelectedDir = QFileDialog::getExistingDirectory(QApplication::activeWindow(), QLatin1String("Choose Folder"), sPreviousFolder, QFileDialog::Option::ShowDirsOnly | QFileDialog::Option::DontResolveSymlinks);
-
-  if (sSelectedDir.isEmpty())
-  {
-    return plStatus("");
-  }
-
-  sPreviousFolder = sSelectedDir;
-  plStringBuilder sTargetDir = sSelectedDir.toUtf8().data();
-
-  // if it is a git repository, clone it
-  if (sType == "git" && !sUrl.IsEmpty())
-  {
-    QStringList args;
-    args << "clone";
-    args << plMakeQString(sUrl);
-    args << plMakeQString(sName);
-
-    QProcess proc;
-    proc.setWorkingDirectory(sTargetDir.GetData());
-    proc.start("git.exe", args);
-
-    if (!proc.waitForStarted())
-    {
-      return plStatus(plFmt("Running 'git' to download the remote project failed."));
-    }
-
-    proc.waitForFinished(60 * 1000);
-
-    if (proc.exitStatus() != QProcess::ExitStatus::NormalExit)
-    {
-      return plStatus(plFmt("Failed to git clone the remote project '{}' from '{}'", sName, sUrl));
-    }
-
-    plLog::Success("Cloned remote project '{}' from '{}' to '{}'", sName, sUrl, sTargetDir);
-
-    inout_sFilePath.Format("{}/{}/{}", sTargetDir, sName, sProjectFile);
-
-    // write redirection file
-    {
-      plOSFile file;
-      if (file.Open(sRedirFile, plFileOpenMode::Write).Succeeded())
-      {
-        file.Write(inout_sFilePath.GetData(), inout_sFilePath.GetElementCount()).AssertSuccess();
-      }
-    }
-
-    return plStatus(PLASMA_SUCCESS);
-  }
-
-  return plStatus(plFmt("Unknown remote project type '{}' or invalid URL '{}'", sType, sUrl));
-}
-
 bool plQtEditorApp::ExistsPluginSelectionStateDDL(const char* szProjectDir /*= ":project"*/)
 {
   plStringBuilder path = szProjectDir;
@@ -415,9 +271,6 @@ bool plQtEditorApp::ExistsPluginSelectionStateDDL(const char* szProjectDir /*= "
 
 void plQtEditorApp::WritePluginSelectionStateDDL(const char* szProjectDir /*= ":project"*/)
 {
-  if (m_StartupFlags.IsAnySet(StartupFlags::Background | StartupFlags::Headless | StartupFlags::UnitTest))
-    return;
-
   plStringBuilder path = szProjectDir;
   path.AppendPath("Editor/PluginSelection.ddl");
 
@@ -432,9 +285,6 @@ void plQtEditorApp::WritePluginSelectionStateDDL(const char* szProjectDir /*= ":
 
 void plQtEditorApp::CreatePluginSelectionDDL(const char* szProjectFile, const char* szTemplate)
 {
-  if (m_StartupFlags.IsAnySet(StartupFlags::Background | StartupFlags::Headless | StartupFlags::UnitTest))
-    return;
-
   plStringBuilder sPath = szProjectFile;
   sPath.PathParentDirectory();
 
@@ -573,6 +423,8 @@ void plQtEditorApp::LaunchEditor(const char* szProject, bool bCreate)
     args << "-safe";
   if (m_StartupFlags.IsSet(StartupFlags::NoRecent))
     args << "-noRecent";
+  if (m_StartupFlags.IsSet(StartupFlags::Debug))
+    args << "-debug";
 
   QProcess proc;
   proc.startDetached(QString::fromUtf8(app, app.GetElementCount()), args);
@@ -598,6 +450,5 @@ void plQtEditorApp::ReloadEngineResources()
 {
   plSimpleConfigMsgToEngine msg;
   msg.m_sWhatToDo = "ReloadResources";
-  msg.m_sPayload = "ReloadAllResources";
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }

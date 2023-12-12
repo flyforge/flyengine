@@ -80,6 +80,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plParticleComponent, 5, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
+    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -305,7 +306,8 @@ plResult plParticleComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& 
 {
   if (m_EffectController.IsAlive())
   {
-    plBoundingBoxSphere volume = plBoundingBoxSphere::MakeInvalid();
+    plBoundingBoxSphere volume;
+    volume.SetInvalid();
 
     m_EffectController.GetBoundingVolume(volume);
 
@@ -319,7 +321,7 @@ plResult plParticleComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& 
 
       if (m_bIgnoreOwnerRotation)
       {
-        volume.Transform((GetOwner()->GetGlobalRotation().GetInverse()).GetAsMat4());
+        volume.Transform((-GetOwner()->GetGlobalRotation()).GetAsMat4());
       }
 
       bounds = volume;
@@ -379,7 +381,7 @@ void plParticleComponent::Update()
     }
     else if (m_RestartTime <= tNow)
     {
-      m_RestartTime = plTime::MakeZero();
+      m_RestartTime.SetZero();
       StartEffect();
     }
   }

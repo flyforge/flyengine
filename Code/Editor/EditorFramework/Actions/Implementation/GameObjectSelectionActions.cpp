@@ -18,7 +18,7 @@ plActionDescriptorHandle plGameObjectSelectionActions::s_hCreateEmptyGameObjectH
 
 void plGameObjectSelectionActions::RegisterActions()
 {
-  s_hSelectionCategory = PLASMA_REGISTER_CATEGORY("G.Selection");
+  s_hSelectionCategory = PLASMA_REGISTER_CATEGORY("SelectionCategory");
   s_hShowInScenegraph = PLASMA_REGISTER_ACTION_1("Selection.ShowInScenegraph", plActionScope::Document, "Scene - Selection", "Ctrl+T",
     plGameObjectSelectionAction, plGameObjectSelectionAction::ActionType::ShowInScenegraph);
   s_hFocusOnSelection = PLASMA_REGISTER_ACTION_1("Selection.FocusSingleView", plActionScope::Document, "Scene - Selection", "F",
@@ -45,42 +45,47 @@ void plGameObjectSelectionActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hCreateEmptyGameObjectHere);
 }
 
-void plGameObjectSelectionActions::MapActions(plStringView sMapping)
+void plGameObjectSelectionActions::MapActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  pMap->MapAction(s_hSelectionCategory, "G.Edit", 5.0f);
+  plStringBuilder sSubPath(szPath, "/SelectionCategory");
 
-  pMap->MapAction(s_hShowInScenegraph, "G.Selection", 2.0f);
-  pMap->MapAction(s_hFocusOnSelection, "G.Selection", 3.0f);
-  pMap->MapAction(s_hFocusOnSelectionAllViews, "G.Selection", 3.5f);
-  pMap->MapAction(s_hSnapCameraToObject, "G.Selection", 8.0f);
-  pMap->MapAction(s_hMoveCameraHere, "G.Selection", 10.0f);
+  pMap->MapAction(s_hSelectionCategory, szPath, 5.0f);
+
+  pMap->MapAction(s_hShowInScenegraph, sSubPath, 2.0f);
+  pMap->MapAction(s_hFocusOnSelection, sSubPath, 3.0f);
+  pMap->MapAction(s_hFocusOnSelectionAllViews, sSubPath, 3.5f);
+  pMap->MapAction(s_hSnapCameraToObject, sSubPath, 8.0f);
+  pMap->MapAction(s_hMoveCameraHere, sSubPath, 10.0f);
 }
 
-void plGameObjectSelectionActions::MapContextMenuActions(plStringView sMapping)
+void plGameObjectSelectionActions::MapContextMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  pMap->MapAction(s_hSelectionCategory, "", 5.0f);
+  plStringBuilder sSubPath(szPath, "/SelectionCategory");
 
-  pMap->MapAction(s_hFocusOnSelectionAllViews, "G.Selection", 1.0f);
+  pMap->MapAction(s_hSelectionCategory, szPath, 5.0f);
+  pMap->MapAction(s_hFocusOnSelectionAllViews, sSubPath, 1.0f);
 }
 
 
-void plGameObjectSelectionActions::MapViewContextMenuActions(plStringView sMapping)
+void plGameObjectSelectionActions::MapViewContextMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  pMap->MapAction(s_hSelectionCategory, "", 5.0f);
+  plStringBuilder sSubPath(szPath, "/SelectionCategory");
 
-  pMap->MapAction(s_hFocusOnSelectionAllViews, "G.Selection", 1.0f);
-  pMap->MapAction(s_hSnapCameraToObject, "G.Selection", 4.0f);
-  pMap->MapAction(s_hMoveCameraHere, "G.Selection", 6.0f);
-  pMap->MapAction(s_hCreateEmptyGameObjectHere, "G.Selection", 1.0f);
+  pMap->MapAction(s_hSelectionCategory, szPath, 5.0f);
+
+  pMap->MapAction(s_hFocusOnSelectionAllViews, sSubPath, 1.0f);
+  pMap->MapAction(s_hSnapCameraToObject, sSubPath, 4.0f);
+  pMap->MapAction(s_hMoveCameraHere, sSubPath, 6.0f);
+  pMap->MapAction(s_hCreateEmptyGameObjectHere, sSubPath, 1.0f);
 }
 
 plGameObjectSelectionAction::plGameObjectSelectionAction(

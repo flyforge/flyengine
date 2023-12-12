@@ -17,15 +17,10 @@ class PhysicsSystem;
 class StateRecorder;
 
 /// Base class for configuration of a character
-class JPH_EXPORT CharacterBaseSettings : public RefTarget<CharacterBaseSettings>
+class CharacterBaseSettings : public RefTarget<CharacterBaseSettings>
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
-
-	/// Constructor
-										CharacterBaseSettings() = default;
-										CharacterBaseSettings(const CharacterBaseSettings &inSettings) = default;
-	CharacterBaseSettings &				operator = (const CharacterBaseSettings &inSettings) = default;
 
 	/// Virtual destructor
 	virtual								~CharacterBaseSettings() = default;
@@ -47,7 +42,7 @@ public:
 };
 
 /// Base class for character class
-class JPH_EXPORT CharacterBase : public RefTarget<CharacterBase>, public NonCopyable
+class CharacterBase : public RefTarget<CharacterBase>, public NonCopyable
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -85,9 +80,6 @@ public:
 		InAir,							///< Character is in the air and is not touching anything.
 	};
 
-	/// Debug function to convert enum values to string
-	static const char *					sToString(EGroundState inState);
-
 	///@name Properties of the ground this character is standing on
 
 	/// Current ground state
@@ -104,7 +96,7 @@ public:
 
 	/// Velocity in world space of ground
 	Vec3								GetGroundVelocity() const								{ return mGroundVelocity; }
-
+	
 	/// Material that the character is standing on
 	const PhysicsMaterial *				GetGroundMaterial() const								{ return mGroundMaterial; }
 

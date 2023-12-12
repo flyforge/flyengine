@@ -55,7 +55,7 @@ void plCrashHandler_WriteMiniDump::SetDumpFilePath(plStringView sAbsDirectoryPat
 
   if (flags.IsSet(PathFlags::AppendDate))
   {
-    const plDateTime date = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
+    const plDateTime date = plTimestamp::CurrentTimestamp();
     sOutputPath.AppendFormat("_{}", date);
   }
 

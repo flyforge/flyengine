@@ -2,17 +2,17 @@
 
 #include <EditorPluginAssets/PropertyAnimAsset/PropertyAnimObjectManager.h>
 
-plPropertyAnimObjectManager::plPropertyAnimObjectManager() = default;
+plPropertyAnimObjectManager::plPropertyAnimObjectManager() {}
 
-plPropertyAnimObjectManager::~plPropertyAnimObjectManager() = default;
+plPropertyAnimObjectManager::~plPropertyAnimObjectManager() {}
 
 plStatus plPropertyAnimObjectManager::InternalCanAdd(
-  const plRTTI* pRtti, const plDocumentObject* pParent, plStringView sParentProperty, const plVariant& index) const
+  const plRTTI* pRtti, const plDocumentObject* pParent, const char* szParentProperty, const plVariant& index) const
 {
   if (m_bAllowStructureChangeOnTemporaries)
     return plStatus(PLASMA_SUCCESS);
 
-  if (IsTemporary(pParent, sParentProperty))
+  if (IsTemporary(pParent, szParentProperty))
     return plStatus("The structure of the context cannot be animated.");
   return plStatus(PLASMA_SUCCESS);
 }
@@ -28,7 +28,7 @@ plStatus plPropertyAnimObjectManager::InternalCanRemove(const plDocumentObject* 
 }
 
 plStatus plPropertyAnimObjectManager::InternalCanMove(
-  const plDocumentObject* pObject, const plDocumentObject* pNewParent, plStringView sParentProperty, const plVariant& index) const
+  const plDocumentObject* pObject, const plDocumentObject* pNewParent, const char* szParentProperty, const plVariant& index) const
 {
   if (m_bAllowStructureChangeOnTemporaries)
     return plStatus(PLASMA_SUCCESS);

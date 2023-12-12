@@ -17,12 +17,12 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLUTAssetDocument, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plLUTAssetDocument::plLUTAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plLUTAssetProperties>(sDocumentPath, plAssetDocEngineConnection::None)
+plLUTAssetDocument::plLUTAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plLUTAssetProperties>(szDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-plTransformStatus plLUTAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plLUTAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   const auto props = GetProperties();
 
@@ -30,51 +30,70 @@ plTransformStatus plLUTAssetDocument::InternalTransformAsset(const char* szTarge
   plFileStats Stats;
   bool bStat = plOSFile::GetFileStats(props->GetAbsoluteInputFilePath(), Stats).Succeeded();
 
+  plStringBuilder inputPath = props->GetAbsoluteInputFilePath();
+
   plFileReader cubeFile;
-  if (!bStat || cubeFile.Open(props->GetAbsoluteInputFilePath()).Failed())
+  if (!bStat || cubeFile.Open(inputPath).Failed())
   {
-    return plStatus(plFmt("Couldn't open CUBE file '{0}'.", props->GetAbsoluteInputFilePath()));
+    return plStatus(plFmt("Couldn't open CUBE file '{0}'.", inputPath));
   }
-
-  plAdobeCUBEReader cubeReader;
-  auto parseRes = cubeReader.ParseFile(cubeFile);
-  if (parseRes.Failed())
-    return parseRes;
-
-  const plUInt32 lutSize = cubeReader.GetLUTSize();
-
-  // Build an plImage from the data
-  plImageHeader imgHeader;
-  imgHeader.SetImageFormat(plImageFormat::R8G8B8A8_UNORM_SRGB);
-  imgHeader.SetWidth(lutSize);
-  imgHeader.SetHeight(lutSize);
-  imgHeader.SetDepth(lutSize);
 
   plImage img;
-  img.ResetAndAlloc(imgHeader);
-
-  if (!img.IsValid())
+  bool isDDS = false;
+  if (inputPath.GetFileExtension() == "cube")
   {
-    return plStatus("Allocated plImage for LUT data is not valid.");
-  }
+    plAdobeCUBEReader cubeReader;
+    auto parseRes = cubeReader.ParseFile(cubeFile);
+    if (parseRes.Failed())
+      return parseRes;
 
+    const plUInt32 lutSize = cubeReader.GetLUTSize();
 
+    // Build an plImage from the data
+    plImageHeader imgHeader;
+    imgHeader.SetImageFormat(plImageFormat::R8G8B8A8_UNORM_SRGB);
+    imgHeader.SetWidth(lutSize);
+    imgHeader.SetHeight(lutSize);
+    imgHeader.SetDepth(lutSize);
 
-  for (plUInt32 b = 0; b < lutSize; ++b)
-  {
-    for (plUInt32 g = 0; g < lutSize; ++g)
+    img.ResetAndAlloc(imgHeader);
+
+    if (!img.IsValid())
     {
-      for (plUInt32 r = 0; r < lutSize; ++r)
+      return plStatus("Allocated plImage for LUT data is not valid.");
+    }
+
+
+
+    for (plUInt32 b = 0; b < lutSize; ++b)
+    {
+      for (plUInt32 g = 0; g < lutSize; ++g)
       {
-        const plVec3 val = cubeReader.GetLUTEntry(r, g, b);
+        for (plUInt32 r = 0; r < lutSize; ++r)
+        {
+          const plVec3 val = cubeReader.GetLUTEntry(r, g, b);
 
-        plColor col(val.x, val.y, val.z);
-        plColorGammaUB colUb(col);
+          plColor col(val.x, val.y, val.z);
+          plColorGammaUB colUb(col);
 
-        plColorGammaUB* pPixel = img.GetPixelPointer<plColorGammaUB>(0, 0, 0, r, g, b);
+          plColorGammaUB* pPixel = img.GetPixelPointer<plColorGammaUB>(0, 0, 0, r, g, b);
 
-        *pPixel = colUb;
+          *pPixel = colUb;
+        }
       }
+    }
+  }
+  else
+  {
+    isDDS = true;
+    if(img.LoadFrom(inputPath).Failed())
+    {
+      return plStatus(plFmt("Failed to load dds file {0}", inputPath));
+    }
+
+    if(img.GetDepth() == 1)
+    {
+      return plStatus(plFmt("File {0} is not a 3D texture", inputPath));
     }
   }
 
@@ -83,10 +102,20 @@ plTransformStatus plLUTAssetDocument::InternalTransformAsset(const char* szTarge
   PLASMA_SUCCEED_OR_RETURN(AssetHeader.Write(file));
 
   plTexFormat texFormat;
-  texFormat.m_bSRGB = true;
-  texFormat.m_AddressModeU = plImageAddressMode::Clamp;
-  texFormat.m_AddressModeV = plImageAddressMode::Clamp;
-  texFormat.m_AddressModeW = plImageAddressMode::Clamp;
+  if(isDDS)
+  {
+    texFormat.m_bSRGB = false;
+    texFormat.m_AddressModeU = plImageAddressMode::Repeat;
+    texFormat.m_AddressModeV = plImageAddressMode::Repeat;
+    texFormat.m_AddressModeW = plImageAddressMode::Repeat;
+  }
+  else
+  {
+    texFormat.m_bSRGB = true;
+    texFormat.m_AddressModeU = plImageAddressMode::Clamp;
+    texFormat.m_AddressModeV = plImageAddressMode::Clamp;
+    texFormat.m_AddressModeW = plImageAddressMode::Clamp;
+  }
   texFormat.m_TextureFilter = plTextureFilterSetting::FixedBilinear;
 
   texFormat.WriteTextureHeader(file);
@@ -109,37 +138,41 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 plLUTAssetDocumentGenerator::plLUTAssetDocumentGenerator()
 {
   AddSupportedFileType("cube");
+  AddSupportedFileType("dds");
 }
 
 plLUTAssetDocumentGenerator::~plLUTAssetDocumentGenerator() = default;
 
-void plLUTAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
+void plLUTAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const
 {
-  plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
+
+  const plStringBuilder baseFilename = baseOutputFile.GetFileName();
+
+  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
+
+  plAssetDocumentGenerator::Info& info = out_modes.ExpandAndGetRef();
   info.m_Priority = plAssetDocGeneratorPriority::DefaultPriority;
+  info.m_sOutputFileParentRelative = baseOutputFile;
+
   info.m_sName = "LUTImport.Cube";
   info.m_sIcon = ":/AssetIcons/LUT.svg";
 }
 
-plStatus plLUTAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plLUTAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
 
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
   plLUTAssetDocument* pAssetDoc = plDynamicCast<plLUTAssetDocument*>(out_pGeneratedDocument);
+  if (pAssetDoc == nullptr)
+    return plStatus("Target document is not a valid plLUTAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("Input", sInputFileRel.GetView());
+  accessor.SetValue("Input", sDataDirRelativePath);
 
   return plStatus(PLASMA_SUCCESS);
 }

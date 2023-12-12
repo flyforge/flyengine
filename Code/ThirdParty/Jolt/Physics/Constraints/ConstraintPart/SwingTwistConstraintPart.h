@@ -20,7 +20,7 @@ JPH_NAMESPACE_BEGIN
 ///
 /// Which roughly corresponds to an elliptic cone shape with major axis (inSwingYHalfAngle, inSwingZHalfAngle).
 ///
-/// In case inSwingYHalfAngle = 0, the rotation around Y will be constrained to 0 and the rotation around Z
+/// In case inSwingYHalfAngle = 0, the rotation around Y will be constrained to 0 and the rotation around Z 
 /// will be constrained between [-inSwingZHalfAngle, inSwingZHalfAngle]. Vice versa if inSwingZHalfAngle = 0.
 class SwingTwistConstraintPart
 {
@@ -209,11 +209,12 @@ public:
 	}
 
 	/// Calculate properties used during the functions below
+	/// @param inDeltaTime Time step
 	/// @param inBody1 The first body that this constraint is attached to
 	/// @param inBody2 The second body that this constraint is attached to
 	/// @param inConstraintRotation The current rotation of the constraint in constraint space
 	/// @param inConstraintToWorld Rotates from constraint space into world space
-	inline void					CalculateConstraintProperties(const Body &inBody1, const Body &inBody2, QuatArg inConstraintRotation, QuatArg inConstraintToWorld)
+	inline void					CalculateConstraintProperties(float inDeltaTime, const Body &inBody1, const Body &inBody2, QuatArg inConstraintRotation, QuatArg inConstraintToWorld)
 	{
 		// Decompose into swing and twist
 		Quat q_swing, q_twist;
@@ -233,18 +234,18 @@ public:
 			if (mRotationFlags & SwingZLocked)
 			{
 				// Swing fully locked
-				mSwingLimitYConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
-				mSwingLimitZConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceSwingLimitZRotationAxis);
+				mSwingLimitYConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
+				mSwingLimitZConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitZRotationAxis);
 			}
 			else
 			{
 				// Swing only locked around Y
-				mSwingLimitYConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
+				mSwingLimitYConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
 				if (swing_z_clamped)
 				{
 					if (Sign(q_swing.GetW()) * q_swing.GetZ() < 0.0f)
 						mWorldSpaceSwingLimitZRotationAxis = -mWorldSpaceSwingLimitZRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [-FLT_MAX, 0]
-					mSwingLimitZConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceSwingLimitZRotationAxis);
+					mSwingLimitZConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitZRotationAxis);
 				}
 				else
 					mSwingLimitZConstraintPart.Deactivate();
@@ -261,11 +262,11 @@ public:
 			{
 				if (Sign(q_swing.GetW()) * q_swing.GetY() < 0.0f)
 					mWorldSpaceSwingLimitYRotationAxis = -mWorldSpaceSwingLimitYRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [-FLT_MAX, 0]
-				mSwingLimitYConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
+				mSwingLimitYConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
 			}
 			else
 				mSwingLimitYConstraintPart.Deactivate();
-			mSwingLimitZConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceSwingLimitZRotationAxis);
+			mSwingLimitZConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitZRotationAxis);
 		}
 		else if ((mRotationFlags & SwingYZFree) != SwingYZFree)
 		{
@@ -280,7 +281,7 @@ public:
 				if (len != 0.0f)
 				{
 					mWorldSpaceSwingLimitYRotationAxis /= len;
-					mSwingLimitYConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
+					mSwingLimitYConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceSwingLimitYRotationAxis);
 				}
 				else
 					mSwingLimitYConstraintPart.Deactivate();
@@ -300,17 +301,17 @@ public:
 		{
 			// Twist locked, always activate constraint
 			mWorldSpaceTwistLimitRotationAxis = (inConstraintToWorld * q_swing).RotateAxisX();
-			mTwistLimitConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceTwistLimitRotationAxis);
+			mTwistLimitConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceTwistLimitRotationAxis);
 		}
 		else if ((mRotationFlags & TwistXFree) == 0)
 		{
 			// Twist has limits
 			if (twist_clamped)
 			{
-				mWorldSpaceTwistLimitRotationAxis = (inConstraintToWorld * q_swing).RotateAxisX();
+				mWorldSpaceTwistLimitRotationAxis = (inConstraintToWorld * q_swing).RotateAxisX();				
 				if (Sign(q_twist.GetW()) * q_twist.GetX() < 0.0f)
 					mWorldSpaceTwistLimitRotationAxis = -mWorldSpaceTwistLimitRotationAxis; // Flip axis if angle is negative because the impulse limit is going to be between [-FLT_MAX, 0]
-				mTwistLimitConstraintPart.CalculateConstraintProperties(inBody1, inBody2, mWorldSpaceTwistLimitRotationAxis);
+				mTwistLimitConstraintPart.CalculateConstraintProperties(inDeltaTime, inBody1, inBody2, mWorldSpaceTwistLimitRotationAxis);
 			}
 			else
 				mTwistLimitConstraintPart.Deactivate();

@@ -69,9 +69,9 @@ namespace plRmlUiInternal
     plIdTable<TextureId, plTexture2DResourceHandle> m_Textures;
     plTexture2DResourceHandle m_hFallbackTexture;
 
-    plVec2 m_vOffset = plVec2::MakeZero();
+    plVec2 m_vOffset = plVec2::ZeroVector();
 
-    plMat4 m_mTransform = plMat4::MakeIdentity();
+    plMat4 m_mTransform = plMat4::IdentityMatrix();
     plRectFloat m_ScissorRect = plRectFloat(0, 0);
     bool m_bEnableScissorRect = false;
 

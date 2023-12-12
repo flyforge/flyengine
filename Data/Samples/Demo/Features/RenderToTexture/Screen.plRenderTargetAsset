@@ -97,7 +97,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plTextureAssetProperties"}
 		u3 %TypeVersion{5}
@@ -131,7 +131,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderTargetFormat"}
 		u3 %TypeVersion{1}
@@ -148,7 +148,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plTexture2DResolution"}
 		u3 %TypeVersion{1}
@@ -199,7 +199,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plTexture2DChannelMappingEnum"}
 		u3 %TypeVersion{1}

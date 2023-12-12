@@ -17,7 +17,7 @@ namespace
   static plVariantArray GetDefaultTags()
   {
     plVariantArray value(plStaticAllocatorWrapper::GetAllocator());
-    value.PushBack("SkyLight");
+    value.PushBack(plStringView("SkyLight"));
     return value;
   }
 } // namespace
@@ -48,7 +48,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSkyLightComponent, 3, plComponentMode::Static)
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Lighting"),
+    new plCategoryAttribute("Rendering/Lighting"),
+    new plColorAttribute(plColorScheme::Lighting),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -57,7 +58,7 @@ PLASMA_END_COMPONENT_TYPE
 
 plSkyLightComponent::plSkyLightComponent()
 {
-  m_Desc.m_uniqueID = plUuid::MakeUuid();
+  m_Desc.m_uniqueID.CreateNewUuid();
 }
 
 plSkyLightComponent::~plSkyLightComponent() = default;

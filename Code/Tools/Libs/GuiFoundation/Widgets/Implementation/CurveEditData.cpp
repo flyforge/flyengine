@@ -74,9 +74,9 @@ plCurveExtentsAttribute::plCurveExtentsAttribute(double fLowerExtent, bool bLowe
   m_bUpperExtentFixed = bUpperExtentFixed;
 }
 
-void plCurveControlPointData::SetTickFromTime(plTime time, plInt64 iFps)
+void plCurveControlPointData::SetTickFromTime(plTime time, plInt64 fps)
 {
-  const plUInt32 uiTicksPerStep = 4800 / iFps;
+  const plUInt32 uiTicksPerStep = 4800 / fps;
   m_iTick = (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
@@ -123,9 +123,9 @@ plInt64 plCurveGroupData::TickFromTime(plTime time) const
   return (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-static void ConvertControlPoint(const plCurveControlPointData& cp, plCurve1D& out_result)
+static void ConvertControlPoint(const plCurveControlPointData& cp, plCurve1D& out_Result)
 {
-  auto& ccp = out_result.AddControlPoint(cp.GetTickAsTime().GetSeconds());
+  auto& ccp = out_Result.AddControlPoint(cp.GetTickAsTime().GetSeconds());
   ccp.m_Position.y = cp.m_fValue;
   ccp.m_LeftTangent = cp.m_LeftTangent;
   ccp.m_RightTangent = cp.m_RightTangent;
@@ -133,13 +133,13 @@ static void ConvertControlPoint(const plCurveControlPointData& cp, plCurve1D& ou
   ccp.m_TangentModeRight = cp.m_RightTangentMode;
 }
 
-void plSingleCurveData::ConvertToRuntimeData(plCurve1D& out_result) const
+void plSingleCurveData::ConvertToRuntimeData(plCurve1D& out_Result) const
 {
-  out_result.Clear();
+  out_Result.Clear();
 
   for (const auto& cp : m_ControlPoints)
   {
-    ConvertControlPoint(cp, out_result);
+    ConvertControlPoint(cp, out_Result);
   }
 }
 
@@ -166,9 +166,9 @@ double plSingleCurveData::Evaluate(plInt64 iTick) const
   return temp.Evaluate(iTick / 4800.0);
 }
 
-void plCurveGroupData::ConvertToRuntimeData(plUInt32 uiCurveIdx, plCurve1D& out_result) const
+void plCurveGroupData::ConvertToRuntimeData(plUInt32 uiCurveIdx, plCurve1D& out_Result) const
 {
-  m_Curves[uiCurveIdx]->ConvertToRuntimeData(out_result);
+  m_Curves[uiCurveIdx]->ConvertToRuntimeData(out_Result);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -186,7 +186,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pPoint = pNode->FindProperty("Point");
     if (pPoint && pPoint->m_Value.IsA<plVec2>())
@@ -212,7 +212,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pPoint = pNode->FindProperty("Time");
     if (pPoint && pPoint->m_Value.IsA<double>())
@@ -235,9 +235,9 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
-    ref_context.RenameClass("plCurveControlPointData");
+    context.RenameClass("plCurveControlPointData");
   }
 };
 
@@ -253,9 +253,9 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
-    ref_context.RenameClass("plSingleCurveData");
+    context.RenameClass("plSingleCurveData");
   }
 };
 
@@ -271,9 +271,9 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
-    ref_context.RenameClass("plCurveGroupData");
+    context.RenameClass("plCurveGroupData");
   }
 };
 

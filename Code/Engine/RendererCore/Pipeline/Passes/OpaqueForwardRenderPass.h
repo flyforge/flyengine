@@ -23,7 +23,7 @@ protected:
   // plRenderPipelineNodeOutputPin m_PinNormal;
   // plRenderPipelineNodeOutputPin m_PinSpecularColorRoughness;
 
-  bool m_bWriteDepth = true;
+  bool m_bWriteDepth;
 
   plTexture2DResourceHandle m_hWhiteTexture;
 };

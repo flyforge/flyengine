@@ -5,8 +5,8 @@
 #include <QThread>
 
 
-plQtLogModel::plQtLogModel(QObject* pParent)
-  : QAbstractItemModel(pParent)
+plQtLogModel::plQtLogModel(QObject* parent)
+  : QAbstractItemModel(parent)
 {
   m_bIsValid = true;
   m_LogLevel = plLogMsgType::InfoMsg;
@@ -44,12 +44,12 @@ void plQtLogModel::Clear()
   Q_EMIT NewErrorsOrWarnings(nullptr, false);
 }
 
-void plQtLogModel::SetLogLevel(plLogMsgType::Enum logLevel)
+void plQtLogModel::SetLogLevel(plLogMsgType::Enum LogLevel)
 {
-  if (m_LogLevel == logLevel)
+  if (m_LogLevel == LogLevel)
     return;
 
-  m_LogLevel = logLevel;
+  m_LogLevel = LogLevel;
   Invalidate();
 }
 
@@ -97,7 +97,7 @@ bool plQtLogModel::IsFiltered(const plLogEntry& lm) const
 // plQtLogModel QAbstractItemModel functions
 ////////////////////////////////////////////////////////////////////////
 
-QVariant plQtLogModel::data(const QModelIndex& index, int iRole) const
+QVariant plQtLogModel::data(const QModelIndex& index, int role) const
 {
   if (!index.isValid() || index.column() != 0)
     return QVariant();
@@ -110,21 +110,12 @@ QVariant plQtLogModel::data(const QModelIndex& index, int iRole) const
 
   const plLogEntry& msg = *m_VisibleMessages[iRow];
 
-  switch (iRole)
+  switch (role)
   {
     case Qt::DisplayRole:
-    {
-      if (msg.m_sMsg.FindSubString("\n") != nullptr)
-      {
-        plStringBuilder sTemp = msg.m_sMsg;
-        sTemp.ReplaceAll("\n", " ");
-        return plMakeQString(sTemp);
-      }
-      return plMakeQString(msg.m_sMsg);
-    }
     case Qt::ToolTipRole:
     {
-      return plMakeQString(msg.m_sMsg);
+      return QString::fromUtf8(msg.m_sMsg.GetData());
     }
     case Qt::ForegroundRole:
     {
@@ -164,17 +155,17 @@ Qt::ItemFlags plQtLogModel::flags(const QModelIndex& index) const
   return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant plQtLogModel::headerData(int iSection, Qt::Orientation orientation, int iRole) const
+QVariant plQtLogModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   return QVariant();
 }
 
-QModelIndex plQtLogModel::index(int iRow, int iColumn, const QModelIndex& parent) const
+QModelIndex plQtLogModel::index(int row, int column, const QModelIndex& parent) const
 {
-  if (parent.isValid() || iColumn != 0)
+  if (parent.isValid() || column != 0)
     return QModelIndex();
 
-  return createIndex(iRow, iColumn, iRow);
+  return createIndex(row, column, row);
 }
 
 QModelIndex plQtLogModel::parent(const QModelIndex& index) const

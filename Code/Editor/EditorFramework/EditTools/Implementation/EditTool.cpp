@@ -6,7 +6,7 @@
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectEditTool, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plGameObjectEditTool::plGameObjectEditTool() = default;
+plGameObjectEditTool::plGameObjectEditTool() {}
 
 void plGameObjectEditTool::ConfigureTool(
   plGameObjectDocument* pDocument, plQtGameObjectDocumentWindow* pWindow, plGameObjectGizmoInterface* pInterface)
@@ -18,12 +18,12 @@ void plGameObjectEditTool::ConfigureTool(
   OnConfigured();
 }
 
-void plGameObjectEditTool::SetActive(bool bActive)
+void plGameObjectEditTool::SetActive(bool active)
 {
-  if (m_bIsActive == bActive)
+  if (m_bIsActive == active)
     return;
 
-  m_bIsActive = bActive;
+  m_bIsActive = active;
   OnActiveChanged(m_bIsActive);
 
   if (!m_bIsActive)

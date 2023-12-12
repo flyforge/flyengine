@@ -25,7 +25,7 @@ public:
 
 protected:
   virtual void InternalRedraw() override;
-  virtual void ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg) override;
+  virtual void ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg) override;
 
 protected Q_SLOTS:
   void HighlightTimer();
@@ -36,8 +36,9 @@ private:
   void PropertyEventHandler(const plDocumentObjectPropertyEvent& e);
   bool UpdatePreview();
 
-  plEngineViewConfig m_ViewConfig;
+  PlasmaEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget;
   plUInt32 m_uiHighlightSlots = 0;
   QPointer<QTimer> m_pHighlightTimer;
 };
+

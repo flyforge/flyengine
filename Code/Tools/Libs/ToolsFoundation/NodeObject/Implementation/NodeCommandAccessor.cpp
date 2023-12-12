@@ -27,7 +27,7 @@ plStatus plNodeCommandAccessor::SetValue(const plDocumentObject* pObject, const 
   else
   {
     return plObjectCommandAccessor::SetValue(pObject, pProp, newValue, index);
-  }
+  }  
 }
 
 plStatus plNodeCommandAccessor::InsertValue(const plDocumentObject* pObject, const plAbstractProperty* pProp, const plVariant& newValue, plVariant index /*= plVariant()*/)
@@ -94,7 +94,8 @@ plStatus plNodeCommandAccessor::DisconnectAllPins(const plDocumentObject* pObjec
 {
   auto pManager = static_cast<const plDocumentNodeManager*>(pObject->GetDocumentObjectManager());
 
-  auto Disconnect = [&](plArrayPtr<const plConnection* const> connections) -> plStatus {
+  auto Disconnect = [&](plArrayPtr<const plConnection* const> connections) -> plStatus
+  {
     for (const plConnection* pConnection : connections)
     {
       auto& connectionInfo = out_oldConnections.ExpandAndGetRef();

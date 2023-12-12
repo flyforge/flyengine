@@ -3,7 +3,6 @@
 #include <EditorEngineProcessFramework/EngineProcess/EngineProcessApp.h>
 #include <EditorEngineProcessFramework/EngineProcess/EngineProcessCommunicationChannel.h>
 #include <Foundation/Communication/IpcChannel.h>
-#include <Foundation/Communication/IpcProcessMessageProtocol.h>
 
 #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
@@ -11,9 +10,9 @@
 #  include <signal.h>
 #endif
 
-bool plEngineProcessCommunicationChannel::IsHostAlive() const
+bool PlasmaEngineProcessCommunicationChannel::IsHostAlive() const
 {
-  if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
     return true;
 
   if (m_iHostPID == 0)
@@ -44,11 +43,11 @@ bool plEngineProcessCommunicationChannel::IsHostAlive() const
   return bValid;
 }
 
-plResult plEngineProcessCommunicationChannel::ConnectToHostProcess()
+plResult PlasmaEngineProcessCommunicationChannel::ConnectToHostProcess()
 {
   PLASMA_ASSERT_DEV(m_pChannel == nullptr, "ProcessCommunication object already in use");
 
-  if (!plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (!PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
   {
     if (plCommandLineUtils::GetGlobalInstance()->GetStringOption("-IPC").IsEmpty())
     {
@@ -73,8 +72,8 @@ plResult plEngineProcessCommunicationChannel::ConnectToHostProcess()
   {
     m_pChannel = plIpcChannel::CreateNetworkChannel("localhost:1050", plIpcChannel::Mode::Server);
   }
-  m_pProtocol = PLASMA_DEFAULT_NEW(plIpcProcessMessageProtocol, m_pChannel.Borrow());
-  m_pProtocol->m_MessageEvent.AddEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
+
+  m_pChannel->m_MessageEvent.AddEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
   m_pChannel->Connect();
 
   return PLASMA_SUCCESS;

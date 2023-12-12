@@ -26,8 +26,8 @@ static plMat3 CalculateTransformationMatrix(const plJoltCollisionMeshAssetProper
   return plBasisAxis::CalculateTransformationMatrix(forwardDir, pProp->m_RightDir, pProp->m_UpDir, us);
 }
 
-plJoltCollisionMeshAssetDocument::plJoltCollisionMeshAssetDocument(plStringView sDocumentPath, bool bConvexMesh)
-  : plSimpleAssetDocument<plJoltCollisionMeshAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple)
+plJoltCollisionMeshAssetDocument::plJoltCollisionMeshAssetDocument(const char* szDocumentPath, bool bConvexMesh)
+  : plSimpleAssetDocument<plJoltCollisionMeshAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
   m_bIsConvexMesh = bConvexMesh;
 }
@@ -54,7 +54,7 @@ void plJoltCollisionMeshAssetDocument::InitializeAfterLoading(bool bFirstTimeCre
 //////////////////////////////////////////////////////////////////////////
 
 
-plTransformStatus plJoltCollisionMeshAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plJoltCollisionMeshAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plProgressRange range("Transforming Asset", 2, false);
 
@@ -67,7 +67,7 @@ plTransformStatus plJoltCollisionMeshAssetDocument::InternalTransformAsset(plStr
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
   uiCompressionMode = 1;
-  plCompressedStreamWriterZstd compressor(&stream, 0, plCompressedStreamWriterZstd::Compression::Average);
+  plCompressedStreamWriterZstd compressor(&stream, plCompressedStreamWriterZstd::Compression::Average);
   plChunkStreamWriter chunk(compressor);
 #else
   plChunkStreamWriter chunk(stream);
@@ -94,7 +94,7 @@ plTransformStatus plJoltCollisionMeshAssetDocument::InternalTransformAsset(plStr
 
       plGeometry geom;
       plGeometry::GeoOptions opt;
-      opt.m_Transform = plMat4(mTransformation, plVec3::MakeZero());
+      opt.m_Transform = plMat4(mTransformation, plVec3::ZeroVector());
 
       if (pProp->m_ConvexMeshType == plJoltConvexCollisionMeshType::Cylinder)
       {
@@ -242,6 +242,7 @@ plStatus plJoltCollisionMeshAssetDocument::CreateMeshFromFile(plJoltCookingMesh&
     }
 
     ApplyNativePropertyChangesToObjectManager();
+    pProp = GetProperties();
   }
 
   return plStatus(PLASMA_SUCCESS);
@@ -266,7 +267,6 @@ plStatus plJoltCollisionMeshAssetDocument::CreateMeshFromGeom(plGeometry& geom, 
 
       // Need to reacquire pProp pointer since it might be reallocated.
       pProp = GetProperties();
-      PLASMA_IGNORE_UNUSED(pProp);
     }
   }
 
@@ -341,7 +341,7 @@ void plJoltCollisionMeshAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentIn
   {
     // remove the mesh file dependency, if it is not actually used
     const auto& sMeshFile = GetProperties()->m_sMeshFile;
-    pInfo->m_TransformDependencies.Remove(sMeshFile);
+    pInfo->m_AssetTransformDependencies.Remove(sMeshFile);
   }
 }
 
@@ -360,28 +360,25 @@ plJoltCollisionMeshAssetDocumentGenerator::plJoltCollisionMeshAssetDocumentGener
 
 plJoltCollisionMeshAssetDocumentGenerator::~plJoltCollisionMeshAssetDocumentGenerator() = default;
 
-void plJoltCollisionMeshAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
+void plJoltCollisionMeshAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const
 {
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
+  baseOutputFile.ChangeFileExtension("plJoltCollisionMeshAsset");
+
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::DefaultPriority;
     info.m_sName = "Jolt_Colmesh_Triangle";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Jolt_Collision_Mesh.svg";
   }
 }
 
-plStatus plJoltCollisionMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plJoltCollisionMeshAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
 
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
@@ -390,10 +387,11 @@ plStatus plJoltCollisionMeshAssetDocumentGenerator::Generate(plStringView sInput
     return plStatus("Target document is not a valid plJoltCollisionMeshAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("MeshFile", sInputFileRel.GetView());
+  accessor.SetValue("MeshFile", sDataDirRelativePath);
 
   return plStatus(PLASMA_SUCCESS);
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -410,28 +408,25 @@ plJoltConvexCollisionMeshAssetDocumentGenerator::plJoltConvexCollisionMeshAssetD
 
 plJoltConvexCollisionMeshAssetDocumentGenerator::~plJoltConvexCollisionMeshAssetDocumentGenerator() = default;
 
-void plJoltConvexCollisionMeshAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
+void plJoltConvexCollisionMeshAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const
 {
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
+  baseOutputFile.ChangeFileExtension("plJoltConvexCollisionMeshAsset");
+
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::LowPriority;
     info.m_sName = "Jolt_Colmesh_Convex";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Jolt_Collision_Mesh_Convex.svg";
   }
 }
 
-plStatus plJoltConvexCollisionMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plJoltConvexCollisionMeshAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
 
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
@@ -440,7 +435,7 @@ plStatus plJoltConvexCollisionMeshAssetDocumentGenerator::Generate(plStringView 
     return plStatus("Target document is not a valid plJoltCollisionMeshAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("MeshFile", sInputFileRel.GetView());
+  accessor.SetValue("MeshFile", sDataDirRelativePath);
 
   return plStatus(PLASMA_SUCCESS);
 }

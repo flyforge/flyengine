@@ -84,7 +84,7 @@ float plVolumeCollection::EvaluateAtGlobalPosition(const plSimdVec4f& vPosition,
       {
         const float fNewValue = ApplyValue(box.m_BlendMode, fValue, box.m_fValue);
         plSimdVec4f vAlpha = absLocalPos.CompMul(plSimdConversion::ToVec3(box.m_vFadeOutScale)) + plSimdConversion::ToVec3(box.m_vFadeOutBias);
-        vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::MakeZero());
+        vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::ZeroVector());
         const float fAlpha = vAlpha.x() * vAlpha.y() * vAlpha.z();
         fValue = plMath::Lerp(fValue, fNewValue, fAlpha);
       }
@@ -130,7 +130,7 @@ float plVolumeCollection::EvaluateAtGlobalPosition(const plSimdVec4f& vPosition,
         {
           const float fNewValue = ApplyValue(image.m_BlendMode, fValue, fValueToUse);
           plSimdVec4f vAlpha = absLocalPos.CompMul(plSimdConversion::ToVec3(image.m_vFadeOutScale)) + plSimdConversion::ToVec3(image.m_vFadeOutBias);
-          vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::MakeZero());
+          vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::ZeroVector());
           const float fAlpha = vAlpha.x() * vAlpha.y() * vAlpha.z();
           fValue = plMath::Lerp(fValue, fNewValue, fAlpha);
         }

@@ -30,3 +30,4 @@ private:
 
   QPointer<plQtImageWidget> m_pImageWidget;
 };
+

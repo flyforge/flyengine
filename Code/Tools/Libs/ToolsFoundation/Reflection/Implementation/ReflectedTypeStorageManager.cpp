@@ -57,12 +57,12 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddProperties(c
 }
 
 void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertiesRecursive(
-  const plRTTI* pType, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass)
+  const plRTTI* pType, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass)
 {
   // Parse parent class
   const plRTTI* pParent = pType->GetParentType();
   if (pParent != nullptr)
-    AddPropertiesRecursive(pParent, ref_requiresPatchingEmbeddedClass);
+    AddPropertiesRecursive(pParent, requiresPatchingEmbeddedClass);
 
   // Parse properties
   const plUInt32 uiPropertyCount = pType->GetProperties().GetCount();
@@ -78,7 +78,7 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertiesRe
       // Value already present, update type and instances
       storageInfo->m_Type = GetStorageType(pProperty);
       storageInfo->m_DefaultValue = plToolsReflectionUtils::GetStorageDefault(pProperty);
-      UpdateInstances(storageInfo->m_uiIndex, pProperty, ref_requiresPatchingEmbeddedClass);
+      UpdateInstances(storageInfo->m_uiIndex, pProperty, requiresPatchingEmbeddedClass);
     }
     else
     {
@@ -86,13 +86,13 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertiesRe
 
       // Add value, new entries are appended
       m_PathToStorageInfoTable.Insert(path, StorageInfo(uiIndex, GetStorageType(pProperty), plToolsReflectionUtils::GetStorageDefault(pProperty)));
-      AddPropertyToInstances(uiIndex, pProperty, ref_requiresPatchingEmbeddedClass);
+      AddPropertyToInstances(uiIndex, pProperty, requiresPatchingEmbeddedClass);
     }
   }
 }
 
 void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::UpdateInstances(
-  plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass)
+  plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass)
 {
   for (auto it = m_Instances.GetIterator(); it.IsValid(); ++it)
   {
@@ -113,13 +113,13 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::UpdateInstances
           {
             if (!value.Get<plUuid>().IsValid())
             {
-              ref_requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
+              requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
             }
           }
           else
           {
             value = plToolsReflectionUtils::GetStorageDefault(pProperty);
-            ref_requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
+            requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
           }
           continue;
         }
@@ -220,7 +220,7 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::UpdateInstances
 }
 
 void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertyToInstances(
-  plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass)
+  plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass)
 {
   if (pProperty->GetCategory() != plPropertyCategory::Member)
     return;
@@ -232,7 +232,7 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertyToIn
     data.PushBack(plToolsReflectionUtils::GetStorageDefault(pProperty));
     if (pProperty->GetFlags().IsSet(plPropertyFlags::Class) && !pProperty->GetFlags().IsSet(plPropertyFlags::Pointer))
     {
-      ref_requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
+      requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
     }
   }
 }
@@ -292,6 +292,7 @@ void plReflectedTypeStorageManager::Shutdown()
     for (auto inst : pMapping->m_Instances)
     {
       plLog::Error("Type '{0}' survived shutdown!", inst->GetType()->GetTypeName());
+
     }
 
     PLASMA_ASSERT_DEV(pMapping->m_Instances.IsEmpty(), "A type was removed which still has instances using the type!");
@@ -348,12 +349,12 @@ void plReflectedTypeStorageManager::TypeEventHandler(const plPhantomRttiManagerE
       ReflectedTypeStorageMapping* pMapping = s_ReflectedTypeToStorageMapping[e.m_pChangedType];
       PLASMA_ASSERT_DEV(pMapping != nullptr, "A type was updated but no mapping exists for it!");
 
-      if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "plEnumBase")
+      if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "ezEnumBase")
       {
         // PLASMA_ASSERT_DEV(false, "Updating enums not implemented yet!");
         break;
       }
-      else if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "plBitflagsBase")
+      else if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "ezBitflagsBase")
       {
         PLASMA_ASSERT_DEV(false, "Updating bitflags not implemented yet!");
       }

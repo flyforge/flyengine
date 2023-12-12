@@ -101,6 +101,11 @@ public:
     : m_Color(color)
   {
   }
+
+  plColorAttribute(plInt32 iColorGroup);
+
+  plInt32 m_iColorGroup = -1;
+
   const plColor& GetColor() const { return m_Color; }
 
 private:
@@ -385,7 +390,7 @@ private:
 /// ## Surface on hit prefab: **Package**
 /// * Transforming a surface is not affected if the prefab it spawns on impact changes. Only the reference is stored.
 /// * The set prefab does not show up in the thumbnail so it is not needed.
-/// * We do, however, need to package it or otherwise the runtime would fail to spawn the prefab on impact.
+/// * We do however need to package it or otherwise the runtime would fail to spawn the prefab on impact.
 ///
 /// As a rule of thumb (also the default for each):
 /// * plFileBrowserAttribute are mostly Transform and Thumbnail.
@@ -399,7 +404,7 @@ struct plDependencyFlags
     None = 0,              ///< The reference is not needed for anything in production. An example of this is editor references that are only used at edit time, e.g. a default animation clip for a skeleton.
     Thumbnail = PLASMA_BIT(0), ///< This reference is a dependency to generating a thumbnail. The material references of a mesh for example.
     Transform = PLASMA_BIT(1), ///< This reference is a dependency to transforming this asset. The input model of a mesh for example.
-    Package = PLASMA_BIT(2),   ///< This reference needs to be packaged as it is used at runtime by this asset. All sounds or debris generated on impact of a surface are common examples of this.
+    Package = PLASMA_BIT(2),   ///< This reference is needs to be packaged as it is used at runtime by this asset. All sounds or debris generated on impact of a surface are common examples of this.
     Default = 0
   };
 
@@ -424,25 +429,27 @@ class PLASMA_FOUNDATION_DLL plFileBrowserAttribute : public plTypeWidgetAttribut
 
 public:
   // Predefined common type filters
-  static constexpr plStringView Meshes = "*.obj;*.fbx;*.gltf;*.glb"_plsv;
-  static constexpr plStringView MeshesWithAnimations = "*.fbx;*.gltf;*.glb"_plsv;
-  static constexpr plStringView ImagesLdrOnly = "*.dds;*.tga;*.png;*.jpg;*.jpeg"_plsv;
-  static constexpr plStringView ImagesHdrOnly = "*.hdr;*.exr"_plsv;
-  static constexpr plStringView ImagesLdrAndHdr = "*.dds;*.tga;*.png;*.jpg;*.jpeg;*.hdr;*.exr"_plsv;
-  static constexpr plStringView CubemapsLdrAndHdr = "*.dds;*.hdr"_plsv;
+  static constexpr const char* Meshes = "*.obj;*.fbx;*.gltf;*.glb";
+  static constexpr const char* MeshesWithAnimations = "*.fbx;*.gltf;*.glb";
+  static constexpr const char* ImagesLdrOnly = "*.dds;*.tga;*.png;*.jpg;*.jpeg";
+  static constexpr const char* ImagesHdrOnly = "*.hdr;*.exr";
+  static constexpr const char* ImagesLdrAndHdr = "*.dds;*.tga;*.png;*.jpg;*.jpeg;*.hdr;*.exr";
+  static constexpr const char* CubemapsLdrAndHdr = "*.dds;*.hdr";
 
   plFileBrowserAttribute() = default;
-  plFileBrowserAttribute(plStringView sDialogTitle, plStringView sTypeFilter, plStringView sCustomAction = {}, plBitflags<plDependencyFlags> depencyFlags = plDependencyFlags::Transform | plDependencyFlags::Thumbnail)
-    : m_sDialogTitle(sDialogTitle)
-    , m_sTypeFilter(sTypeFilter)
-    , m_sCustomAction(sCustomAction)
+  plFileBrowserAttribute(const char* szDialogTitle,
+    const char* szTypeFilter, const char* szCustomAction = nullptr,
+    plBitflags<plDependencyFlags> depencyFlags = plDependencyFlags::Transform | plDependencyFlags::Thumbnail)
+    : m_sDialogTitle(szDialogTitle)
+    , m_sTypeFilter(szTypeFilter)
+    , m_sCustomAction(szCustomAction)
     , m_DependencyFlags(depencyFlags)
   {
   }
 
-  plStringView GetDialogTitle() const { return m_sDialogTitle; }
-  plStringView GetTypeFilter() const { return m_sTypeFilter; }
-  plStringView GetCustomAction() const { return m_sCustomAction; }
+  const char* GetDialogTitle() const { return m_sDialogTitle; }
+  const char* GetTypeFilter() const { return m_sTypeFilter; }
+  const char* GetCustomAction() const { return m_sCustomAction; }
   plBitflags<plDependencyFlags> GetDependencyFlags() const { return m_DependencyFlags; }
 
 private:
@@ -749,7 +756,7 @@ class PLASMA_FOUNDATION_DLL plBoxVisualizerAttribute : public plVisualizerAttrib
 
 public:
   plBoxVisualizerAttribute();
-  plBoxVisualizerAttribute(const char* szSizeProperty, float fSizeScale = 1.0f, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::MakeZero(), const char* szOffsetProperty = nullptr, const char* szRotationProperty = nullptr);
+  plBoxVisualizerAttribute(const char* szSizeProperty, float fSizeScale = 1.0f, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::ZeroVector(), const char* szOffsetProperty = nullptr, const char* szRotationProperty = nullptr);
 
   const plUntrackedString& GetSizeProperty() const { return m_sProperty1; }
   const plUntrackedString& GetColorProperty() const { return m_sProperty2; }
@@ -769,7 +776,7 @@ class PLASMA_FOUNDATION_DLL plSphereVisualizerAttribute : public plVisualizerAtt
 
 public:
   plSphereVisualizerAttribute();
-  plSphereVisualizerAttribute(const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::MakeZero(), const char* szOffsetProperty = nullptr);
+  plSphereVisualizerAttribute(const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::ZeroVector(), const char* szOffsetProperty = nullptr);
 
   const plUntrackedString& GetRadiusProperty() const { return m_sProperty1; }
   const plUntrackedString& GetColorProperty() const { return m_sProperty2; }
@@ -805,8 +812,8 @@ class PLASMA_FOUNDATION_DLL plCylinderVisualizerAttribute : public plVisualizerA
 
 public:
   plCylinderVisualizerAttribute();
-  plCylinderVisualizerAttribute(plEnum<plBasisAxis> axis, const char* szHeightProperty, const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::MakeZero(), const char* szOffsetProperty = nullptr);
-  plCylinderVisualizerAttribute(const char* szAxisProperty, const char* szHeightProperty, const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::MakeZero(), const char* szOffsetProperty = nullptr);
+  plCylinderVisualizerAttribute(plEnum<plBasisAxis> axis, const char* szHeightProperty, const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::ZeroVector(), const char* szOffsetProperty = nullptr);
+  plCylinderVisualizerAttribute(const char* szAxisProperty, const char* szHeightProperty, const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::ZeroVector(), const char* szOffsetProperty = nullptr);
 
   const plUntrackedString& GetAxisProperty() const { return m_sProperty5; }
   const plUntrackedString& GetHeightProperty() const { return m_sProperty1; }

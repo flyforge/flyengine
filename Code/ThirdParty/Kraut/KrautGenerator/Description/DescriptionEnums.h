@@ -10,13 +10,13 @@ namespace Kraut
     {
       Straight, // along the start direction
       Upwards,  // to the sky!
-      MakeFromDegree22,
-      MakeFromDegree45,
-      MakeFromDegree67,
-      MakeFromDegree90,
-      MakeFromDegree112,
-      MakeFromDegree135,
-      MakeFromDegree157,
+      Degree22,
+      Degree45,
+      Degree67,
+      Degree90,
+      Degree112,
+      Degree135,
+      Degree157,
       Downwards, // to the ground
       ENUM_COUNT
     };

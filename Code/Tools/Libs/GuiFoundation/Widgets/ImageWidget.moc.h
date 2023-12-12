@@ -23,7 +23,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtImageWidget : public QWidget, public Ui_Image
   Q_OBJECT
 
 public:
-  plQtImageWidget(QWidget* pParent, bool bShowButtons = true);
+  plQtImageWidget(QWidget* parent, bool bShowButtons = true);
   ~plQtImageWidget();
 
   void SetImage(QPixmap pixmap);

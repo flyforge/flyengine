@@ -69,11 +69,11 @@ void plStackAllocator<TrackingFlags>::Reset()
   m_PtrToDestructDataIndexTable.Clear();
 
   this->m_allocator.Reset();
-  if constexpr ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
   {
     plMemoryTracker::RemoveAllAllocations(this->m_Id);
   }
-  else if constexpr ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
+  else if ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
   {
     plAllocatorBase::Stats stats;
     this->m_allocator.FillStats(stats);

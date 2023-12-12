@@ -28,7 +28,6 @@ plDecalAssetDocumentManager::plDecalAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Decal";
   m_DocTypeDesc.m_sFileExtension = "plDecalAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Decal.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Effects";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plDecalAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Decal");
@@ -42,19 +41,19 @@ plDecalAssetDocumentManager::~plDecalAssetDocumentManager()
   plDocumentManager::s_Events.RemoveEventHandler(plMakeDelegate(&plDecalAssetDocumentManager::OnDocumentManagerEvent, this));
 }
 
-void plDecalAssetDocumentManager::AddEntriesToAssetTable(plStringView sDataDirectory, const plPlatformProfile* pAssetProfile, plDelegate<void(plStringView sGuid, plStringView sPath, plStringView sType)> addEntry) const
+void plDecalAssetDocumentManager::AddEntriesToAssetTable(const char* szDataDirectory, const plPlatformProfile* pAssetProfile, plMap<plString, plString>& inout_GuidToPath) const
 {
   plStringBuilder projectDir = plToolsProject::GetSingleton()->GetProjectDirectory();
   projectDir.MakeCleanPath();
   projectDir.Append("/");
 
-  if (projectDir.StartsWith_NoCase(sDataDirectory))
+  if (projectDir.StartsWith_NoCase(szDataDirectory))
   {
-    addEntry("{ ProjectDecalAtlas }", "PC/Decals.plTextureAtlas", "Decal Atlas");
+    inout_GuidToPath["{ ProjectDecalAtlas }"] = "PC/Decals.plTextureAtlas";
   }
 }
 
-plString plDecalAssetDocumentManager::GetAssetTableEntry(const plSubAsset* pSubAsset, plStringView sDataDirectory, const plPlatformProfile* pAssetProfile) const
+plString plDecalAssetDocumentManager::GetAssetTableEntry(const plSubAsset* pSubAsset, const char* szDataDirectory, const plPlatformProfile* pAssetProfile) const
 {
   // means NO table entry will be written, because for decals we don't need a redirection
   return plString();
@@ -68,7 +67,7 @@ void plDecalAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plDecalAssetDocument>())
       {
-        new plQtDecalAssetDocumentWindow(static_cast<plDecalAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtDecalAssetDocumentWindow* pDocWnd = new plQtDecalAssetDocumentWindow(static_cast<plDecalAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -78,9 +77,9 @@ void plDecalAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager
   }
 }
 
-void plDecalAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plDecalAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plDecalAssetDocument(sPath);
+  out_pDocument = new plDecalAssetDocument(szPath);
 }
 
 void plDecalAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const
@@ -139,18 +138,18 @@ plStatus plDecalAssetDocumentManager::GenerateDecalTexture(const plPlatformProfi
       if (asset.m_pAssetInfo->GetManager() != this)
         continue;
 
-      PLASMA_LOG_BLOCK("Decal", asset.m_pAssetInfo->m_Path.GetDataDirParentRelativePath());
+      PLASMA_LOG_BLOCK("Decal", asset.m_pAssetInfo->m_sDataDirParentRelativePath);
 
       // does the document already exist and is it open ?
       bool bWasOpen = false;
-      plDocument* pDoc = GetDocumentByPath(asset.m_pAssetInfo->m_Path.GetAbsolutePath());
+      plDocument* pDoc = GetDocumentByPath(asset.m_pAssetInfo->m_sAbsolutePath);
       if (pDoc)
         bWasOpen = true;
       else
-        pDoc = pEditorApp->OpenDocument(asset.m_pAssetInfo->m_Path.GetAbsolutePath(), plDocumentFlags::None);
+        pDoc = pEditorApp->OpenDocument(asset.m_pAssetInfo->m_sAbsolutePath, plDocumentFlags::None);
 
       if (pDoc == nullptr)
-        return plStatus(plFmt("Could not open asset document '{0}'", asset.m_pAssetInfo->m_Path.GetDataDirParentRelativePath()));
+        return plStatus(plFmt("Could not open asset document '{0}'", asset.m_pAssetInfo->m_sDataDirParentRelativePath));
 
       plDecalAssetDocument* pDecalAsset = static_cast<plDecalAssetDocument*>(pDoc);
 

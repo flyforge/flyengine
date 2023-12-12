@@ -167,9 +167,9 @@ const char* plParticleEmitterFactory_Continuous::GetCountCurveFile() const
 
 void plParticleEmitter_Continuous::OnFinalize()
 {
-  m_CountCurveTime = plTime::MakeZero();
+  m_CountCurveTime.SetZero();
   m_fCurSpawnPerSec = (float)GetRNG().DoubleInRange(m_uiSpawnCountPerSec, m_uiSpawnCountPerSecRange);
-  m_TimeSinceRandom = plTime::MakeZero();
+  m_TimeSinceRandom.SetZero();
   m_fCurSpawnCounter = 0;
 }
 
@@ -194,7 +194,7 @@ plUInt32 plParticleEmitter_Continuous::ComputeSpawnCount(const plTime& tDiff)
 
   if (m_TimeSinceRandom >= plTime::Milliseconds(200))
   {
-    m_TimeSinceRandom = plTime::MakeZero();
+    m_TimeSinceRandom.SetZero();
     m_fCurSpawnPerSec = (float)GetRNG().DoubleInRange(m_uiSpawnCountPerSec, m_uiSpawnCountPerSecRange);
   }
 

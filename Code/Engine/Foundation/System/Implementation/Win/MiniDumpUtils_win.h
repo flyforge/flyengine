@@ -42,7 +42,7 @@ plMinWindows::HANDLE plMiniDumpUtils::GetProcessHandleWithNecessaryRights(plUInt
   return hProcess;
 }
 
-plStatus plMiniDumpUtils::WriteProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess, struct _EXCEPTION_POINTERS* pExceptionInfo)
+plStatus plMiniDumpUtils::WriteProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE pProcess, struct _EXCEPTION_POINTERS* pExceptionInfo)
 {
   HMODULE hDLL = ::LoadLibraryA("dbghelp.dll");
 
@@ -89,7 +89,7 @@ plStatus plMiniDumpUtils::WriteProcessMiniDump(plStringView sDumpFile, plUInt32 
   exceptionParam.ClientPointers = TRUE;
 
   if (MiniDumpWriteDumpFunc(
-        hProcess, uiProcessID, hFile, (MINIDUMP_TYPE)dumpType, pExceptionInfo != nullptr ? &exceptionParam : nullptr, nullptr, nullptr) == FALSE)
+        pProcess, uiProcessID, hFile, (MINIDUMP_TYPE)dumpType, pExceptionInfo != nullptr ? &exceptionParam : nullptr, nullptr, nullptr) == FALSE)
   {
     return plStatus(plFmt("Writing dump file failed: '{}'.", plArgErrorCode(GetLastError())));
   }
@@ -102,9 +102,9 @@ plStatus plMiniDumpUtils::WriteOwnProcessMiniDump(plStringView sDumpFile, struct
   return WriteProcessMiniDump(sDumpFile, GetCurrentProcessId(), GetCurrentProcess(), pExceptionInfo);
 }
 
-plStatus plMiniDumpUtils::WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess)
+plStatus plMiniDumpUtils::WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE pProcess)
 {
-  return WriteProcessMiniDump(sDumpFile, uiProcessID, hProcess, nullptr);
+  return WriteProcessMiniDump(sDumpFile, uiProcessID, pProcess, nullptr);
 }
 
 #endif

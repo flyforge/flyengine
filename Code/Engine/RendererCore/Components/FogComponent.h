@@ -6,7 +6,7 @@
 
 struct plMsgUpdateLocalBounds;
 
-using plFogComponentManager = plSettingsComponentManager<class plFogComponent>;
+typedef plSettingsComponentManager<class plFogComponent> plFogComponentManager;
 
 /// \brief The render data object for ambient light.
 class PLASMA_RENDERERCORE_DLL plFogRenderData : public plRenderData

@@ -15,7 +15,8 @@ plResult plConvexHullGenerator::ComputeCenterAndScale(const plArrayPtr<const plV
   if (vertices.IsEmpty())
     return PLASMA_FAILURE;
 
-  plBoundingBox box = plBoundingBox::MakeFromPoints(vertices.GetPtr(), vertices.GetCount());
+  plBoundingBox box;
+  box.SetFromPoints(vertices.GetPtr(), vertices.GetCount());
 
   const plVec3 c = box.GetCenter();
   m_vCenter.Set(c.x, c.y, c.z);

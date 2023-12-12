@@ -33,7 +33,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plHeightfieldComponent, 2, plComponentMode::Static)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering/Terrain"),
+    new plCategoryAttribute("Terrain"),
+    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -150,7 +151,7 @@ void plHeightfieldComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg)
 
     plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(GetOwner());
     {
-      //pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
+      pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
       pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
       pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
       pRenderData->m_hMesh = m_hMesh;

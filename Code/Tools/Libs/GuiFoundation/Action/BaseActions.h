@@ -19,10 +19,10 @@ public:
 
   const char* GetName() const { return m_sName; }
 
-  plStringView GetAdditionalDisplayString() { return m_sAdditionalDisplayString; }
-  void SetAdditionalDisplayString(plStringView sString, bool bTriggerUpdate = true)
+  const char* GetAdditionalDisplayString() { return m_sAdditionalDisplayString; }
+  void SetAdditionalDisplayString(const char* szString, bool bTriggerUpdate = true)
   {
-    m_sAdditionalDisplayString = sString;
+    m_sAdditionalDisplayString = szString;
     if (bTriggerUpdate)
       TriggerUpdate();
   }
@@ -81,7 +81,7 @@ public:
 
     struct ItemFlags
     {
-      using StorageType = plUInt8;
+      typedef plUInt8 StorageType;
 
       enum Enum
       {
@@ -107,7 +107,7 @@ public:
     : plMenuAction(context, szName, szIconPath)
   {
   }
-  virtual void GetEntries(plHybridArray<Item, 16>& out_entries) = 0;
+  virtual void GetEntries(plHybridArray<Item, 16>& out_Entries) = 0;
 };
 
 ///
@@ -147,7 +147,7 @@ class PLASMA_GUIFOUNDATION_DLL plEnumerationMenuAction : public plDynamicMenuAct
 public:
   plEnumerationMenuAction(const plActionContext& context, const char* szName, const char* szIconPath);
   void InitEnumerationType(const plRTTI* pEnumerationType);
-  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries) override;
+  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries) override;
   virtual plInt64 GetValue() const = 0;
 
 protected:
@@ -234,7 +234,7 @@ public:
   void SetRange(plInt32 iMin, plInt32 iMax, bool bTriggerUpdate = true);
 
   plInt32 GetValue() const { return m_iCurValue; }
-  void SetValue(plInt32 iVal, bool bTriggerUpdate = true);
+  void SetValue(plInt32 val, bool bTriggerUpdate = true);
 
 protected:
   bool m_bEnabled;

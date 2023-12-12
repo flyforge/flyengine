@@ -16,20 +16,36 @@ plTranslateGizmo::plTranslateGizmo()
   m_vStartPosition.SetZero();
   m_fCameraSpeed = 0.2f;
 
-  const plColor colr = plColorScheme::LightUI(plColorScheme::Red);
-  const plColor colg = plColorScheme::LightUI(plColorScheme::Green);
-  const plColor colb = plColorScheme::LightUI(plColorScheme::Blue);
+  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
+  m_bUseExperimentalGizmo = !pPreferences->m_bOldGizmos;
 
-  m_hAxisX.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colr, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/TranslateArrowX.obj");
-  m_hAxisY.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colg, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/TranslateArrowY.obj");
-  m_hAxisZ.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colb, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/TranslateArrowZ.obj");
+  if (m_bUseExperimentalGizmo)
+  {
+    const plColor colr = plColorScheme::LightUI(plColorScheme::Red);
+    const plColor colg = plColorScheme::LightUI(plColorScheme::Green);
+    const plColor colb = plColorScheme::LightUI(plColorScheme::Blue);
 
-  m_hPlaneYZ.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colr, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable | plGizmoFlags::FaceCamera, "Editor/Meshes/TranslatePlaneX.obj");
-  m_hPlaneXZ.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colg, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable | plGizmoFlags::FaceCamera, "Editor/Meshes/TranslatePlaneY.obj");
-  m_hPlaneXY.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colb, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable | plGizmoFlags::FaceCamera, "Editor/Meshes/TranslatePlaneZ.obj");
+    m_hAxisX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colr, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/TranslateArrowX.obj");
+    m_hAxisY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colg, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/TranslateArrowY.obj");
+    m_hAxisZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colb, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/TranslateArrowZ.obj");
+
+    m_hPlaneYZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colr, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable | plGizmoFlags::FaceCamera, "Editor/Meshes/TranslatePlaneX.obj");
+    m_hPlaneXZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colg, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable | plGizmoFlags::FaceCamera, "Editor/Meshes/TranslatePlaneY.obj");
+    m_hPlaneXY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colb, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable | plGizmoFlags::FaceCamera, "Editor/Meshes/TranslatePlaneZ.obj");
+  }
+  else
+  {
+    m_hAxisX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Arrow, plColorLinearUB(128, 0, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+    m_hAxisY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Arrow, plColorLinearUB(0, 128, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+    m_hAxisZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Arrow, plColorLinearUB(0, 0, 128), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+
+    m_hPlaneXY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Rect, plColorLinearUB(128, 128, 255), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+    m_hPlaneXZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Rect, plColorLinearUB(128, 255, 128), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+    m_hPlaneYZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Rect, plColorLinearUB(255, 128, 128), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+  }
 
   SetVisible(false);
-  SetTransformation(plTransform::MakeIdentity());
+  SetTransformation(plTransform::IdentityTransform());
 
   m_Mode = TranslateMode::None;
   m_MovementMode = MovementMode::ScreenProjection;
@@ -60,12 +76,38 @@ void plTranslateGizmo::OnVisibleChanged(bool bVisible)
 
 void plTranslateGizmo::OnTransformationChanged(const plTransform& transform)
 {
-  m_hAxisX.SetTransformation(transform);
-  m_hAxisY.SetTransformation(transform);
-  m_hAxisZ.SetTransformation(transform);
-  m_hPlaneXY.SetTransformation(transform);
-  m_hPlaneYZ.SetTransformation(transform);
-  m_hPlaneXZ.SetTransformation(transform);
+  if (m_bUseExperimentalGizmo)
+  {
+    m_hAxisX.SetTransformation(transform);
+    m_hAxisY.SetTransformation(transform);
+    m_hAxisZ.SetTransformation(transform);
+    m_hPlaneXY.SetTransformation(transform);
+    m_hPlaneYZ.SetTransformation(transform);
+    m_hPlaneXZ.SetTransformation(transform);
+  }
+  else
+  {
+    plTransform m;
+    m.SetIdentity();
+
+    m.m_vScale.Set(2.0f);
+    m_hAxisX.SetTransformation(transform * m);
+
+    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
+    m_hAxisY.SetTransformation(transform * m);
+
+    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
+    m_hAxisZ.SetTransformation(transform * m);
+
+    m.SetIdentity();
+    m_hPlaneXY.SetTransformation(transform * m);
+
+    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
+    m_hPlaneYZ.SetTransformation(transform * m);
+
+    m.m_qRotation.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Degree(90));
+    m_hPlaneXZ.SetTransformation(transform * m);
+  }
 
   if (!IsActiveInputContext())
   {
@@ -102,13 +144,13 @@ void plTranslateGizmo::DoFocusLost(bool bCancel)
   GetOwnerWindow()->SetPermanentStatusBarMsg("");
 }
 
-plEditorInput plTranslateGizmo::DoMousePressEvent(QMouseEvent* e)
+PlasmaEditorInput plTranslateGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   m_vLastMoveDiff.SetZero();
 
@@ -154,7 +196,7 @@ plEditorInput plTranslateGizmo::DoMousePressEvent(QMouseEvent* e)
     m_LastPlaneInteraction = PlaneInteraction::PlaneX;
   }
   else
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -172,7 +214,7 @@ plEditorInput plTranslateGizmo::DoMousePressEvent(QMouseEvent* e)
 
   m_LastInteraction = plTime::Now();
 
-  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::WrapAtScreenBorders);
+  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::WrapAtScreenBorders);
   SetActiveInputContext(this);
 
   if (m_Mode == TranslateMode::Axis)
@@ -191,21 +233,21 @@ plEditorInput plTranslateGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plTranslateGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+PlasmaEditorInput plTranslateGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
 plResult plTranslateGizmo::GetPointOnPlane(plInt32 iScreenPosX, plInt32 iScreenPosY, plVec3& out_Result) const
@@ -217,7 +259,7 @@ plResult plTranslateGizmo::GetPointOnPlane(plInt32 iScreenPosX, plInt32 iScreenP
     return PLASMA_FAILURE;
 
   plPlane Plane;
-  Plane = plPlane::MakeFromNormalAndPoint(m_vMoveAxis, m_vStartPosition);
+  Plane.SetFromNormalAndPoint(m_vMoveAxis, m_vStartPosition);
 
   plVec3 vIntersection;
   if (!Plane.GetRayIntersection(m_pCamera->GetPosition(), vRayDir, nullptr, &vIntersection))
@@ -239,7 +281,7 @@ plResult plTranslateGizmo::GetPointOnAxis(plInt32 iScreenPosX, plInt32 iScreenPo
   const plVec3 vPlaneNormal = m_vMoveAxis.CrossRH(vPlaneTangent);
 
   plPlane Plane;
-  Plane = plPlane::MakeFromNormalAndPoint(vPlaneNormal, m_vStartPosition);
+  Plane.SetFromNormalAndPoint(vPlaneNormal, m_vStartPosition);
 
   plVec3 vIntersection;
   if (!Plane.GetRayIntersection(m_pCamera->GetPosition(), vRayDir, nullptr, &vIntersection))
@@ -252,19 +294,17 @@ plResult plTranslateGizmo::GetPointOnAxis(plInt32 iScreenPosX, plInt32 iScreenPo
   return PLASMA_SUCCESS;
 }
 
-plEditorInput plTranslateGizmo::DoMouseMoveEvent(QMouseEvent* e)
+PlasmaEditorInput plTranslateGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
-    return plEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
-  const QPoint mousePosition = e->globalPosition().toPoint();
-
-  const plVec2I32 CurMousePos(mousePosition.x(), mousePosition.y());
+  const plVec2I32 CurMousePos(e->globalX(), e->globalY());
 
   m_LastInteraction = tNow;
 
@@ -280,7 +320,7 @@ plEditorInput plTranslateGizmo::DoMouseMoveEvent(QMouseEvent* e)
       if (GetPointOnAxis(e->pos().x(), m_vViewport.y - e->pos().y(), vCurrentInteractionPoint).Failed())
       {
         m_vLastMousePos = UpdateMouseMode(e);
-        return plEditorInput::WasExclusivelyHandled;
+        return PlasmaEditorInput::WasExclusivelyHandled;
       }
     }
     else if (m_Mode == TranslateMode::Plane)
@@ -288,7 +328,7 @@ plEditorInput plTranslateGizmo::DoMouseMoveEvent(QMouseEvent* e)
       if (GetPointOnPlane(e->pos().x(), m_vViewport.y - e->pos().y(), vCurrentInteractionPoint).Failed())
       {
         m_vLastMousePos = UpdateMouseMode(e);
-        return plEditorInput::WasExclusivelyHandled;
+        return PlasmaEditorInput::WasExclusivelyHandled;
       }
     }
 
@@ -335,7 +375,7 @@ plEditorInput plTranslateGizmo::DoMouseMoveEvent(QMouseEvent* e)
 
   // set statusbar message
   {
-    const plVec3 diff = GetTransformation().m_qRotation.GetInverse() * GetTranslationResult();
+    const plVec3 diff = -GetTransformation().m_qRotation * GetTranslationResult();
     GetOwnerWindow()->SetPermanentStatusBarMsg(plFmt("Translation: {}, {}, {}", plArgF(diff.x, 2), plArgF(diff.y, 2), plArgF(diff.z, 2)));
   }
 
@@ -347,7 +387,7 @@ plEditorInput plTranslateGizmo::DoMouseMoveEvent(QMouseEvent* e)
     m_GizmoEvents.Broadcast(ev);
   }
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
 void plTranslateGizmo::SetMovementMode(MovementMode mode)
@@ -359,11 +399,11 @@ void plTranslateGizmo::SetMovementMode(MovementMode mode)
 
   if (m_MovementMode == MovementMode::MouseDiff)
   {
-    m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+    m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
   }
   else
   {
-    m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::WrapAtScreenBorders);
+    m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::WrapAtScreenBorders);
   }
 }
 
@@ -374,6 +414,6 @@ void plTranslateGizmo::SetCameraSpeed(float fSpeed)
 
 void plTranslateGizmo::UpdateStatusBarText(plQtEngineDocumentWindow* pWindow)
 {
-  const plVec3 diff = plVec3::MakeZero();
+  const plVec3 diff = plVec3::ZeroVector();
   GetOwnerWindow()->SetPermanentStatusBarMsg(plFmt("Translation: {}, {}, {}", plArgF(diff.x, 2), plArgF(diff.y, 2), plArgF(diff.z, 2)));
 }

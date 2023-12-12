@@ -295,7 +295,7 @@ bool plTypeScriptBinding::DukPushStashObject(duk_context* pDuk, plUInt32 uiStash
   }
 }
 
-void plTypeScriptBinding::SyncTsObjectPlasmaTsObject(duk_context* pDuk, const plRTTI* pRtti, void* pObject, plInt32 iObjIdx)
+void plTypeScriptBinding::SyncTsObjectEzTsObject(duk_context* pDuk, const plRTTI* pRtti, void* pObject, plInt32 iObjIdx)
 {
   plHybridArray<const plAbstractProperty*, 32> properties;
   pRtti->GetAllProperties(properties);
@@ -316,7 +316,7 @@ void plTypeScriptBinding::SyncTsObjectPlasmaTsObject(duk_context* pDuk, const pl
   }
 }
 
-void plTypeScriptBinding::SyncPlasmaObjectToTsObject(duk_context* pDuk, const plRTTI* pRtti, const void* pObject, plInt32 iObjIdx)
+void plTypeScriptBinding::SyncEzObjectToTsObject(duk_context* pDuk, const plRTTI* pRtti, const void* pObject, plInt32 iObjIdx)
 {
   plDuktapeHelper duk(pDuk);
 
@@ -456,7 +456,7 @@ void plTypeScriptBinding::GenerateConstructorString(plStringBuilder& out_String,
     case plVariant::Type::Quaternion:
     {
       const plQuat q = value.Get<plQuat>();
-      out_String.Format("new Quat({}, {}, {}, {})", q.x, q.y, q.z, q.w);
+      out_String.Format("new Quat({}, {}, {}, {})", q.v.x, q.v.y, q.v.z, q.w);
       break;
     }
 

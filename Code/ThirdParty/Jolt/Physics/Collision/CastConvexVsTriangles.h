@@ -10,7 +10,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Collision detection helper that casts a convex object vs one or more triangles
-class JPH_EXPORT CastConvexVsTriangles
+class CastConvexVsTriangles
 {
 public:
 	/// Constructor

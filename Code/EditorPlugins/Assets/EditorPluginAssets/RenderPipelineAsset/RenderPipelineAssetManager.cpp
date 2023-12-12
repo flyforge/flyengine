@@ -14,7 +14,6 @@ plRenderPipelineAssetManager::plRenderPipelineAssetManager()
   m_DocTypeDesc.m_sDocumentTypeName = "RenderPipeline";
   m_DocTypeDesc.m_sFileExtension = "plRenderPipelineAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/RenderPipeline.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plRenderPipelineAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_RenderPipeline");
@@ -38,7 +37,7 @@ void plRenderPipelineAssetManager::OnDocumentManagerEvent(const plDocumentManage
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plRenderPipelineAssetDocument>())
       {
-        new plQtRenderPipelineAssetDocumentWindow(e.m_pDocument); // NOLINT: Not a memory leak
+        plQtRenderPipelineAssetDocumentWindow* pDocWnd = new plQtRenderPipelineAssetDocumentWindow(e.m_pDocument);
       }
     }
     break;
@@ -49,9 +48,9 @@ void plRenderPipelineAssetManager::OnDocumentManagerEvent(const plDocumentManage
 }
 
 void plRenderPipelineAssetManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plRenderPipelineAssetDocument(sPath);
+  out_pDocument = new plRenderPipelineAssetDocument(szPath);
 }
 
 void plRenderPipelineAssetManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

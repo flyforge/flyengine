@@ -13,7 +13,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(DemoComponent, 3 /* version */, plComponentMode::Dyn
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("Amplitude", m_fAmplitude)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(0, 10)),
-    PLASMA_MEMBER_PROPERTY("Speed", m_Speed)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(90))),
+    PLASMA_MEMBER_PROPERTY("Speed", m_Speed)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(90))),
   }
   PLASMA_END_PROPERTIES;
 
@@ -77,7 +77,7 @@ void DemoComponent::DeserializeComponent(plWorldReader& stream)
     // convert this to plAngle
     float fDegree;
     s >> fDegree;
-    m_Speed = plAngle::MakeFromDegree(fDegree);
+    m_Speed = plAngle::Degree(fDegree);
   }
   else
   {

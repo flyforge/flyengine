@@ -87,7 +87,7 @@ plStatus plExposedParameterCommandAccessor::GetCount(const plDocumentObject* pOb
   if (m_pParameterProp == pProp)
   {
     plHybridArray<plVariant, 16> keys;
-    GetKeys(pObject, pProp, keys).AssertSuccess();
+    GetKeys(pObject, pProp, keys).IgnoreResult();
     out_iCount = keys.GetCount();
     return plStatus(PLASMA_SUCCESS);
   }
@@ -127,7 +127,7 @@ plStatus plExposedParameterCommandAccessor::GetValues(
   if (m_pParameterProp == pProp)
   {
     plHybridArray<plVariant, 16> keys;
-    GetKeys(pObject, pProp, keys).AssertSuccess();
+    GetKeys(pObject, pProp, keys).IgnoreResult();
     for (const auto& key : keys)
     {
       auto& var = out_values.ExpandAndGetRef();
@@ -212,7 +212,7 @@ bool plExposedParameterCommandAccessor::IsExposedProperty(const plDocumentObject
   if (auto type = GetExposedParamsType(pObject))
   {
     auto props = type->GetProperties();
-    return std::any_of(cbegin(props), cend(props), [&](const plAbstractProperty* pOtherProp) { return pOtherProp == pProp; });
+    return std::any_of(cbegin(props), cend(props), [pProp](const plAbstractProperty* prop) { return prop == pProp; });
   }
   return false;
 }
@@ -222,6 +222,7 @@ bool plExposedParameterCommandAccessor::IsExposedProperty(const plDocumentObject
 void plQtExposedParameterPropertyWidget::InternalSetValue(const plVariant& value)
 {
   plVariantType::Enum commonType = plVariantType::Invalid;
+  const bool sameType = GetCommonVariantSubType(m_Items, m_pProp, commonType);
   const plRTTI* pNewtSubType = commonType != plVariantType::Invalid ? plReflectionUtils::GetTypeFromVariant(commonType) : nullptr;
 
   plExposedParameterCommandAccessor* proxy = static_cast<plExposedParameterCommandAccessor*>(m_pObjectAccessor);
@@ -249,7 +250,6 @@ void plQtExposedParameterPropertyWidget::InternalSetValue(const plVariant& value
           m_pWidget->setParent(this);
           m_pLayout->addWidget(m_pWidget);
           m_pWidget->Init(m_pGrid, m_pObjectAccessor, type, prop);
-
           UpdateTypeListSelection(commonType);
         }
         m_pWidget->SetSelection(m_Items);
@@ -262,7 +262,7 @@ void plQtExposedParameterPropertyWidget::InternalSetValue(const plVariant& value
 
 //////////////////////////////////////////////////////////////////////////
 
-plQtExposedParametersPropertyWidget::plQtExposedParametersPropertyWidget() = default;
+plQtExposedParametersPropertyWidget::plQtExposedParametersPropertyWidget() {}
 
 plQtExposedParametersPropertyWidget::~plQtExposedParametersPropertyWidget()
 {
@@ -307,11 +307,11 @@ void plQtExposedParametersPropertyWidget::OnInit()
       m_pRemoveUnusedAction = pFixMeMenu->addAction(QStringLiteral("Remove unused keys"));
       m_pRemoveUnusedAction->setToolTip(
         QStringLiteral("The map contains keys that are no longer used by the asset's exposed parameters and thus can be removed."));
-      connect(m_pRemoveUnusedAction, &QAction::triggered, this, [this](bool bChecked) { RemoveUnusedKeys(false); });
+      connect(m_pRemoveUnusedAction, &QAction::triggered, this, [this](bool checked) { RemoveUnusedKeys(false); });
     }
     {
       m_pFixTypesAction = pFixMeMenu->addAction(QStringLiteral("Fix keys with wrong types"));
-      connect(m_pFixTypesAction, &QAction::triggered, this, [this](bool bChecked) { FixKeyTypes(false); });
+      connect(m_pFixTypesAction, &QAction::triggered, this, [this](bool checked) { FixKeyTypes(false); });
     }
     m_pFixMeButton->setMenu(pFixMeMenu);
 

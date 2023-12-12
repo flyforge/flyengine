@@ -2,7 +2,6 @@
 
 #include <Foundation/Strings/Implementation/StringIterator.h>
 
-#include <string_view>
 #include <type_traits>
 
 /// Base class which marks a class as containing string data
@@ -41,10 +40,6 @@ public:
   template <typename T>                                                                                           // T is always const char*
   constexpr plStringView(T pStart, typename std::enable_if<std::is_same<T, const char*>::value, int>::type* = 0); // [tested]
 
-  /// \brief Creates a string view starting at the given position, ending at the next '\0' terminator.
-  template <typename T>                                                                                           // T is always const char*
-  constexpr plStringView(T pStart, typename std::enable_if<std::is_same<T, const char8_t*>::value, int>::type* = 0); // [tested]
-
   /// \brief Creates a string view from any class / struct which is implicitly convertible to const char *
   template <typename T>
   PLASMA_ALWAYS_INLINE plStringView(const T&& str, typename std::enable_if<std::is_same<T, const char*>::value == false && std::is_convertible<T, const char*>::value, int>::type* = 0); // [tested]
@@ -62,12 +57,6 @@ public:
   /// \brief Construct a string view from a fixed size buffer
   template <size_t N>
   plStringView(char (&str)[N]);
-
-  /// \brief Makes the plStringView reference the same memory as the const std::string_view&.
-  plStringView(const std::string_view& rhs);
-
-  /// \brief Makes the plStringView reference the same memory as the const std::string_view&.
-  plStringView(const std::string& rhs);
 
   /// \brief Advances the start to the next character, unless the end of the range was reached.
   void operator++(); // [tested]
@@ -277,12 +266,6 @@ public:
   /// ":/MyRoot\folder" -> "MyRoot"
   /// Returns an empty string, if the path is not rooted.
   plStringView GetRootedPathRootName() const; // [tested]
-
-  /// \brief Returns a std::string_view to this string.
-  operator std::string_view() const;
-
-  /// \brief Returns a std::string_view to this string.
-  std::string_view GetAsStdView() const;
 
 private:
   const char* m_pStart = nullptr;

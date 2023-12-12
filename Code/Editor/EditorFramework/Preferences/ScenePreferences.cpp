@@ -29,9 +29,9 @@ void plScenePreferencesUser::SetCameraSpeed(plInt32 value)
   TriggerPreferencesChangedEvent();
 }
 
-void plScenePreferencesUser::SetShowGrid(bool bShow)
+void plScenePreferencesUser::SetShowGrid(bool show)
 {
-  m_bShowGrid = bShow;
+  m_bShowGrid = show;
 
   TriggerPreferencesChangedEvent();
 }

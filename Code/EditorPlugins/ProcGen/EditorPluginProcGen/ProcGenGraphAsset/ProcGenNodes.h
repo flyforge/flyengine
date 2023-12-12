@@ -61,7 +61,7 @@ public:
   plVec3 m_vMinOffset = plVec3(0);
   plVec3 m_vMaxOffset = plVec3(0);
 
-  plAngle m_YawRotationSnap = plAngle::MakeFromRadian(0.0f);
+  plAngle m_YawRotationSnap = plAngle::Radian(0.0f);
   float m_fAlignToNormal = 1.0f;
 
   plVec3 m_vMinScale = plVec3(1);
@@ -76,7 +76,6 @@ public:
   plString m_sColorGradient;
 
   plEnum<plProcPlacementMode> m_PlacementMode;
-  plEnum<plProcPlacementPattern> m_PlacementPattern;
 
   plRenderPipelineNodeInputPin m_DensityPin;
   plRenderPipelineNodeInputPin m_ScalePin;
@@ -133,7 +132,7 @@ public:
   virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
 
   plVec3 m_Scale = plVec3(10);
-  plVec3 m_Offset = plVec3::MakeZero();
+  plVec3 m_Offset = plVec3::ZeroVector();
   plUInt32 m_uiNumOctaves = 3;
 
   float m_fOutputMin = 0.0f;
@@ -187,8 +186,8 @@ class plProcGen_Slope : public plProcGenNodeBase
 public:
   virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
 
-  plAngle m_MinSlope = plAngle::MakeFromDegree(0.0f);
-  plAngle m_MaxSlope = plAngle::MakeFromDegree(30.0f);
+  plAngle m_MinSlope = plAngle::Degree(0.0f);
+  plAngle m_MaxSlope = plAngle::Degree(30.0f);
   float m_fLowerFade = 0.0f;
   float m_fUpperFade = 0.2f;
 

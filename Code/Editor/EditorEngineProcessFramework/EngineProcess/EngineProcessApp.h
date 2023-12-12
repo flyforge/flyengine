@@ -11,7 +11,7 @@ class plActor;
 
 using plRenderPipelineResourceHandle = plTypedResourceHandle<class plRenderPipelineResource>;
 
-enum class plEditorEngineProcessMode
+enum class PlasmaEditorEngineProcessMode
 {
   Primary,
   Remote,
@@ -22,20 +22,20 @@ class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plRemoteProcessWindow : public plW
 public:
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEditorEngineProcessApp
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEditorEngineProcessApp
 {
-  PLASMA_DECLARE_SINGLETON(plEditorEngineProcessApp);
+  PLASMA_DECLARE_SINGLETON(PlasmaEditorEngineProcessApp);
 
 public:
-  plEditorEngineProcessApp();
-  ~plEditorEngineProcessApp();
+  PlasmaEditorEngineProcessApp();
+  ~PlasmaEditorEngineProcessApp();
 
   void SetRemoteMode();
 
-  bool IsRemoteMode() const { return m_Mode == plEditorEngineProcessMode::Remote; }
+  bool IsRemoteMode() const { return m_Mode == PlasmaEditorEngineProcessMode::Remote; }
 
   virtual plViewHandle CreateRemoteWindowAndView(plCamera* pCamera);
-  void DestroyRemoteWindow();
+  virtual void DestroyRemoteWindow();
 
   virtual plRenderPipelineResourceHandle CreateDefaultMainRenderPipeline();
   virtual plRenderPipelineResourceHandle CreateDefaultDebugRenderPipeline();
@@ -43,7 +43,7 @@ public:
 protected:
   virtual void CreateRemoteWindow();
 
-  plEditorEngineProcessMode m_Mode = plEditorEngineProcessMode::Primary;
+  PlasmaEditorEngineProcessMode m_Mode = PlasmaEditorEngineProcessMode::Primary;
 
   plActor* m_pActor = nullptr;
   plViewHandle m_hRemoteView;

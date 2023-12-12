@@ -34,6 +34,12 @@ plSizeU32 plWindowXR::GetClientAreaSize() const
   return m_pVrInterface->GetHmdInfo().m_vEyeRenderTargetSize;
 }
 
+plSizeU32 plWindowXR::GetRenderAreaSize() const
+{
+  // In XR mode, the render area should be the size of the eye render target.
+  return GetClientAreaSize();
+}
+
 plWindowHandle plWindowXR::GetNativeWindowHandle() const
 {
   if (m_pCompanionWindow)

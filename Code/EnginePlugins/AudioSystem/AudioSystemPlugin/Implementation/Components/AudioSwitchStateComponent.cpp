@@ -101,7 +101,7 @@ void plAudioSwitchStateComponent::SetState(const plString& sSwitchStateName, boo
     msg.m_sSwitchState = sSwitchStateName;
 
     // We are not in the writing thread, so posting the message for the next frame instead of sending it now...
-    m_ValueChangedEventSender.PostEventMessage(msg, this, GetOwner(), plTime::MakeZero(), plObjectMsgQueueType::NextFrame);
+    m_ValueChangedEventSender.PostEventMessage(msg, this, GetOwner(), plTime::Zero(), plObjectMsgQueueType::NextFrame);
   };
 
   if (bSync)

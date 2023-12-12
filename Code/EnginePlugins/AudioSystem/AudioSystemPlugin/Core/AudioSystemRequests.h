@@ -16,6 +16,7 @@
 
 /// \brief Helper macro to declare a new audio system request.
 #define PLASMA_DECLARE_AUDIOSYSTEM_REQUEST_TYPE_SIMPLE(name)                                      \
+  PLASMA_DECLARE_POD_TYPE();                                                                      \
   bool operator==(const name& rhs) const                                                          \
   {                                                                                               \
     return static_cast<plAudioSystemRequest>(*this) == static_cast<plAudioSystemRequest>(rhs);    \
@@ -29,6 +30,7 @@
 
 /// \brief Helper macro to declare a new audio system request.
 #define PLASMA_DECLARE_AUDIOSYSTEM_REQUEST_TYPE(name, eq_ex)                                                  \
+  PLASMA_DECLARE_POD_TYPE();                                                                                  \
   bool operator==(const name& rhs) const                                                                      \
   {                                                                                                           \
     return static_cast<plAudioSystemRequest>(*this) == static_cast<plAudioSystemRequest>(rhs) && (eq_ex);     \
@@ -125,6 +127,8 @@
 /// This will block the main thread until the request has been processed.
 struct PLASMA_AUDIOSYSTEMPLUGIN_DLL plAudioSystemRequest
 {
+  PLASMA_DECLARE_POD_TYPE();
+
   /// \brief The audio entity which is being manipulated, if any.
   plAudioSystemDataID m_uiEntityId{0};
 

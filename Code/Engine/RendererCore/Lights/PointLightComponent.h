@@ -4,7 +4,7 @@
 #include <RendererCore/Pipeline/Declarations.h>
 #include <RendererCore/Textures/TextureCubeResource.h>
 
-using plPointLightComponentManager = plComponentManager<class plPointLightComponent, plBlockStorageType::Compact>;
+typedef plComponentManager<class plPointLightComponent, plBlockStorageType::Compact> plPointLightComponentManager;
 
 /// \brief The render data object for point lights.
 class PLASMA_RENDERERCORE_DLL plPointLightRenderData : public plLightRenderData
@@ -13,6 +13,9 @@ class PLASMA_RENDERERCORE_DLL plPointLightRenderData : public plLightRenderData
 
 public:
   float m_fRange;
+  float m_fFalloff;
+  float m_fSize;
+  float m_fLength;
   plTextureCubeResourceHandle m_hProjectedTexture;
 };
 
@@ -47,7 +50,14 @@ public:
   void SetRange(float fRange); // [ property ]
   float GetRange() const;      // [ property ]
 
-  float GetEffectiveRange() const;
+  void SetFalloff(float fFalloff); // [ property ]
+  float GetFalloff() const;      // [ property ]
+
+  void SetSize(float fSize); // [ property ]
+  float GetSize() const;      // [ property ]
+
+  void SetLength(float fLength); // [ property ]
+  float GetLength() const;      // [ property ]
 
   void SetProjectedTextureFile(const char* szFile); // [ property ]
   const char* GetProjectedTextureFile() const;      // [ property ]
@@ -59,7 +69,9 @@ protected:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
 
   float m_fRange = 0.0f;
-  float m_fEffectiveRange = 0.0f;
+  float m_fFalloff = 1.0f;
+  float m_fSize = 0;
+  float m_fLength = 0;
 
   plTextureCubeResourceHandle m_hProjectedTexture;
 };

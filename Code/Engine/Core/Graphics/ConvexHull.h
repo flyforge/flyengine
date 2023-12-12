@@ -90,8 +90,8 @@ private:
   };
 
   // used for mesh simplification
-  plAngle m_MinTriangleAngle = plAngle::MakeFromDegree(22.0f);
-  plAngle m_FlatVertexNormalThreshold = plAngle::MakeFromDegree(5);
+  plAngle m_MinTriangleAngle = plAngle::Degree(22.0f);
+  plAngle m_FlatVertexNormalThreshold = plAngle::Degree(5);
   double m_fMinTriangleEdgeLength = 0.05;
 
   plVec3d m_vCenter;

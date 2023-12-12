@@ -22,6 +22,8 @@ private:
   friend class plMessageLoop;
   friend class plMessageLoop_linux;
 
+  virtual void AddToMessageLoop(plMessageLoop* pMsgLoop) override;
+
   // All functions from here on down are run from worker thread only
   virtual void InternalConnect() override;
   virtual void InternalDisconnect() override;
@@ -40,6 +42,8 @@ private:
   int m_clientSocketFd = -1;
 
   plUInt8 m_InputBuffer[4096];
+  plAtomicBool m_Connecting = false;
+
   plUInt64 m_previousSendOffset = 0;
 };
 #endif

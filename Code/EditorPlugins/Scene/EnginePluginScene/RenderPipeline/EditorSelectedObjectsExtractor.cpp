@@ -8,7 +8,7 @@
 #include <RendererFoundation/Device/SwapChain.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorSelectedObjectsExtractor, 1, plRTTIDefaultAllocator<plEditorSelectedObjectsExtractor>)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorSelectedObjectsExtractor, 1, plRTTIDefaultAllocator<PlasmaEditorSelectedObjectsExtractor>)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -19,17 +19,17 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorSelectedObjectsExtractor, 1, plRTTID
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plEditorSelectedObjectsExtractor::plEditorSelectedObjectsExtractor()
+PlasmaEditorSelectedObjectsExtractor::PlasmaEditorSelectedObjectsExtractor()
 {
   m_pSceneContext = nullptr;
 }
 
-plEditorSelectedObjectsExtractor::~plEditorSelectedObjectsExtractor()
+PlasmaEditorSelectedObjectsExtractor::~PlasmaEditorSelectedObjectsExtractor()
 {
   plRenderWorld::DeleteView(m_hRenderTargetView);
 }
 
-const plDeque<plGameObjectHandle>* plEditorSelectedObjectsExtractor::GetSelection()
+const plDeque<plGameObjectHandle>* PlasmaEditorSelectedObjectsExtractor::GetSelection()
 {
   if (m_pSceneContext == nullptr)
     return nullptr;
@@ -37,7 +37,7 @@ const plDeque<plGameObjectHandle>* plEditorSelectedObjectsExtractor::GetSelectio
   return &m_pSceneContext->GetSelectionWithChildren();
 }
 
-void plEditorSelectedObjectsExtractor::Extract(
+void PlasmaEditorSelectedObjectsExtractor::Extract(
   const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData)
 {
   const bool bShowCameraOverlays = view.GetCameraUsageHint() == plCameraUsageHint::EditorView;
@@ -84,7 +84,7 @@ void plEditorSelectedObjectsExtractor::Extract(
   plSelectedObjectsExtractorBase::Extract(view, visibleObjects, extractedRenderData);
 }
 
-void plEditorSelectedObjectsExtractor::CreateRenderTargetTexture(const plView& view)
+void PlasmaEditorSelectedObjectsExtractor::CreateRenderTargetTexture(const plView& view)
 {
   if (m_hRenderTarget.IsValid())
     return;
@@ -107,7 +107,7 @@ void plEditorSelectedObjectsExtractor::CreateRenderTargetTexture(const plView& v
   CreateRenderTargetView(view);
 }
 
-void plEditorSelectedObjectsExtractor::CreateRenderTargetView(const plView& view)
+void PlasmaEditorSelectedObjectsExtractor::CreateRenderTargetView(const plView& view)
 {
   PLASMA_ASSERT_DEV(m_hRenderTargetView.IsInvalidated(), "Render target view is already created");
 
@@ -138,7 +138,7 @@ void plEditorSelectedObjectsExtractor::CreateRenderTargetView(const plView& view
   pRenderTargetView->SetViewport(plRectFloat(0, 0, resX, resY));
 }
 
-void plEditorSelectedObjectsExtractor::UpdateRenderTargetCamera(const plCameraComponent* pCamComp)
+void PlasmaEditorSelectedObjectsExtractor::UpdateRenderTargetCamera(const plCameraComponent* pCamComp)
 {
   float fFarPlane = plMath::Max(pCamComp->GetNearPlane() + 0.00001f, pCamComp->GetFarPlane());
   switch (pCamComp->GetCameraMode())
@@ -187,5 +187,5 @@ void plEditorSelectedObjectsExtractor::UpdateRenderTargetCamera(const plCameraCo
   m_RenderTargetCamera.SetExposure(pCamComp->GetExposure());
   m_RenderTargetCamera.SetAperture(pCamComp->GetAperture());
   m_RenderTargetCamera.SetISO(pCamComp->GetISO());
-  //m_RenderTargetCamera.SetFocusDistance(pCamComp->GetFocusDistance());
+  m_RenderTargetCamera.SetFocusDistance(pCamComp->GetFocusDistance());
 }

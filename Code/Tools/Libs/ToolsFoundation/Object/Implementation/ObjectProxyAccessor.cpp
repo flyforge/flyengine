@@ -8,11 +8,11 @@ plObjectProxyAccessor::plObjectProxyAccessor(plObjectAccessorBase* pSource)
 {
 }
 
-plObjectProxyAccessor::~plObjectProxyAccessor() = default;
+plObjectProxyAccessor::~plObjectProxyAccessor() {}
 
-void plObjectProxyAccessor::StartTransaction(plStringView sDisplayString)
+void plObjectProxyAccessor::StartTransaction(const char* szDisplayString)
 {
-  m_pSource->StartTransaction(sDisplayString);
+  m_pSource->StartTransaction(szDisplayString);
 }
 
 void plObjectProxyAccessor::CancelTransaction()
@@ -25,9 +25,9 @@ void plObjectProxyAccessor::FinishTransaction()
   m_pSource->FinishTransaction();
 }
 
-void plObjectProxyAccessor::BeginTemporaryCommands(plStringView sDisplayString, bool bFireEventsWhenUndoingTempCommands /*= false*/)
+void plObjectProxyAccessor::BeginTemporaryCommands(const char* szDisplayString, bool bFireEventsWhenUndoingTempCommands /*= false*/)
 {
-  m_pSource->BeginTemporaryCommands(sDisplayString, bFireEventsWhenUndoingTempCommands);
+  m_pSource->BeginTemporaryCommands(szDisplayString, bFireEventsWhenUndoingTempCommands);
 }
 
 void plObjectProxyAccessor::CancelTemporaryCommands()

@@ -156,15 +156,17 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 ////////////////////////////////////////////////////////////////////////
 
 plAddObjectCommand::plAddObjectCommand()
-
-  = default;
+  : m_pType(nullptr)
+  , m_pObject(nullptr)
+{
+}
 
 plStringView plAddObjectCommand::GetType() const
 {
-  if (m_pType == nullptr)
-    return {};
+if (m_pType == nullptr)
+  return {};
 
-  return m_pType->GetTypeName();
+return m_pType->GetTypeName();
 }
 
 void plAddObjectCommand::SetType(plStringView sType)
@@ -179,7 +181,7 @@ plStatus plAddObjectCommand::DoInternal(bool bRedo)
   if (!bRedo)
   {
     if (!m_NewObjectGuid.IsValid())
-      m_NewObjectGuid = plUuid::MakeUuid();
+      m_NewObjectGuid.CreateNewUuid();
   }
 
   plDocumentObject* pParent = nullptr;
@@ -226,7 +228,7 @@ void plAddObjectCommand::CleanupInternal(CommandState state)
 // plPasteObjectsCommand
 ////////////////////////////////////////////////////////////////////////
 
-plPasteObjectsCommand::plPasteObjectsCommand() = default;
+plPasteObjectsCommand::plPasteObjectsCommand() {}
 
 plStatus plPasteObjectsCommand::DoInternal(bool bRedo)
 {
@@ -251,7 +253,9 @@ plStatus plPasteObjectsCommand::DoInternal(bool bRedo)
     }
 
     // Remap
-    graph.ReMapNodeGuids(plUuid::MakeUuid());
+    plUuid seed;
+    seed.CreateNewUuid();
+    graph.ReMapNodeGuids(seed);
 
     plDocumentObjectConverterReader reader(&graph, pDocument->GetObjectManager(), plDocumentObjectConverterReader::Mode::CreateOnly);
 
@@ -273,7 +277,8 @@ plStatus plPasteObjectsCommand::DoInternal(bool bRedo)
       {
         return pOrderA->m_Value.ConvertTo<plUInt32>() < pOrderB->m_Value.ConvertTo<plUInt32>();
       }
-      return a < b; });
+      return a < b;
+    });
 
     plHybridArray<plDocument::PasteInfo, 16> ToBePasted;
     for (plAbstractObjectNode* pNode : RootNodes)
@@ -375,7 +380,7 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
   {
     // TODO: this is hard-coded, it only works for scene documents !
     const plRTTI* pRootObjectType = plRTTI::FindTypeByName("plGameObject");
-    plStringView sParentProperty = "Children"_plsv;
+    const char* szParentProperty = "Children";
 
     plDocumentObject* pRootObject = nullptr;
     plHybridArray<plDocument::PasteInfo, 16> ToBePasted;
@@ -383,7 +388,7 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
 
     // create root object
     {
-      PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanAdd(pRootObjectType, pParent, sParentProperty, m_Index));
+      PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanAdd(pRootObjectType, pParent, szParentProperty, m_Index));
 
       // use the same GUID for the root object ID as the remap GUID, this way the object ID is deterministic and reproducible
       m_CreatedRootObject = m_RemapGuid;
@@ -414,7 +419,7 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
       }
     }
 
-    if (pDocument->Paste(ToBePasted, graph, m_bAllowPickedPosition, "application/plEditor.plAbstractGraph"))
+    if (pDocument->Paste(ToBePasted, graph, m_bAllowPickedPosition, "application/PlasmaEditor.plAbstractGraph"))
     {
       for (const auto& item : ToBePasted)
       {
@@ -458,7 +463,7 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
         reader.ApplyPropertiesToObject(pPrefabRoot, pNewObject);
 
         // attach all prefab nodes to the main group node
-        pDocument->GetObjectManager()->AddObject(pNewObject, pRootObject, sParentProperty, -1);
+        pDocument->GetObjectManager()->AddObject(pNewObject, pRootObject, szParentProperty, -1);
       }
     }
   }
@@ -562,8 +567,10 @@ plStatus plUnlinkPrefabCommand::UndoInternal(bool bFireEvents)
 ////////////////////////////////////////////////////////////////////////
 
 plRemoveObjectCommand::plRemoveObjectCommand()
-
-  = default;
+  : m_pParent(nullptr)
+  , m_pObject(nullptr)
+{
+}
 
 plStatus plRemoveObjectCommand::DoInternal(bool bRedo)
 {
@@ -791,7 +798,7 @@ plStatus plResizeAndSetObjectPropertyCommand::DoInternal(bool bRedo)
       ins.m_Index = i;
       ins.m_NewValue = plReflectionUtils::GetDefaultVariantFromType(m_NewValue.GetType());
 
-      AddSubCommand(ins).AssertSuccess();
+      AddSubCommand(ins).IgnoreResult();
     }
 
     plSetObjectPropertyCommand set;
@@ -800,7 +807,7 @@ plStatus plResizeAndSetObjectPropertyCommand::DoInternal(bool bRedo)
     set.m_NewValue = m_NewValue;
     set.m_Object = m_Object;
 
-    AddSubCommand(set).AssertSuccess();
+    AddSubCommand(set).IgnoreResult();
   }
 
   return plStatus(PLASMA_SUCCESS);
@@ -961,5 +968,5 @@ plStatus plMoveObjectPropertyCommand::UndoInternal(bool bFireEvents)
     }
   }
 
-  return GetDocument()->GetObjectManager()->MoveValue(m_pObject, m_sProperty, FinalNewPosition, FinalOldPosition);
+  return GetDocument()->GetObjectManager()->MoveValue(m_pObject, m_sProperty, FinalOldPosition, FinalNewPosition);
 }

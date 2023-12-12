@@ -20,7 +20,7 @@
 using namespace plProcGenInternal;
 
 plCVarInt cvar_ProcGenProcessingMaxTiles("ProcGen.Processing.MaxTiles", 8, plCVarFlags::Default, "Maximum number of tiles in process");
-plCVarInt cvar_ProcGenProcessingMaxNewObjectsPerFrame("ProcGen.Processing.MaxNewObjectsPerFrame", 256, plCVarFlags::Default, "Maximum number of objects placed per frame");
+plCVarInt cvar_ProcGenProcessingMaxNewObjectsPerFrame("ProcGen.Processing.MaxNewObjectsPerFrame", 128, plCVarFlags::Default, "Maximum number of objects placed per frame");
 plCVarBool cvar_ProcGenVisTiles("ProcGen.VisTiles", false, plCVarFlags::Default, "Enables debug visualization of procedural placement tiles");
 
 plProcPlacementComponentManager::plProcPlacementComponentManager(plWorld* pWorld)
@@ -574,7 +574,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plProcGenBoxExtents, plNoBase, 1, plRTTIDefau
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plBoxManipulatorAttribute("Extents", 1.0f, false, "Offset", "Rotation"),
-    new plBoxVisualizerAttribute("Extents", 1.0f, plColorScheme::LightUI(plColorScheme::Blue), nullptr, plVisualizerAnchor::Center, plVec3(1,1,1), "Offset", "Rotation"),
+    new plBoxVisualizerAttribute("Extents", 1.0f, plColorScheme::LightUI(plColorScheme::Blue), nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "Offset", "Rotation"),
     new plTransformManipulatorAttribute("Offset", "Rotation"),
   }
   PLASMA_END_ATTRIBUTES;
@@ -597,7 +597,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plProcPlacementComponent, 1, plComponentMode::Static
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction/PCG"),
+    new plCategoryAttribute("Procedural Generation"),
+    new plColorAttribute(plColorScheme::Construction),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -667,7 +668,8 @@ void plProcPlacementComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
   if (m_BoxExtents.IsEmpty())
     return;
 
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   for (auto& boxExtent : m_BoxExtents)
   {
@@ -774,7 +776,8 @@ void plProcPlacementComponent::UpdateBoundsAndTiles()
       localBoxTransform.m_Rotation = plSimdConversion::ToQuat(boxExtent.m_Rotation);
       localBoxTransform.m_Scale = plSimdConversion::ToVec3(boxExtent.m_vExtents * 0.5f);
 
-      plSimdTransform finalBoxTransform = plSimdTransform::MakeGlobalTransform(ownerTransform, localBoxTransform);
+      plSimdTransform finalBoxTransform;
+      finalBoxTransform.SetGlobalTransform(ownerTransform, localBoxTransform);
 
       plSimdMat4f finalBoxMat = finalBoxTransform.GetAsMat4();
 

@@ -14,7 +14,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRotorComponent, 3, plComponentMode::Dynamic)
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
-    PLASMA_MEMBER_PROPERTY("AxisDeviation", m_AxisDeviation)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(-180), plAngle::MakeFromDegree(180))),
+    PLASMA_MEMBER_PROPERTY("AxisDeviation", m_AxisDeviation)->AddAttributes(new plClampValueAttribute(plAngle::Degree(-180), plAngle::Degree(180))),
     PLASMA_MEMBER_PROPERTY("DegreesToRotate", m_iDegreeToRotate),
     PLASMA_MEMBER_PROPERTY("Acceleration", m_fAcceleration),
     PLASMA_MEMBER_PROPERTY("Deceleration", m_fDeceleration),
@@ -41,9 +41,10 @@ void plRotorComponent::Update()
       const float fNewDistance =
         CalculateAcceleratedMovement((float)m_iDegreeToRotate, m_fAcceleration, m_fAnimationSpeed, m_fDeceleration, m_AnimationTime);
 
-      plQuat qRotation = plQuat::MakeFromAxisAndAngle(m_vRotationAxis, plAngle::MakeFromDegree(fNewDistance));
+      plQuat qRotation;
+      qRotation.SetFromAxisAndAngle(m_vRotationAxis, plAngle::Degree(fNewDistance));
 
-      GetOwner()->SetLocalRotation(GetOwner()->GetLocalRotation() * m_qLastRotation.GetInverse() * qRotation);
+      GetOwner()->SetLocalRotation(GetOwner()->GetLocalRotation() * -m_qLastRotation * qRotation);
 
       m_qLastRotation = qRotation;
 
@@ -84,7 +85,8 @@ void plRotorComponent::Update()
     {
       /// \todo This will probably give precision issues pretty quickly
 
-      plQuat qRotation = plQuat::MakeFromAxisAndAngle(m_vRotationAxis, plAngle::MakeFromDegree(m_fAnimationSpeed * GetWorld()->GetClock().GetTimeDiff().AsFloatInSeconds()));
+      plQuat qRotation;
+      qRotation.SetFromAxisAndAngle(m_vRotationAxis, plAngle::Degree(m_fAnimationSpeed * GetWorld()->GetClock().GetTimeDiff().AsFloatInSeconds()));
 
       GetOwner()->SetLocalRotation(GetOwner()->GetLocalRotation() * qRotation);
     }
@@ -153,13 +155,13 @@ void plRotorComponent::OnSimulationStarted()
 
   if (m_AxisDeviation.GetRadian() != 0.0f)
   {
-    if (m_AxisDeviation > plAngle::MakeFromDegree(179))
+    if (m_AxisDeviation > plAngle::Degree(179))
     {
-      m_vRotationAxis = plVec3::MakeRandomDirection(GetWorld()->GetRandomNumberGenerator());
+      m_vRotationAxis = plVec3::CreateRandomDirection(GetWorld()->GetRandomNumberGenerator());
     }
     else
     {
-      m_vRotationAxis = plVec3::MakeRandomDeviation(GetWorld()->GetRandomNumberGenerator(), m_AxisDeviation, m_vRotationAxis);
+      m_vRotationAxis = plVec3::CreateRandomDeviation(GetWorld()->GetRandomNumberGenerator(), m_AxisDeviation, m_vRotationAxis);
 
       if (m_AxisDeviation.GetRadian() > 0 && GetWorld()->GetRandomNumberGenerator().Bool())
         m_vRotationAxis = -m_vRotationAxis;

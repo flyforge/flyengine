@@ -19,7 +19,7 @@ plQtNode::plQtNode()
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 
   setBrush(palette.window());
-  QPen pen(palette.mid().color(), 3, Qt::SolidLine);
+  QPen pen(palette.light().color(), 3, Qt::SolidLine);
   setPen(pen);
 
   {
@@ -43,7 +43,7 @@ plQtNode::plQtNode()
     m_pIcon = new QGraphicsPixmapItem(this);
   }
 
-  m_HeaderColor = palette.alternateBase().color();
+  m_HeaderColor = palette.highlight().color();
 }
 
 plQtNode::~plQtNode()
@@ -51,9 +51,9 @@ plQtNode::~plQtNode()
   EnableDropShadow(false);
 }
 
-void plQtNode::EnableDropShadow(bool bEnable)
+void plQtNode::EnableDropShadow(bool enable)
 {
-  if (bEnable && m_pShadow == nullptr)
+  if (enable && m_pShadow == nullptr)
   {
     auto palette = QApplication::palette();
 
@@ -64,7 +64,7 @@ void plQtNode::EnableDropShadow(bool bEnable)
     setGraphicsEffect(m_pShadow);
   }
 
-  if (!bEnable && m_pShadow != nullptr)
+  if (!enable && m_pShadow != nullptr)
   {
     delete m_pShadow;
     m_pShadow = nullptr;
@@ -148,10 +148,11 @@ void plQtNode::UpdateGeometry()
     y += rectPin.height();
   }
 
-  int w = maxInputWidth + maxOutputWidth + 20;
+  int w = plMath::Max(maxInputWidth, 10) + plMath::Max(maxOutputWidth, 10) + 20;
 
   const int headerWidth = plMath::Max(titleRect.width(), subtitleRect.width()) + iconRect.width();
   w = plMath::Max(w, headerWidth);
+
 
   maxheight = plMath::Max(maxheight, y);
 
@@ -162,7 +163,7 @@ void plQtNode::UpdateGeometry()
     m_Outputs[i]->setX(w - rectPin.width());
   }
 
-  m_HeaderRect = QRectF(-5, -3, w + 10, plMath::Max(titleRect.bottom(), subtitleRect.bottom()) + 5);
+  m_HeaderRect = QRectF(-5, -5, w + 10, plMath::Max(titleRect.bottom(), subtitleRect.bottom()) + 5);
 
   {
     QPainterPath p;
@@ -183,24 +184,24 @@ void plQtNode::UpdateState()
   else
   {
     plStringBuilder tmp;
-    m_pTitleLabel->setPlainText(plMakeQString(plTranslate(typeAccessor.GetType()->GetTypeName().GetData(tmp))));
+    m_pTitleLabel->setPlainText(plTranslate(typeAccessor.GetType()->GetTypeName().GetData(tmp)));
   }
 }
 
-void plQtNode::SetActive(bool bActive)
+void plQtNode::SetActive(bool active)
 {
-  if (m_bIsActive != bActive)
+  if (m_bIsActive != active)
   {
-    m_bIsActive = bActive;
+    m_bIsActive = active;
 
     for (auto pInputPin : m_Inputs)
     {
-      pInputPin->SetActive(bActive);
+      pInputPin->SetActive(active);
     }
 
     for (auto pOutputPin : m_Outputs)
     {
-      pOutputPin->SetActive(bActive);
+      pOutputPin->SetActive(active);
     }
   }
 
@@ -331,7 +332,7 @@ void plQtNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     p.setColor(palette.highlight().color());
     painter->setPen(p);
 
-    labelColor = plToQtColor(plColor::White);
+    labelColor = palette.highlightedText().color();
   }
   else
   {

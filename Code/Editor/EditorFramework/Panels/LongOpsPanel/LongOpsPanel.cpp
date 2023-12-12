@@ -25,7 +25,7 @@ plQtLongOpsPanel ::plQtLongOpsPanel()
 
   setWidget(pDummy);
   setIcon(plQtUiServices::GetCachedIconResource(":/GuiFoundation/Icons/Background.svg"));
-  setWindowTitle(plMakeQString(plTranslate("Panel.LongOps")));
+  setWindowTitle(QString::fromUtf8(plTranslate("Panel.LongOps")));
 
   // setup table
   {

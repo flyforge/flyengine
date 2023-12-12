@@ -471,7 +471,7 @@ PLASMA_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 // static
-void plDebugRenderer::DrawLines(const plDebugRendererContext& context, plArrayPtr<const Line> lines, const plColor& color, const plTransform& transform /*= plTransform::MakeIdentity()*/)
+void plDebugRenderer::DrawLines(const plDebugRendererContext& context, plArrayPtr<const Line> lines, const plColor& color, const plTransform& transform /*= plTransform::IdentityTransform()*/)
 {
   if (lines.IsEmpty())
     return;
@@ -517,15 +517,15 @@ void plDebugRenderer::Draw2DLines(const plDebugRendererContext& context, plArray
 }
 
 // static
-void plDebugRenderer::DrawCross(const plDebugRendererContext& context, const plVec3& vGlobalPosition, float fLineLength, const plColor& color, const plTransform& transform /*= plTransform::MakeIdentity()*/)
+void plDebugRenderer::DrawCross(const plDebugRendererContext& context, const plVec3& vGlobalPosition, float fLineLength, const plColor& color, const plTransform& transform /*= plTransform::IdentityTransform()*/)
 {
   if (fLineLength <= 0.0f)
     return;
 
   const float fHalfLineLength = fLineLength * 0.5f;
-  const plVec3 xAxis = plVec3::MakeAxisX() * fHalfLineLength;
-  const plVec3 yAxis = plVec3::MakeAxisY() * fHalfLineLength;
-  const plVec3 zAxis = plVec3::MakeAxisZ() * fHalfLineLength;
+  const plVec3 xAxis = plVec3::UnitXAxis() * fHalfLineLength;
+  const plVec3 yAxis = plVec3::UnitYAxis() * fHalfLineLength;
+  const plVec3 zAxis = plVec3::UnitZAxis() * fHalfLineLength;
 
   PLASMA_LOCK(s_Mutex);
 
@@ -550,7 +550,7 @@ void plDebugRenderer::DrawLineBox(const plDebugRendererContext& context, const p
 
   auto& boxData = data.m_lineBoxes.ExpandAndGetRef();
 
-  plTransform boxTransform(box.GetCenter(), plQuat::MakeIdentity(), box.GetHalfExtents());
+  plTransform boxTransform(box.GetCenter(), plQuat::IdentityQuaternion(), box.GetHalfExtents());
 
   boxData.m_transform = transform * boxTransform;
   boxData.m_color = color;
@@ -601,7 +601,7 @@ void plDebugRenderer::DrawLineBoxCorners(const plDebugRendererContext& context, 
 }
 
 // static
-void plDebugRenderer::DrawLineSphere(const plDebugRendererContext& context, const plBoundingSphere& sphere, const plColor& color, const plTransform& transform /*= plTransform::MakeIdentity()*/)
+void plDebugRenderer::DrawLineSphere(const plDebugRendererContext& context, const plBoundingSphere& sphere, const plColor& color, const plTransform& transform /*= plTransform::IdentityTransform()*/)
 {
   enum
   {
@@ -610,7 +610,7 @@ void plDebugRenderer::DrawLineSphere(const plDebugRendererContext& context, cons
 
   const plVec3 vCenter = sphere.m_vCenter;
   const float fRadius = sphere.m_fRadius;
-  const plAngle stepAngle = plAngle::MakeFromDegree(360.0f / (float)NUM_SEGMENTS);
+  const plAngle stepAngle = plAngle::Degree(360.0f / NUM_SEGMENTS);
 
   PLASMA_LOCK(s_Mutex);
 
@@ -639,7 +639,7 @@ void plDebugRenderer::DrawLineSphere(const plDebugRendererContext& context, cons
 }
 
 
-void plDebugRenderer::DrawLineCapsuleZ(const plDebugRendererContext& context, float fLength, float fRadius, const plColor& color, const plTransform& transform /*= plTransform::MakeIdentity()*/)
+void plDebugRenderer::DrawLineCapsuleZ(const plDebugRendererContext& context, float fLength, float fRadius, const plColor& color, const plTransform& transform /*= plTransform::IdentityTransform()*/)
 {
   enum
   {
@@ -648,7 +648,7 @@ void plDebugRenderer::DrawLineCapsuleZ(const plDebugRendererContext& context, fl
     NUM_LINES = NUM_SEGMENTS + NUM_SEGMENTS + NUM_SEGMENTS + NUM_SEGMENTS + 4,
   };
 
-  const plAngle stepAngle = plAngle::MakeFromDegree(360.0f / (float)NUM_SEGMENTS);
+  const plAngle stepAngle = plAngle::Degree(360.0f / NUM_SEGMENTS);
 
   Line lines[NUM_LINES];
 
@@ -811,7 +811,7 @@ void plDebugRenderer::DrawSolidBox(const plDebugRendererContext& context, const 
 
   auto& boxData = data.m_solidBoxes.ExpandAndGetRef();
 
-  plTransform boxTransform(box.GetCenter(), plQuat::MakeIdentity(), box.GetHalfExtents());
+  plTransform boxTransform(box.GetCenter(), plQuat::IdentityQuaternion(), box.GetHalfExtents());
 
   boxData.m_transform = transform * boxTransform;
   boxData.m_color = color;
@@ -998,7 +998,7 @@ void plDebugRenderer::AddPersistentLineBox(const plDebugRendererContext& context
   item.m_Timeout = data.m_Now + duration;
 }
 
-void plDebugRenderer::DrawAngle(const plDebugRendererContext& context, plAngle startAngle, plAngle endAngle, const plColor& solidColor, const plColor& lineColor, const plTransform& transform, plVec3 vForwardAxis /*= plVec3::MakeAxisX()*/, plVec3 vRotationAxis /*= plVec3::MakeAxisZ()*/)
+void plDebugRenderer::DrawAngle(const plDebugRendererContext& context, plAngle startAngle, plAngle endAngle, const plColor& solidColor, const plColor& lineColor, const plTransform& transform, plVec3 vForwardAxis /*= plVec3::UnitXAxis()*/, plVec3 vRotationAxis /*= plVec3::UnitZAxis()*/)
 {
   plHybridArray<Triangle, 64> tris;
   plHybridArray<Line, 64> lines;
@@ -1007,15 +1007,17 @@ void plDebugRenderer::DrawAngle(const plDebugRendererContext& context, plAngle s
   endAngle.NormalizeRange();
 
   if (startAngle > endAngle)
-    startAngle -= plAngle::MakeFromDegree(360);
+    startAngle -= plAngle::Degree(360);
 
   const plAngle range = endAngle - startAngle;
-  const plUInt32 uiTesselation = plMath::Max(1u, (plUInt32)(range / plAngle::MakeFromDegree(5)));
+  const plUInt32 uiTesselation = plMath::Max(1u, (plUInt32)(range / plAngle::Degree(5)));
   const plAngle step = range / (float)uiTesselation;
 
-  plQuat qStart = plQuat::MakeFromAxisAndAngle(vRotationAxis, startAngle);
+  plQuat qStart;
+  qStart.SetFromAxisAndAngle(vRotationAxis, startAngle);
 
-  plQuat qStep = plQuat::MakeFromAxisAndAngle(vRotationAxis, step);
+  plQuat qStep;
+  qStep.SetFromAxisAndAngle(vRotationAxis, step);
 
   plVec3 vCurDir = qStart * vForwardAxis;
 
@@ -1061,21 +1063,23 @@ void plDebugRenderer::DrawAngle(const plDebugRendererContext& context, plAngle s
   DrawLines(context, lines, lineColor, transform);
 }
 
-void plDebugRenderer::DrawOpeningCone(const plDebugRendererContext& context, plAngle halfAngle, const plColor& colorInside, const plColor& colorOutside, const plTransform& transform, plVec3 vForwardAxis /*= plVec3::MakeAxisX()*/)
+void plDebugRenderer::DrawOpeningCone(const plDebugRendererContext& context, plAngle halfAngle, const plColor& colorInside, const plColor& colorOutside, const plTransform& transform, plVec3 vForwardAxis /*= plVec3::UnitXAxis()*/)
 {
   plHybridArray<Triangle, 64> trisInside;
   plHybridArray<Triangle, 64> trisOutside;
 
-  halfAngle = plMath::Clamp(halfAngle, plAngle(), plAngle::MakeFromDegree(180));
+  halfAngle = plMath::Clamp(halfAngle, plAngle(), plAngle::Degree(180));
 
-  const plAngle refAngle = halfAngle <= plAngle::MakeFromDegree(90) ? halfAngle : plAngle::MakeFromDegree(180) - halfAngle;
-  const plUInt32 uiTesselation = plMath::Max(8u, (plUInt32)(refAngle / plAngle::MakeFromDegree(2)));
+  const plAngle refAngle = halfAngle <= plAngle::Degree(90) ? halfAngle : plAngle::Degree(180) - halfAngle;
+  const plUInt32 uiTesselation = plMath::Max(8u, (plUInt32)(refAngle / plAngle::Degree(2)));
 
   const plVec3 tangentAxis = vForwardAxis.GetOrthogonalVector().GetNormalized();
 
-  plQuat tilt = plQuat::MakeFromAxisAndAngle(tangentAxis, halfAngle);
+  plQuat tilt;
+  tilt.SetFromAxisAndAngle(tangentAxis, halfAngle);
 
-  plQuat step = plQuat::MakeFromAxisAndAngle(vForwardAxis, plAngle::MakeFromDegree(360) / (float)uiTesselation);
+  plQuat step;
+  step.SetFromAxisAndAngle(vForwardAxis, plAngle::Degree(360) / (float)uiTesselation);
 
   plVec3 vCurDir = tilt * vForwardAxis;
 
@@ -1125,7 +1129,7 @@ void plDebugRenderer::DrawLimitCone(const plDebugRendererContext& context, plAng
     for (plUInt32 i = 0; i <= NUM_LINES; i++)
     {
       const float angle = 2 * plMath::Pi<float>() / NUM_LINES * i;
-      const float c = plMath::Cos(plAngle::MakeFromRadian(angle)), s = plMath::Sin(plAngle::MakeFromRadian(angle));
+      const float c = plMath::Cos(plAngle::Radian(angle)), s = plMath::Sin(plAngle::Radian(angle));
       const plVec3 rv(0, -tanQSwingZ * s, tanQSwingY * c);
       const float rv2 = rv.GetLengthSquared();
       const float r = (1 / (1 + rv2));
@@ -1170,7 +1174,7 @@ void plDebugRenderer::DrawCylinder(const plDebugRendererContext& context, float 
   plHybridArray<Line, NUM_SEGMENTS * 3> lines;
   plHybridArray<Triangle, NUM_SEGMENTS * 2 * 2> tris;
 
-  const plAngle step = plAngle::MakeFromDegree(360) / NUM_SEGMENTS;
+  const plAngle step = plAngle::Degree(360) / NUM_SEGMENTS;
   plAngle angle = {};
 
   plVec3 vCurCircle(0, 1 /*plMath::Cos(angle)*/, 0 /*plMath::Sin(angle)*/);
@@ -1261,7 +1265,7 @@ void plDebugRenderer::RenderInternal(const plDebugRendererContext& context, cons
         }
         else
         {
-          plDebugRenderer::DrawCross(context, plVec3::MakeZero(), item.m_fSize, item.m_Color, item.m_Transform);
+          plDebugRenderer::DrawCross(context, plVec3::ZeroVector(), item.m_fSize, item.m_Color, item.m_Transform);
 
           ++i;
         }
@@ -1282,7 +1286,7 @@ void plDebugRenderer::RenderInternal(const plDebugRendererContext& context, cons
         }
         else
         {
-          plDebugRenderer::DrawLineSphere(context, plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), item.m_fRadius), item.m_Color, item.m_Transform);
+          plDebugRenderer::DrawLineSphere(context, plBoundingSphere(plVec3::ZeroVector(), item.m_fRadius), item.m_Color, item.m_Transform);
 
           ++i;
         }
@@ -1303,7 +1307,7 @@ void plDebugRenderer::RenderInternal(const plDebugRendererContext& context, cons
         }
         else
         {
-          plDebugRenderer::DrawLineBox(context, plBoundingBox::MakeFromMinMax(-item.m_vHalfSize, item.m_vHalfSize), item.m_Color, item.m_Transform);
+          plDebugRenderer::DrawLineBox(context, plBoundingBox(-item.m_vHalfSize, item.m_vHalfSize), item.m_Color, item.m_Transform);
 
           ++i;
         }
@@ -1821,15 +1825,15 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plScriptExtensionClass_Debug, plNoBase, 1, pl
     PLASMA_SCRIPT_FUNCTION_PROPERTY(AddPersistentCross, In, "World", In, "Position", In, "Size", In, "Color", In, "Transform", In, "Duration")->AddAttributes(
       new plFunctionArgumentAttributes(2, new plDefaultValueAttribute(0.1f)),
       new plFunctionArgumentAttributes(3, new plExposeColorAlphaAttribute()),
-      new plFunctionArgumentAttributes(5, new plDefaultValueAttribute(plTime::MakeFromSeconds(1)))),
+      new plFunctionArgumentAttributes(5, new plDefaultValueAttribute(plTime::Seconds(1)))),
     PLASMA_SCRIPT_FUNCTION_PROPERTY(AddPersistentLineBox, In, "World", In, "Position", In, "HalfExtents", In, "Color", In, "Transform", In, "Duration")->AddAttributes(
       new plFunctionArgumentAttributes(2, new plDefaultValueAttribute(plVec3(1))),
       new plFunctionArgumentAttributes(3, new plExposeColorAlphaAttribute()),
-      new plFunctionArgumentAttributes(5, new plDefaultValueAttribute(plTime::MakeFromSeconds(1)))),
+      new plFunctionArgumentAttributes(5, new plDefaultValueAttribute(plTime::Seconds(1)))),
     PLASMA_SCRIPT_FUNCTION_PROPERTY(AddPersistentLineSphere, In, "World", In, "Position", In, "Radius", In, "Color", In, "Transform", In, "Duration")->AddAttributes(
       new plFunctionArgumentAttributes(2, new plDefaultValueAttribute(1.0f)),
       new plFunctionArgumentAttributes(3, new plExposeColorAlphaAttribute()),
-      new plFunctionArgumentAttributes(5, new plDefaultValueAttribute(plTime::MakeFromSeconds(1)))),
+      new plFunctionArgumentAttributes(5, new plDefaultValueAttribute(plTime::Seconds(1)))),
   }
   PLASMA_END_FUNCTIONS;
   PLASMA_BEGIN_ATTRIBUTES
@@ -1850,19 +1854,19 @@ void plScriptExtensionClass_Debug::DrawCross(const plWorld* pWorld, const plVec3
 // static
 void plScriptExtensionClass_Debug::DrawLineBox(const plWorld* pWorld, const plVec3& vPosition, const plVec3& vHalfExtents, const plColor& color, const plTransform& transform)
 {
-  plDebugRenderer::DrawLineBox(pWorld, plBoundingBox::MakeFromCenterAndHalfExtents(vPosition, vHalfExtents), color, transform);
+  plDebugRenderer::DrawLineBox(pWorld, plBoundingBox(vPosition, vHalfExtents), color, transform);
 }
 
 // static
 void plScriptExtensionClass_Debug::DrawLineSphere(const plWorld* pWorld, const plVec3& vPosition, float fRadius, const plColor& color, const plTransform& transform)
 {
-  plDebugRenderer::DrawLineSphere(pWorld, plBoundingSphere::MakeFromCenterAndRadius(vPosition, fRadius), color, transform);
+  plDebugRenderer::DrawLineSphere(pWorld, plBoundingSphere(vPosition, fRadius), color, transform);
 }
 
 // static
 void plScriptExtensionClass_Debug::DrawSolidBox(const plWorld* pWorld, const plVec3& vPosition, const plVec3& vHalfExtents, const plColor& color, const plTransform& transform)
 {
-  plDebugRenderer::DrawSolidBox(pWorld, plBoundingBox::MakeFromCenterAndHalfExtents(vPosition, vHalfExtents), color, transform);
+  plDebugRenderer::DrawSolidBox(pWorld, plBoundingBox(vPosition, vHalfExtents), color, transform);
 }
 
 // static

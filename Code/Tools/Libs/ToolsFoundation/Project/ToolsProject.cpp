@@ -17,16 +17,16 @@ plToolsProjectRequest::plToolsProjectRequest()
   m_iContainerWindowUniqueIdentifier = 0;
 }
 
-plToolsProject::plToolsProject(plStringView sProjectPath)
+plToolsProject::plToolsProject(const char* szProjectPath)
   : m_SingletonRegistrar(this)
 {
   m_bIsClosing = false;
 
-  m_sProjectPath = sProjectPath;
+  m_sProjectPath = szProjectPath;
   PLASMA_ASSERT_DEV(!m_sProjectPath.IsEmpty(), "Path cannot be empty.");
 }
 
-plToolsProject::~plToolsProject() = default;
+plToolsProject::~plToolsProject() {}
 
 plStatus plToolsProject::Create()
 {
@@ -38,9 +38,9 @@ plStatus plToolsProject::Create()
     }
     else
     {
-      plStringView szToken = "PlasmaEditor Project File";
+      const char* szToken = "PlasmaEditor Project File";
 
-      PLASMA_SUCCEED_OR_RETURN(ProjectFile.Write(szToken.GetStartPointer(), szToken.GetElementCount() + 1));
+      PLASMA_SUCCEED_OR_RETURN(ProjectFile.Write(szToken, plStringUtils::GetStringElementCount(szToken) + 1));
       ProjectFile.Close();
     }
   }
@@ -71,13 +71,13 @@ plStatus plToolsProject::Open()
   return plStatus(PLASMA_SUCCESS);
 }
 
-void plToolsProject::CreateSubFolder(plStringView sFolder) const
+void plToolsProject::CreateSubFolder(const char* szFolder) const
 {
   plStringBuilder sPath;
 
   sPath = m_sProjectPath;
   sPath.PathParentDirectory();
-  sPath.AppendPath(sFolder);
+  sPath.AppendPath(szFolder);
 
   plOSFile::CreateDirectoryStructure(sPath).IgnoreResult();
 }
@@ -165,11 +165,11 @@ plStringBuilder plToolsProject::GetPathForDocumentGuid(const plUuid& guid)
   return e.m_sAbsDocumentPath;
 }
 
-plStatus plToolsProject::CreateOrOpenProject(plStringView sProjectPath, bool bCreate)
+plStatus plToolsProject::CreateOrOpenProject(const char* szProjectPath, bool bCreate)
 {
   CloseProject();
 
-  new plToolsProject(sProjectPath);
+  new plToolsProject(szProjectPath);
 
   plStatus ret;
 
@@ -190,16 +190,16 @@ plStatus plToolsProject::CreateOrOpenProject(plStringView sProjectPath, bool bCr
   return plStatus(PLASMA_SUCCESS);
 }
 
-plStatus plToolsProject::OpenProject(plStringView sProjectPath)
+plStatus plToolsProject::OpenProject(const char* szProjectPath)
 {
-  plStatus status = CreateOrOpenProject(sProjectPath, false);
+  plStatus status = CreateOrOpenProject(szProjectPath, false);
 
   return status;
 }
 
-plStatus plToolsProject::CreateProject(plStringView sProjectPath)
+plStatus plToolsProject::CreateProject(const char* szProjectPath)
 {
-  return CreateOrOpenProject(sProjectPath, true);
+  return CreateOrOpenProject(szProjectPath, true);
 }
 
 void plToolsProject::BroadcastSaveAll()
@@ -220,9 +220,9 @@ void plToolsProject::BroadcastConfigChanged()
   s_Events.Broadcast(e);
 }
 
-void plToolsProject::AddAllowedDocumentRoot(plStringView sPath)
+void plToolsProject::AddAllowedDocumentRoot(const char* szPath)
 {
-  plStringBuilder s = sPath;
+  plStringBuilder s = szPath;
   s.MakeCleanPath();
   s.Trim("", "/");
 
@@ -230,22 +230,22 @@ void plToolsProject::AddAllowedDocumentRoot(plStringView sPath)
 }
 
 
-bool plToolsProject::IsDocumentInAllowedRoot(plStringView sDocumentPath, plString* out_pRelativePath) const
+bool plToolsProject::IsDocumentInAllowedRoot(const char* szDocumentPath, plString* out_RelativePath) const
 {
   for (plUInt32 i = m_AllowedDocumentRoots.GetCount(); i > 0; --i)
   {
     const auto& root = m_AllowedDocumentRoots[i - 1];
 
-    plStringBuilder s = sDocumentPath;
+    plStringBuilder s = szDocumentPath;
     if (!s.IsPathBelowFolder(root))
       continue;
 
-    if (out_pRelativePath)
+    if (out_RelativePath)
     {
-      plStringBuilder sText = sDocumentPath;
+      plStringBuilder sText = szDocumentPath;
       sText.MakeRelativeTo(root).IgnoreResult();
 
-      *out_pRelativePath = sText;
+      *out_RelativePath = sText;
     }
 
     return true;
@@ -326,9 +326,9 @@ plString plToolsProject::GetProjectDataFolder() const
   return s;
 }
 
-plString plToolsProject::FindProjectDirectoryForDocument(plStringView sDocumentPath)
+plString plToolsProject::FindProjectDirectoryForDocument(const char* szDocumentPath)
 {
-  plStringBuilder sPath = sDocumentPath;
+  plStringBuilder sPath = szDocumentPath;
   sPath.PathParentDirectory();
 
   plStringBuilder sTemp;

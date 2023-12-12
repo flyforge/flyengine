@@ -366,9 +366,9 @@ void plTypeScriptBinding::PushQuat(duk_context* pDuk, const plQuat& value)
   duk.PushGlobalObject();                                   // [ global ]
   PLASMA_VERIFY(duk.PushLocalObject("__Quat").Succeeded(), ""); // [ global __Quat ]
   duk_get_prop_string(duk, -1, "Quat");                     // [ global __Quat Quat ]
-  duk_push_number(duk, value.x);                          // [ global __Quat Quat x ]
-  duk_push_number(duk, value.y);                          // [ global __Quat Quat x y ]
-  duk_push_number(duk, value.z);                          // [ global __Quat Quat x y z ]
+  duk_push_number(duk, value.v.x);                          // [ global __Quat Quat x ]
+  duk_push_number(duk, value.v.y);                          // [ global __Quat Quat x y ]
+  duk_push_number(duk, value.v.z);                          // [ global __Quat Quat x y z ]
   duk_push_number(duk, value.w);                            // [ global __Quat Quat x y z w ]
   duk_new(duk, 4);                                          // [ global __Quat result ]
   duk_remove(duk, -2);                                      // [ global result ]
@@ -381,9 +381,9 @@ void plTypeScriptBinding::SetQuat(duk_context* pDuk, plInt32 iObjIdx, const plQu
 {
   plDuktapeHelper duk(pDuk);
 
-  duk.SetNumberProperty("x", value.x, iObjIdx);
-  duk.SetNumberProperty("y", value.y, iObjIdx);
-  duk.SetNumberProperty("z", value.z, iObjIdx);
+  duk.SetNumberProperty("x", value.v.x, iObjIdx);
+  duk.SetNumberProperty("y", value.v.y, iObjIdx);
+  duk.SetNumberProperty("z", value.v.z, iObjIdx);
   duk.SetNumberProperty("w", value.w, iObjIdx);
 }
 
@@ -406,13 +406,13 @@ plQuat plTypeScriptBinding::GetQuat(duk_context* pDuk, plInt32 iObjIdx, plQuat f
   plQuat res;
 
   PLASMA_VERIFY(duk_get_prop_string(pDuk, iObjIdx, "x"), "");
-  res.x = static_cast<float>(duk_get_number_default(pDuk, -1, fallback.x));
+  res.v.x = static_cast<float>(duk_get_number_default(pDuk, -1, fallback.v.x));
   duk_pop(pDuk);
   PLASMA_VERIFY(duk_get_prop_string(pDuk, iObjIdx, "y"), "");
-  res.y = static_cast<float>(duk_get_number_default(pDuk, -1, fallback.y));
+  res.v.y = static_cast<float>(duk_get_number_default(pDuk, -1, fallback.v.y));
   duk_pop(pDuk);
   PLASMA_VERIFY(duk_get_prop_string(pDuk, iObjIdx, "z"), "");
-  res.z = static_cast<float>(duk_get_number_default(pDuk, -1, fallback.z));
+  res.v.z = static_cast<float>(duk_get_number_default(pDuk, -1, fallback.v.z));
   duk_pop(pDuk);
   PLASMA_VERIFY(duk_get_prop_string(pDuk, iObjIdx, "w"), "");
   res.w = static_cast<float>(duk_get_number_default(pDuk, -1, fallback.w));
@@ -739,7 +739,7 @@ plVariant plTypeScriptBinding::GetVariant(duk_context* pDuk, plInt32 iObjIdx, co
       return duk.GetBoolValue(iObjIdx);
 
     case plVariant::Type::Angle:
-      return plAngle::MakeFromRadian(duk.GetFloatValue(iObjIdx));
+      return plAngle::Radian(duk.GetFloatValue(iObjIdx));
 
     case plVariant::Type::Time:
       return plTime::Seconds(duk.GetFloatValue(iObjIdx));

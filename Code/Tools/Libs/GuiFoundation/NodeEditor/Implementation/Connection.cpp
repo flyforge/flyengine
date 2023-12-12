@@ -5,10 +5,12 @@
 #include <QApplication>
 #include <QPalette>
 
-plQtConnection::plQtConnection(QGraphicsItem* pParent)
-  : QGraphicsPathItem(pParent)
+plQtConnection::plQtConnection(QGraphicsItem* parent)
+  : QGraphicsPathItem(parent)
 {
-  QPen pen(plToQtColor(plColor::White), 3, Qt::SolidLine);
+  auto palette = QApplication::palette();
+
+  QPen pen(palette.text().color(), 3, Qt::SolidLine);
   setPen(pen);
   setBrush(Qt::NoBrush);
 
@@ -198,14 +200,11 @@ void plQtConnection::UpdateGeometry()
   else
   {
     p.moveTo(m_OutPoint);
-    float fDotOut = plMath::Abs(QPointF::dotProduct(m_OutDir, dir));
-    float fDotIn = plMath::Abs(QPointF::dotProduct(m_InDir, -dir));
+    float fDotOut = QPointF::dotProduct(m_OutDir, dir);
+    float fDotIn = QPointF::dotProduct(m_InDir, -dir);
 
-    float fMinDistance = plMath::Abs(QPointF::dotProduct(m_OutDir.transposed(), dir));
-    fMinDistance = plMath::Min(200.0f, fMinDistance);
-
-    fDotOut = plMath::Max(fMinDistance, fDotOut);
-    fDotIn = plMath::Max(fMinDistance, fDotIn);
+    fDotOut = plMath::Max(100.0f, plMath::Abs(fDotOut));
+    fDotIn = plMath::Max(100.0f, plMath::Abs(fDotIn));
 
     QPointF ctr1 = m_OutPoint + m_OutDir * (fDotOut * 0.5f);
     QPointF ctr2 = m_InPoint + m_InDir * (fDotIn * 0.5f);
@@ -223,35 +222,35 @@ QPen plQtConnection::DeterminePen() const
     return pen();
   }
 
-  plColor color;
-  const plColor sourceColor = m_pConnection->GetSourcePin().GetColor();
-  const plColor targetColor = m_pConnection->GetTargetPin().GetColor();
+  plColor sourceColor = m_pConnection->GetSourcePin().GetColor();
+  plColor targetColor = m_pConnection->GetTargetPin().GetColor();
 
-  const bool isSourceGrey = (sourceColor.r == sourceColor.g && sourceColor.r == sourceColor.b);
-  const bool isTargetGrey = (targetColor.r == targetColor.g && targetColor.r == targetColor.b);
-
-  if (!isSourceGrey)
-  {
-    color = plMath::Lerp(sourceColor, targetColor, 0.2f);
-  }
-  else if (!isTargetGrey)
-  {
-    color = plMath::Lerp(sourceColor, targetColor, 0.8f);
-  }
-  else
-  {
-    color = plMath::Lerp(sourceColor, targetColor, 0.5f);
-  }
 
   if (m_bAdjacentNodeSelected)
   {
-    color = plMath::Lerp(color, plColor::White, 0.1f);
-    return QPen(QBrush(plToQtColor(color)), 3, Qt::DashLine);
+    sourceColor = plMath::Lerp(sourceColor, plColor::White, 0.1f);
+    targetColor = plMath::Lerp(targetColor, plColor::White, 0.1f);
   }
-  else
-  {
-    return QPen(QBrush(plToQtColor(color)), 2, Qt::SolidLine);
-  }
+
+  QPointF startPoint = m_OutPoint;
+  QPointF endPoint = m_InPoint;
+  QPointF dir = endPoint - startPoint;
+  const QPointF midPoint = startPoint + dir * 0.5f;
+
+
+  QLinearGradient gradient(startPoint, endPoint);
+  gradient.setColorAt(0.0, plToQtColor(sourceColor));
+  gradient.setColorAt(1.0, plToQtColor(targetColor));
+
+//  if (m_bAdjacentNodeSelected)
+//  {
+//    color = plMath::Lerp(color, plColorGammaUB(255, 255, 255), 0.1f);
+//    return QPen(QBrush(plToQtColor(color)), 3, Qt::DashLine);
+//  }
+//  else
+//  {
+    return QPen(gradient, 2, Qt::SolidLine);
+  //}
 }
 
 void plQtConnection::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -265,6 +264,8 @@ void plQtConnection::paint(QPainter* painter, const QStyleOptionGraphicsItem* op
   }
   painter->setPen(p);
 
+  painter->setRenderHints(QPainter::Antialiasing, true);
+
   auto decorationFlags = static_cast<plQtNodeScene*>(scene())->GetConnectionDecorationFlags();
   if (decorationFlags.IsSet(plQtNodeScene::ConnectionDecorationFlags::DirectionArrows))
   {
@@ -273,3 +274,4 @@ void plQtConnection::paint(QPainter* painter, const QStyleOptionGraphicsItem* op
 
   painter->drawPath(path());
 }
+

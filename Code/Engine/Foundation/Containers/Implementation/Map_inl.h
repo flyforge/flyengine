@@ -220,7 +220,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
   Node* pNode = m_pRoot;
 
-  while ((const void*)pNode->m_pLink[0] != (const void*)&m_NilNode)
+  while (pNode->m_pLink[0] != &m_NilNode)
     pNode = pNode->m_pLink[0];
 
   return pNode;
@@ -234,7 +234,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
   Node* pNode = m_pRoot;
 
-  while ((const void*)pNode->m_pLink[1] != (const void*)&m_NilNode)
+  while (pNode->m_pLink[1] != &m_NilNode)
     pNode = pNode->m_pLink[1];
 
   return pNode;
@@ -246,7 +246,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 {
   Node* pNode = m_pRoot;
 
-  while ((const void*)pNode != (const void*)&m_NilNode)
+  while (pNode != &m_NilNode)
   {
     const plInt32 dir = (plInt32)m_Comparer.Less(pNode->m_Key, key);
     const plInt32 dir2 = (plInt32)m_Comparer.Less(key, pNode->m_Key);
@@ -257,7 +257,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
     pNode = pNode->m_pLink[dir];
   }
 
-  if ((const void*)pNode == (const void*)&m_NilNode)
+  if (pNode == &m_NilNode)
     return nullptr;
 
   return pNode;
@@ -357,7 +357,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
   Node* pNode = m_pRoot;
   Node* pNodeSmaller = nullptr;
 
-  while ((const void*)pNode != (const void*)&m_NilNode)
+  while (pNode != &m_NilNode)
   {
     const plInt32 dir = (plInt32)m_Comparer.Less(pNode->m_Key, key);
     const plInt32 dir2 = (plInt32)m_Comparer.Less(key, pNode->m_Key);
@@ -395,7 +395,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
   Node* pNode = m_pRoot;
   Node* pNodeSmaller = nullptr;
 
-  while ((const void*)pNode != (const void*)&m_NilNode)
+  while (pNode != &m_NilNode)
   {
     const plInt32 dir = (plInt32)m_Comparer.Less(pNode->m_Key, key);
     const plInt32 dir2 = (plInt32)m_Comparer.Less(key, pNode->m_Key);

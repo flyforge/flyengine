@@ -7,8 +7,8 @@
 #include <QTextOption>
 #include <qevent.h>
 
-plQtGraphicsView::plQtGraphicsView(QWidget* pParent /*= nullptr*/)
-  : QGraphicsView(pParent)
+plQtGraphicsView::plQtGraphicsView(QWidget* parent /*= nullptr*/)
+  : QGraphicsView(parent)
 {
   m_fZoom = 50.0f;
   m_fMinZoom = 10.0f;
@@ -44,7 +44,7 @@ void plQtGraphicsView::mousePressEvent(QMouseEvent* e)
 {
   if (e->buttons() == Qt::RightButton) // right button only
   {
-    m_LastGlobalMouseMovePos = e->globalPosition().toPoint();
+    m_LastGlobalMouseMovePos = e->globalPos();
     m_bPanning = true;
     m_bForwardMouseEvents = false;
   }
@@ -96,8 +96,8 @@ void plQtGraphicsView::mouseMoveEvent(QMouseEvent* e)
 {
   if (m_bPanning)
   {
-    const QPoint diff = e->globalPosition().toPoint() - m_LastGlobalMouseMovePos;
-    m_LastGlobalMouseMovePos = e->globalPosition().toPoint();
+    const QPoint diff = e->globalPos() - m_LastGlobalMouseMovePos;
+    m_LastGlobalMouseMovePos = e->globalPos();
 
     // Copied from QGraphicsView
     QScrollBar* hBar = horizontalScrollBar();
@@ -127,16 +127,16 @@ void plQtGraphicsView::keyPressEvent(QKeyEvent* e)
   }
 }
 
-void plQtGraphicsView::SetZoom(float fZoom)
+void plQtGraphicsView::SetZoom(float zoom)
 {
-  m_fZoom = fZoom;
+  m_fZoom = zoom;
   UpdateTransform();
 }
 
-void plQtGraphicsView::SetZoomLimits(float fMinZoom, float fMaxZoom)
+void plQtGraphicsView::SetZoomLimits(float minZoom, float maxZoom)
 {
-  m_fMinZoom = plMath::Min(fMinZoom, fMaxZoom);
-  m_fMaxZoom = plMath::Max(fMinZoom, fMaxZoom);
+  m_fMinZoom = plMath::Min(minZoom, maxZoom);
+  m_fMaxZoom = plMath::Max(minZoom, maxZoom);
 
   UpdateTransform();
 }

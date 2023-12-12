@@ -47,10 +47,10 @@ void plEnumerationMenuAction::InitEnumerationType(const plRTTI* pEnumerationType
   m_pEnumerationType = pEnumerationType;
 }
 
-void plEnumerationMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries)
+void plEnumerationMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries)
 {
-  out_entries.Clear();
-  out_entries.Reserve(m_pEnumerationType->GetProperties().GetCount() - 1);
+  out_Entries.Clear();
+  out_Entries.Reserve(m_pEnumerationType->GetProperties().GetCount() - 1);
   plInt64 iCurrentValue = plReflectionUtils::MakeEnumerationValid(m_pEnumerationType, GetValue());
 
   // sort entries by group / category
@@ -84,15 +84,15 @@ void plEnumerationMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item
 
     unsortedItems.Sort();
 
-    if (!out_entries.IsEmpty())
+    if (!out_Entries.IsEmpty())
     {
       // add a separator between groups
-      out_entries.ExpandAndGetRef().m_ItemFlags.Add(plDynamicMenuAction::Item::ItemFlags::Separator);
+      out_Entries.ExpandAndGetRef().m_ItemFlags.Add(plDynamicMenuAction::Item::ItemFlags::Separator);
     }
 
     for (const auto& sortedItem : unsortedItems)
     {
-      out_entries.PushBack(sortedItem.m_Item);
+      out_Entries.PushBack(sortedItem.m_Item);
     }
 
     unsortedItems.Clear();
@@ -172,9 +172,9 @@ void plSliderAction::SetRange(plInt32 iMin, plInt32 iMax, bool bTriggerUpdate /*
     TriggerUpdate();
 }
 
-void plSliderAction::SetValue(plInt32 iVal, bool bTriggerUpdate /*= true*/)
+void plSliderAction::SetValue(plInt32 val, bool bTriggerUpdate /*= true*/)
 {
-  m_iCurValue = plMath::Clamp(iVal, m_iMinValue, m_iMaxValue);
+  m_iCurValue = plMath::Clamp(val, m_iMinValue, m_iMaxValue);
   if (bTriggerUpdate)
     TriggerUpdate();
 }

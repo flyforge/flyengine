@@ -25,8 +25,10 @@ class plCollectionAssetDocument : public plSimpleAssetDocument<plCollectionAsset
   PLASMA_ADD_DYNAMIC_REFLECTION(plCollectionAssetDocument, plSimpleAssetDocument<plCollectionAssetData>);
 
 public:
-  plCollectionAssetDocument(plStringView sDocumentPath);
+  plCollectionAssetDocument(const char* szDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
+
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 };

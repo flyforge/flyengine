@@ -423,13 +423,14 @@ PLASMA_FOUNDATION_DLL plVariant operator-(const plVariant& a, const plVariant& b
 PLASMA_FOUNDATION_DLL plVariant operator*(const plVariant& a, const plVariant& b);
 PLASMA_FOUNDATION_DLL plVariant operator/(const plVariant& a, const plVariant& b);
 
+
 namespace plMath
 {
   /// \brief An overload of plMath::Lerp to interpolate variants. A and b must have the same type.
   ///
   /// If the type can't be interpolated like e.g. strings, a is returned for a fFactor less than 0.5, b is returned for a fFactor greater or equal to 0.5.
   PLASMA_FOUNDATION_DLL plVariant Lerp(const plVariant& a, const plVariant& b, double fFactor);
-} // namespace plMath
+}
 
 #include <Foundation/Types/Implementation/VariantHelper_inl.h>
 

@@ -97,6 +97,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plBlackboardComponent, 2, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"),
+    new plColorAttribute(plColorScheme::Logic),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -367,7 +368,7 @@ void plBlackboardComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) con
 {
   if (GetShowDebugInfo())
   {
-    msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 2.0f), plDefaultSpatialDataCategories::RenderDynamic);
+    msg.AddBounds(plBoundingSphere(plVec3::ZeroVector(), 2.0f), plDefaultSpatialDataCategories::RenderDynamic);
   }
 }
 

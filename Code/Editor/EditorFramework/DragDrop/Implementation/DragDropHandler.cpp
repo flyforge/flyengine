@@ -7,14 +7,14 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plDragDropHandler* plDragDropHandler::s_pActiveDnD = nullptr;
 
-plDragDropHandler::plDragDropHandler() = default;
+plDragDropHandler::plDragDropHandler() {}
 
 
 plDragDropHandler* plDragDropHandler::FindDragDropHandler(const plDragDropInfo* pInfo)
 {
   float fBestValue = 0.0f;
   plDragDropHandler* pBestDnD = nullptr;
-
+  
   plRTTI::ForEachDerivedType<plDragDropHandler>(
     [&](const plRTTI* pRtti) {
       plDragDropHandler* pDnD = pRtti->GetAllocator()->Allocate<plDragDropHandler>();

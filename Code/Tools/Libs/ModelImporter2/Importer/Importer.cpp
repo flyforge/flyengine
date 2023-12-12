@@ -36,12 +36,4 @@ namespace plModelImporter2
     return res;
   }
 
-  void OutputTexture::GenerateFileName(plStringBuilder& out_sName) const
-  {
-    plStringBuilder tmp("Embedded_", m_sFilename);
-
-    plPathUtils::MakeValidFilename(tmp.GetFileName(), '_', out_sName);
-    out_sName.ChangeFileExtension(m_sFileFormatExtension);
-  }
-
 } // namespace plModelImporter2

@@ -15,7 +15,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeLightFactory, 1, plRTTIDefault
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("SizeFactor", m_fSizeFactor)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.0f, 1000.0f)),
-    PLASMA_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 100000.0f)),
+    PLASMA_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, 100000.0f)),
     PLASMA_MEMBER_PROPERTY("Percentage", m_uiPercentage)->AddAttributes(new plDefaultValueAttribute(50), new plClampValueAttribute(1, 100)),
     PLASMA_MEMBER_PROPERTY("TintColorParam", m_sTintColorParameter),
     PLASMA_MEMBER_PROPERTY("IntensityScaleParam", m_sIntensityParameter),
@@ -177,13 +177,13 @@ void plParticleTypeLight::ExtractTypeRenderData(plMsgExtractRenderData& msg, con
     pRenderData->m_GlobalTransform.m_vPosition = transform * pPosition[i].GetAsVec3();
     pRenderData->m_LightColor = tintColor * pColor[i].ToLinearFloat();
     pRenderData->m_fIntensity = intensity;
-//    pRenderData->m_fFalloff = 0.8f;
-//    pRenderData->m_fSpecularMultiplier = 1.0;
-//    pRenderData->m_fVolumetricIntensity = 0.0f; //TODO: add volumetric intensity to the particle type
+    pRenderData->m_fFalloff = 0.8f;
+    pRenderData->m_fSpecularMultiplier = 1.0;
+    pRenderData->m_fVolumetricIntensity = 0.0f; //TODO: add volumetric intensity to the particle type
     pRenderData->m_fRange = pSize[i] * sizeFactor;
     pRenderData->m_uiShadowDataOffset = plInvalidIndex;
 
-    float fScreenSpaceSize = plLightComponent::CalculateScreenSpaceSize(plBoundingSphere::MakeFromCenterAndRadius(pRenderData->m_GlobalTransform.m_vPosition, pRenderData->m_fRange * 0.5f), *msg.m_pView->GetCullingCamera());
+    float fScreenSpaceSize = plLightComponent::CalculateScreenSpaceSize(plBoundingSphere(pRenderData->m_GlobalTransform.m_vPosition, pRenderData->m_fRange * 0.5f), *msg.m_pView->GetCullingCamera());
     pRenderData->FillBatchIdAndSortingKey(fScreenSpaceSize);
 
     msg.AddRenderData(pRenderData, plDefaultRenderDataCategories::Light, plRenderData::Caching::Never);

@@ -61,14 +61,14 @@ inline double plClock::GetSpeed() const
 
 inline void plClock::SetMinimumTimeStep(plTime min)
 {
-  PLASMA_ASSERT_DEV(min >= plTime::MakeFromSeconds(0.0), "Time flows in one direction only.");
+  PLASMA_ASSERT_DEV(min >= plTime::Seconds(0.0), "Time flows in one direction only.");
 
   m_MinTimeStep = min;
 }
 
 inline void plClock::SetMaximumTimeStep(plTime max)
 {
-  PLASMA_ASSERT_DEV(max >= plTime::MakeFromSeconds(0.0), "Time flows in one direction only.");
+  PLASMA_ASSERT_DEV(max >= plTime::Seconds(0.0), "Time flows in one direction only.");
 
   m_MaxTimeStep = max;
 }

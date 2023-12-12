@@ -30,7 +30,7 @@ plTargetPass::plTargetPass(const char* szName)
 {
 }
 
-plTargetPass::~plTargetPass() = default;
+plTargetPass::~plTargetPass() {}
 
 const plGALTextureHandle* plTargetPass::GetTextureHandle(const plGALRenderTargets& renderTargets, const plRenderPipelineNodePin* pPin)
 {

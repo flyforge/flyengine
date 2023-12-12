@@ -28,6 +28,40 @@ plPipeChannel_linux::plPipeChannel_linux(plStringView sAddress, Mode::Enum Mode)
   pipePath.Append(".client");
   m_clientSocketPath = pipePath;
 
+  const char* thisSocketPath = (Mode == Mode::Server) ? m_serverSocketPath.GetData() : m_clientSocketPath.GetData();
+
+  int& targetSocket = (Mode == Mode::Server) ? m_serverSocketFd : m_clientSocketFd;
+
+  targetSocket = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+  if (targetSocket == -1)
+  {
+    plLog::Error("[IPC]Failed to create unix domain socket. error {}", errno);
+    return;
+  }
+
+  // If the socket file already exists, delete it
+  plOSFile::DeleteFile(thisSocketPath).IgnoreResult();
+
+  struct sockaddr_un addr = {};
+  addr.sun_family = AF_UNIX;
+
+  if (strlen(thisSocketPath) >= PLASMA_ARRAY_SIZE(addr.sun_path) - 1)
+  {
+    plLog::Error("[IPC]Given ipc channel address is to long. Resulting path '{}' path length limit {}", strlen(thisSocketPath), PLASMA_ARRAY_SIZE(addr.sun_path) - 1);
+    close(targetSocket);
+    targetSocket = -1;
+    return;
+  }
+
+  strcpy(addr.sun_path, thisSocketPath);
+  if (bind(targetSocket, (struct sockaddr*)&addr, SUN_LEN(&addr)) == -1)
+  {
+    plLog::Error("[IPC]Failed to bind unix domain socket to '{}' error {}", thisSocketPath, errno);
+    close(targetSocket);
+    targetSocket = -1;
+    return;
+  }
+
   m_pOwner->AddChannel(this);
 }
 
@@ -60,47 +94,17 @@ plPipeChannel_linux::~plPipeChannel_linux()
   }
 }
 
+void plPipeChannel_linux::AddToMessageLoop(plMessageLoop* pMessageLoop)
+{
+}
+
 void plPipeChannel_linux::InternalConnect()
 {
-  if (GetConnectionState() != ConnectionState::Disconnected)
-    return;
-
-  int& targetSocket = (m_Mode == Mode::Server) ? m_serverSocketFd : m_clientSocketFd;
-
-  if (targetSocket < 0)
+  if (m_bConnected || m_Connecting)
   {
-    const char* thisSocketPath = (m_Mode == Mode::Server) ? m_serverSocketPath.GetData() : m_clientSocketPath.GetData();
-
-    targetSocket = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-    if (targetSocket == -1)
-    {
-      plLog::Error("[IPC]Failed to create unix domain socket. error {}", errno);
-      return;
-    }
-
-    // If the socket file already exists, delete it
-    plOSFile::DeleteFile(thisSocketPath).IgnoreResult();
-
-    struct sockaddr_un addr = {};
-    addr.sun_family = AF_UNIX;
-
-    if (strlen(thisSocketPath) >= PLASMA_ARRAY_SIZE(addr.sun_path) - 1)
-    {
-      plLog::Error("[IPC]Given ipc channel address is to long. Resulting path '{}' path length limit {}", strlen(thisSocketPath), PLASMA_ARRAY_SIZE(addr.sun_path) - 1);
-      close(targetSocket);
-      targetSocket = -1;
-      return;
-    }
-
-    strcpy(addr.sun_path, thisSocketPath);
-    if (bind(targetSocket, (struct sockaddr*)&addr, SUN_LEN(&addr)) == -1)
-    {
-      plLog::Error("[IPC]Failed to bind unix domain socket to '{}' error {}", thisSocketPath, errno);
-      close(targetSocket);
-      targetSocket = -1;
-      return;
-    }
+    return;
   }
+
 
   if (m_Mode == Mode::Server)
   {
@@ -108,8 +112,8 @@ void plPipeChannel_linux::InternalConnect()
     {
       return;
     }
+    m_Connecting = true;
     listen(m_serverSocketFd, 1);
-    SetConnectionState(ConnectionState::Connecting);
     static_cast<plMessageLoop_linux*>(m_pOwner)->RegisterWait(this, plMessageLoop_linux::WaitType::Accept, m_serverSocketFd);
   }
   else
@@ -118,7 +122,7 @@ void plPipeChannel_linux::InternalConnect()
     {
       return;
     }
-    SetConnectionState(ConnectionState::Connecting);
+    m_Connecting = true;
     struct sockaddr_un serverAddress = {};
     serverAddress.sun_family = AF_UNIX;
     strcpy(serverAddress.sun_path, m_serverSocketPath.GetData());
@@ -131,8 +135,10 @@ void plPipeChannel_linux::InternalConnect()
 
 void plPipeChannel_linux::InternalDisconnect()
 {
-  if (GetConnectionState() == ConnectionState::Disconnected)
+  if (!m_bConnected && !m_Connecting)
+  {
     return;
+  }
 
   static_cast<plMessageLoop_linux*>(m_pOwner)->RemovePendingWaits(this);
 
@@ -144,7 +150,10 @@ void plPipeChannel_linux::InternalDisconnect()
     m_OutputQueue.Clear();
   }
 
-  SetConnectionState(ConnectionState::Disconnected);
+  m_bConnected = false;
+  m_Connecting = false;
+
+  m_Events.Broadcast(plIpcChannelEvent(m_Mode == Mode::Server ? plIpcChannelEvent::DisconnectedFromClient : plIpcChannelEvent::DisconnectedFromServer, this));
 
   m_IncomingMessages.RaiseSignal(); // Wakeup anyone still waiting for messages
 }
@@ -218,7 +227,9 @@ void plPipeChannel_linux::AcceptIncomingConnection()
   }
   else
   {
-    SetConnectionState(ConnectionState::Connected);
+    m_bConnected = true;
+    m_Events.Broadcast(plIpcChannelEvent(plIpcChannelEvent::ConnectedToClient, this));
+
     // We are connected. Register for incoming messages events.
     static_cast<plMessageLoop_linux*>(m_pOwner)->RegisterWait(this, plMessageLoop_linux::WaitType::IncomingMessage, m_clientSocketFd);
   }
@@ -231,7 +242,9 @@ bool plPipeChannel_linux::NeedWakeup() const
 
 void plPipeChannel_linux::ProcessConnectSuccessfull()
 {
-  SetConnectionState(ConnectionState::Connected);
+  m_Connecting = false;
+  m_bConnected = true;
+  m_Events.Broadcast(plIpcChannelEvent(plIpcChannelEvent::ConnectedToServer, this));
 
   // We are connected. Register for incoming messages events.
   static_cast<plMessageLoop_linux*>(m_pOwner)->RegisterWait(this, plMessageLoop_linux::WaitType::IncomingMessage, m_clientSocketFd);
@@ -263,7 +276,7 @@ void plPipeChannel_linux::ProcessIncomingPackages()
       return;
     }
 
-    ReceiveData(plArrayPtr(m_InputBuffer, static_cast<plUInt32>(recieveResult)));
+    ReceiveMessageData(plArrayPtr(m_InputBuffer, static_cast<plUInt32>(recieveResult)));
   }
 }
 

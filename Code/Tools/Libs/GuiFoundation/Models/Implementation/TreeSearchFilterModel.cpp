@@ -3,22 +3,22 @@
 #include <GuiFoundation/Models/TreeSearchFilterModel.moc.h>
 #include <QWidget>
 
-plQtTreeSearchFilterModel::plQtTreeSearchFilterModel(QWidget* pParent)
-  : QSortFilterProxyModel(pParent)
+plQtTreeSearchFilterModel::plQtTreeSearchFilterModel(QWidget* parent)
+  : QSortFilterProxyModel(parent)
 {
   m_bIncludeChildren = false;
 }
 
-void plQtTreeSearchFilterModel::SetFilterText(const QString& sText)
+void plQtTreeSearchFilterModel::SetFilterText(const QString& text)
 {
   // only clear the current visible state, if the new filter text got shorter
   // this way previous information stays valid and can be used to early out
-  if (!sText.contains(m_Filter.GetSearchText().GetData(), Qt::CaseInsensitive) || m_Filter.ContainsExclusions())
+  if (!text.contains(m_sFilterText, Qt::CaseInsensitive))
     m_Visible.Clear();
 
-  m_Filter.SetSearchText(sText.toUtf8().data());
+  m_sFilterText = text;
 
-  if (!m_Filter.IsEmpty())
+  if (!m_sFilterText.isEmpty())
   {
     RecomputeVisibleItems();
   }
@@ -31,7 +31,7 @@ void plQtTreeSearchFilterModel::SetIncludeChildren(bool bInclude)
 {
   m_bIncludeChildren = true;
 
-  if (!m_Filter.IsEmpty())
+  if (!m_sFilterText.isEmpty())
   {
     RecomputeVisibleItems();
     invalidateFilter();
@@ -61,13 +61,11 @@ bool plQtTreeSearchFilterModel::UpdateVisibility(const QModelIndex& idx, bool bP
   if (bExisted && !itVis.Value())
     return false;
 
-  QString displayName = m_pSourceModel->data(idx, Qt::DisplayRole).toString();
-  QVariant internalNameVar = m_pSourceModel->data(idx, Qt::UserRole + 1);
+  QString name = m_pSourceModel->data(idx, Qt::DisplayRole).toString();
 
   bool bSubTreeAnyVisible = false;
 
-  if (m_Filter.PassesFilters(displayName.toUtf8().data()) ||
-      (internalNameVar.canConvert<QString>() && m_Filter.PassesFilters(internalNameVar.toString().toUtf8().data())))
+  if (name.contains(m_sFilterText, Qt::CaseInsensitive))
   {
     bParentIsVisible = true;
     bSubTreeAnyVisible = true;
@@ -99,7 +97,7 @@ bool plQtTreeSearchFilterModel::filterAcceptsRow(int source_row, const QModelInd
 {
   QModelIndex idx = sourceModel()->index(source_row, 0, source_parent);
 
-  if (m_Filter.IsEmpty())
+  if (m_sFilterText.isEmpty())
     return true;
 
   auto itVis = m_Visible.Find(idx);

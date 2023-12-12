@@ -56,7 +56,7 @@ plQtAnimationClipAssetDocumentWindow::plQtAnimationClipAssetDocumentWindow(plAni
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("AnimationClipAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Animation Clip Properties");
+    pPropertyPanel->setWindowTitle("ANIMATION CLIP PRPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -70,7 +70,7 @@ plQtAnimationClipAssetDocumentWindow::plQtAnimationClipAssetDocumentWindow(plAni
   // Time Scrubber
   {
     m_pTimeScrubber = new plQtTimeScrubberWidget(pContainer);
-    m_pTimeScrubber->SetDuration(plTime::MakeFromSeconds(1));
+    m_pTimeScrubber->SetDuration(plTime::Seconds(1));
 
     pContainer->GetLayout()->addWidget(m_pTimeScrubber);
 
@@ -81,7 +81,7 @@ plQtAnimationClipAssetDocumentWindow::plQtAnimationClipAssetDocumentWindow(plAni
   {
     m_pEventTrackPanel = new plQtDocumentPanel(this, pDocument);
     m_pEventTrackPanel->setObjectName("AnimClipEventTrackDockWidget");
-    m_pEventTrackPanel->setWindowTitle("Event Track");
+    m_pEventTrackPanel->setWindowTitle("EVENT TRACK");
     m_pEventTrackPanel->show();
 
     m_pEventTrackEditor = new plQtEventTrackEditorWidget(m_pEventTrackPanel);
@@ -124,7 +124,7 @@ plAnimationClipAssetDocument* plQtAnimationClipAssetDocumentWindow::GetAnimation
 void plQtAnimationClipAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {
@@ -163,7 +163,7 @@ void plQtAnimationClipAssetDocumentWindow::SendRedrawMsg()
   QueryObjectBBox();
 }
 
-void plQtAnimationClipAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose /*= 0*/)
+void plQtAnimationClipAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose)
 {
   plQuerySelectionBBoxMsgToEngine msg;
   msg.m_uiViewID = 0xFFFFFFFF;
@@ -207,16 +207,16 @@ void plQtAnimationClipAssetDocumentWindow::InternalRedraw()
     }
   }
 
-  m_PlaybackPosition = plMath::Clamp(m_PlaybackPosition, plTime::MakeZero(), m_ClipDuration);
+  m_PlaybackPosition = plMath::Clamp(m_PlaybackPosition, plTime::Zero(), m_ClipDuration);
   m_pTimeScrubber->SetScrubberPosition(m_PlaybackPosition);
   m_pEventTrackEditor->SetScrubberPosition(m_PlaybackPosition);
 
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
 
-void plQtAnimationClipAssetDocumentWindow::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg0)
+void plQtAnimationClipAssetDocumentWindow::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg0)
 {
   if (auto pMsg = plDynamicCast<const plQuerySelectionBBoxResultMsgToEditor*>(pMsg0))
   {
@@ -239,7 +239,7 @@ void plQtAnimationClipAssetDocumentWindow::ProcessMessageEventHandler(const plEd
   {
     if (pMsg->m_sName == "ClipDuration")
     {
-      const plTime newDuration = plTime::MakeFromSeconds(pMsg->m_fPayload);
+      const plTime newDuration = plTime::Seconds(pMsg->m_fPayload);
 
       if (m_ClipDuration != newDuration)
       {
@@ -261,7 +261,7 @@ void plQtAnimationClipAssetDocumentWindow::CommonAssetUiEventHandler(const plCom
 
   if (e.m_State == plCommonAssetUiState::Restart)
   {
-    m_PlaybackPosition = plTime::MakeFromSeconds(-1);
+    m_PlaybackPosition = plTime::Seconds(-1);
   }
 }
 
@@ -270,7 +270,7 @@ void plQtAnimationClipAssetDocumentWindow::OnScrubberPosChangedEvent(plUInt64 ui
   if (m_pTimeScrubber == nullptr || m_ClipDuration.IsZeroOrNegative())
     return;
 
-  m_PlaybackPosition = plTime::MakeFromSeconds(uiNewScrubberTickPos / 4800.0);
+  m_PlaybackPosition = plTime::Seconds(uiNewScrubberTickPos / 4800.0);
 }
 
 void plQtAnimationClipAssetDocumentWindow::onEventTrackInsertCpAt(plInt64 tickX, QString value)
@@ -298,7 +298,7 @@ void plQtAnimationClipAssetDocumentWindow::onEventTrackCpMoved(plUInt32 cpIdx, p
 
   cmdSet.m_sProperty = "Tick";
   cmdSet.m_NewValue = iTickX;
-  pDoc->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  pDoc->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtAnimationClipAssetDocumentWindow::onEventTrackCpDeleted(plUInt32 cpIdx)
@@ -318,7 +318,7 @@ void plQtAnimationClipAssetDocumentWindow::onEventTrackCpDeleted(plUInt32 cpIdx)
 
   plRemoveObjectCommand cmdSet;
   cmdSet.m_Object = cpGuid.Get<plUuid>();
-  pDoc->GetCommandHistory()->AddCommand(cmdSet).AssertSuccess();
+  pDoc->GetCommandHistory()->AddCommand(cmdSet).IgnoreResult();
 }
 
 void plQtAnimationClipAssetDocumentWindow::onEventTrackBeginOperation(QString name)

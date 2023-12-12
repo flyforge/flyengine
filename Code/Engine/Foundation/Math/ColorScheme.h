@@ -78,34 +78,30 @@ public:
     return plMath::Lerp(s_LightUIColors[uiIndexA], s_LightUIColors[uiIndexB], fFrac);
   }
 
-  /// \see GetCategoryColor()
-  enum class CategoryColorUsage
+  enum ColorGroup
   {
-    ViewportIcon,    // shape icons in 3D viewport
-    MenuEntryIcon,   // tint color for icons in a menu
-    SceneTreeIcon,   // tint color for icons in a scene tree
-    OverlayIcon,     // tint color for overlay icons on top of thumbnails (asset browser)
-    BorderColor,     // color for a border frame around UI elements
-    BorderIconColor, // color for icons embedded in a border frame
-    AssetMenuIcon,   // tint color for icons in asset browser menus
+    None,
+    Ai,
+    Animation,
+    Construction,
+    Custom,
+    Effects,
+    Gameplay,
+    Input,
+    Lighting,
+    Logic,
+    Physics,
+    Prefab,
+    Rendering,
+    Scripting,
+    Sound,
+    Utilities,
+    XR,
+    UI,
   };
 
-  using CategoryColorFunc = plColor (*)(plStringView sCategory, CategoryColorUsage usage);
+  static plColor GetGroupColor(ColorGroup group, plInt8 iBrightnessOffset = -3, plUInt8 uiSaturationStep = 0);
 
-  static CategoryColorFunc s_CategoryColorFunc;
-
-  /// \brief Returns a color to use in UI for elements of a given 'category'.
-  ///
-  /// The category is typically defined via an plCategoryAttribute.
-  /// It is simply a string. If it is a complex category, e.g. a path such as "Effects/Wind",
-  /// the default implementation only looks at the first part, ie. it treats this all as the category "Effects.
-  ///
-  /// A custom implementation can be provided through s_CategoryColorFunc, in which case it has full control
-  /// and can also use the full category name.
-  ///
-  /// The 'usage' is provided to tell the function what the color will be used for, allowing to use more or less contrast
-  /// or switch of coloring entirely.
-  static plColor GetCategoryColor(plStringView sCategory, CategoryColorUsage usage);
 
 private:
   PLASMA_ALWAYS_INLINE constexpr static void GetInterpolation(float fIndex, plUInt32& out_uiIndexA, plUInt32& out_uiIndexB, float& out_fFrac)

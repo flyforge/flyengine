@@ -16,8 +16,8 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectAssetDocument, 6, plRTTINoAl
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plParticleEffectAssetDocument::plParticleEffectAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plParticleEffectDescriptor>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
+plParticleEffectAssetDocument::plParticleEffectAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plParticleEffectDescriptor>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
   plVisualizerManager::GetSingleton()->SetVisualizersActive(this, m_bRenderVisualizers);
 }
@@ -111,11 +111,11 @@ void plParticleEffectAssetDocument::PropertyMetaStateEventHandler(plPropertyMeta
   }
 }
 
-void plParticleEffectAssetDocument::WriteResource(plStreamWriter& inout_stream) const
+void plParticleEffectAssetDocument::WriteResource(plStreamWriter& stream) const
 {
   const plParticleEffectDescriptor* pProp = GetProperties();
 
-  pProp->Save(inout_stream);
+  pProp->Save(stream);
 }
 
 
@@ -129,12 +129,12 @@ void plParticleEffectAssetDocument::TriggerRestartEffect()
 }
 
 
-void plParticleEffectAssetDocument::SetAutoRestart(bool bEnable)
+void plParticleEffectAssetDocument::SetAutoRestart(bool enable)
 {
-  if (m_bAutoRestart == bEnable)
+  if (m_bAutoRestart == enable)
     return;
 
-  m_bAutoRestart = bEnable;
+  m_bAutoRestart = enable;
 
   plParticleEffectAssetEvent e;
   e.m_pDocument = this;
@@ -158,12 +158,12 @@ void plParticleEffectAssetDocument::SetSimulationPaused(bool bPaused)
   m_Events.Broadcast(e);
 }
 
-void plParticleEffectAssetDocument::SetSimulationSpeed(float fSpeed)
+void plParticleEffectAssetDocument::SetSimulationSpeed(float speed)
 {
-  if (m_fSimulationSpeed == fSpeed)
+  if (m_fSimulationSpeed == speed)
     return;
 
-  m_fSimulationSpeed = fSpeed;
+  m_fSimulationSpeed = speed;
 
   plParticleEffectAssetEvent e;
   e.m_pDocument = this;
@@ -189,10 +189,10 @@ void plParticleEffectAssetDocument::SetRenderVisualizers(bool b)
   m_Events.Broadcast(e);
 }
 
-plResult plParticleEffectAssetDocument::ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_result) const
+plResult plParticleEffectAssetDocument::ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_Result) const
 {
   // currently the preview particle effect is always at the origin
-  out_result.SetIdentity();
+  out_Result.SetIdentity();
   return PLASMA_SUCCESS;
 }
 
@@ -211,7 +211,7 @@ void plParticleEffectAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo*
         if (pType->m_RenderMode != plParticleTypeRenderMode::Distortion)
         {
           // remove unused dependencies
-          pInfo->m_TransformDependencies.Remove(pType->m_sDistortionTexture);
+          pInfo->m_AssetTransformDependencies.Remove(pType->m_sDistortionTexture);
         }
       }
 
@@ -220,7 +220,7 @@ void plParticleEffectAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo*
         if (pType->m_RenderMode != plParticleTypeRenderMode::Distortion)
         {
           // remove unused dependencies
-          pInfo->m_TransformDependencies.Remove(pType->m_sDistortionTexture);
+          pInfo->m_AssetTransformDependencies.Remove(pType->m_sDistortionTexture);
         }
       }
     }
@@ -250,7 +250,7 @@ void plParticleEffectAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo*
   }
 }
 
-plTransformStatus plParticleEffectAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag,
+plTransformStatus plParticleEffectAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag,
   const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   WriteResource(stream);

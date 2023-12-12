@@ -9,7 +9,7 @@ struct plPropertyMetaStateEvent;
 
 struct plMeshPrimitive
 {
-  using StorageType = plInt8;
+  typedef plInt8 StorageType;
 
   enum Enum
   {
@@ -47,7 +47,7 @@ public:
   float m_fRadius = 0.5f;
   float m_fRadius2 = 0.5f;
   float m_fHeight = 1.0f;
-  plAngle m_Angle = plAngle::MakeFromDegree(360.0f);
+  plAngle m_Angle = plAngle::Degree(360.0f);
   plUInt16 m_uiDetail = 0;
   plUInt16 m_uiDetail2 = 0;
   bool m_bCap = true;
@@ -62,6 +62,7 @@ public:
   bool m_bRecalculateNormals = false;
   bool m_bRecalculateTrangents = true;
   bool m_bImportMaterials = true;
+  bool m_bOptimize = true;
 
   plEnum<plMeshNormalPrecision> m_NormalPrecision;
   plEnum<plMeshTexCoordPrecision> m_TexCoordPrecision;

@@ -9,23 +9,23 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 plSceneViewContext::plSceneViewContext(plSceneContext* pSceneContext)
-  : plEngineProcessViewContext(pSceneContext)
+  : PlasmaEngineProcessViewContext(pSceneContext)
 {
   m_pSceneContext = pSceneContext;
   m_bUpdatePickingData = true;
 
   // Start with something valid.
   m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, 45.0f, 0.1f, 1000.0f);
-  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::MakeZero(), plVec3(0.0f, 0.0f, 1.0f));
+  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::ZeroVector(), plVec3(0.0f, 0.0f, 1.0f));
 
   m_CullingCamera = m_Camera;
 }
 
 plSceneViewContext::~plSceneViewContext() {}
 
-void plSceneViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
+void plSceneViewContext::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg)
 {
-  plEngineProcessViewContext::HandleViewMessage(pMsg);
+  PlasmaEngineProcessViewContext::HandleViewMessage(pMsg);
 
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plViewRedrawMsgToEngine>())
   {
@@ -45,7 +45,7 @@ void plSceneViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
       {
         if (plSoundInterface* pSoundInterface = plSingletonRegistry::GetSingletonInstance<plSoundInterface>())
         {
-          pSoundInterface->SetListener(-1, pMsg2->m_vPosition, pMsg2->m_vDirForwards, pMsg2->m_vDirUp, plVec3::MakeZero());
+          pSoundInterface->SetListener(-1, pMsg2->m_vPosition, pMsg2->m_vDirForwards, pMsg2->m_vDirUp, plVec3::ZeroVector());
         }
       }
     }
@@ -66,7 +66,7 @@ void plSceneViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
 
 void plSceneViewContext::SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* renderTargets, plUInt16 uiWidth, plUInt16 uiHeight)
 {
-  plEngineProcessViewContext::SetupRenderTarget(hSwapChain, renderTargets, uiWidth, uiHeight);
+  PlasmaEngineProcessViewContext::SetupRenderTarget(hSwapChain, renderTargets, uiWidth, uiHeight);
   plView* pView = nullptr;
   if (plRenderWorld::TryGetView(m_hView, pView))
   {
@@ -156,12 +156,12 @@ void plSceneViewContext::Redraw(bool bRenderEditorGizmos)
     }
   }
 
-  plEngineProcessViewContext::Redraw(bRenderEditorGizmos);
+  PlasmaEngineProcessViewContext::Redraw(bRenderEditorGizmos);
 }
 
 void plSceneViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
-  plEngineProcessViewContext::SetCamera(pMsg);
+  PlasmaEngineProcessViewContext::SetCamera(pMsg);
 
   plView* pView = nullptr;
   plRenderWorld::TryGetView(m_hView, pView);
@@ -210,7 +210,7 @@ plViewHandle plSceneViewContext::CreateView()
   pView->SetExtractorProperty("EditorShapeIconsExtractor", "SceneContext", sceneContextVariant);
   pView->SetExtractorProperty("EditorGridExtractor", "SceneContext", sceneContextVariant);
 
-  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   pView->SetCullingCamera(&m_CullingCamera);
@@ -225,7 +225,7 @@ plViewHandle plSceneViewContext::CreateView()
 void plSceneViewContext::PickObjectAt(plUInt16 x, plUInt16 y)
 {
   // remote processes do not support picking, just ignore this
-  if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
     return;
 
   plViewPickingResultMsgToEditor res;
@@ -257,7 +257,7 @@ void plSceneViewContext::PickObjectAt(plUInt16 x, plUInt16 y)
         {
           plComponentHandle hComponent = pContext->m_ComponentMap.GetHandle(res.m_ComponentGuid);
 
-          plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+          PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
 
           // check whether the component is still valid
           plComponent* pComponent = nullptr;
@@ -285,7 +285,7 @@ void plSceneViewContext::PickObjectAt(plUInt16 x, plUInt16 y)
 void plSceneViewContext::MarqueePickObjects(const plViewMarqueePickingMsgToEngine* pMsg)
 {
   // remote processes do not support picking, just ignore this
-  if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
     return;
 
   plViewMarqueePickingResultMsgToEditor res;
@@ -311,7 +311,7 @@ void plSceneViewContext::MarqueePickObjects(const plViewMarqueePickingMsgToEngin
 
     if (varMarquee.IsA<plVariantArray>())
     {
-      plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+      PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
 
       const plVariantArray resArray = varMarquee.Get<plVariantArray>();
 

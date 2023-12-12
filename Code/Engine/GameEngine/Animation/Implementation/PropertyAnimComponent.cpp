@@ -443,7 +443,7 @@ void plPropertyAnimComponent::ApplyAnimations(const plTime& tDiff)
 
 plTime plPropertyAnimComponent::ComputeAnimationLookup(plTime tDiff)
 {
-  m_AnimationRangeLow = plMath::Clamp(m_AnimationRangeLow, plTime::MakeZero(), m_pAnimDesc->m_AnimationDuration);
+  m_AnimationRangeLow = plMath::Clamp(m_AnimationRangeLow, plTime::Zero(), m_pAnimDesc->m_AnimationDuration);
   m_AnimationRangeHigh = plMath::Clamp(m_AnimationRangeHigh, m_AnimationRangeLow, m_pAnimDesc->m_AnimationDuration);
 
   const plTime duration = m_AnimationRangeHigh - m_AnimationRangeLow;
@@ -579,7 +579,7 @@ void plPropertyAnimComponent::StartPlayback()
   if (m_pAnimDesc == nullptr)
     return;
 
-  m_AnimationRangeLow = plMath::Clamp(m_AnimationRangeLow, plTime::MakeZero(), m_pAnimDesc->m_AnimationDuration);
+  m_AnimationRangeLow = plMath::Clamp(m_AnimationRangeLow, plTime::Zero(), m_pAnimDesc->m_AnimationDuration);
   m_AnimationRangeHigh = plMath::Clamp(m_AnimationRangeHigh, m_AnimationRangeLow, m_pAnimDesc->m_AnimationDuration);
 
   // when starting with a negative speed, start at the end of the animation and play backwards
@@ -646,7 +646,7 @@ void plPropertyAnimComponent::ApplySingleFloatAnimation(const FloatBinding& bind
   {
     auto pTyped = static_cast<const plTypedMemberProperty<plAngle>*>(binding.m_pMemberProperty);
 
-    pTyped->SetValue(binding.m_pObject, plAngle::MakeFromDegree((float)fFinalValue));
+    pTyped->SetValue(binding.m_pObject, plAngle::Degree((float)fFinalValue));
     return;
   }
   else if (pRtti == plGetStaticRTTI<plTime>())
@@ -752,7 +752,8 @@ void plPropertyAnimComponent::ApplyFloatAnimation(const FloatBinding& binding, p
   {
     auto pTyped = static_cast<const plTypedMemberProperty<plQuat>*>(binding.m_pMemberProperty);
 
-    plQuat rot = plQuat::MakeFromEulerAngles(plAngle::MakeFromDegree(fCurValue[0]), plAngle::MakeFromDegree(fCurValue[1]), plAngle::MakeFromDegree(fCurValue[2]));
+    plQuat rot;
+    rot.SetFromEulerAngles(plAngle::Degree(fCurValue[0]), plAngle::Degree(fCurValue[1]), plAngle::Degree(fCurValue[2]));
 
     pTyped->SetValue(binding.m_pObject, rot);
   }

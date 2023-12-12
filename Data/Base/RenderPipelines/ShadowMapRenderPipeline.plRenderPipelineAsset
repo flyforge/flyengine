@@ -14,7 +14,6 @@ o
 		u4 %Hash{17997667719207102130}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
-		VarArray %PackageDeps{}
 		VarArray %References{}
 	}
 }
@@ -223,6 +222,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plGALResourceFormat"}
+		u3 %TypeSize{1}
 		u3 %TypeVersion{1}
 	}
 }
@@ -240,6 +240,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderPipelineNodeInputPin"}
+		u3 %TypeSize{16}
 		u3 %TypeVersion{1}
 	}
 }
@@ -257,6 +258,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderPipelineNodePassThrougPin"}
+		u3 %TypeSize{16}
 		u3 %TypeVersion{1}
 	}
 }
@@ -274,6 +276,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plDocumentRoot"}
+		u3 %TypeSize{72}
 		u3 %TypeVersion{1}
 	}
 }
@@ -291,6 +294,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plDepthOnlyPass"}
+		u3 %TypeSize{128}
 		u3 %TypeVersion{1}
 	}
 }
@@ -308,6 +312,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"DocumentNodeManager_DefaultConnection"}
+		u3 %TypeSize{8}
 		u3 %TypeVersion{1}
 	}
 }
@@ -325,6 +330,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plSourcePass"}
+		u3 %TypeSize{160}
 		u3 %TypeVersion{2}
 	}
 }
@@ -342,6 +348,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plTargetPass"}
+		u3 %TypeSize{256}
 		u3 %TypeVersion{1}
 	}
 }
@@ -359,6 +366,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderPipelineNode"}
+		u3 %TypeSize{88}
 		u3 %TypeVersion{1}
 	}
 }
@@ -376,6 +384,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plExtractor"}
+		u3 %TypeSize{88}
 		u3 %TypeVersion{1}
 	}
 }
@@ -393,6 +402,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plEnumBase"}
+		u3 %TypeSize{1}
 		u3 %TypeVersion{1}
 	}
 }
@@ -410,6 +420,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderPipelineNodeOutputPin"}
+		u3 %TypeSize{16}
 		u3 %TypeVersion{1}
 	}
 }
@@ -427,6 +438,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plGALMSAASampleCount"}
+		u3 %TypeSize{1}
 		u3 %TypeVersion{1}
 	}
 }
@@ -444,6 +456,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plVisibleObjectsExtractor"}
+		u3 %TypeSize{88}
 		u3 %TypeVersion{1}
 	}
 }
@@ -461,6 +474,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plReflectedClass"}
+		u3 %TypeSize{8}
 		u3 %TypeVersion{1}
 	}
 }
@@ -478,6 +492,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderPipelineNodePin"}
+		u3 %TypeSize{16}
 		u3 %TypeVersion{1}
 	}
 }
@@ -495,6 +510,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plRenderPipelinePass"}
+		u3 %TypeSize{112}
 		u3 %TypeVersion{1}
 	}
 }

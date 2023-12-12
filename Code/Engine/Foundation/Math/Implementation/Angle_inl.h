@@ -30,12 +30,12 @@ constexpr Type plAngle::RadToDeg(Type f)
   return f * RadToDegMultiplier<Type>();
 }
 
-constexpr inline plAngle plAngle::MakeFromDegree(float fDegree)
+constexpr inline plAngle plAngle::Degree(float fDegree)
 {
   return plAngle(DegToRad(fDegree));
 }
 
-constexpr PLASMA_ALWAYS_INLINE plAngle plAngle::MakeFromRadian(float fRadian)
+constexpr PLASMA_ALWAYS_INLINE plAngle plAngle::Radian(float fRadian)
 {
   return plAngle(fRadian);
 }
@@ -130,17 +130,17 @@ constexpr PLASMA_ALWAYS_INLINE bool plAngle::operator>=(const plAngle& r) const
 
 constexpr inline plAngle operator*(plAngle a, float f)
 {
-  return plAngle::MakeFromRadian(a.GetRadian() * f);
+  return plAngle::Radian(a.GetRadian() * f);
 }
 
 constexpr inline plAngle operator*(float f, plAngle a)
 {
-  return plAngle::MakeFromRadian(a.GetRadian() * f);
+  return plAngle::Radian(a.GetRadian() * f);
 }
 
 constexpr inline plAngle operator/(plAngle a, float f)
 {
-  return plAngle::MakeFromRadian(a.GetRadian() / f);
+  return plAngle::Radian(a.GetRadian() / f);
 }
 
 constexpr inline float operator/(plAngle a, plAngle b)

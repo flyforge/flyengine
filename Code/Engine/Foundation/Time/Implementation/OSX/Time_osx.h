@@ -17,5 +17,5 @@ void plTime::Initialize()
 plTime plTime::Now()
 {
   // mach_absolute_time() returns nanoseconds after factoring in the mach_timebase_info_data_t
-  return plTime::MakeFromSeconds((double)mach_absolute_time() * g_TimeFactor);
+  return plTime::Seconds((double)mach_absolute_time() * g_TimeFactor);
 }

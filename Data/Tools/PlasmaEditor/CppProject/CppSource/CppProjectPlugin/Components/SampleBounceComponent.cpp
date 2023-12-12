@@ -10,7 +10,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(SampleBounceComponent, 1 /* version */, plComponentM
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("Amplitude", m_fAmplitude)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(0, 10)),
-    PLASMA_MEMBER_PROPERTY("Speed", m_Speed)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(90))),
+    PLASMA_MEMBER_PROPERTY("Speed", m_Speed)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(90))),
   }
   PLASMA_END_PROPERTIES;
 

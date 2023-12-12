@@ -60,7 +60,7 @@ namespace
     plSimdMat4f helperMat;
     while (pPosX < pPosXEnd)
     {
-      helperMat.SetRows(pPosX->f, pPosY->f, pPosZ->f, plSimdVec4f::MakeZero());
+      helperMat.SetRows(pPosX->f, pPosY->f, pPosZ->f, plSimdVec4f::ZeroVector());
 
       const float x = pVolumeCollection->EvaluateAtGlobalPosition(helperMat.m_col0, pInitialValues->f.x(), imgMode, refColor);
       const float y = pVolumeCollection->EvaluateAtGlobalPosition(helperMat.m_col1, pInitialValues->f.y(), imgMode, refColor);

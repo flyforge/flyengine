@@ -28,7 +28,7 @@ public:
   void ChangeVerticalRotation(float radians); // [ scriptable ]
 
   plAngle m_NewVerticalRotation;                       // [ property ]
-  plAngle m_MaxVerticalRotation = plAngle::MakeFromDegree(80); // [ property ]
+  plAngle m_MaxVerticalRotation = plAngle::Degree(80); // [ property ]
 
 protected:
   void Update();

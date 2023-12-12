@@ -4,19 +4,17 @@ vk::ShaderModule plGALShaderVulkan::GetShader(plGALShaderStage::Enum stage) cons
   return m_Shaders[stage];
 }
 
-plUInt32 plGALShaderVulkan::GetSetCount() const
+const plGALShaderVulkan::DescriptorSetLayoutDesc& plGALShaderVulkan::GetDescriptorSetLayout() const
 {
-  return m_SetBindings.GetCount();
+  return m_descriptorSetLayoutDesc;
 }
 
-const plGALShaderVulkan::DescriptorSetLayoutDesc& plGALShaderVulkan::GetDescriptorSetLayout(plUInt32 uiSet) const
+const plArrayPtr<const plGALShaderVulkan::BindingMapping> plGALShaderVulkan::GetBindingMapping() const
 {
-  PLASMA_ASSERT_DEBUG(uiSet < m_descriptorSetLayoutDesc.GetCount(), "Set index out of range.");
-  return m_descriptorSetLayoutDesc[uiSet];
+  return m_BindingMapping;
 }
 
-plArrayPtr<const plShaderResourceBinding> plGALShaderVulkan::GetBindings(plUInt32 uiSet) const
+const plArrayPtr<const plGALShaderVulkan::VertexInputAttribute> plGALShaderVulkan::GetVertexInputAttributes() const
 {
-  PLASMA_ASSERT_DEBUG(uiSet < m_descriptorSetLayoutDesc.GetCount(), "Set index out of range.");
-  return m_SetBindings[uiSet].GetArrayPtr();
+  return m_VertexInputAttributes;
 }

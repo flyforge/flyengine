@@ -53,21 +53,21 @@ class PLASMA_GUIFOUNDATION_DLL plQtTimeScrubberToolbar : public QToolBar
   Q_OBJECT
 
 public:
-  explicit plQtTimeScrubberToolbar(QWidget* pParent);
+  explicit plQtTimeScrubberToolbar(QWidget* parent);
 
   /// \brief Sets the duration in 'ticks'. There are 4800 ticks per second.
-  void SetDuration(plUInt64 uiNumTicks);
+  void SetDuration(plUInt64 iNumTicks);
 
   /// \brief Sets the current position in 'ticks'. There are 4800 ticks per second.
   void SetScrubberPosition(plUInt64 uiTick);
 
-  void SetButtonState(bool bPlaying, bool bRepeatEnabled);
+  void SetButtonState(bool playing, bool repeatEnabled);
 
 Q_SIGNALS:
   void ScrubberPosChangedEvent(plUInt64 uiNewScrubberTickPos);
   void PlayPauseEvent();
   void RepeatEvent();
-  void DurationChangedEvent(double fDuration);
+  void DurationChangedEvent(double duration);
   void AdjustDurationEvent();
 
 private:

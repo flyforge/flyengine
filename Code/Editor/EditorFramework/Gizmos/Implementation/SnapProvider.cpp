@@ -5,7 +5,7 @@
 #include <EditorFramework/Preferences/EditorPreferences.h>
 #include <Foundation/Configuration/SubSystem.h>
 
-plAngle plSnapProvider::s_RotationSnapValue = plAngle::MakeFromDegree(15.0f);
+plAngle plSnapProvider::s_RotationSnapValue = plAngle::Degree(15.0f);
 float plSnapProvider::s_fScaleSnapValue = 0.125f;
 float plSnapProvider::s_fTranslationSnapValue = 0.25f;
 plEventSubscriptionID plSnapProvider::s_UserPreferencesChanged = 0;
@@ -41,17 +41,17 @@ void plSnapProvider::Shutdown()
 {
   if (s_UserPreferencesChanged)
   {
-    plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+    PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
     pPreferences->m_ChangedEvent.RemoveEventHandler(s_UserPreferencesChanged);
   }
   plQtEditorApp::m_Events.RemoveEventHandler(plMakeDelegate(&plSnapProvider::EditorEventHandler));
 }
 
-void plSnapProvider::EditorEventHandler(const plEditorAppEvent& e)
+void plSnapProvider::EditorEventHandler(const PlasmaEditorAppEvent& e)
 {
-  if (e.m_Type == plEditorAppEvent::Type::EditorStarted)
+  if (e.m_Type == PlasmaEditorAppEvent::Type::EditorStarted)
   {
-    plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+    PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
     PreferenceChangedEventHandler(pPreferences);
     s_UserPreferencesChanged = pPreferences->m_ChangedEvent.AddEventHandler(plMakeDelegate(&plSnapProvider::PreferenceChangedEventHandler));
   }
@@ -59,7 +59,7 @@ void plSnapProvider::EditorEventHandler(const plEditorAppEvent& e)
 
 void plSnapProvider::PreferenceChangedEventHandler(plPreferences* pPreferenceBase)
 {
-  auto* pPreferences = static_cast<plEditorPreferencesUser*>(pPreferenceBase);
+  auto* pPreferences = static_cast<PlasmaEditorPreferencesUser*>(pPreferenceBase);
   SetRotationSnapValue(pPreferences->m_RotationSnapValue);
   SetScaleSnapValue(pPreferences->m_fScaleSnapValue);
   SetTranslationSnapValue(pPreferences->m_fTranslationSnapValue);
@@ -87,7 +87,7 @@ void plSnapProvider::SetRotationSnapValue(plAngle angle)
 
   s_RotationSnapValue = angle;
 
-  plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
   pPreferences->m_RotationSnapValue = angle;
   pPreferences->TriggerPreferencesChangedEvent();
 
@@ -103,7 +103,7 @@ void plSnapProvider::SetScaleSnapValue(float fPercentage)
 
   s_fScaleSnapValue = fPercentage;
 
-  plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
   pPreferences->m_fScaleSnapValue = fPercentage;
   pPreferences->TriggerPreferencesChangedEvent();
 
@@ -119,7 +119,7 @@ void plSnapProvider::SetTranslationSnapValue(float fUnits)
 
   s_fTranslationSnapValue = fUnits;
 
-  plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
   pPreferences->m_fTranslationSnapValue = fUnits;
   pPreferences->TriggerPreferencesChangedEvent();
 
@@ -138,50 +138,50 @@ void plSnapProvider::SnapTranslation(plVec3& value)
   value.z = plMath::RoundToMultiple(value.z, s_fTranslationSnapValue);
 }
 
-void plSnapProvider::SnapTranslationInLocalSpace(const plQuat& qRotation, plVec3& ref_vTranslation)
+void plSnapProvider::SnapTranslationInLocalSpace(const plQuat& rotation, plVec3& translation)
 {
   if (s_fTranslationSnapValue <= 0.0f)
     return;
 
-  const plQuat mInvRot = qRotation.GetInverse();
+  const plQuat mInvRot = -rotation;
 
-  plVec3 vLocalTranslation = mInvRot * ref_vTranslation;
+  plVec3 vLocalTranslation = mInvRot * translation;
   vLocalTranslation.x = plMath::RoundToMultiple(vLocalTranslation.x, s_fTranslationSnapValue);
   vLocalTranslation.y = plMath::RoundToMultiple(vLocalTranslation.y, s_fTranslationSnapValue);
   vLocalTranslation.z = plMath::RoundToMultiple(vLocalTranslation.z, s_fTranslationSnapValue);
 
-  ref_vTranslation = qRotation * vLocalTranslation;
+  translation = rotation * vLocalTranslation;
 }
 
-void plSnapProvider::SnapRotation(plAngle& ref_rotation)
+void plSnapProvider::SnapRotation(plAngle& rotation)
 {
   if (s_RotationSnapValue.GetRadian() != 0.0f)
   {
-    ref_rotation = plAngle::MakeFromRadian(plMath::RoundToMultiple(ref_rotation.GetRadian(), s_RotationSnapValue.GetRadian()));
+    rotation = plAngle::Radian(plMath::RoundToMultiple(rotation.GetRadian(), s_RotationSnapValue.GetRadian()));
   }
 }
 
-void plSnapProvider::SnapScale(float& ref_fScale)
+void plSnapProvider::SnapScale(float& scale)
 {
   if (s_fScaleSnapValue > 0.0f)
   {
-    ref_fScale = plMath::RoundToMultiple(ref_fScale, s_fScaleSnapValue);
+    scale = plMath::RoundToMultiple(scale, s_fScaleSnapValue);
   }
 }
 
-void plSnapProvider::SnapScale(plVec3& ref_vScale)
+void plSnapProvider::SnapScale(plVec3& scale)
 {
   if (s_fScaleSnapValue > 0.0f)
   {
-    SnapScale(ref_vScale.x);
-    SnapScale(ref_vScale.y);
-    SnapScale(ref_vScale.z);
+    SnapScale(scale.x);
+    SnapScale(scale.y);
+    SnapScale(scale.z);
   }
 }
 
-plVec3 plSnapProvider::GetScaleSnapped(const plVec3& vScale)
+plVec3 plSnapProvider::GetScaleSnapped(const plVec3& scale)
 {
-  plVec3 res = vScale;
+  plVec3 res = scale;
   SnapScale(res);
   return res;
 }

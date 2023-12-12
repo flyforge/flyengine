@@ -18,7 +18,7 @@ plGALProxyTexture::plGALProxyTexture(const plGALTexture& parentTexture)
 {
 }
 
-plGALProxyTexture::~plGALProxyTexture() = default;
+plGALProxyTexture::~plGALProxyTexture() {}
 
 
 const plGALResourceBase* plGALProxyTexture::GetParentResource() const

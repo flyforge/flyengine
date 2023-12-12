@@ -4,7 +4,6 @@
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/IO/FileSystem/FileWriter.h>
 #include <Foundation/Profiling/Profiling.h>
-#include <Foundation/Time/Stopwatch.h>
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 #include <QDesktopServices>
 #include <QDir>
@@ -47,7 +46,7 @@ PLASMA_END_SUBSYSTEM_DECLARATION;
 plQtUiServices::plQtUiServices()
   : m_SingletonRegistrar(this)
 {
-  qRegisterMetaType<plUuid>();
+  int id = qRegisterMetaType<plUuid>();
   m_pColorDlg = nullptr;
 }
 
@@ -73,111 +72,74 @@ void plQtUiServices::SaveState()
   Settings.endGroup();
 }
 
-plTime g_Total = plTime::MakeZero();
+plMutex m;
 
-const QIcon& plQtUiServices::GetCachedIconResource(plStringView sIdentifier, plColor svgTintColor)
+const QIcon& plQtUiServices::GetCachedIconResource(const char* szIdentifier, plColor color)
 {
-  plStringBuilder sFullIdentifier = sIdentifier;
+  plStringBuilder sIdentifier = szIdentifier;
   auto& map = s_IconsCache;
 
-  const bool bNeedsColoring = svgTintColor != plColor::MakeZero() && sIdentifier.EndsWith_NoCase(".svg");
-
-  if (bNeedsColoring)
+  if (color != plColor::ZeroColor())
   {
-    sFullIdentifier.AppendFormat("-{}", plColorGammaUB(svgTintColor));
+    sIdentifier.AppendFormat("-{}", plColorGammaUB(color));
   }
 
-  auto it = map.Find(sFullIdentifier);
+  auto it = map.Find(sIdentifier);
 
   if (it.IsValid())
     return it.Value();
 
-  if (bNeedsColoring)
+  plStringBuilder filename = sIdentifier.GetFileName();
+
+  if (color != plColor::ZeroColor())
   {
-    plStopwatch sw;
+    PLASMA_LOCK(m);
 
-    // read the icon from the Qt virtual file system (QResource)
-    QFile file(plString(sIdentifier).GetData());
-    if (!file.open(QIODeviceBase::OpenModeFlag::ReadOnly))
+    const plColorGammaUB color8 = color;
+
+    plOSFile::CreateDirectoryStructure(plOSFile::GetTempDataFolder("QIcons")).AssertSuccess();
+    const plStringBuilder name(plOSFile::GetTempDataFolder("QIcons"), "/", filename, ".svg");
+
+    QFile file(szIdentifier);
+    file.open(QIODeviceBase::OpenModeFlag::ReadOnly);
+    QByteArray content = file.readAll();
+    file.close();
+
+    QString sContent = content;
+
+    const QChar c0 = '0';
+
+    sContent = sContent.replace("#ffffff", QString("#%1%2%3").arg((int)color8.r, 2, 16, c0).arg((int)color8.g, 2, 16, c0).arg((int)color8.b, 2, 16, c0), Qt::CaseInsensitive);
+
     {
-      // if it doesn't exist, return an empty QIcon
+      plStringBuilder tmp = sContent.toUtf8().data();
 
-      map[sFullIdentifier] = QIcon();
-      return map[sFullIdentifier];
+      QFile fileOut(name.GetData());
+      fileOut.open(QIODeviceBase::OpenModeFlag::WriteOnly);
+      fileOut.write(tmp.GetData(), tmp.GetElementCount());
+      fileOut.flush();
+      fileOut.close();
     }
 
-    // get the entire SVG file content
-    plStringBuilder sContent = QString(file.readAll()).toUtf8().data();
-
-    // replace the occurrence of the color white ("#FFFFFF") with the desired target color
-    {
-      const plColorGammaUB color8 = svgTintColor;
-
-      plStringBuilder rep;
-      rep.Format("#{}{}{}", plArgI((int)color8.r, 2, true, 16), plArgI((int)color8.g, 2, true, 16), plArgI((int)color8.b, 2, true, 16));
-
-      sContent.ReplaceAll_NoCase("#ffffff", rep);
-    }
-
-    // hash the content AFTER the color replacement, so it includes the custom color change
-    const plUInt32 uiSrcHash = plHashingUtils::xxHash32String(sContent);
-
-    // file the path to the temp file, including the source hash
-    const plStringBuilder sTempFolder = plOSFile::GetTempDataFolder("plEditor/QIcons");
-    plStringBuilder sTempIconFile(sTempFolder, "/", sIdentifier.GetFileName());
-    sTempIconFile.AppendFormat("-{}.svg", uiSrcHash);
-
-    // only write to the file system, if the target file doesn't exist yet, this saves more than half the time
-    if (!plOSFile::ExistsFile(sTempIconFile))
-    {
-      // now write the new SVG file back to a dummy file
-      // yes, this is as stupid as it sounds, we really write the file BACK TO THE FILESYSTEM, rather than doing this stuff in-memory
-      // that's because I wasn't able to figure out whether we can somehow read a QIcon from a string rather than from file
-      // it doesn't appear to be easy at least, since we can only give it a path, not a memory stream or anything like that
-      {
-        // necessary for Qt to be able to write to the folder
-        plOSFile::CreateDirectoryStructure(sTempFolder).AssertSuccess();
-
-        QFile fileOut(sTempIconFile.GetData());
-        fileOut.open(QIODeviceBase::OpenModeFlag::WriteOnly);
-        fileOut.write(sContent.GetData(), sContent.GetElementCount());
-        fileOut.flush();
-        fileOut.close();
-      }
-    }
-
-    QIcon icon(sTempIconFile.GetData());
+    QIcon icon(name.GetData());
 
     if (!icon.pixmap(QSize(16, 16)).isNull())
-      map[sFullIdentifier] = icon;
+      map[sIdentifier] = icon;
     else
-      map[sFullIdentifier] = QIcon();
-
-    plTime local = sw.GetRunningTotal();
-    g_Total += local;
-
-    // kept here for debug purposes, but don't waste time on logging
-    // plLog::Info("Icon load time: {}, total = {}", local, g_Total);
+      map[sIdentifier] = QIcon();
   }
   else
   {
-    const QString sFile = plString(sIdentifier).GetData();
+    QIcon icon(szIdentifier);
 
-    if (QFile::exists(sFile)) // prevent Qt from spamming warnings about non-existing files by checking this manually
-    {
-      QIcon icon(sFile);
-
-      // Workaround for QIcon being stupid and treating failed to load icons as not-null.
-      if (!icon.pixmap(QSize(16, 16)).isNull())
-        map[sFullIdentifier] = icon;
-      else
-        map[sFullIdentifier] = QIcon();
-    }
+    // Workaround for QIcon being stupid and treating failed to load icons as not-null.
+    if (!icon.pixmap(QSize(16, 16)).isNull())
+      map[sIdentifier] = icon;
     else
-      map[sFullIdentifier] = QIcon();
+      map[sIdentifier] = QIcon();
   }
 
-  return map[sFullIdentifier];
+  return map[sIdentifier];
 }
 
 
@@ -270,7 +232,7 @@ void plQtUiServices::Init()
     s_LastTickEvent.m_fRefreshRate = pScreen->refreshRate();
   }
 
-  QTimer::singleShot((plInt32)plMath::Floor(1000.0 / s_LastTickEvent.m_fRefreshRate), this, SLOT(TickEventHandler()));
+  QTimer::singleShot(0, this, SLOT(TickEventHandler()));
 }
 
 void plQtUiServices::TickEventHandler()
@@ -293,11 +255,11 @@ void plQtUiServices::TickEventHandler()
   const plTime endTime = plTime::Now();
   plTime lastFrameTime = endTime - startTime;
 
-  plTime delay = plTime::MakeFromMilliseconds(1000.0 / s_LastTickEvent.m_fRefreshRate);
+  plTime delay = plTime::Milliseconds(1000.0 / s_LastTickEvent.m_fRefreshRate);
   delay -= lastFrameTime;
-  delay = plMath::Max(delay, plTime::MakeZero());
+  delay = plMath::Max(delay, plTime::Zero());
 
-  QTimer::singleShot((plInt32)plMath::Floor(delay.GetMilliseconds()), this, SLOT(TickEventHandler()));
+  QTimer::singleShot(0, this, SLOT(TickEventHandler()));
 }
 
 void plQtUiServices::LoadState()
@@ -341,7 +303,7 @@ void plQtUiServices::ShowGlobalStatusBarMessage(const plFormatString& msg)
   Event e;
   e.m_Type = Event::ShowGlobalStatusBarText;
   e.m_sText = msg.GetText(tmp);
-  e.m_Time = plTime::MakeFromSeconds(0);
+  e.m_Time = plTime::Seconds(0);
 
   s_Events.Broadcast(e);
 }

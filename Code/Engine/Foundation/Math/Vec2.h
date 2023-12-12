@@ -37,11 +37,8 @@ public:
 
   // no copy-constructor and operator= since the default-generated ones will be faster
 
-  /// \brief Returns a vector with all components set to Not-a-Number (NaN).
-  [[nodiscard]] static const plVec2Template<Type> MakeNaN() { return plVec2Template<Type>(plMath::NaN<Type>()); }
-
   /// \brief Static function that returns a zero-vector.
-  [[nodiscard]] static const plVec2Template<Type> MakeZero() { return plVec2Template(0); } // [tested]
+  static const plVec2Template<Type> ZeroVector() { return plVec2Template(0); } // [tested]
 
 #if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
@@ -101,7 +98,8 @@ public:
 
   /// \brief Tries to normalize this vector. If the vector is too close to zero, PLASMA_FAILURE is returned and the vector is set to the given
   /// fallback value.
-  plResult NormalizeIfNotZero(const plVec2Template<Type>& vFallback = plVec2Template<Type>(1, 0), Type fEpsilon = plMath::DefaultEpsilon<Type>()); // [tested]
+  plResult NormalizeIfNotZero(
+    const plVec2Template<Type>& vFallback = plVec2Template<Type>(1, 0), Type fEpsilon = plMath::DefaultEpsilon<Type>()); // [tested]
 
   /// \brief Returns, whether this vector is (0, 0).
   bool IsZero() const; // [tested]

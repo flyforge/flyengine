@@ -7,7 +7,6 @@
 #include <EditorFramework/PropertyGrid/AssetBrowserPropertyWidget.moc.h>
 #include <GuiFoundation/UIServices/ImageCache.moc.h>
 #include <ToolsFoundation/Assets/AssetFileExtensionWhitelist.h>
-#include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
 plQtAssetPropertyWidget::plQtAssetPropertyWidget()
   : plQtStandardPropertyWidget()
@@ -169,39 +168,18 @@ void plQtAssetPropertyWidget::InternalSetValue(const plVariant& value)
         return;
       }
 
-      plUuid newAssetGuid = plConversionUtils::ConvertStringToUuid(sText);
+      m_AssetGuid = plConversionUtils::ConvertStringToUuid(sText);
 
-      // If this is a thumbnail or transform dependency, make sure the target is not in our inverse hull, i.e. we don't create a circular dependency.
-      const plAssetBrowserAttribute* pAssetAttribute = m_pProp->GetAttributeByType<plAssetBrowserAttribute>();
-      if (pAssetAttribute->GetDependencyFlags().IsAnySet(plDependencyFlags::Thumbnail | plDependencyFlags::Transform))
-      {
-        plUuid documentGuid = m_pObjectAccessor->GetObjectManager()->GetDocument()->GetGuid();
-        plAssetCurator::plLockedSubAsset asset = plAssetCurator::GetSingleton()->GetSubAsset(documentGuid);
-        if (asset.isValid())
-        {
-          plSet<plUuid> inverseHull;
-          plAssetCurator::GetSingleton()->GenerateInverseTransitiveHull(asset->m_pAssetInfo, inverseHull, true, true);
-          if (inverseHull.Contains(newAssetGuid))
-          {
-            plQtUiServices::GetSingleton()->MessageBoxWarning("This asset can't be used here, as that would create a circular dependency.");
-            return;
-          }
-        }
-      }
-
-      m_AssetGuid = newAssetGuid;
       auto pAsset = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid);
 
       if (pAsset)
       {
         pAsset->GetSubAssetIdentifier(sText);
 
-        sThumbnailPath = pAsset->m_pAssetInfo->GetManager()->GenerateResourceThumbnailPath(pAsset->m_pAssetInfo->m_Path, pAsset->m_Data.m_sName);
+        sThumbnailPath = pAsset->m_pAssetInfo->GetManager()->GenerateResourceThumbnailPath(pAsset->m_pAssetInfo->m_sAbsolutePath, pAsset->m_Data.m_sName);
       }
       else
-      {
         m_AssetGuid = plUuid();
-      }
     }
 
     UpdateThumbnail(m_AssetGuid, sThumbnailPath);
@@ -289,7 +267,7 @@ void plQtAssetPropertyWidget::ThumbnailInvalidated(QString sPath, plUInt32 uiIma
 void plQtAssetPropertyWidget::OnOpenAssetDocument()
 {
   plQtEditorApp::GetSingleton()->OpenDocumentQueued(
-    plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_Path.GetAbsolutePath(), GetSelection()[0].m_pObject);
+    plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_sAbsolutePath, GetSelection()[0].m_pObject);
 }
 
 void plQtAssetPropertyWidget::OnSelectInAssetBrowser()
@@ -304,7 +282,7 @@ void plQtAssetPropertyWidget::OnOpenExplorer()
 
   if (m_AssetGuid.IsValid())
   {
-    sPath = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_Path.GetAbsolutePath();
+    sPath = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_sAbsolutePath;
   }
   else
   {
@@ -336,7 +314,7 @@ void plQtAssetPropertyWidget::OnCopyAssetGuid()
   mimeData->setText(QString::fromUtf8(sGuid.GetData()));
   clipboard->setMimeData(mimeData);
 
-  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied asset GUID: {}", sGuid), plTime::MakeFromSeconds(5));
+  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied asset GUID: {}", sGuid), plTime::Seconds(5));
 }
 
 void plQtAssetPropertyWidget::OnCreateNewAsset()
@@ -347,7 +325,7 @@ void plQtAssetPropertyWidget::OnCreateNewAsset()
   {
     if (m_AssetGuid.IsValid())
     {
-      sPath = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_Path.GetAbsolutePath();
+      sPath = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_sAbsolutePath;
     }
     else
     {

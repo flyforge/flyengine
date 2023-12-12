@@ -99,25 +99,6 @@ struct plProcPlacementMode
 
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcPlacementMode);
 
-struct plProcPlacementPattern
-{
-  using StorageType = plUInt8;
-
-  enum Enum
-  {
-    RegularGrid,
-    HexGrid,
-    Natural,
-
-    COUNT,
-
-    Default = Natural
-  };
-};
-
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcPlacementPattern);
-
-
 struct plProcVolumeImageMode
 {
   using StorageType = plUInt8;
@@ -157,9 +138,8 @@ namespace plProcGenInternal
   {
     struct Point
     {
-      float x;
-      float y;
-      float threshold;
+      plVec2 m_Coordinates;
+      float m_fThreshold;
     };
 
     plArrayPtr<Point> m_Points;
@@ -197,10 +177,10 @@ namespace plProcGenInternal
     const Pattern* m_pPattern = nullptr;
     float m_fFootprint = 1.0f;
 
-    plVec3 m_vMinOffset = plVec3::MakeZero();
-    plVec3 m_vMaxOffset = plVec3::MakeZero();
+    plVec3 m_vMinOffset = plVec3::ZeroVector();
+    plVec3 m_vMaxOffset = plVec3::ZeroVector();
 
-    plAngle m_YawRotationSnap = plAngle::MakeFromRadian(0.0f);
+    plAngle m_YawRotationSnap = plAngle::Radian(0.0f);
     float m_fAlignToNormal = 1.0f;
 
     plVec3 m_vMinScale = plVec3(1.0f);

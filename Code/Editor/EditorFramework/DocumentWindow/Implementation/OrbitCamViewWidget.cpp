@@ -4,7 +4,7 @@
 #include <EditorFramework/InputContexts/OrbitCameraContext.h>
 #include <EditorFramework/InputContexts/SelectionContext.h>
 
-plQtOrbitCamViewWidget::plQtOrbitCamViewWidget(plQtEngineDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig, bool bPicking)
+plQtOrbitCamViewWidget::plQtOrbitCamViewWidget(plQtEngineDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig, bool bPicking)
   : plQtEngineViewWidget(nullptr, pOwnerWindow, pViewConfig)
 {
   setAcceptDrops(true);

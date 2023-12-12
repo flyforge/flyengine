@@ -15,7 +15,7 @@ void* plPageAllocator::AllocatePage(size_t uiSize)
   size_t uiAlign = plSystemInformation::Get().GetMemoryPageSize();
   PLASMA_CHECK_ALIGNMENT(ptr, uiAlign);
 
-  if constexpr ((plMemoryTrackingFlags::Default & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if ((plMemoryTrackingFlags::Default & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
   {
     plMemoryTracker::AddAllocation(GetPageAllocatorId(), plMemoryTrackingFlags::Default, ptr, uiSize, uiAlign, plTime::Now() - fAllocationTime);
   }
@@ -26,7 +26,7 @@ void* plPageAllocator::AllocatePage(size_t uiSize)
 // static
 void plPageAllocator::DeallocatePage(void* pPtr)
 {
-  if constexpr ((plMemoryTrackingFlags::Default & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if ((plMemoryTrackingFlags::Default & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
   {
     plMemoryTracker::RemoveAllocation(GetPageAllocatorId(), pPtr);
   }

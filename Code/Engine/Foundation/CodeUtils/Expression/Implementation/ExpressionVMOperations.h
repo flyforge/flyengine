@@ -77,10 +77,8 @@ namespace
     DEFINE_TARGET_REGISTER();                                                                                       \
     DEFINE_OP_REGISTER(a);                                                                                          \
     plUInt32 bRaw;                                                                                                  \
-    PLASMA_IGNORE_UNUSED(bRaw);                                                                                         \
     plExpression::Register bConstant;                                                                               \
     const plExpression::Register* b;                                                                                \
-    PLASMA_IGNORE_UNUSED(b);                                                                                            \
     if constexpr (RightIsConstant)                                                                                  \
     {                                                                                                               \
       bRaw = *pByteCode;                                                                                            \
@@ -214,9 +212,6 @@ namespace
 
   void VM_MovX_C_4(const ByteCodeType*& pByteCode, ExecutionContext& context)
   {
-    PLASMA_WARNING_PUSH()
-    PLASMA_WARNING_DISABLE_MSVC(4189);
-
     DEFINE_TARGET_REGISTER();
     DEFINE_CONSTANT(a);
     while (r != re)
@@ -224,8 +219,6 @@ namespace
       r->i = a->i;
       ++r;
     }
-
-    PLASMA_WARNING_POP()
   }
 
   template <typename ValueType, typename StreamType>
@@ -430,9 +423,6 @@ namespace
 
   void VM_Call(const ByteCodeType*& pByteCode, ExecutionContext& context)
   {
-    PLASMA_WARNING_PUSH()
-    PLASMA_WARNING_DISABLE_MSVC(4189);
-
     plUInt32 uiFunctionIndex = plExpressionByteCode::GetRegisterIndex(pByteCode);
     auto& function = *context.m_Functions[uiFunctionIndex];
 
@@ -450,8 +440,6 @@ namespace
     plExpression::Output output = plMakeArrayPtr(r, context.m_uiNumSimd4Instances);
 
     function.m_Func(inputs, output, *context.m_pGlobalData);
-
-    PLASMA_WARNING_POP()
   }
 
   static constexpr OpFunc s_Simd4Funcs[] = {

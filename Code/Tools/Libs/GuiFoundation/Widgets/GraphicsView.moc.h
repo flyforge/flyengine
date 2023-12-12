@@ -14,7 +14,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtGraphicsView : public QGraphicsView
   Q_OBJECT
 
 public:
-  plQtGraphicsView(QWidget* pParent = nullptr);
+  plQtGraphicsView(QWidget* parent = nullptr);
 
   virtual void wheelEvent(QWheelEvent* e) override;
   virtual void mousePressEvent(QMouseEvent* e) override;
@@ -22,10 +22,10 @@ public:
   virtual void mouseMoveEvent(QMouseEvent* e) override;
   virtual void keyPressEvent(QKeyEvent* e) override;
 
-  void SetZoom(float fZoom);
+  void SetZoom(float zoom);
   float GetZoom() const { return m_fZoom; }
 
-  void SetZoomLimits(float fMinZoom, float fMaxZoom);
+  void SetZoomLimits(float minZoom, float maxZoom);
 
 Q_SIGNALS:
   void BeginDrag();

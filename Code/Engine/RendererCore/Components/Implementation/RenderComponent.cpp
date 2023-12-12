@@ -8,7 +8,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plRenderComponent, 1)
 {
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering"),
+    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -43,7 +43,8 @@ void plRenderComponent::OnDeactivated()
 
 void plRenderComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
 {
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   bool bAlwaysVisible = false;
 

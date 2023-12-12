@@ -17,7 +17,7 @@ plResult plBakingScene::Extract()
 {
   m_Volumes.Clear();
   m_MeshObjects.Clear();
-  m_BoundingBox = plBoundingBox::MakeInvalid();
+  m_BoundingBox.SetInvalid();
   m_bIsBaked = false;
 
   const plWorld* pWorld = plWorld::GetWorld(m_uiWorldIndex);

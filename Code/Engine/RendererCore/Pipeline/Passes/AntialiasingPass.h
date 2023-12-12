@@ -12,9 +12,8 @@ public:
   ~plAntialiasingPass();
 
   virtual bool GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs) override;
+
   virtual void Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
-  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
-  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
 protected:
   plRenderPipelineNodeInputPin m_PinInput;

@@ -99,7 +99,7 @@ public:
   virtual bool ExceededBreakingPoint() = 0;
 
   /// \brief Forwards to BreakConstraint().
-  void OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& ref_msg); // [ msg handler ]
+  void OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& msg); // [ msg handler ]
 
 protected:
   plResult FindParentBody(plUInt32& out_uiJoltBodyID, plJoltDynamicActorComponent*& pRbComp);

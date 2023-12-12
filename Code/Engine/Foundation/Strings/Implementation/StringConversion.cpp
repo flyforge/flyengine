@@ -79,7 +79,7 @@ void plStringWChar::operator=(plStringView sUtf8)
   {
     const char* szUtf8 = sUtf8.GetStartPointer();
 
-    //PLASMA_ASSERT_DEV(plUnicodeUtils::IsValidUtf8(szUtf8), "Input Data is not a valid Utf8 string. Did you intend to use a Wide-String and forget the 'L' prefix?");
+    PLASMA_ASSERT_DEV(plUnicodeUtils::IsValidUtf8(szUtf8), "Input Data is not a valid Utf8 string. Did you intend to use a Wide-String and forget the 'L' prefix?");
 
     // skip any Utf8 Byte Order Mark
     plUnicodeUtils::SkipUtf8Bom(szUtf8);

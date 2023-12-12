@@ -14,7 +14,7 @@ class DebugRenderer;
 #endif // JPH_DEBUG_RENDERER
 
 /// Instance of a skeleton, contains the pose the current skeleton is in
-class JPH_EXPORT SkeletonPose
+class SkeletonPose
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE

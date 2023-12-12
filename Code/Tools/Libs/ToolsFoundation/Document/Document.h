@@ -14,7 +14,7 @@
 
 class plObjectAccessorBase;
 class plObjectCommandAccessor;
-class plEditorInputContext;
+class PlasmaEditorInputContext;
 class plAbstractObjectNode;
 
 struct PLASMA_TOOLSFOUNDATION_DLL plObjectAccessorChangeEvent
@@ -58,7 +58,7 @@ class PLASMA_TOOLSFOUNDATION_DLL plDocument : public plReflectedClass
   PLASMA_ADD_DYNAMIC_REFLECTION(plDocument, plReflectedClass);
 
 public:
-  plDocument(plStringView sPath, plDocumentObjectManager* pDocumentObjectManagerImpl);
+  plDocument(const char* szPath, plDocumentObjectManager* pDocumentObjectManagerImpl);
   virtual ~plDocument();
 
   /// \name Document State Functions
@@ -66,7 +66,7 @@ public:
 
   bool IsModified() const { return m_bModified; }
   bool IsReadOnly() const { return m_bReadOnly; }
-  const plUuid GetGuid() const { return m_pDocumentInfo ? m_pDocumentInfo->m_DocumentID : plUuid(); }
+  const plUuid& GetGuid() const { return m_pDocumentInfo->m_DocumentID; }
 
   const plDocumentObjectManager* GetObjectManager() const { return m_pObjectManager.Borrow(); }
   plDocumentObjectManager* GetObjectManager() { return m_pObjectManager.Borrow(); }
@@ -99,17 +99,16 @@ protected:
 
 public:
   /// \brief Returns the absolute path to the document.
-  plStringView GetDocumentPath() const { return m_sDocumentPath; }
+  const char* GetDocumentPath() const { return m_sDocumentPath; }
 
   /// \brief Saves the document, if it is modified.
   /// If bForce is true, the document will be written, even if it is not considered modified.
   plStatus SaveDocument(bool bForce = false);
-  using AfterSaveCallback = plDelegate<void(plDocument*, plStatus)>;
+  typedef plDelegate<void(plDocument* doc, plStatus res)> AfterSaveCallback;
   plTaskGroupID SaveDocumentAsync(AfterSaveCallback callback, bool bForce = false);
-  void DocumentRenamed(plStringView sNewDocumentPath);
 
-  static plStatus ReadDocument(plStringView sDocumentPath, plUniquePtr<plAbstractObjectGraph>& ref_pHeader, plUniquePtr<plAbstractObjectGraph>& ref_pObjects,
-    plUniquePtr<plAbstractObjectGraph>& ref_pTypes);
+  static plStatus ReadDocument(const char* sDocumentPath, plUniquePtr<plAbstractObjectGraph>& header, plUniquePtr<plAbstractObjectGraph>& objects,
+    plUniquePtr<plAbstractObjectGraph>& types);
   static plStatus ReadAndRegisterTypes(const plAbstractObjectGraph& types);
 
   plStatus LoadDocument() { return InternalLoadDocument(); }
@@ -158,10 +157,10 @@ public:
   };
 
   /// \brief Whether this document supports pasting the given mime format into it
-  virtual void GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_mimeTypes) const {}
+  virtual void GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const {}
   /// \brief Creates the abstract graph of data to be copied and returns the mime type for the clipboard to identify the data
-  virtual bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_sMimeType) const { return false; };
-  virtual bool Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
+  virtual bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const { return false; };
+  virtual bool Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
   {
     return false;
   };
@@ -185,7 +184,7 @@ public:
   /// \brief Allows to return a single input context that currently overrides all others (in priority).
   ///
   /// Used to implement custom tools that need to have priority over selection and camera movement.
-  virtual plEditorInputContext* GetEditorInputContextOverride() { return nullptr; }
+  virtual PlasmaEditorInputContext* GetEditorInputContextOverride() { return nullptr; }
 
   ///@}
   /// \name Misc Functions
@@ -206,7 +205,7 @@ public:
   void ShowDocumentStatus(const plFormatString& msg) const;
 
   /// \brief Tries to compute the position and rotation for an object in the document. Returns PLASMA_SUCCESS if it was possible.
-  virtual plResult ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_result) const;
+  virtual plResult ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_Result) const;
 
   /// \brief Needed by plManipulatorManager to know where to look for the manipulator attributes.
   ///
@@ -225,16 +224,15 @@ public:
   virtual void UpdatePrefabs();
 
   /// \brief Resets the given objects to their template prefab state, if they have local modifications.
-  void RevertPrefabs(const plDeque<const plDocumentObject*>& selection);
+  void RevertPrefabs(const plDeque<const plDocumentObject*>& Selection);
 
   /// \brief Removes the link between a prefab instance and its template, turning the instance into a regular object.
-  virtual void UnlinkPrefabs(const plDeque<const plDocumentObject*>& selection);
+  virtual void UnlinkPrefabs(const plDeque<const plDocumentObject*>& Selection);
 
-  virtual plStatus CreatePrefabDocumentFromSelection(plStringView sFile, const plRTTI* pRootType, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB = {}, plDelegate<void(plDocumentObject*)> adjustNewNodesCB = {}, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB = {});
-  virtual plStatus CreatePrefabDocument(plStringView sFile, plArrayPtr<const plDocumentObject*> rootObjects, const plUuid& invPrefabSeed, plUuid& out_newDocumentGuid, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB = {}, bool bKeepOpen = false, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB = {});
-
+  virtual plStatus CreatePrefabDocumentFromSelection(const char* szFile, const plRTTI* pRootType, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB = {}, plDelegate<void(plDocumentObject*)> adjustNewNodesCB = {}, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB = {});
+  virtual plStatus CreatePrefabDocument(const char* szFile, plArrayPtr<const plDocumentObject*> rootObjects, const plUuid& invPrefabSeed, plUuid& out_newDocumentGuid, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB = {}, bool bKeepOpen = false, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB = {});
   // Returns new guid of replaced object.
-  virtual plUuid ReplaceByPrefab(const plDocumentObject* pRootObject, plStringView sPrefabFile, const plUuid& prefabAsset, const plUuid& prefabSeed, bool bEnginePrefab);
+  virtual plUuid ReplaceByPrefab(const plDocumentObject* pRootObject, const char* szPrefabFile, const plUuid& prefabAsset, const plUuid& prefabSeed, bool bEnginePrefab);
   // Returns new guid of reverted object.
   virtual plUuid RevertPrefab(const plDocumentObject* pObject);
 
@@ -272,7 +270,7 @@ protected:
   ///@{
 
   virtual void UpdatePrefabsRecursive(plDocumentObject* pObject);
-  virtual void UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, plStringView sBasePrefab);
+  virtual void UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, const char* szBasePrefab);
 
   ///@}
 

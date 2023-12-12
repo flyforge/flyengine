@@ -41,10 +41,7 @@
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
-       <item>
-        <widget class="plQtSearchWidget" name="SearchWidget" native="true"/>
-       </item>
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
        <item>
         <widget class="QComboBox" name="TypeFilter"/>
        </item>
@@ -53,7 +50,8 @@
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <widget class="eqQtAssetBrowserFolderView" name="TreeFolderFilter">
+         <widget class="QListWidget" name="ListTypeFilter"/>
+         <widget class="plQtAssetTreeWidget" name="TreeFolderFilter">
           <property name="uniformRowHeights">
            <bool>true</bool>
           </property>
@@ -74,9 +72,12 @@
       </layout>
      </widget>
      <widget class="QWidget" name="layoutWidget2">
-      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0">
+      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
        <item>
         <layout class="QHBoxLayout" name="ToolBarLayout">
+         <item>
+          <widget class="plQtAssetBrowserFilterView" name="filterView" native="true"/>
+         </item>
          <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
@@ -152,12 +153,12 @@
         </layout>
        </item>
        <item>
+        <widget class="plQtSearchWidget" name="SearchWidget" native="true"/>
+       </item>
+       <item>
         <widget class="plQtAssetBrowserView" name="ListAssets">
-         <property name="contextMenuPolicy">
-          <enum>Qt::CustomContextMenu</enum>
-         </property>
          <property name="editTriggers">
-          <set>QAbstractItemView::EditKeyPressed</set>
+          <set>QAbstractItemView::NoEditTriggers</set>
          </property>
          <property name="dragEnabled">
           <bool>true</bool>
@@ -166,7 +167,7 @@
           <enum>QAbstractItemView::DragOnly</enum>
          </property>
          <property name="alternatingRowColors">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -177,6 +178,14 @@
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="plQtAssetCuratorPanel" name="curatorPanel" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
      </widget>
     </widget>
    </item>
@@ -189,19 +198,30 @@
    <header location="global">EditorFramework/Assets/AssetBrowserView.moc.h</header>
   </customwidget>
   <customwidget>
+   <class>plQtAssetTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header location="global">EditorFramework/Assets/TreeView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>plQtAssetCuratorPanel</class>
+   <extends>QWidget</extends>
+   <header location="global">EditorFramework/Assets/AssetCuratorPanel/AssetCuratorPanel.moc.h</header>
+  </customwidget>
+  <customwidget>
    <class>plQtSearchWidget</class>
    <extends>QWidget</extends>
    <header location="global">GuiFoundation/Widgets/SearchWidget.moc.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>eqQtAssetBrowserFolderView</class>
-   <extends>QTreeWidget</extends>
-   <header location="global">EditorFramework/Assets/AssetBrowserFolderView.moc.h</header>
+   <class>plQtAssetBrowserFilterView</class>
+   <extends>QWidget</extends>
+   <header location="global">EditorFramework/Assets/AssetBrowserFilterView.moc.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>ListAssets</tabstop>
+  <tabstop>ListTypeFilter</tabstop>
   <tabstop>TreeFolderFilter</tabstop>
   <tabstop>IconSizeSlider</tabstop>
   <tabstop>ButtonListMode</tabstop>

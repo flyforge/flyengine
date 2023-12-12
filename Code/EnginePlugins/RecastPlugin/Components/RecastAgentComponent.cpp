@@ -4,8 +4,8 @@
 #include <Core/ResourceManager/ResourceManager.h>
 #include <Core/WorldSerializer/WorldReader.h>
 #include <Core/WorldSerializer/WorldWriter.h>
-#include <DetourCrowd.h>
 #include <GameEngine/Physics/CharacterControllerComponent.h>
+#include <Recast/DetourCrowd.h>
 #include <RecastPlugin/Components/RecastAgentComponent.h>
 #include <RecastPlugin/Resources/RecastNavMeshResource.h>
 #include <RecastPlugin/Utils/RcMath.h>
@@ -26,8 +26,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRcAgentComponent, 2, plComponentMode::Dynamic)
 PLASMA_END_COMPONENT_TYPE
 // clang-format on
 
-plRcAgentComponent::plRcAgentComponent() = default;
-plRcAgentComponent::~plRcAgentComponent() = default;
+plRcAgentComponent::plRcAgentComponent() {}
+plRcAgentComponent::~plRcAgentComponent() {}
 
 void plRcAgentComponent::SerializeComponent(plWorldWriter& stream) const
 {
@@ -119,22 +119,22 @@ plVec3 plRcAgentComponent::GetTargetPosition() const
   return m_vTargetPosition;
 }
 
-plResult plRcAgentComponent::FindNavMeshPolyAt(const plVec3& vPosition, dtPolyRef& out_polyRef, plVec3* out_pAdjustedPosition /*= nullptr*/, float fPlaneEpsilon /*= 0.01f*/, float fHeightEpsilon /*= 1.0f*/) const
+plResult plRcAgentComponent::FindNavMeshPolyAt(const plVec3& vPosition, dtPolyRef& out_PolyRef, plVec3* out_vAdjustedPosition /*= nullptr*/, float fPlaneEpsilon /*= 0.01f*/, float fHeightEpsilon /*= 1.0f*/) const
 {
   plRcPos rcPos = vPosition;
   plVec3 vSize(fPlaneEpsilon, fHeightEpsilon, fPlaneEpsilon);
 
   plRcPos resultPos;
   dtQueryFilter filter; /// \todo Hard-coded filter
-  if (dtStatusFailed(m_pQuery->findNearestPoly(rcPos, &vSize.x, &m_QueryFilter, &out_polyRef, resultPos)))
+  if (dtStatusFailed(m_pQuery->findNearestPoly(rcPos, &vSize.x, &m_QueryFilter, &out_PolyRef, resultPos)))
     return PLASMA_FAILURE;
 
   if (!plMath::IsEqual(vPosition.x, resultPos.m_Pos[0], fPlaneEpsilon) || !plMath::IsEqual(vPosition.y, resultPos.m_Pos[2], fPlaneEpsilon) || !plMath::IsEqual(vPosition.z, resultPos.m_Pos[1], fHeightEpsilon))
     return PLASMA_FAILURE;
 
-  if (out_pAdjustedPosition != nullptr)
+  if (out_vAdjustedPosition != nullptr)
   {
-    *out_pAdjustedPosition = resultPos;
+    *out_vAdjustedPosition = resultPos;
   }
 
   return PLASMA_SUCCESS;
@@ -225,9 +225,9 @@ plResult plRcAgentComponent::ComputePathToTarget()
   return PLASMA_SUCCESS;
 }
 
-bool plRcAgentComponent::HasReachedPosition(const plVec3& vPos, float fMaxDistance) const
+bool plRcAgentComponent::HasReachedPosition(const plVec3& pos, float fMaxDistance) const
 {
-  plVec3 vTargetPos = vPos;
+  plVec3 vTargetPos = pos;
   plVec3 vOwnPos = GetOwner()->GetGlobalPosition();
 
   /// \todo The comment below may not always be true
@@ -263,7 +263,7 @@ void plRcAgentComponent::PlanNextSteps()
   dtPolyRef stepPolys[16];
 
   m_iFirstNextStep = 0;
-  m_iNumNextSteps = m_pCorridor->findCorners(&m_vNextSteps[0].x, stepFlags, stepPolys, 4, m_pQuery.Borrow());
+  m_iNumNextSteps = m_pCorridor->findCorners(&m_vNextSteps[0].x, stepFlags, stepPolys, 4, m_pQuery.Borrow(), &m_QueryFilter);
 
   // convert from Recast convention (Y up) to pl (Z up)
   for (plInt32 i = 0; i < m_iNumNextSteps; ++i)
@@ -272,9 +272,9 @@ void plRcAgentComponent::PlanNextSteps()
   }
 }
 
-bool plRcAgentComponent::IsPositionVisible(const plVec3& vPos) const
+bool plRcAgentComponent::IsPositionVisible(const plVec3& pos) const
 {
-  plRcPos endPos = vPos;
+  plRcPos endPos = pos;
 
   dtRaycastHit hit;
   if (dtStatusFailed(m_pQuery->raycast(m_pCorridor->getFirstPoly(), m_pCorridor->getPos(), endPos, &m_QueryFilter, 0, &hit)))
@@ -301,7 +301,8 @@ void plRcAgentComponent::ApplySteering(const plVec3& vDirection, float fSpeed)
 {
   // compute new rotation
   {
-    plQuat qDesiredNewRotation = plQuat::MakeShortestRotation(plVec3(1, 0, 0), vDirection);
+    plQuat qDesiredNewRotation;
+    qDesiredNewRotation.SetShortestRotation(plVec3(1, 0, 0), vDirection);
 
     /// \todo Pass through character controller
     GetOwner()->SetGlobalRotation(qDesiredNewRotation);
@@ -313,7 +314,7 @@ void plRcAgentComponent::ApplySteering(const plVec3& vDirection, float fSpeed)
     if (GetWorld()->TryGetComponent(m_hCharacterController, pCharacter))
     {
       // the character controller already applies time scaling
-      const plVec3 vRelativeSpeed = (GetOwner()->GetGlobalRotation().GetInverse() * vDirection) * fSpeed;
+      const plVec3 vRelativeSpeed = (-GetOwner()->GetGlobalRotation() * vDirection) * fSpeed;
 
       plMsgMoveCharacterController msg;
       msg.m_fMoveForwards = plMath::Max(0.0f, vRelativeSpeed.x);
@@ -448,7 +449,7 @@ void plRcAgentComponent::ComputeSteeringDirection(float fMaxDistance)
 
   plVec3 vDirection = m_vNextSteps[m_iFirstNextStep] - vCurPos;
   vDirection.z = 0;
-  vDirection.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
+  vDirection.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
 
   m_vCurrentSteeringDirection = vDirection;
 }
@@ -467,7 +468,8 @@ void plRcAgentComponent::VisualizePathCorridorPosition()
   const float* pos = m_pCorridor->getPos();
   const plVec3 vPos(pos[0], pos[2], pos[1]);
 
-  plBoundingBox box = plBoundingBox::MakeFromCenterAndHalfExtents(plVec3(0, 0, 1.0f), plVec3(0.3f, 0.3f, 1.0f));
+  plBoundingBox box;
+  box.SetCenterAndHalfExtents(plVec3(0, 0, 1.0f), plVec3(0.3f, 0.3f, 1.0f));
 
   plTransform t;
   t.SetIdentity();
@@ -563,7 +565,7 @@ plRcAgentComponentManager::plRcAgentComponentManager(plWorld* pWorld)
   : SUPER(pWorld)
 {
 }
-plRcAgentComponentManager::~plRcAgentComponentManager() = default;
+plRcAgentComponentManager::~plRcAgentComponentManager() {}
 
 void plRcAgentComponentManager::Initialize()
 {

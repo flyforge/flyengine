@@ -9,57 +9,29 @@
 #include <Foundation/IO/OpenDdlUtils.h>
 #include <Foundation/IO/OpenDdlWriter.h>
 #include <QNetworkReply>
-#include <QProcess>
 
-static plString GetVersionFilePath()
+PageDownloader::PageDownloader(QUrl url)
 {
-  plStringBuilder sTemp = plOSFile::GetTempDataFolder();
-  sTemp.AppendPath("plEditor/version-page.htm");
-  return sTemp;
+  connect(&m_WebCtrl, &QNetworkAccessManager::finished, this, &PageDownloader::DownloadDone);
+
+  QNetworkRequest request(url);
+  m_WebCtrl.get(request);
 }
 
-PageDownloader::PageDownloader(const QString& sUrl)
+void PageDownloader::DownloadDone(QNetworkReply* pReply)
 {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-  QStringList args;
+  QNetworkReply::NetworkError e = pReply->error();
 
-  args << "-Command";
-  args << QString("(Invoke-webrequest -URI \"%1\").Content > \"%2\"").arg(sUrl).arg(GetVersionFilePath().GetData());
-
-  m_pProcess = PLASMA_DEFAULT_NEW(QProcess);
-  connect(m_pProcess.Borrow(), &QProcess::finished, this, &PageDownloader::DownloadDone);
-  m_pProcess->start("C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe", args);
-#else
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-#endif
-}
-
-void PageDownloader::DownloadDone(int exitCode, QProcess::ExitStatus exitStatus)
-{
-  m_pProcess = nullptr;
-
-  plOSFile file;
-  if (file.Open(GetVersionFilePath(), plFileOpenMode::Read).Failed())
-    return;
-
-  plDataBuffer content;
-  file.ReadAll(content);
-
-  content.PushBack('\0');
-  content.PushBack('\0');
-
-  const plUInt16* pStart = (plUInt16*)content.GetData();
-  if (plUnicodeUtils::SkipUtf16BomLE(pStart))
+  if (e != QNetworkReply::NetworkError::NoError)
   {
-    m_sDownloadedPage = plStringWChar(pStart);
+    m_DownloadedData = pReply->readAll();
   }
   else
   {
-    const char* szUtf8 = (const char*)content.GetData();
-    m_sDownloadedPage = plStringWChar(szUtf8);
+    m_DownloadedData = pReply->readAll();
   }
 
-  plOSFile::DeleteFile(GetVersionFilePath()).IgnoreResult();
+  pReply->deleteLater();
 
   Q_EMIT FinishedDownload();
 }
@@ -96,7 +68,7 @@ void plQtVersionChecker::Initialize()
 
   m_sKnownLatestVersion = pLatest->GetPrimitivesString()[0];
 
-  const plTimestamp nextCheck = fs.m_LastModificationTime + plTime::MakeFromHours(24);
+  const plTimestamp nextCheck = fs.m_LastModificationTime + plTime::Hours(24);
 
   if (nextCheck.Compare(plTimestamp::CurrentTimestamp(), plTimestamp::CompareMode::Newer))
   {
@@ -122,11 +94,6 @@ plResult plQtVersionChecker::StoreKnownVersion()
 
 bool plQtVersionChecker::Check(bool bForce)
 {
-#if PLASMA_DISABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-  PLASMA_ASSERT_DEV(!bForce, "The version check is not yet implemented on this platform.");
-  return false;
-#endif
-
   if (bForce)
   {
     // to trigger a 'new release available' signal
@@ -145,9 +112,10 @@ bool plQtVersionChecker::Check(bool bForce)
 
   m_bCheckInProgresss = true;
 
-  m_pVersionPage = PLASMA_DEFAULT_NEW(PageDownloader, "https://plengine.net/pages/getting-started/binaries.html");
+  // DON'T use HTTPS here, our Qt version only supports HTTP
+  m_pVersionPage = new PageDownloader(QUrl("http://plengine.net/pages/getting-started/binaries.html"));
 
-  connect(m_pVersionPage.Borrow(), &PageDownloader::FinishedDownload, this, &plQtVersionChecker::PageDownloaded);
+  connect(m_pVersionPage.data(), &PageDownloader::FinishedDownload, this, &plQtVersionChecker::PageDownloaded);
 
   return true;
 }
@@ -211,9 +179,7 @@ bool plQtVersionChecker::IsLatestNewer() const
 void plQtVersionChecker::PageDownloaded()
 {
   m_bCheckInProgresss = false;
-  plStringBuilder sPage = m_pVersionPage->GetDownloadedData();
-
-  m_pVersionPage = nullptr;
+  plStringBuilder sPage = m_pVersionPage->GetDownloadedData().data();
 
   if (sPage.IsEmpty())
   {

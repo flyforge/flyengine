@@ -10,7 +10,7 @@
 plResult plCppSettings::Save(plStringView sFile)
 {
   plFileWriter file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile));
+  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile.GetStartPointer()));
 
   plOpenDdlWriter ddl;
   ddl.SetOutputStream(&file);
@@ -23,6 +23,9 @@ plResult plCppSettings::Save(plStringView sFile)
   {
     case Compiler::None:
       plOpenDdlUtils::StoreString(ddl, "", "Compiler");
+      break;
+    case Compiler::Vs2019:
+      plOpenDdlUtils::StoreString(ddl, "Vs2019", "Compiler");
       break;
     case Compiler::Vs2022:
       plOpenDdlUtils::StoreString(ddl, "Vs2022", "Compiler");
@@ -39,7 +42,7 @@ plResult plCppSettings::Save(plStringView sFile)
 plResult plCppSettings::Load(plStringView sFile)
 {
   plFileReader file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile));
+  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile.GetStartPointer()));
 
   plOpenDdlReader ddl;
   PLASMA_SUCCEED_OR_RETURN(ddl.ParseDocument(file));
@@ -53,7 +56,9 @@ plResult plCppSettings::Load(plStringView sFile)
 
     if (auto pValue = pTarget->FindChildOfType(plOpenDdlPrimitiveType::String, "Compiler"))
     {
-      if (pValue->GetPrimitivesString()[0] == "Vs2022")
+      if (pValue->GetPrimitivesString()[0] == "Vs2019")
+        m_Compiler = Compiler::Vs2019;
+      else if (pValue->GetPrimitivesString()[0] == "Vs2022")
         m_Compiler = Compiler::Vs2022;
       else
         m_Compiler = Compiler::None;

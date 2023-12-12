@@ -64,10 +64,10 @@ plCommandHistory::~plCommandHistory()
   }
 }
 
-void plCommandHistory::BeginTemporaryCommands(plStringView sDisplayString, bool bFireEventsWhenUndoingTempCommands)
+void plCommandHistory::BeginTemporaryCommands(const char* szDisplayString, bool bFireEventsWhenUndoingTempCommands)
 {
-  PLASMA_ASSERT_DEV(!m_bTemporaryMode, "Temporary Mode cannot be nested");
-  StartTransaction(sDisplayString);
+  PLASMA_ASSERT_DEBUG(!m_bTemporaryMode, "Temporary Mode cannot be nested");
+  StartTransaction(szDisplayString);
   StartTransaction("[Temporary]");
 
   m_bFireEventsWhenUndoingTempCommands = bFireEventsWhenUndoingTempCommands;
@@ -117,8 +117,8 @@ void plCommandHistory::ResumeTemporaryTransaction()
 
 void plCommandHistory::EndTemporaryCommands(bool bCancel)
 {
-  PLASMA_ASSERT_DEV(m_bTemporaryMode, "Temporary Mode was not enabled");
-  PLASMA_ASSERT_DEV(m_iTemporaryDepth == (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount(), "Transaction stack is at depth {0} but temporary is at {1}",
+  PLASMA_ASSERT_DEBUG(m_bTemporaryMode, "Temporary Mode was not enabled");
+  PLASMA_ASSERT_DEBUG(m_iTemporaryDepth == (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount(), "Transaction stack is at depth {0} but temporary is at {1}",
     m_pHistoryStorage->m_TransactionStack.GetCount(), m_iTemporaryDepth);
   m_bTemporaryMode = false;
 
@@ -236,7 +236,7 @@ bool plCommandHistory::CanRedo() const
 }
 
 
-plStringView plCommandHistory::GetUndoDisplayString() const
+const char* plCommandHistory::GetUndoDisplayString() const
 {
   if (m_pHistoryStorage->m_UndoHistory.IsEmpty())
     return "";
@@ -245,7 +245,7 @@ plStringView plCommandHistory::GetUndoDisplayString() const
 }
 
 
-plStringView plCommandHistory::GetRedoDisplayString() const
+const char* plCommandHistory::GetRedoDisplayString() const
 {
   if (m_pHistoryStorage->m_RedoHistory.IsEmpty())
     return "";
@@ -253,7 +253,7 @@ plStringView plCommandHistory::GetRedoDisplayString() const
   return m_pHistoryStorage->m_RedoHistory.PeekBack()->m_sDisplayString;
 }
 
-void plCommandHistory::StartTransaction(const plFormatString& displayString)
+void plCommandHistory::StartTransaction(const plFormatString& sDisplayString)
 {
   PLASMA_ASSERT_DEV(!m_bIsInUndoRedo, "Cannot start new transaction while redoing/undoing.");
 
@@ -275,12 +275,12 @@ void plCommandHistory::StartTransaction(const plFormatString& displayString)
 
   pTransaction = plGetStaticRTTI<plCommandTransaction>()->GetAllocator()->Allocate<plCommandTransaction>();
   pTransaction->m_pDocument = m_pHistoryStorage->m_pDocument;
-  pTransaction->m_sDisplayString = displayString.GetText(tmp);
+  pTransaction->m_sDisplayString = sDisplayString.GetText(tmp);
 
   if (!m_pHistoryStorage->m_TransactionStack.IsEmpty())
   {
     // Stacked transaction
-    m_pHistoryStorage->m_TransactionStack.PeekBack()->AddCommandTransaction(pTransaction).AssertSuccess();
+    m_pHistoryStorage->m_TransactionStack.PeekBack()->AddCommandTransaction(pTransaction).IgnoreResult();
     m_pHistoryStorage->m_TransactionStack.PushBack(pTransaction);
     m_pHistoryStorage->m_ActiveCommandStack.PushBack(pTransaction);
   }
@@ -342,7 +342,7 @@ void plCommandHistory::EndTransaction(bool bCancel)
   {
     plCommandTransaction* pTransaction = m_pHistoryStorage->m_TransactionStack.PeekBack();
 
-    pTransaction->Undo(true).AssertSuccess();
+    pTransaction->Undo(true).IgnoreResult();
     m_pHistoryStorage->m_TransactionStack.PopBack();
     m_pHistoryStorage->m_ActiveCommandStack.PopBack();
 
@@ -363,12 +363,12 @@ void plCommandHistory::EndTransaction(bool bCancel)
   }
 }
 
-plStatus plCommandHistory::AddCommand(plCommand& ref_command)
+plStatus plCommandHistory::AddCommand(plCommand& command)
 {
   PLASMA_ASSERT_DEV(!m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Cannot add command while no transaction is started");
   PLASMA_ASSERT_DEV(!m_pHistoryStorage->m_ActiveCommandStack.IsEmpty(), "Transaction stack is not synced anymore with m_ActiveCommandStack");
 
-  auto res = m_pHistoryStorage->m_ActiveCommandStack.PeekBack()->AddSubCommand(ref_command);
+  auto res = m_pHistoryStorage->m_ActiveCommandStack.PeekBack()->AddSubCommand(command);
 
   // Error handling should be on the caller side.
   // if (res.Failed() && !res.m_sMessage.IsEmpty())
@@ -435,14 +435,14 @@ plUInt32 plCommandHistory::GetRedoStackSize() const
   return m_pHistoryStorage->m_RedoHistory.GetCount();
 }
 
-const plCommandTransaction* plCommandHistory::GetUndoStackEntry(plUInt32 uiIndex) const
+const plCommandTransaction* plCommandHistory::GetUndoStackEntry(plUInt32 iIndex) const
 {
-  return m_pHistoryStorage->m_UndoHistory[GetUndoStackSize() - 1 - uiIndex];
+  return m_pHistoryStorage->m_UndoHistory[GetUndoStackSize() - 1 - iIndex];
 }
 
-const plCommandTransaction* plCommandHistory::GetRedoStackEntry(plUInt32 uiIndex) const
+const plCommandTransaction* plCommandHistory::GetRedoStackEntry(plUInt32 iIndex) const
 {
-  return m_pHistoryStorage->m_RedoHistory[GetRedoStackSize() - 1 - uiIndex];
+  return m_pHistoryStorage->m_RedoHistory[GetRedoStackSize() - 1 - iIndex];
 }
 
 plSharedPtr<plCommandHistory::Storage> plCommandHistory::SwapStorage(plSharedPtr<plCommandHistory::Storage> pNewStorage)
@@ -457,8 +457,7 @@ plSharedPtr<plCommandHistory::Storage> plCommandHistory::SwapStorage(plSharedPtr
 
   m_pHistoryStorage = pNewStorage;
 
-  m_pHistoryStorage->m_Events.AddEventHandler([this](const plCommandHistoryEvent& e) { m_Events.Broadcast(e); },
-    m_EventsUnsubscriber);
+  m_pHistoryStorage->m_Events.AddEventHandler([this](const plCommandHistoryEvent& e) { m_Events.Broadcast(e); }, m_EventsUnsubscriber);
 
   return retVal;
 }

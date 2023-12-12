@@ -189,14 +189,13 @@ endloop:
   if (!bSupported)
     return PLASMA_FAILURE;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
   plFileStats stats;
   if (plOSFile::GetFileStats(sArchivePath, stats).Failed())
     return PLASMA_FAILURE;
-  m_LastModificationTime = stats.m_LastModificationTime;
-#endif
 
   PLASMA_LOG_BLOCK("plArchiveDataDir", sDirectory);
+
+  m_LastModificationTime = stats.m_LastModificationTime;
 
   PLASMA_SUCCEED_OR_RETURN(m_ArchiveReader.OpenArchive(sArchivePath));
 

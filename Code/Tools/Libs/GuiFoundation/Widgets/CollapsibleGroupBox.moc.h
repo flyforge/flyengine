@@ -11,7 +11,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtCollapsibleGroupBox : public plQtGroupBoxBase
 public:
   explicit plQtCollapsibleGroupBox(QWidget* pParent);
 
-  virtual void SetTitle(plStringView sTitle) override;
+  virtual void SetTitle(const char* szTitle) override;
   virtual void SetIcon(const QIcon& icon) override;
   virtual void SetFillColor(const QColor& color) override;
 
@@ -26,6 +26,6 @@ protected:
   virtual void paintEvent(QPaintEvent* event) override;
 
 protected:
-  bool m_bCollapsed = false;
+  bool m_bCollapsed;
 };
 

@@ -120,7 +120,7 @@ void plProfilingScopeAndMarker::Stop(plGALCommandEncoder* pCommandEncoder, GPUTi
 }
 
 plProfilingScopeAndMarker::plProfilingScopeAndMarker(plGALCommandEncoder* pCommandEncoder, const char* szName)
-  : plProfilingScope(szName, nullptr, plTime::MakeZero())
+  : plProfilingScope(szName, nullptr, plTime::Zero())
   , m_pCommandEncoder(pCommandEncoder)
 {
   m_pTimingScope = Start(pCommandEncoder, szName);

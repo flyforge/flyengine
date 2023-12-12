@@ -17,7 +17,7 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plRmlUiDocumentContext::plRmlUiDocumentContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
@@ -46,17 +46,17 @@ void plRmlUiDocumentContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plRmlUiDocumentContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plRmlUiDocumentContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plRmlUiViewContext, this);
 }
 
-void plRmlUiDocumentContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plRmlUiDocumentContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
-bool plRmlUiDocumentContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plRmlUiDocumentContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   PLASMA_LOCK(m_pMainObject->GetWorld()->GetWriteMarker());
 

@@ -1,7 +1,7 @@
 
 #include <xcb/xcb.h>
 
-plEditorProcessViewWindow::~plEditorProcessViewWindow()
+PlasmaEditorProcessViewWindow::~PlasmaEditorProcessViewWindow()
 {
   if (m_hWnd.type == plWindowHandle::Type::XCB)
   {
@@ -14,7 +14,7 @@ plEditorProcessViewWindow::~plEditorProcessViewWindow()
   }
 }
 
-plResult plEditorProcessViewWindow::UpdateWindow(plWindowHandle parentWindow, plUInt16 uiWidth, plUInt16 uiHeight)
+plResult PlasmaEditorProcessViewWindow::UpdateWindow(plWindowHandle parentWindow, plUInt16 uiWidth, plUInt16 uiHeight)
 {
   if (m_hWnd.type == plWindowHandle::Type::Invalid)
   {

@@ -284,11 +284,12 @@ void plParticleEventReaction_Prefab::ProcessEvent(const plParticleEvent& e)
   }
 
   // rotate the prefab randomly along its main axis (the X axis)
-  plQuat qRot = plQuat ::MakeFromAxisAndAngle(plVec3(1, 0, 0), plAngle::MakeFromRadian((float)m_pOwnerEffect->GetRNG().DoubleZeroToOneInclusive() * plMath::Pi<float>() * 2.0f));
+  plQuat qRot;
+  qRot.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Radian((float)m_pOwnerEffect->GetRNG().DoubleZeroToOneInclusive() * plMath::Pi<float>() * 2.0f));
 
-  vAlignDir.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
+  vAlignDir.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
 
-  trans.m_qRotation = plQuat::MakeShortestRotation(plVec3(1, 0, 0), vAlignDir);
+  trans.m_qRotation.SetShortestRotation(plVec3(1, 0, 0), vAlignDir);
   trans.m_qRotation = trans.m_qRotation * qRot;
 
   plResourceLock<plPrefabResource> pPrefab(m_hPrefab, plResourceAcquireMode::BlockTillLoaded);

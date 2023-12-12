@@ -15,8 +15,8 @@ class PLASMA_EDITORFRAMEWORK_DLL plQtGameObjectAdapter : public plQtNameableAdap
 public:
   plQtGameObjectAdapter(plDocumentObjectManager* pObjectManager, plObjectMetaData<plUuid, plDocumentObjectMetaData>* pObjectMetaData = nullptr, plObjectMetaData<plUuid, plGameObjectMetaData>* pGameObjectMetaData = nullptr);
   ~plQtGameObjectAdapter();
-  virtual QVariant data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const override;
-  virtual bool setData(const plDocumentObject* pObject, int iRow, int iColumn, const QVariant& value, int iRole) const override;
+  virtual QVariant data(const plDocumentObject* pObject, int row, int column, int role) const override;
+  virtual bool setData(const plDocumentObject* pObject, int row, int column, const QVariant& value, int role) const override;
 
 public:
   void DocumentObjectMetaDataEventHandler(const plObjectMetaData<plUuid, plDocumentObjectMetaData>::EventData& e);

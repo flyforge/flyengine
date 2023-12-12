@@ -18,12 +18,12 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 plAudioSystemProjectPreferences::plAudioSystemProjectPreferences()
   : plPreferences(Domain::Project, "AudioSystem")
 {
-  plEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plAudioSystemProjectPreferences::ProcessEventHandler, this));
+  PlasmaEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plAudioSystemProjectPreferences::ProcessEventHandler, this));
 }
 
 plAudioSystemProjectPreferences::~plAudioSystemProjectPreferences()
 {
-  plEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plAudioSystemProjectPreferences::ProcessEventHandler, this));
+  PlasmaEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plAudioSystemProjectPreferences::ProcessEventHandler, this));
 }
 
 void plAudioSystemProjectPreferences::SetMute(bool bMute)
@@ -47,7 +47,7 @@ void plAudioSystemProjectPreferences::SyncCVars()
     msg.m_sCVarName = "Audio.MasterGain";
     msg.m_NewValue = m_fGain;
 
-    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 
   {
@@ -55,13 +55,13 @@ void plAudioSystemProjectPreferences::SyncCVars()
     msg.m_sCVarName = "Audio.Mute";
     msg.m_NewValue = m_bMute;
 
-    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 }
 
-void plAudioSystemProjectPreferences::ProcessEventHandler(const plEditorEngineProcessConnection::Event& e)
+void plAudioSystemProjectPreferences::ProcessEventHandler(const PlasmaEditorEngineProcessConnection::Event& e)
 {
-  if (e.m_Type == plEditorEngineProcessConnection::Event::Type::ProcessRestarted)
+  if (e.m_Type == PlasmaEditorEngineProcessConnection::Event::Type::ProcessRestarted)
   {
     SyncCVars();
   }

@@ -2,11 +2,10 @@
 
 #include <EditorFramework/IPC/EditorProcessCommunicationChannel.h>
 #include <Foundation/Communication/IpcChannel.h>
-#include <Foundation/Communication/IpcProcessMessageProtocol.h>
 #include <Foundation/IO/OSFile.h>
 #include <Foundation/System/Process.h>
 
-plResult plEditorProcessCommunicationChannel::StartClientProcess(
+plResult PlasmaEditorProcessCommunicationChannel::StartClientProcess(
   const char* szProcess, const QStringList& args, bool bRemote, const plRTTI* pFirstAllowedMessageType, plUInt32 uiMemSize)
 {
   PLASMA_LOG_BLOCK("plProcessCommunicationChannel::StartClientProcess");
@@ -33,22 +32,9 @@ plResult plEditorProcessCommunicationChannel::StartClientProcess(
   {
     m_pChannel = plIpcChannel::CreatePipeChannel(sMemName, plIpcChannel::Mode::Server);
   }
-  m_pProtocol = PLASMA_DEFAULT_NEW(plIpcProcessMessageProtocol, m_pChannel.Borrow());
-  m_pProtocol->m_MessageEvent.AddEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
-  m_pChannel->Connect();
-  for (plUInt32 i = 0; i < 100; i++)
-  {
-    if (m_pChannel->GetConnectionState() == plIpcChannel::ConnectionState::Connecting)
-      break;
 
-    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
-  }
-  if (m_pChannel->GetConnectionState() != plIpcChannel::ConnectionState::Connecting)
-  {
-    plLog::Error("Failed to start IPC server");
-    CloseConnection();
-    return PLASMA_FAILURE;
-  }
+  m_pChannel->m_MessageEvent.AddEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
+  m_pChannel->Connect();
 
   plStringBuilder sPath = szProcess;
 
@@ -81,8 +67,7 @@ plResult plEditorProcessCommunicationChannel::StartClientProcess(
       delete m_pClientProcess;
       m_pClientProcess = nullptr;
 
-      m_pProtocol.Clear();
-      m_pChannel.Clear();
+      PLASMA_DEFAULT_DELETE(m_pChannel);
 
       plLog::Error("Failed to start process '{0}'", sPath);
       return PLASMA_FAILURE;
@@ -92,7 +77,7 @@ plResult plEditorProcessCommunicationChannel::StartClientProcess(
   return PLASMA_SUCCESS;
 }
 
-bool plEditorProcessCommunicationChannel::IsClientAlive() const
+bool PlasmaEditorProcessCommunicationChannel::IsClientAlive() const
 {
   if (m_pClientProcess == nullptr)
     return false;
@@ -103,15 +88,13 @@ bool plEditorProcessCommunicationChannel::IsClientAlive() const
   return bRunning && bNoError;
 }
 
-void plEditorProcessCommunicationChannel::CloseConnection()
+void PlasmaEditorProcessCommunicationChannel::CloseConnection()
 {
-  if (m_pProtocol)
+  if (m_pChannel)
   {
-    m_pProtocol->m_MessageEvent.RemoveEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
-    m_pProtocol.Clear();
+    m_pChannel->m_MessageEvent.RemoveEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
+    PLASMA_DEFAULT_DELETE(m_pChannel);
   }
-  m_pChannel.Clear();
-
   if (m_pClientProcess)
   {
     m_pClientProcess->close();
@@ -120,7 +103,7 @@ void plEditorProcessCommunicationChannel::CloseConnection()
   }
 }
 
-plString plEditorProcessCommunicationChannel::GetStdoutContents()
+plString PlasmaEditorProcessCommunicationChannel::GetStdoutContents()
 {
   if (m_pClientProcess)
   {
@@ -132,38 +115,37 @@ plString plEditorProcessCommunicationChannel::GetStdoutContents()
 
 //////////////////////////////////////////////////////////////////////////
 
-plResult plEditorProcessRemoteCommunicationChannel::ConnectToServer(const char* szAddress)
+plResult PlasmaEditorProcessRemoteCommunicationChannel::ConnectToServer(const char* szAddress)
 {
-  PLASMA_LOG_BLOCK("plEditorProcessRemoteCommunicationChannel::ConnectToServer");
+  PLASMA_LOG_BLOCK("PlasmaEditorProcessRemoteCommunicationChannel::ConnectToServer");
 
   PLASMA_ASSERT_DEV(m_pChannel == nullptr, "ProcessCommunication object already in use");
 
   m_pFirstAllowedMessageType = nullptr;
 
   m_pChannel = plIpcChannel::CreateNetworkChannel(szAddress, plIpcChannel::Mode::Client);
-  m_pProtocol = PLASMA_DEFAULT_NEW(plIpcProcessMessageProtocol, m_pChannel.Borrow());
-  m_pProtocol->m_MessageEvent.AddEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
+
+  m_pChannel->m_MessageEvent.AddEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
   m_pChannel->Connect();
 
   return PLASMA_SUCCESS;
 }
 
-bool plEditorProcessRemoteCommunicationChannel::IsConnected() const
+bool PlasmaEditorProcessRemoteCommunicationChannel::IsConnected() const
 {
   return m_pChannel->IsConnected();
 }
 
-void plEditorProcessRemoteCommunicationChannel::CloseConnection()
+void PlasmaEditorProcessRemoteCommunicationChannel::CloseConnection()
 {
-  if (m_pProtocol)
+  if (m_pChannel)
   {
-    m_pProtocol->m_MessageEvent.RemoveEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
-    m_pProtocol.Clear();
+    m_pChannel->m_MessageEvent.RemoveEventHandler(plMakeDelegate(&plProcessCommunicationChannel::MessageFunc, this));
+    PLASMA_DEFAULT_DELETE(m_pChannel);
   }
-  m_pChannel.Clear();
 }
 
-void plEditorProcessRemoteCommunicationChannel::TryConnect()
+void PlasmaEditorProcessRemoteCommunicationChannel::TryConnect()
 {
   if (m_pChannel && !m_pChannel->IsConnected())
   {

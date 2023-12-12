@@ -33,6 +33,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plCharacterControllerComponent, 1)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
+    new plColorAttribute(plColorScheme::Gameplay),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_FUNCTIONS

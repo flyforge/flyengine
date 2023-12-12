@@ -19,8 +19,8 @@ protected:
   plTransform m_LocalTransformFrustum;
   plTransform m_LocalTransformNearPlane;
   plTransform m_LocalTransformFarPlane;
-  plEngineGizmoHandle m_hBoxGizmo;
-  plEngineGizmoHandle m_hFrustumGizmo;
-  plEngineGizmoHandle m_hNearPlaneGizmo;
-  plEngineGizmoHandle m_hFarPlaneGizmo;
+  PlasmaEngineGizmoHandle m_hBoxGizmo;
+  PlasmaEngineGizmoHandle m_hFrustumGizmo;
+  PlasmaEngineGizmoHandle m_hNearPlaneGizmo;
+  PlasmaEngineGizmoHandle m_hFarPlaneGizmo;
 };

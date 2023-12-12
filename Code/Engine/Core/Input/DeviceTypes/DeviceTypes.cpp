@@ -117,7 +117,7 @@ void plInputDeviceController::UpdateVibration(plTime tTimeDifference)
   static plTime tElapsedTime;
   tElapsedTime += tTimeDifference;
 
-  const plTime tTimePerSample = plTime::MakeFromSeconds(1.0 / (double)VibrationSamplesPerSecond);
+  const plTime tTimePerSample = plTime::Seconds(1.0 / VibrationSamplesPerSecond);
 
   // advance the vibration track sampling
   while (tElapsedTime >= tTimePerSample)
@@ -191,7 +191,7 @@ void plInputDeviceMouseKeyboard::UpdateInputSlotValues()
         if (tNow - m_LastMouseClick[i] <= m_DoubleClickTime)
         {
           m_InputSlotValues[dlbSlots[i]] = 1.0f;
-          m_LastMouseClick[i] = plTime::MakeZero(); // this prevents triple-clicks from appearing as two double clicks
+          m_LastMouseClick[i].SetZero(); // this prevents triple-clicks from appearing as two double clicks
         }
         else
         {

@@ -45,7 +45,7 @@ QVariant plQtLayerAdapter::data(const plDocumentObject* pObject, int row, int co
       {
         if (role == Qt::ToolTipRole)
         {
-          return plMakeQString(subAsset->m_pAssetInfo->m_Path.GetAbsolutePath());
+          return subAsset->m_pAssetInfo->m_sAbsolutePath.GetData();
         }
         plStringBuilder sName = subAsset->GetName();
         QString sQtName = QString::fromUtf8(sName.GetData());

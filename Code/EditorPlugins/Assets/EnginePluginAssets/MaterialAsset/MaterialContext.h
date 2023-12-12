@@ -11,21 +11,21 @@
 class plObjectSelectionMsgToEngine;
 class plRenderContext;
 
-class PLASMA_ENGINEPLUGINASSETS_DLL plMaterialContext : public plEngineProcessDocumentContext
+class PLASMA_ENGINEPLUGINASSETS_DLL plMaterialContext : public PlasmaEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMaterialContext, plEngineProcessDocumentContext);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plMaterialContext, PlasmaEngineProcessDocumentContext);
 
 public:
   plMaterialContext();
 
-  virtual void HandleMessage(const plEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
 
 protected:
   virtual void OnInitialize() override;
 
-  virtual plEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
-  virtual bool UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext) override;
+  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
+  virtual bool UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext) override;
 
 private:
   plMaterialResourceHandle m_hMaterial;

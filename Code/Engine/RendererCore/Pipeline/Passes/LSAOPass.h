@@ -10,7 +10,7 @@
 /// \brief Defines the depth compare function to be used to decide sample weights.
 struct PLASMA_RENDERERCORE_DLL plLSAODepthCompareFunction
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -48,8 +48,6 @@ public:
 
   virtual void Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
   virtual void ExecuteInactive(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
-  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
-  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   plUInt32 GetLineToLinePixelOffset() const { return m_iLineToLinePixelOffset; }
   void SetLineToLinePixelOffset(plUInt32 uiPixelOffset);
@@ -78,8 +76,7 @@ protected:
 
   plConstantBufferStorageHandle m_hLineSweepCB;
 
-  bool m_bSweepDataDirty = true;
-  bool m_bConstantsDirty = true;
+  bool m_bSweepDataDirty;
 
   /// Output of the line sweep pass.
   plGALBufferHandle m_hLineSweepOutputBuffer;
@@ -91,15 +88,12 @@ protected:
   plGALResourceViewHandle m_hLineSweepInfoSRV;
 
   /// Total number of lines to be traced.
-  plUInt32 m_uiNumSweepLines = 0;
+  plUInt32 m_uiNumSweepLines;
 
-  plInt32 m_iLineToLinePixelOffset = 2;
-  plInt32 m_iLineSamplePixelOffsetFactor = 1;
-  float m_fOcclusionFalloff = 0.2f;
-  float m_fDepthCutoffDistance = 4.0f;
-
+  plInt32 m_iLineToLinePixelOffset;
+  plInt32 m_iLineSamplePixelOffsetFactor;
   plEnum<plLSAODepthCompareFunction> m_DepthCompareFunction;
-  bool m_bDistributedGathering = true;
+  bool m_bDistributedGathering;
 
   plShaderResourceHandle m_hShaderLineSweep;
   plShaderResourceHandle m_hShaderGather;

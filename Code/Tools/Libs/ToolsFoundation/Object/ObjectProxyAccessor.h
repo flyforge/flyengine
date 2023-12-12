@@ -13,10 +13,10 @@ public:
   /// \name Transaction Operations
   ///@{
 
-  virtual void StartTransaction(plStringView sDisplayString) override;
+  virtual void StartTransaction(const char* szDisplayString) override;
   virtual void CancelTransaction() override;
   virtual void FinishTransaction() override;
-  virtual void BeginTemporaryCommands(plStringView sDisplayString, bool bFireEventsWhenUndoingTempCommands = false) override;
+  virtual void BeginTemporaryCommands(const char* szDisplayString, bool bFireEventsWhenUndoingTempCommands = false) override;
   virtual void CancelTemporaryCommands() override;
   virtual void FinishTemporaryCommands() override;
 

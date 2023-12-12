@@ -26,12 +26,6 @@ void plQtDynamicStringEnumPropertyWidget::OnInit()
   const plDynamicStringEnumAttribute* pAttr = m_pProp->GetAttributeByType<plDynamicStringEnumAttribute>();
 
   m_pEnum = &plDynamicStringEnum::GetDynamicEnum(pAttr->GetDynamicEnumName());
-
-  if (auto pDefaultValueAttr = m_pProp->GetAttributeByType<plDefaultValueAttribute>())
-  {
-    m_pEnum->AddValidValue(pDefaultValueAttr->GetValue().ConvertTo<plString>(), true);
-  }
-
   const auto& AllValues = m_pEnum->GetAllValidValues();
 
   plQtScopedBlockSignals bs(m_pWidget);
@@ -42,7 +36,7 @@ void plQtDynamicStringEnumPropertyWidget::OnInit()
     m_pWidget->addItem(QString::fromUtf8(val.GetData()));
   }
 
-  if (!m_pEnum->GetStorageFile().IsEmpty())
+  if (!plStringUtils::IsNullOrEmpty(m_pEnum->GetStorageFile()))
   {
     m_pWidget->addItem("< Edit Values... >", QString("<edit>"));
   }

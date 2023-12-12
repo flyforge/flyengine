@@ -133,9 +133,6 @@ struct plArgFileSize : public plArgHumanReadable
 };
 
 #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-/// \brief Converts a windows HRESULT into an error code and a human-readable error message.
-/// Pass in `GetLastError()` function or an HRESULT from another error source. Be careful when printing multiple values, a function could clear `GetLastError` as a side-effect so it is best to store it in a temp variable before printing a complex error message.
-/// \sa https://learn.microsoft.com/en-gb/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
 struct plArgErrorCode
 {
   inline explicit plArgErrorCode(plUInt32 uiErrorCode)
@@ -147,23 +144,6 @@ struct plArgErrorCode
 };
 PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrorCode& arg);
 
-#endif
-
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-/// \brief Many Linux APIs will fill out error on failure. This converts the error into an error code and a human-readable error message.
-/// Pass in the linux `errno` symbol. Be careful when printing multiple values, a function could clear `errno` as a side-effect so it is best to store it in a temp variable before printing a complex error message.
-/// You may have to include #include <errno.h> use this.
-/// \sa https://man7.org/linux/man-pages/man3/errno.3.html
-struct plArgErrno
-{
-  inline explicit plArgErrno(plInt32 iErrno)
-    : m_iErrno(iErrno)
-  {
-  }
-
-  plInt32 m_iErrno;
-};
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrno& arg);
 #endif
 
 /// \brief Wraps a string that may contain sensitive information, such as user file paths.
@@ -202,7 +182,6 @@ PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, c
 PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, double fArg);
 PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, bool bArg);
 PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const char* szArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const char8_t* szArg);
 PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const wchar_t* pArg);
 PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plStringBuilder& sArg);
 PLASMA_FOUNDATION_DLL const plStringView& BuildString(char* szTmp, plUInt32 uiLength, const plStringView& sArg);

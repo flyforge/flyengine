@@ -69,7 +69,7 @@ void PlacementTask::FindPlacementPoints()
   for (plUInt32 i = 0; i < patternPoints.GetCount(); ++i)
   {
     auto& patternPoint = patternPoints[i];
-    plSimdVec4f patternCoords = plSimdVec4f(patternPoint.x, patternPoint.y, 0.0f);
+    plSimdVec4f patternCoords = plSimdConversion::ToVec3(patternPoint.m_Coordinates.GetAsVec3(0.0f));
 
     plPhysicsCastResult hitResult;
 
@@ -177,7 +177,7 @@ void PlacementTask::ExecuteVM()
     {
       auto& inputPoint = m_InputPoints[i];
       const plUInt32 uiPointIndex = inputPoint.m_uiPointIndex;
-      const float fThreshold = pPattern->m_Points[uiPointIndex].threshold;
+      const float fThreshold = pPattern->m_Points[uiPointIndex].m_fThreshold;
 
       if (m_Density[i] >= fThreshold)
       {
@@ -224,23 +224,25 @@ void PlacementTask::ExecuteVM()
 
     plSimdVec4f random = plSimdRandom::FloatMinMax(plSimdVec4i(placementPoint.m_uiPointIndex), vMinValue, vMaxValue, seed);
 
-    plSimdVec4f offset = plSimdVec4f::MakeZero();
+    plSimdVec4f offset = plSimdVec4f::ZeroVector();
     offset.SetZ(random.y());
     placementTransform.m_Transform.m_Position = plSimdConversion::ToVec3(placementPoint.m_vPosition) + offset;
 
     plSimdVec4f yaw = plSimdVec4f(random.x());
     plSimdVec4f roundedYaw = (yaw.CompDiv(vYawRotationSnap) + vHalf).Floor().CompMul(vYawRotationSnap);
-    yaw = plSimdVec4f::Select(vYawRotationSnap == plSimdVec4f::MakeZero(), yaw, roundedYaw);
+    yaw = plSimdVec4f::Select(vYawRotationSnap == plSimdVec4f::ZeroVector(), yaw, roundedYaw);
 
-    plSimdQuat qYawRot = plSimdQuat::MakeFromAxisAndAngle(vUp, yaw.x());
+    plSimdQuat qYawRot;
+    qYawRot.SetFromAxisAndAngle(vUp, yaw.x());
     plSimdVec4f vNormal = plSimdConversion::ToVec3(placementPoint.m_vNormal);
-    plSimdQuat qToNormalRot = plSimdQuat::MakeShortestRotation(vUp, plSimdVec4f::Lerp(vUp, vNormal, vAlignToNormal));
+    plSimdQuat qToNormalRot;
+    qToNormalRot.SetShortestRotation(vUp, plSimdVec4f::Lerp(vUp, vNormal, vAlignToNormal));
     placementTransform.m_Transform.m_Rotation = qToNormalRot * qYawRot;
 
     plSimdVec4f scale = plSimdVec4f(plMath::Clamp(placementPoint.m_fScale, 0.0f, 1.0f));
     placementTransform.m_Transform.m_Scale = plSimdVec4f::Lerp(vMinScale, vMaxScale, scale);
 
-    placementTransform.m_ObjectColor = plColor::MakeZero();
+    placementTransform.m_ObjectColor = plColor::ZeroColor();
     placementTransform.m_uiPointIndex = placementPoint.m_uiPointIndex;
     placementTransform.m_uiObjectIndex = placementPoint.m_uiObjectIndex;
     placementTransform.m_bHasValidColor = false;

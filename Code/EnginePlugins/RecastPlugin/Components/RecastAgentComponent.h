@@ -2,9 +2,9 @@
 
 #include <Core/World/Component.h>
 #include <Core/World/World.h>
-#include <DetourNavMeshQuery.h>
-#include <DetourPathCorridor.h>
-#include <RecastPlugin/Components/AgentSteeringComponent.h>
+#include <GameEngine/AI/AgentSteeringComponent.h>
+#include <Recast/DetourNavMeshQuery.h>
+#include <Recast/DetourPathCorridor.h>
 #include <RecastPlugin/Components/RecastNavMeshComponent.h>
 #include <RecastPlugin/NavMeshBuilder/NavMeshBuilder.h>
 #include <RecastPlugin/RecastPluginDLL.h>
@@ -17,7 +17,7 @@ struct plResourceEvent;
 
 class PLASMA_RECASTPLUGIN_DLL plRcAgentComponentManager : public plComponentManager<class plRcAgentComponent, plBlockStorageType::FreeList>
 {
-  using SUPER = plComponentManager<class plRcAgentComponent, plBlockStorageType::FreeList>;
+  typedef plComponentManager<class plRcAgentComponent, plBlockStorageType::FreeList> SUPER;
 
 public:
   plRcAgentComponentManager(plWorld* pWorld);
@@ -65,11 +65,11 @@ public:
   // Helper Functions
 
 public:
-  plResult FindNavMeshPolyAt(const plVec3& vPosition, dtPolyRef& out_polyRef, plVec3* out_pAdjustedPosition = nullptr, float fPlaneEpsilon = 0.01f,
+  plResult FindNavMeshPolyAt(const plVec3& vPosition, dtPolyRef& out_PolyRef, plVec3* out_vAdjustedPosition = nullptr, float fPlaneEpsilon = 0.01f,
     float fHeightEpsilon = 1.0f) const;
-  bool HasReachedPosition(const plVec3& vPos, float fMaxDistance) const;
+  bool HasReachedPosition(const plVec3& pos, float fMaxDistance) const;
   bool HasReachedGoal(float fMaxDistance) const;
-  bool IsPositionVisible(const plVec3& vPos) const;
+  bool IsPositionVisible(const plVec3& pos) const;
 
   //////////////////////////////////////////////////////////////////////////
   // Debug Visualization Functions

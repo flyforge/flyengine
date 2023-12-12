@@ -217,12 +217,13 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
   {
     double randomAngle = pWorld->GetRandomNumberGenerator().DoubleInRange(0.0, plMath::Pi<double>() * 2.0);
 
-    plMat3 rotMat = plMat3::MakeAxisRotation(vDir, plAngle::MakeFromRadian((float)randomAngle));
+    plMat3 rotMat;
+    rotMat.SetRotationMatrix(vDir, plAngle::Radian((float)randomAngle));
 
     vTangent = rotMat * vTangent;
   }
 
-  if (pIA->m_Deviation > plAngle::MakeFromRadian(0.0f))
+  if (pIA->m_Deviation > plAngle::Radian(0.0f))
   {
     plAngle maxDeviation;
 
@@ -235,7 +236,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
         const float fCosAngle = vDir.Dot(-vSurfaceNormal);
         const float fMaxDeviation = plMath::Pi<float>() - plMath::ACos(fCosAngle).GetRadian();
 
-        maxDeviation = plMath::Min(pIA->m_Deviation, plAngle::MakeFromRadian(fMaxDeviation));
+        maxDeviation = plMath::Min(pIA->m_Deviation, plAngle::Radian(fMaxDeviation));
       }
       break;
 
@@ -245,7 +246,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
         const float fCosAngle = vDir.Dot(vSurfaceNormal);
         const float fMaxDeviation = plMath::Pi<float>() - plMath::ACos(fCosAngle).GetRadian();
 
-        maxDeviation = plMath::Min(pIA->m_Deviation, plAngle::MakeFromRadian(fMaxDeviation));
+        maxDeviation = plMath::Min(pIA->m_Deviation, plAngle::Radian(fMaxDeviation));
       }
       break;
 
@@ -254,10 +255,11 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
         break;
     }
 
-    const plAngle deviation = plAngle::MakeFromRadian((float)pWorld->GetRandomNumberGenerator().DoubleMinMax(-maxDeviation.GetRadian(), maxDeviation.GetRadian()));
+    const plAngle deviation = plAngle::Radian((float)pWorld->GetRandomNumberGenerator().DoubleMinMax(-maxDeviation.GetRadian(), maxDeviation.GetRadian()));
 
     // tilt around the tangent (we don't want to compute another random rotation here)
-    plMat3 matTilt = plMat3::MakeAxisRotation(vTangent, deviation);
+    plMat3 matTilt;
+    matTilt.SetRotationMatrix(vTangent, deviation);
 
     vDir = matTilt * vDir;
   }
@@ -273,7 +275,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
 
   plTransform t;
   t.m_vPosition = vPosition;
-  t.m_qRotation = plQuat::MakeFromMat3(mRot);
+  t.m_qRotation.SetFromMat3(mRot);
   t.m_vScale.Set(1.0f);
 
   // attach to dynamic objects
@@ -283,7 +285,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
   if (pWorld->TryGetObject(hObject, pObject) && pObject->IsDynamic())
   {
     hParent = hObject;
-    t = plTransform::MakeLocalTransform(pObject->GetGlobalTransform(), t);
+    t.SetLocalTransform(pObject->GetGlobalTransform(), t);
   }
 
   plHybridArray<plGameObject*, 8> rootObjects;
@@ -302,7 +304,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
 
     for (auto pRootObject : rootObjects)
     {
-      pRootObject->PostMessageRecursive(msgSetFloat, plTime::MakeZero(), plObjectMsgQueueType::AfterInitialized);
+      pRootObject->PostMessageRecursive(msgSetFloat, plTime::Zero(), plObjectMsgQueueType::AfterInitialized);
     }
   }
 
@@ -313,7 +315,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
 
     for (auto pRootObject : rootObjects)
     {
-      pRootObject->PostMessageRecursive(msg, plTime::MakeZero(), plObjectMsgQueueType::AfterInitialized);
+      pRootObject->PostMessageRecursive(msg, plTime::Zero(), plObjectMsgQueueType::AfterInitialized);
     }
   }
 

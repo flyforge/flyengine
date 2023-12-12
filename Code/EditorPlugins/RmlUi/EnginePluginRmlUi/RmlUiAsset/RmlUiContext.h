@@ -7,9 +7,9 @@
 class plObjectSelectionMsgToEngine;
 class plRenderContext;
 
-class PLASMA_ENGINEPLUGINRMLUI_DLL plRmlUiDocumentContext : public plEngineProcessDocumentContext
+class PLASMA_ENGINEPLUGINRMLUI_DLL plRmlUiDocumentContext : public PlasmaEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRmlUiDocumentContext, plEngineProcessDocumentContext);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plRmlUiDocumentContext, PlasmaEngineProcessDocumentContext);
 
 public:
   plRmlUiDocumentContext();
@@ -20,9 +20,9 @@ public:
 protected:
   virtual void OnInitialize() override;
 
-  virtual plEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
-  virtual bool UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext) override;
+  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
+  virtual bool UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext) override;
 
 private:
   plGameObject* m_pMainObject = nullptr;

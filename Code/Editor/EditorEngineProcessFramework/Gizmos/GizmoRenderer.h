@@ -12,8 +12,8 @@ public:
   ~plGizmoRenderer();
 
   // plRenderer implementation
-  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& inout_types) const override;
-  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& inout_categories) const override;
+  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const override;
+  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const override;
   virtual void RenderBatch(
     const plRenderViewContext& renderContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const override;
 

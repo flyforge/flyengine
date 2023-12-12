@@ -2,18 +2,18 @@
 
 const void* plGALShaderByteCode::GetByteCode() const
 {
-  if (m_ByteCode.IsEmpty())
+  if (m_Source.IsEmpty())
     return nullptr;
 
-  return &m_ByteCode[0];
+  return &m_Source[0];
 }
 
 plUInt32 plGALShaderByteCode::GetSize() const
 {
-  return m_ByteCode.GetCount();
+  return m_Source.GetCount();
 }
 
 bool plGALShaderByteCode::IsValid() const
 {
-  return !m_ByteCode.IsEmpty();
+  return !m_Source.IsEmpty();
 }

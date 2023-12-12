@@ -20,7 +20,7 @@ class QGraphicsDropShadowEffect;
 
 struct plNodeFlags
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -57,15 +57,15 @@ public:
   plBitflags<plNodeFlags> GetFlags() const;
   void ResetFlags();
 
-  void EnableDropShadow(bool bEnable);
+  void EnableDropShadow(bool enable);
   virtual void UpdateState();
 
   const plHybridArray<plQtPin*, 6>& GetInputPins() const { return m_Inputs; }
   const plHybridArray<plQtPin*, 6>& GetOutputPins() const { return m_Outputs; }
 
-  void SetActive(bool bActive);
+  void SetActive(bool active);
 
-  virtual void ExtendContextMenu(QMenu& ref_menu) {}
+  virtual void ExtendContextMenu(QMenu& menu) {}
 
 protected:
   virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

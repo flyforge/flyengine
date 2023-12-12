@@ -8,16 +8,16 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 plSkeletonViewContext::plSkeletonViewContext(plSkeletonContext* pContext)
-  : plEngineProcessViewContext(pContext)
+  : PlasmaEngineProcessViewContext(pContext)
 {
   m_pContext = pContext;
 
   // Start with something valid.
   m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, 45.0f, 0.1f, 1000.0f);
-  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::MakeZero(), plVec3(0.0f, 0.0f, 1.0f));
+  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::ZeroVector(), plVec3(0.0f, 0.0f, 1.0f));
 }
 
-plSkeletonViewContext::~plSkeletonViewContext() = default;
+plSkeletonViewContext::~plSkeletonViewContext() {}
 
 bool plSkeletonViewContext::UpdateThumbnailCamera(const plBoundingBoxSphere& bounds)
 {
@@ -48,7 +48,7 @@ void plSkeletonViewContext::Redraw(bool bRenderEditorGizmos)
     }
   }
 
-  plEngineProcessViewContext::Redraw(bRenderEditorGizmos);
+  PlasmaEngineProcessViewContext::Redraw(bRenderEditorGizmos);
 }
 
 plViewHandle plSkeletonViewContext::CreateView()
@@ -59,7 +59,7 @@ plViewHandle plSkeletonViewContext::CreateView()
 
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
 
-  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   return pView->GetHandle();
@@ -69,10 +69,10 @@ void plSkeletonViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
   if (m_pContext->m_bDisplayGrid)
   {
-    plEngineProcessViewContext::DrawSimpleGrid();
+    PlasmaEngineProcessViewContext::DrawSimpleGrid();
   }
 
-  plEngineProcessViewContext::SetCamera(pMsg);
+  PlasmaEngineProcessViewContext::SetCamera(pMsg);
 
   const plUInt32 viewHeight = pMsg->m_uiWindowHeight;
 
@@ -91,7 +91,7 @@ void plSkeletonViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
   }
 }
 
-void plSkeletonViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
+void plSkeletonViewContext::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plViewPickingMsgToEngine>())
   {
@@ -108,62 +108,61 @@ void plSkeletonViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
   }
   else
   {
-    plEngineProcessViewContext::HandleViewMessage(pMsg);
+    PlasmaEngineProcessViewContext::HandleViewMessage(pMsg);
   }
 }
 
 void plSkeletonViewContext::PickObjectAt(plUInt16 x, plUInt16 y)
 {
   // remote processes do not support picking, just ignore this
-  if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
     return;
 
   plViewPickingResultMsgToEditor res;
-  PLASMA_SCOPE_EXIT(SendViewMessage(&res));
 
   plView* pView = nullptr;
-  if (plRenderWorld::TryGetView(m_hView, pView) == false)
-    return;
-
-  pView->SetRenderPassProperty("EditorPickingPass", "PickingPosition", plVec2(x, y));
-
-  if (pView->IsRenderPassReadBackPropertyExisting("EditorPickingPass", "PickedPosition") == false)
-    return;
-
-  plVariant varPickedPos = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickedPosition");
-  if (varPickedPos.IsA<plVec3>() == false)
-    return;
-
-  const plUInt32 uiPickingID = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickedID").ConvertTo<plUInt32>();
-  res.m_vPickedNormal = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickedNormal").ConvertTo<plVec3>();
-  res.m_vPickingRayStartPosition = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickedRayStartPosition").ConvertTo<plVec3>();
-  res.m_vPickedPosition = varPickedPos.ConvertTo<plVec3>();
-
-  PLASMA_ASSERT_DEBUG(!res.m_vPickedPosition.IsNaN(), "");
-
-  const plUInt32 uiComponentID = (uiPickingID & 0x00FFFFFF);
-  const plUInt32 uiPartIndex = (uiPickingID >> 24) & 0x7F; // highest bit indicates whether the object is dynamic, ignore this
-
-  res.m_ComponentGuid = GetDocumentContext()->m_Context.m_ComponentPickingMap.GetGuid(uiComponentID);
-  res.m_OtherGuid = GetDocumentContext()->m_Context.m_OtherPickingMap.GetGuid(uiComponentID);
-
-  if (res.m_ComponentGuid.IsValid())
+  if (plRenderWorld::TryGetView(m_hView, pView) && pView->IsRenderPassReadBackPropertyExisting("EditorPickingPass", "PickingMatrix"))
   {
-    plComponentHandle hComponent = GetDocumentContext()->m_Context.m_ComponentMap.GetHandle(res.m_ComponentGuid);
+    pView->SetRenderPassProperty("EditorPickingPass", "PickingPosition", plVec2(x, y));
+    plVariant varMat = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingMatrix");
 
-    plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+    if (varMat.IsA<plMat4>())
+    {
+      const plUInt32 uiPickingID = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingID").ConvertTo<plUInt32>();
+      // const float fPickingDepth = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingDepth").ConvertTo<float>();
+      res.m_vPickedNormal = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingNormal").ConvertTo<plVec3>();
+      res.m_vPickingRayStartPosition = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingRayStartPosition").ConvertTo<plVec3>();
+      res.m_vPickedPosition = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingPosition").ConvertTo<plVec3>();
 
-    // check whether the component is still valid
-    plComponent* pComponent = nullptr;
-    if (pDocumentContext->GetWorld()->TryGetComponent<plComponent>(hComponent, pComponent))
-    {
-      // if yes, fill out the parent game object guid
-      res.m_ObjectGuid = GetDocumentContext()->m_Context.m_GameObjectMap.GetGuid(pComponent->GetOwner()->GetHandle());
-      res.m_uiPartIndex = uiPartIndex;
-    }
-    else
-    {
-      res.m_ComponentGuid = plUuid();
+      PLASMA_ASSERT_DEBUG(!res.m_vPickedPosition.IsNaN(), "");
+
+      const plUInt32 uiComponentID = (uiPickingID & 0x00FFFFFF);
+      const plUInt32 uiPartIndex = (uiPickingID >> 24) & 0x7F; // highest bit indicates whether the object is dynamic, ignore this
+
+      res.m_ComponentGuid = GetDocumentContext()->m_Context.m_ComponentPickingMap.GetGuid(uiComponentID);
+      res.m_OtherGuid = GetDocumentContext()->m_Context.m_OtherPickingMap.GetGuid(uiComponentID);
+
+      if (res.m_ComponentGuid.IsValid())
+      {
+        plComponentHandle hComponent = GetDocumentContext()->m_Context.m_ComponentMap.GetHandle(res.m_ComponentGuid);
+
+        PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+
+        // check whether the component is still valid
+        plComponent* pComponent = nullptr;
+        if (pDocumentContext->GetWorld()->TryGetComponent<plComponent>(hComponent, pComponent))
+        {
+          // if yes, fill out the parent game object guid
+          res.m_ObjectGuid = GetDocumentContext()->m_Context.m_GameObjectMap.GetGuid(pComponent->GetOwner()->GetHandle());
+          res.m_uiPartIndex = uiPartIndex;
+        }
+        else
+        {
+          res.m_ComponentGuid = plUuid();
+        }
+      }
     }
   }
+
+  SendViewMessage(&res);
 }

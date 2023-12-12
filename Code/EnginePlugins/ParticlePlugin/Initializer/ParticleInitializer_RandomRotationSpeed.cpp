@@ -16,7 +16,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_RandomRotationS
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("RandomStartAngle", m_bRandomStartAngle),
-    PLASMA_MEMBER_PROPERTY("DegreesPerSecond", m_RotationSpeed)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(90)), new plClampValueAttribute(plAngle::MakeFromDegree(0), plVariant())),
+    PLASMA_MEMBER_PROPERTY("DegreesPerSecond", m_RotationSpeed)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(90)), new plClampValueAttribute(plAngle::Degree(0), plVariant())),
   }
   PLASMA_END_PROPERTIES;
 }
@@ -90,7 +90,7 @@ void plParticleInitializer_RandomRotationSpeed::InitializeElements(plUInt64 uiSt
   plFloat16* pSpeed = m_pStreamRotationSpeed->GetWritableData<plFloat16>();
 
   // speed
-  if (m_RotationSpeed.m_Value != plAngle::MakeFromRadian(0))
+  if (m_RotationSpeed.m_Value != plAngle::Radian(0))
   {
     plRandom& rng = GetRNG();
 

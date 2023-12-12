@@ -64,20 +64,22 @@ public:
   /// \brief Sets the frustum manually by specifying the planes directly.
   ///
   /// \note Make sure to pass in the planes in the order of the PlaneType enum, otherwise plFrustum may not always work as expected.
-  [[nodiscard]] static plFrustum MakeFromPlanes(const plPlane* pPlanes); // [tested]
+  void SetFrustum(const plPlane* pPlanes); // [tested]
 
   /// \brief Creates the frustum by extracting the planes from the given (model-view / projection) matrix.
   ///
   /// If the matrix is just the projection matrix, the frustum will be in local space. Pass the full ModelViewProjection
   /// matrix to create the frustum in world-space. If the projection matrix contained in ModelViewProjection is an infinite
   /// plane projection matrix, the resulting frustum will yield a far plane with infinite distance.
-  [[nodiscard]] static plFrustum MakeFromMVP(const plMat4& mModelViewProjection, plClipSpaceDepthRange::Enum depthRange = plClipSpaceDepthRange::Default, plHandedness::Enum handedness = plHandedness::Default); // [tested]
+  void SetFrustum(const plMat4& mModelViewProjection, plClipSpaceDepthRange::Enum depthRange = plClipSpaceDepthRange::Default,
+    plHandedness::Enum handedness = plHandedness::Default); // [tested]
 
   /// \brief Creates a frustum from the given camera position, direction vectors and the field-of-view along X and Y.
   ///
   /// The up vector does not need to be exactly orthogonal to the forwards vector, it will get recomputed properly.
   /// FOV X and Y define the entire field-of-view, so a FOV of 180 degree would mean the entire half-space in front of the camera.
-  [[nodiscard]] static plFrustum MakeFromFOV(const plVec3& vPosition, const plVec3& vForwards, const plVec3& vUp, plAngle fovX, plAngle fovY, float fNearPlane, float fFarPlane); // [tested]
+  void SetFrustum(
+    const plVec3& vPosition, const plVec3& vForwards, const plVec3& vUp, plAngle fovX, plAngle fovY, float fNearPlane, float fFarPlane); // [tested]
 
   /// \brief Returns the n-th plane of the frustum.
   const plPlane& GetPlane(plUInt8 uiPlane) const; // [tested]

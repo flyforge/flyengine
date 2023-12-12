@@ -29,11 +29,7 @@ public:
   /// \brief Returns the stored number as a standard float.
   operator float() const; // [tested]
 
-  /// \brief Creates an plSimdFloat that is initialized to zero.
-  [[nodiscard]] static plSimdFloat MakeZero(); // [tested]
-
-  /// \brief Creates an plSimdFloat that is initialized to Not-A-Number (NaN).
-  [[nodiscard]] static plSimdFloat MakeNaN(); // [tested]
+  static plSimdFloat Zero(); // [tested]
 
 public:
   plSimdFloat operator+(const plSimdFloat& f) const; // [tested]
@@ -71,9 +67,9 @@ public:
   template <plMathAcc::Enum acc = plMathAcc::FULL>
   plSimdFloat GetInvSqrt() const; // [tested]
 
-  [[nodiscard]] plSimdFloat Max(const plSimdFloat& f) const; // [tested]
-  [[nodiscard]] plSimdFloat Min(const plSimdFloat& f) const; // [tested]
-  [[nodiscard]] plSimdFloat Abs() const;                     // [tested]
+  plSimdFloat Max(const plSimdFloat& f) const; // [tested]
+  plSimdFloat Min(const plSimdFloat& f) const; // [tested]
+  plSimdFloat Abs() const;                     // [tested]
 
 public:
   plInternal::QuadFloat m_v;

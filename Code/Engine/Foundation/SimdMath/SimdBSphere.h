@@ -13,28 +13,9 @@ public:
   /// \brief Creates a sphere with the given radius around the given center.
   plSimdBSphere(const plSimdVec4f& vCenter, const plSimdFloat& fRadius); // [tested]
 
-  /// \brief Creates a sphere at the origin with radius zero.
-  [[nodiscard]] static plSimdBSphere MakeZero();
-
-  /// \brief Creates an 'invalid' sphere, with its center at the given position and a negative radius.
-  ///
-  /// Such a sphere can be made 'valid' through ExpandToInclude(), but be aware that the originally provided center position
-  /// will always be part of the sphere.
-  [[nodiscard]] static plSimdBSphere MakeInvalid(const plSimdVec4f& vCenter = plSimdVec4f::MakeZero()); // [tested]
-
-  /// \brief Creates a sphere with the provided center and radius.
-  [[nodiscard]] static plSimdBSphere MakeFromCenterAndRadius(const plSimdVec4f& vCenter, const plSimdFloat& fRadius); // [tested]
-
-  /// \brief Creates a bounding sphere around the provided points.
-  ///
-  /// The center of the sphere will be at the 'center of mass' of all the points, and the radius will be the distance to the
-  /// farthest point from there.
-  [[nodiscard]] static plSimdBSphere MakeFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plSimdVec4f));
-
-
 public:
   /// \brief Sets the bounding sphere to invalid values.
-  [[deprecated("Use MakeInvalid() instead.")]] void SetInvalid(); // [tested]
+  void SetInvalid(); // [tested]
 
   /// \brief Returns whether the sphere has valid values.
   bool IsValid() const; // [tested]
@@ -49,7 +30,7 @@ public:
   plSimdFloat GetRadius() const; // [tested]
 
   /// \brief Initializes the sphere to be the bounding sphere of all the given points.
-  [[deprecated("Use MakeFromPoints() instead.")]] void SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plSimdVec4f));
+  void SetFromPoints(const plSimdVec4f* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plSimdVec4f)); // [tested]
 
   /// \brief Increases the sphere's radius to include this point.
   void ExpandToInclude(const plSimdVec4f& vPoint); // [tested]
@@ -87,10 +68,10 @@ public:
 
   /// \brief Clamps the given position to the volume of the sphere. The resulting point will always be inside the sphere, but have the
   /// closest distance to the original point.
-  [[nodiscard]] plSimdVec4f GetClampedPoint(const plSimdVec4f& vPoint); // [tested]
+  plSimdVec4f GetClampedPoint(const plSimdVec4f& vPoint); // [tested]
 
-  [[nodiscard]] bool operator==(const plSimdBSphere& rhs) const; // [tested]
-  [[nodiscard]] bool operator!=(const plSimdBSphere& rhs) const; // [tested]
+  bool operator==(const plSimdBSphere& rhs) const; // [tested]
+  bool operator!=(const plSimdBSphere& rhs) const; // [tested]
 
 public:
   plSimdVec4f m_CenterAndRadius;

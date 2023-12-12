@@ -441,8 +441,8 @@ plUInt32 plShadowPool::AddDirectionalLight(const plDirectionalLightComponent* pD
   const char* viewNames[4] = {"DirLightViewC0", "DirLightViewC1", "DirLightViewC2", "DirLightViewC3"};
 
   const plGameObject* pOwner = pDirLight->GetOwner();
-  const plVec3 vLightDirForwards = pOwner->GetGlobalDirForwards();
-  const plVec3 vLightDirUp = pOwner->GetGlobalDirUp();
+  plVec3 vForward = pOwner->GetGlobalDirForwards();
+  plVec3 vUp = pOwner->GetGlobalDirUp();
 
   float fAspectRatio = pReferenceView->GetViewport().width / pReferenceView->GetViewport().height;
 
@@ -499,20 +499,20 @@ plUInt32 plShadowPool::AddDirectionalLight(const plDirectionalLightComponent* pD
 
       if (false)
       {
-        plDebugRenderer::DrawLineSphere(pReferenceView->GetHandle(), plBoundingSphere::MakeFromCenterAndRadius(center, radius), plColor::OrangeRed);
+        plDebugRenderer::DrawLineSphere(pReferenceView->GetHandle(), plBoundingSphere(center, radius), plColor::OrangeRed);
       }
 
       float fCameraToCenterDistance = radius + fNearPlaneOffset;
-      plVec3 shadowCameraPos = center - vLightDirForwards * fCameraToCenterDistance;
+      plVec3 shadowCameraPos = center - vForward * fCameraToCenterDistance;
       float fFarPlane = radius + fCameraToCenterDistance;
 
       plCamera& camera = shadowView.m_Camera;
-      camera.LookAt(shadowCameraPos, center, vLightDirUp);
+      camera.LookAt(shadowCameraPos, center, vUp);
       camera.SetCameraMode(plCameraMode::OrthoFixedWidth, radius * 2.0f, 0.0f, fFarPlane);
 
       // stabilize
       plMat4 worldToLightMatrix = pView->GetViewMatrix(plCameraEye::Left);
-      plVec3 offset = worldToLightMatrix.TransformPosition(plVec3::MakeZero());
+      plVec3 offset = worldToLightMatrix.TransformPosition(plVec3::ZeroVector());
       float texelInWorld = (2.0f * radius) / s_uiShadowMapSize;
       offset.x -= plMath::Floor(offset.x / texelInWorld) * texelInWorld;
       offset.y -= plMath::Floor(offset.y / texelInWorld) * texelInWorld;
@@ -568,10 +568,10 @@ plUInt32 plShadowPool::AddPointLight(const plPointLightComponent* pPointLight, f
   plVec3 vUp = plVec3(0.0f, 0.0f, 1.0f);
 
   float fPenumbraSize = plMath::Max(pPointLight->GetPenumbraSize(), (0.5f / s_uiMinShadowMapSize)); // at least one texel for hardware pcf
-  float fFov = AddSafeBorder(plAngle::MakeFromDegree(90.0f), fPenumbraSize);
+  float fFov = AddSafeBorder(plAngle::Degree(90.0f), fPenumbraSize);
 
   float fNearPlane = 0.1f; ///\todo expose somewhere
-  float fFarPlane = pPointLight->GetEffectiveRange();
+  float fFarPlane = pPointLight->GetRange();
 
   for (plUInt32 i = 0; i < 6; ++i)
   {
@@ -640,7 +640,7 @@ plUInt32 plShadowPool::AddSpotLight(const plSpotLightComponent* pSpotLight, floa
 
     float fFov = AddSafeBorder(pSpotLight->GetOuterSpotAngle(), pSpotLight->GetPenumbraSize());
     float fNearPlane = 0.1f; ///\todo expose somewhere
-    float fFarPlane = pSpotLight->GetEffectiveRange();
+    float fFarPlane = pSpotLight->GetRange();
 
     plCamera& camera = shadowView.m_Camera;
     camera.LookAt(vPosition, vPosition + vForward, vUp);

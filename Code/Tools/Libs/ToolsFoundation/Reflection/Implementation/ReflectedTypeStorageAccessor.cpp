@@ -37,20 +37,20 @@ plReflectedTypeStorageAccessor::~plReflectedTypeStorageAccessor()
   plReflectedTypeStorageManager::RemoveStorageAccessor(this);
 }
 
-const plVariant plReflectedTypeStorageAccessor::GetValue(plStringView sProperty, plVariant index, plStatus* pRes) const
+const plVariant plReflectedTypeStorageAccessor::GetValue(const char* szProperty, plVariant index, plStatus* pRes) const
 {
-  const plAbstractProperty* pProp = GetType()->FindPropertyByName(sProperty);
+  const plAbstractProperty* pProp = GetType()->FindPropertyByName(szProperty);
   if (pProp == nullptr)
   {
     if (pRes)
-      *pRes = plStatus(plFmt("Property '{0}' not found in type '{1}'", sProperty, GetType()->GetTypeName()));
+      *pRes = plStatus(plFmt("Property '{0}' not found in type '{1}'", szProperty, GetType()->GetTypeName()));
     return plVariant();
   }
 
   if (pRes)
     *pRes = plStatus(PLASMA_SUCCESS);
   const plReflectedTypeStorageManager::ReflectedTypeStorageMapping::StorageInfo* storageInfo = nullptr;
-  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(sProperty, storageInfo))
+  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(szProperty, storageInfo))
   {
     switch (pProp->GetCategory())
     {
@@ -74,7 +74,7 @@ const plVariant plReflectedTypeStorageAccessor::GetValue(plStringView sProperty,
           }
         }
         if (pRes)
-          *pRes = plStatus(plFmt("Index '{0}' for property '{1}' is invalid or out of bounds.", index, sProperty));
+          *pRes = plStatus(plFmt("Index '{0}' for property '{1}' is invalid or out of bounds.", index, szProperty));
       }
       break;
       case plPropertyCategory::Map:
@@ -94,7 +94,7 @@ const plVariant plReflectedTypeStorageAccessor::GetValue(plStringView sProperty,
           }
         }
         if (pRes)
-          *pRes = plStatus(plFmt("Index '{0}' for property '{1}' is invalid or out of bounds.", index, sProperty));
+          *pRes = plStatus(plFmt("Index '{0}' for property '{1}' is invalid or out of bounds.", index, szProperty));
       }
       break;
       default:
@@ -104,12 +104,12 @@ const plVariant plReflectedTypeStorageAccessor::GetValue(plStringView sProperty,
   return plVariant();
 }
 
-bool plReflectedTypeStorageAccessor::SetValue(plStringView sProperty, const plVariant& value, plVariant index)
+bool plReflectedTypeStorageAccessor::SetValue(const char* szProperty, const plVariant& value, plVariant index)
 {
   const plReflectedTypeStorageManager::ReflectedTypeStorageMapping::StorageInfo* storageInfo = nullptr;
-  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(sProperty, storageInfo))
+  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(szProperty, storageInfo))
   {
-    const plAbstractProperty* pProp = GetType()->FindPropertyByName(sProperty);
+    const plAbstractProperty* pProp = GetType()->FindPropertyByName(szProperty);
     if (pProp == nullptr)
       return false;
     PLASMA_ASSERT_DEV(pProp->GetSpecificType() == plGetStaticRTTI<plVariant>() || value.IsValid(), "");
@@ -218,15 +218,15 @@ bool plReflectedTypeStorageAccessor::SetValue(plStringView sProperty, const plVa
   return false;
 }
 
-plInt32 plReflectedTypeStorageAccessor::GetCount(plStringView sProperty) const
+plInt32 plReflectedTypeStorageAccessor::GetCount(const char* szProperty) const
 {
   const plReflectedTypeStorageManager::ReflectedTypeStorageMapping::StorageInfo* storageInfo = nullptr;
-  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(sProperty, storageInfo))
+  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(szProperty, storageInfo))
   {
     if (storageInfo->m_Type == plVariant::Type::Invalid)
       return -1;
 
-    const plAbstractProperty* pProp = GetType()->FindPropertyByName(sProperty);
+    const plAbstractProperty* pProp = GetType()->FindPropertyByName(szProperty);
     if (pProp == nullptr)
       return -1;
 
@@ -250,17 +250,17 @@ plInt32 plReflectedTypeStorageAccessor::GetCount(plStringView sProperty) const
   return -1;
 }
 
-bool plReflectedTypeStorageAccessor::GetKeys(plStringView sProperty, plDynamicArray<plVariant>& out_keys) const
+bool plReflectedTypeStorageAccessor::GetKeys(const char* szProperty, plDynamicArray<plVariant>& out_keys) const
 {
   out_keys.Clear();
 
   const plReflectedTypeStorageManager::ReflectedTypeStorageMapping::StorageInfo* storageInfo = nullptr;
-  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(sProperty, storageInfo))
+  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(szProperty, storageInfo))
   {
     if (storageInfo->m_Type == plVariant::Type::Invalid)
       return false;
 
-    const plAbstractProperty* pProp = GetType()->FindPropertyByName(sProperty);
+    const plAbstractProperty* pProp = GetType()->FindPropertyByName(szProperty);
     if (pProp == nullptr)
       return false;
 
@@ -296,15 +296,15 @@ bool plReflectedTypeStorageAccessor::GetKeys(plStringView sProperty, plDynamicAr
   }
   return false;
 }
-bool plReflectedTypeStorageAccessor::InsertValue(plStringView sProperty, plVariant index, const plVariant& value)
+bool plReflectedTypeStorageAccessor::InsertValue(const char* szProperty, plVariant index, const plVariant& value)
 {
   const plReflectedTypeStorageManager::ReflectedTypeStorageMapping::StorageInfo* storageInfo = nullptr;
-  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(sProperty, storageInfo))
+  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(szProperty, storageInfo))
   {
     if (storageInfo->m_Type == plVariant::Type::Invalid)
       return false;
 
-    const plAbstractProperty* pProp = GetType()->FindPropertyByName(sProperty);
+    const plAbstractProperty* pProp = GetType()->FindPropertyByName(szProperty);
     if (pProp == nullptr)
       return false;
 
@@ -378,15 +378,15 @@ bool plReflectedTypeStorageAccessor::InsertValue(plStringView sProperty, plVaria
   return false;
 }
 
-bool plReflectedTypeStorageAccessor::RemoveValue(plStringView sProperty, plVariant index)
+bool plReflectedTypeStorageAccessor::RemoveValue(const char* szProperty, plVariant index)
 {
   const plReflectedTypeStorageManager::ReflectedTypeStorageMapping::StorageInfo* storageInfo = nullptr;
-  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(sProperty, storageInfo))
+  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(szProperty, storageInfo))
   {
     if (storageInfo->m_Type == plVariant::Type::Invalid)
       return false;
 
-    const plAbstractProperty* pProp = GetType()->FindPropertyByName(sProperty);
+    const plAbstractProperty* pProp = GetType()->FindPropertyByName(szProperty);
     if (pProp == nullptr)
       return false;
 
@@ -429,15 +429,15 @@ bool plReflectedTypeStorageAccessor::RemoveValue(plStringView sProperty, plVaria
   return false;
 }
 
-bool plReflectedTypeStorageAccessor::MoveValue(plStringView sProperty, plVariant oldIndex, plVariant newIndex)
+bool plReflectedTypeStorageAccessor::MoveValue(const char* szProperty, plVariant oldIndex, plVariant newIndex)
 {
   const plReflectedTypeStorageManager::ReflectedTypeStorageMapping::StorageInfo* storageInfo = nullptr;
-  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(sProperty, storageInfo))
+  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(szProperty, storageInfo))
   {
     if (storageInfo->m_Type == plVariant::Type::Invalid)
       return false;
 
-    const plAbstractProperty* pProp = GetType()->FindPropertyByName(sProperty);
+    const plAbstractProperty* pProp = GetType()->FindPropertyByName(szProperty);
     if (pProp == nullptr)
       return false;
 
@@ -488,15 +488,15 @@ bool plReflectedTypeStorageAccessor::MoveValue(plStringView sProperty, plVariant
   return false;
 }
 
-plVariant plReflectedTypeStorageAccessor::GetPropertyChildIndex(plStringView sProperty, const plVariant& value) const
+plVariant plReflectedTypeStorageAccessor::GetPropertyChildIndex(const char* szProperty, const plVariant& value) const
 {
   const plReflectedTypeStorageManager::ReflectedTypeStorageMapping::StorageInfo* storageInfo = nullptr;
-  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(sProperty, storageInfo))
+  if (m_pMapping->m_PathToStorageInfoTable.TryGetValue(szProperty, storageInfo))
   {
     if (storageInfo->m_Type == plVariant::Type::Invalid)
       return plVariant();
 
-    const plAbstractProperty* pProp = GetType()->FindPropertyByName(sProperty);
+    const plAbstractProperty* pProp = GetType()->FindPropertyByName(szProperty);
     if (pProp == nullptr)
       return plVariant();
 

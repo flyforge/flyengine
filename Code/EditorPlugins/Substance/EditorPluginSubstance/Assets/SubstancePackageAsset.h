@@ -1,7 +1,6 @@
 #pragma once
 
 #include <EditorFramework/Assets/SimpleAssetDocument.h>
-#include <Texture/TexConv/TexConvEnums.h>
 
 struct plSubstanceUsage
 {
@@ -33,10 +32,9 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_EDITORPLUGINSUBSTANCE_DLL, plSubstanceUsa
 struct plSubstanceGraphOutput
 {
   bool m_bEnabled = true;
-  plEnum<plTexConvCompressionMode> m_CompressionMode;
+  bool m_bUseHighCompression = true;
   plEnum<plSubstanceUsage> m_Usage;
   plUInt8 m_uiNumChannels = 1;
-  bool m_bPreserveAlphaCoverage = false;
   plString m_sName;
   plString m_sLabel;
   plUuid m_Uuid;
@@ -44,10 +42,9 @@ struct plSubstanceGraphOutput
   bool operator==(const plSubstanceGraphOutput& other) const
   {
     return m_bEnabled == other.m_bEnabled &&
-           m_CompressionMode == other.m_CompressionMode &&
+           m_bUseHighCompression == other.m_bUseHighCompression &&
            m_Usage == other.m_Usage &&
            m_uiNumChannels == other.m_uiNumChannels &&
-           m_bPreserveAlphaCoverage == other.m_bPreserveAlphaCoverage &&
            m_sName == other.m_sName &&
            m_sLabel == other.m_sLabel &&
            m_Uuid == other.m_Uuid;
@@ -99,20 +96,19 @@ public:
   plDynamicArray<plString> m_OutputNames;
 };
 
-class plTextureAssetProfileConfig;
 
 class plSubstancePackageAssetDocument : public plSimpleAssetDocument<plSubstancePackageAssetProperties>
 {
   PLASMA_ADD_DYNAMIC_REFLECTION(plSubstancePackageAssetDocument, plSimpleAssetDocument<plSubstancePackageAssetProperties>);
 
 public:
-  plSubstancePackageAssetDocument(plStringView sDocumentPath);
+  plSubstancePackageAssetDocument(const char* szDocumentPath);
   ~plSubstancePackageAssetDocument();
 
 private:
   virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override { return plStatus(PLASMA_SUCCESS); }
-  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override { return plStatus(PLASMA_SUCCESS); }
+  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   void OnPropertyChanged(const plDocumentObjectPropertyEvent& e);

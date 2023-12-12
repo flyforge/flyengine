@@ -141,8 +141,8 @@ private: // friend plParticleEffectUpdateTask
   bool StepSimulation(const plTime& tDiff);
 
 private:
-  plTime m_TotalEffectLifeTime = plTime::MakeZero();
-  plTime m_ElapsedTimeSinceUpdate = plTime::MakeZero();
+  plTime m_TotalEffectLifeTime = plTime::Zero();
+  plTime m_ElapsedTimeSinceUpdate = plTime::Zero();
 
 
   /// @}

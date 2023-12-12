@@ -27,6 +27,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAreaDamageComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
+    new plColorAttribute(plColorScheme::Gameplay),
     new plSphereVisualizerAttribute("Radius", plColor::OrangeRed),
     new plSphereManipulatorAttribute("Radius"),
   }
@@ -81,7 +82,7 @@ void plAreaDamageComponent::ApplyAreaDamage()
         else
         {
           // otherwise, if we are so close, that the distance is zero, pick a random direction away from it
-          vDirToTarget = plVec3::MakeRandomDirection(GetWorld()->GetRandomNumberGenerator());
+          vDirToTarget.CreateRandomDirection(GetWorld()->GetRandomNumberGenerator());
         }
 
         // linearly scale damage and impulse down by distance

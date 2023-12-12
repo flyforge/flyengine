@@ -12,7 +12,7 @@ namespace plWidgetUtils
   PLASMA_GUIFOUNDATION_DLL QScreen& GetClosestScreen(const QPoint& point);
 
   PLASMA_GUIFOUNDATION_DLL void AdjustGridDensity(
-    double& ref_fFinestDensity, double& ref_fRoughDensity, plUInt32 uiWindowWidth, double fViewportSceneWidth, plUInt32 uiMinPixelsForStep);
+    double& fFinestDensity, double& fRoughDensity, plUInt32 uiWindowWidth, double fViewportSceneWidth, plUInt32 uiMinPixelsForStep);
 
   PLASMA_GUIFOUNDATION_DLL void ComputeGridExtentsX(const QRectF& viewportSceneRect, double fGridStops, double& out_fMinX, double& out_fMaxX);
 

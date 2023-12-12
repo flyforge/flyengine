@@ -35,7 +35,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plProcVolumeComponent, 1)
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction/PCG"),
+    new plColorAttribute(plColorScheme::Construction),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -184,7 +184,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plProcVolumeSphereComponent, 1, plComponentMode::Sta
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction/PCG"),
+    new plCategoryAttribute("Procedural Generation"),
     new plSphereManipulatorAttribute("Radius"),
     new plSphereVisualizerAttribute("Radius", plColor::LimeGreen),
   }
@@ -243,7 +243,7 @@ void plProcVolumeSphereComponent::DeserializeComponent(plWorldReader& stream)
 
 void plProcVolumeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fRadius), s_ProcVolumeCategory);
+  msg.AddBounds(plBoundingSphere(plVec3::ZeroVector(), m_fRadius), s_ProcVolumeCategory);
 }
 
 void plProcVolumeSphereComponent::OnExtractVolumes(plMsgExtractVolumes& msg) const
@@ -270,7 +270,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plProcVolumeBoxComponent, 1, plComponentMode::Static
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction/PCG"),
+    new plCategoryAttribute("Procedural Generation"),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColor::LimeGreen),
   }

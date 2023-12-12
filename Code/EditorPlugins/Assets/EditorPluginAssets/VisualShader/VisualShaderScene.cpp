@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/VisualShader/VisualShaderScene.moc.h>
 
 
-plQtVisualShaderScene::plQtVisualShaderScene(QObject* pParent)
-  : plQtNodeScene(pParent)
+plQtVisualShaderScene::plQtVisualShaderScene(QObject* parent)
+  : plQtNodeScene(parent)
 {
 }
 
@@ -44,15 +44,15 @@ void plQtVisualShaderPin::SetPin(const plPin& pin)
   setToolTip(sTooltip.GetData());
 }
 
-void plQtVisualShaderPin::paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget)
+void plQtVisualShaderPin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
   QPainterPath p = path();
 
   const plVisualShaderPin* pVsPin = static_cast<const plVisualShaderPin*>(GetPin());
 
-  pPainter->save();
-  pPainter->setBrush(brush());
-  pPainter->setPen(pen());
+  painter->save();
+  painter->setBrush(brush());
+  painter->setPen(pen());
 
   if (pVsPin->GetType() == plPin::Type::Input && GetConnections().IsEmpty())
   {
@@ -67,16 +67,16 @@ void plQtVisualShaderPin::paint(QPainter* pPainter, const QStyleOptionGraphicsIt
       pen.setStyle(Qt::PenStyle::SolidLine);
       pen.setCapStyle(Qt::PenCapStyle::SquareCap);
 
-      pPainter->setPen(pen);
+      painter->setPen(pen);
 
-      pPainter->drawRect(this->path().boundingRect());
-      pPainter->restore();
+      painter->drawRect(this->path().boundingRect());
+      painter->restore();
       return;
     }
   }
 
-  pPainter->drawPath(p);
-  pPainter->restore();
+  painter->drawPath(p);
+  painter->restore();
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -4,9 +4,9 @@
 #include <EditorFramework/Visualizers/CylinderVisualizerAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plCylinderVisualizerAdapter::plCylinderVisualizerAdapter() = default;
+plCylinderVisualizerAdapter::plCylinderVisualizerAdapter() {}
 
-plCylinderVisualizerAdapter::~plCylinderVisualizerAdapter() = default;
+plCylinderVisualizerAdapter::~plCylinderVisualizerAdapter() {}
 
 void plCylinderVisualizerAdapter::Finalize()
 {
@@ -16,7 +16,7 @@ void plCylinderVisualizerAdapter::Finalize()
 
   const plCylinderVisualizerAttribute* pAttr = static_cast<const plCylinderVisualizerAttribute*>(m_pVisualizerAttr);
 
-  m_hCylinder.ConfigureHandle(nullptr, plEngineGizmoHandleType::CylinderZ, pAttr->m_Color, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
+  m_hCylinder.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::CylinderZ, pAttr->m_Color, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
 
   pAssetDocument->AddSyncObject(&m_hCylinder);
 
@@ -41,7 +41,7 @@ void plCylinderVisualizerAdapter::Update()
       return;
 
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, pProp, value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, pProp, value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property '{0}' bound to plCylinderVisualizerAttribute 'radius'",
       pAttr->GetRadiusProperty());
@@ -51,7 +51,7 @@ void plCylinderVisualizerAdapter::Update()
   if (!pAttr->GetHeightProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetHeightProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetHeightProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plCylinderVisualizerAttribute 'height'");
     m_fHeight = value.ConvertTo<float>();
@@ -60,7 +60,7 @@ void plCylinderVisualizerAdapter::Update()
   if (!pAttr->GetColorProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plCylinderVisualizerAttribute 'color'");
     m_hCylinder.SetColor(value.ConvertTo<plColor>() * pAttr->m_Color);
@@ -71,7 +71,7 @@ void plCylinderVisualizerAdapter::Update()
   if (!pAttr->GetOffsetProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetOffsetProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetOffsetProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plVec3>(), "Invalid property bound to plCylinderVisualizerAttribute 'offset'");
 
@@ -84,7 +84,7 @@ void plCylinderVisualizerAdapter::Update()
   if (!pAttr->GetAxisProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetAxisProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetAxisProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plInt32>(), "Invalid property bound to plCylinderVisualizerAttribute 'axis'");
 
@@ -100,6 +100,8 @@ void plCylinderVisualizerAdapter::Update()
 
 void plCylinderVisualizerAdapter::UpdateGizmoTransform()
 {
+  const plCylinderVisualizerAttribute* pAttr = static_cast<const plCylinderVisualizerAttribute*>(m_pVisualizerAttr);
+
   const plQuat axisRotation = plBasisAxis::GetBasisRotation(plBasisAxis::PositiveZ, m_Axis);
 
   plTransform t;
@@ -107,7 +109,7 @@ void plCylinderVisualizerAdapter::UpdateGizmoTransform()
   t.m_vScale = plVec3(m_fRadius, m_fRadius, m_fHeight);
   t.m_vPosition = m_vPositionOffset;
 
-  plVec3 vOffset = plVec3::MakeZero();
+  plVec3 vOffset = plVec3::ZeroVector();
 
   if (m_Anchor.IsSet(plVisualizerAnchor::PosX))
     vOffset.x -= t.m_vScale.x;

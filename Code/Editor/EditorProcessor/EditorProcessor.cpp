@@ -10,13 +10,11 @@
 #include <EditorFramework/CodeGen/CppSettings.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <Foundation/Application/Application.h>
-#include <Foundation/System/CrashHandler.h>
 #include <Foundation/Utilities/CommandLineOptions.h>
 #include <GuiFoundation/Action/ActionManager.h>
-#include <ToolsFoundation/Application/ApplicationServices.h>
 
 plCommandLineOptionPath opt_OutputDir("_EditorProcessor", "-outputDir", "Output directory", "");
-plCommandLineOptionBool opt_SaveProfilingData("_EditorProcessor", "-profiling", "Saves performance profiling information into the output folder.", false);
+plCommandLineOptionBool opt_Debug("_EditorProcessor", "-debug", "Writes various debug logs into the output folder.", false);
 plCommandLineOptionPath opt_Project("_EditorProcessor", "-project", "Path to the project folder.", "");
 plCommandLineOptionBool opt_Resave("_EditorProcessor", "-resave", "If specified, assets will be resaved.", false);
 plCommandLineOptionString opt_Transform("_EditorProcessor", "-transform", "If specified, assets will be transformed for the given platform profile.\n\
@@ -26,16 +24,16 @@ Example:\n\
 ",
   "");
 
-class plEditorApplication : public plApplication
+class PlasmaEditorApplication : public plApplication
 {
 public:
-  using SUPER = plApplication;
+  typedef plApplication SUPER;
 
-  plEditorApplication()
-    : plApplication("plEditor")
+  PlasmaEditorApplication()
+    : plApplication("PlasmaEditor")
   {
     EnableMemoryLeakReporting(true);
-    m_pEditorEngineProcessAppDummy = PLASMA_DEFAULT_NEW(plEditorEngineProcessApp);
+    m_pEditorEngineProcessAppDummy = PLASMA_DEFAULT_NEW(PlasmaEditorEngineProcessApp);
 
     m_pEditorApp = new plQtEditorApp;
   }
@@ -47,11 +45,6 @@ public:
     plStartup::AddApplicationTag("editorprocessor");
 
     plQtEditorApp::GetSingleton()->InitQt(GetArgumentCount(), (char**)GetArgumentsArray());
-
-    plString sUserDataFolder = plApplicationServices::GetSingleton()->GetApplicationUserDataFolder();
-    plString sOutputFolder = opt_OutputDir.GetOptionValue(plCommandLineOption::LogMode::Never);
-    plCrashHandler_WriteMiniDump::g_Instance.SetDumpFilePath(sOutputFolder.IsEmpty() ? sUserDataFolder : sOutputFolder, "EditorProcessor");
-    plCrashHandler::SetCrashHandler(&plCrashHandler_WriteMiniDump::g_Instance);
 
     return PLASMA_SUCCESS;
   }
@@ -70,6 +63,8 @@ public:
   {
     if (const plProcessAssetMsg* pMsg = plDynamicCast<const plProcessAssetMsg*>(e.m_pMessage))
     {
+      plQtEditorApp::GetSingleton()->RestartEngineProcessIfPluginsChanged(false);
+
       if (pMsg->m_sAssetPath.HasExtension("plPrefab") || pMsg->m_sAssetPath.HasExtension("plScene"))
       {
         plQtEditorApp::GetSingleton()->RestartEngineProcessIfPluginsChanged(true);
@@ -77,7 +72,8 @@ public:
 
       plProcessAssetResponseMsg msg;
       {
-        plLogEntryDelegate logger([&msg](plLogEntry& ref_entry) -> void { msg.m_LogEntries.PushBack(std::move(ref_entry)); },
+        plLogEntryDelegate logger([&msg](plLogEntry& ref_entry) -> void
+          { msg.m_LogEntries.PushBack(std::move(ref_entry)); },
           plLogMsgType::WarningMsg);
         plLogSystemScope logScope(&logger);
 
@@ -168,7 +164,7 @@ public:
     const bool bResave = opt_Resave.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified);
     const bool bBackgroundMode = sTransformProfile.IsEmpty() && !bResave;
     const plString sOutputDir = opt_OutputDir.GetOptionValue(plCommandLineOption::LogMode::Always);
-    const plBitflags<plQtEditorApp::StartupFlags> startupFlags = bBackgroundMode ? plQtEditorApp::StartupFlags::Headless | plQtEditorApp::StartupFlags::Background : plQtEditorApp::StartupFlags::Headless;
+    const plBitflags<plQtEditorApp::StartupFlags> startupFlags = plQtEditorApp::StartupFlags::Headless;
     plQtEditorApp::GetSingleton()->StartupEditor(startupFlags, sOutputDir);
     plQtUiServices::SetHeadless(true);
 
@@ -199,7 +195,8 @@ public:
 
       bool bTransform = true;
 
-      plQtEditorApp::GetSingleton()->connect(plQtEditorApp::GetSingleton(), &plQtEditorApp::IdleEvent, plQtEditorApp::GetSingleton(), [this, &bTransform, &sTransformProfile]() {
+      plQtEditorApp::GetSingleton()->connect(plQtEditorApp::GetSingleton(), &plQtEditorApp::IdleEvent, plQtEditorApp::GetSingleton(), [this, &bTransform, &sTransformProfile]()
+        {
         if (!bTransform)
           return;
 
@@ -220,7 +217,7 @@ public:
             SetReturnCode(1);
           }
 
-          if (opt_SaveProfilingData.GetOptionValue(plCommandLineOption::LogMode::Always))
+          if (opt_Debug.GetOptionValue(plCommandLineOption::LogMode::Always))
           {
             plActionContext context;
             plActionManager::ExecuteAction("Engine", "Editor.SaveProfiling", context).IgnoreResult();
@@ -237,13 +234,14 @@ public:
     {
       plQtEditorApp::GetSingleton()->OpenProject(sProject).IgnoreResult();
 
-      plQtEditorApp::GetSingleton()->connect(plQtEditorApp::GetSingleton(), &plQtEditorApp::IdleEvent, plQtEditorApp::GetSingleton(), [this]() {
-        plAssetCurator::GetSingleton()->ResaveAllAssets();
-
-        if (opt_SaveProfilingData.GetOptionValue(plCommandLineOption::LogMode::Always))
+      plQtEditorApp::GetSingleton()->connect(plQtEditorApp::GetSingleton(), &plQtEditorApp::IdleEvent, plQtEditorApp::GetSingleton(), [this]()
         {
-          plActionContext context;
-          plActionManager::ExecuteAction("Engine", "Editor.SaveProfiling", context).IgnoreResult();
+        plAssetCurator::GetSingleton()->ResaveAllAssets();
+        
+          if (opt_Debug.GetOptionValue(plCommandLineOption::LogMode::Always))
+          {
+            plActionContext context;
+            plActionManager::ExecuteAction("Engine", "Editor.SaveProfiling", context).IgnoreResult();
           }
 
         QApplication::quit(); });
@@ -257,10 +255,11 @@ public:
       plResult res = m_IPC.ConnectToHostProcess();
       if (res.Succeeded())
       {
-        m_IPC.m_Events.AddEventHandler(plMakeDelegate(&plEditorApplication::EventHandlerIPC, this));
+        m_IPC.m_Events.AddEventHandler(plMakeDelegate(&PlasmaEditorApplication::EventHandlerIPC, this));
 
         plQtEditorApp::GetSingleton()->OpenProject(sProject).IgnoreResult();
-        plQtEditorApp::GetSingleton()->connect(plQtEditorApp::GetSingleton(), &plQtEditorApp::IdleEvent, plQtEditorApp::GetSingleton(), [this]() {
+        plQtEditorApp::GetSingleton()->connect(plQtEditorApp::GetSingleton(), &plQtEditorApp::IdleEvent, plQtEditorApp::GetSingleton(), [this]()
+          {
           static bool bRecursionBlock = false;
           if (bRecursionBlock)
             return;
@@ -289,8 +288,8 @@ public:
 
 private:
   plQtEditorApp* m_pEditorApp;
-  plEngineProcessCommunicationChannel m_IPC;
-  plUniquePtr<plEditorEngineProcessApp> m_pEditorEngineProcessAppDummy;
+  PlasmaEngineProcessCommunicationChannel m_IPC;
+  plUniquePtr<PlasmaEditorEngineProcessApp> m_pEditorEngineProcessAppDummy;
 };
 
-PLASMA_APPLICATION_ENTRY_POINT(plEditorApplication);
+PLASMA_APPLICATION_ENTRY_POINT(PlasmaEditorApplication);

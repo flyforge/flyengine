@@ -18,7 +18,12 @@ struct PLASMA_SHADER_STRUCT plPerLightData
   UINT1(colorAndType);
   FLOAT1(intensity);
   UINT1(direction); // 10 bits fixed point per axis
+  UINT1(rightDirection); // 10 bits fixed point per axis
+
+  UINT1(upDirection);
   UINT1(shadowDataOffset);
+  UINT1(ununsed1);
+  UINT1(unused2);
 
   FLOAT3(position);
   FLOAT1(invSqrAttRadius);
@@ -26,14 +31,18 @@ struct PLASMA_SHADER_STRUCT plPerLightData
   UINT1(spotParams); // scale and offset as 16 bit floats
   UINT1(projectorAtlasOffset); // xy as 16 bit floats
   UINT1(projectorAtlasScale); // xy as 16 bit floats
+  FLOAT1(falloff);
 
-  UINT1(reserved);
+  FLOAT1(size);
+  FLOAT1(length);
+  FLOAT1(specularIntensity);
+  FLOAT1(volumetricIntensity);
 };
 
 #if PLASMA_ENABLED(PLATFORM_SHADER)
   StructuredBuffer<plPerLightData> perLightDataBuffer;
 #else
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plPerLightData) == 48);
+  PLASMA_CHECK_AT_COMPILETIME(sizeof(plPerLightData) == 80);
 #endif
 
 struct PLASMA_SHADER_STRUCT plPointShadowData
@@ -59,13 +68,13 @@ struct PLASMA_SHADER_STRUCT plDirShadowData
 
 };
 
-#define GET_SHADOW_PARAMS_INDEX(baseOffset) ((baseOffset) + 0)
-#define GET_WORLD_TO_LIGHT_MATRIX_INDEX(baseOffset, index) ((baseOffset) + 1 + 4 * (index))
-#define GET_SHADOW_PARAMS2_INDEX(baseOffset) ((baseOffset) + 5)
-#define GET_FADE_OUT_PARAMS_INDEX(baseOffset) ((baseOffset) + 6)
-#define GET_CASCADE_SCALE_INDEX(baseOffset, index) ((baseOffset) + 7 + 2 * (index))
-#define GET_CASCADE_OFFSET_INDEX(baseOffset, index) ((baseOffset) + 8 + 2 * (index))
-#define GET_ATLAS_SCALE_OFFSET_INDEX(baseOffset, index) ((baseOffset) + 13 + (index))
+#define GET_SHADOW_PARAMS_INDEX(baseOffset) (baseOffset + 0)
+#define GET_WORLD_TO_LIGHT_MATRIX_INDEX(baseOffset, index) (baseOffset + 1 + 4 * (index))
+#define GET_SHADOW_PARAMS2_INDEX(baseOffset) (baseOffset + 5)
+#define GET_FADE_OUT_PARAMS_INDEX(baseOffset) (baseOffset + 6)
+#define GET_CASCADE_SCALE_INDEX(baseOffset, index) (baseOffset + 7 + 2 * (index))
+#define GET_CASCADE_OFFSET_INDEX(baseOffset, index) (baseOffset + 8 + 2 * (index))
+#define GET_ATLAS_SCALE_OFFSET_INDEX(baseOffset, index) (baseOffset + 13 + (index))
 
 #if PLASMA_ENABLED(PLATFORM_SHADER)
   StructuredBuffer<float4> shadowDataBuffer;
@@ -109,7 +118,7 @@ struct PLASMA_SHADER_STRUCT plPerDecalData
 #define REFLECTION_PROBE_IS_SPHERE (1 << 31)
 #define REFLECTION_PROBE_IS_PROJECTED (1 << 30)
 #define REFLECTION_PROBE_INDEX_BITMASK 0x3FFFFFFF
-#define GET_REFLECTION_PROBE_INDEX(index) ((index) & REFLECTION_PROBE_INDEX_BITMASK)
+#define GET_REFLECTION_PROBE_INDEX(index) (index & REFLECTION_PROBE_INDEX_BITMASK)
 
   struct PLASMA_SHADER_STRUCT plPerReflectionProbeData
   {
@@ -153,7 +162,7 @@ struct PLASMA_SHADER_STRUCT plPerDecalData
 };
 
 #define NUM_CLUSTERS_X 16
-#define NUM_CLUSTERS_Y 8
+#define NUM_CLUSTERS_Y 9
 #define NUM_CLUSTERS_Z 24
 #define NUM_CLUSTERS_XY (NUM_CLUSTERS_X * NUM_CLUSTERS_Y)
 #define NUM_CLUSTERS (NUM_CLUSTERS_X * NUM_CLUSTERS_Y * NUM_CLUSTERS_Z)
@@ -164,7 +173,7 @@ struct PLASMA_SHADER_STRUCT plPerDecalData
 #define PROBE_SHIFT 20
 #define PROBE_BITMASK 0x3FF
 
-#define GET_LIGHT_INDEX(index) ((index) & LIGHT_BITMASK)
+#define GET_LIGHT_INDEX(index) (index & LIGHT_BITMASK)
 #define GET_DECAL_INDEX(index) ((index >> DECAL_SHIFT) & DECAL_BITMASK)
 #define GET_PROBE_INDEX(index) ((index >> PROBE_SHIFT) & PROBE_BITMASK)
 

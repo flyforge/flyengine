@@ -36,10 +36,8 @@ PLASMA_ALWAYS_INLINE plGALResourceFormat::Enum plMeshBoneWeigthPrecision::ToReso
       return plGALResourceFormat::RGBAUShortNormalized;
     case _32Bit:
       return plGALResourceFormat::RGBAFloat;
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
-
-  return plGALResourceFormat::RGBAUByteNormalized;
+  return plGALResourceFormat::RGBAFloat;
 }
 
 //////////////////////////////////////////////////////////////////////////

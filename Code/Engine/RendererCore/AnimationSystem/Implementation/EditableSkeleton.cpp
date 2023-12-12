@@ -50,16 +50,16 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeletonJoint, 2, plRTTIDefaultAll
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_ACCESSOR_PROPERTY("Name", GetName, SetName)->AddAttributes(new plReadOnlyAttribute()),
-    PLASMA_MEMBER_PROPERTY("Transform", m_LocalTransform)->AddFlags(plPropertyFlags::Hidden)->AddAttributes(new plDefaultValueAttribute(plTransform::MakeIdentity())),
+    PLASMA_MEMBER_PROPERTY("Transform", m_LocalTransform)->AddFlags(plPropertyFlags::Hidden)->AddAttributes(new plDefaultValueAttribute(plTransform::IdentityTransform())),
     PLASMA_MEMBER_PROPERTY_READ_ONLY("GizmoOffsetTranslationRO", m_vGizmoOffsetPositionRO)->AddAttributes(new plHiddenAttribute()),
     PLASMA_MEMBER_PROPERTY_READ_ONLY("GizmoOffsetRotationRO", m_qGizmoOffsetRotationRO)->AddAttributes(new plHiddenAttribute()),
     PLASMA_MEMBER_PROPERTY("LocalRotation", m_qLocalJointRotation),
     PLASMA_ENUM_MEMBER_PROPERTY("JointType", plSkeletonJointType, m_JointType),
     PLASMA_MEMBER_PROPERTY("Stiffness", m_fStiffness)->AddAttributes(new plDefaultValueAttribute(10.0f)),
-    PLASMA_MEMBER_PROPERTY("SwingLimitY", m_SwingLimitY)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(170)), new plDefaultValueAttribute(plAngle::MakeFromDegree(30))),
-    PLASMA_MEMBER_PROPERTY("SwingLimitZ", m_SwingLimitZ)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(170)), new plDefaultValueAttribute(plAngle::MakeFromDegree(30))),
-    PLASMA_MEMBER_PROPERTY("TwistLimitHalfAngle", m_TwistLimitHalfAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(10), plAngle::MakeFromDegree(170)), new plDefaultValueAttribute(plAngle::MakeFromDegree(30))),
-    PLASMA_MEMBER_PROPERTY("TwistLimitCenterAngle", m_TwistLimitCenterAngle)->AddAttributes(new plClampValueAttribute(-plAngle::MakeFromDegree(170), plAngle::MakeFromDegree(170))),
+    PLASMA_MEMBER_PROPERTY("SwingLimitY", m_SwingLimitY)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(170)), new plDefaultValueAttribute(plAngle::Degree(30))),
+    PLASMA_MEMBER_PROPERTY("SwingLimitZ", m_SwingLimitZ)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(170)), new plDefaultValueAttribute(plAngle::Degree(30))),
+    PLASMA_MEMBER_PROPERTY("TwistLimitHalfAngle", m_TwistLimitHalfAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(10), plAngle::Degree(170)), new plDefaultValueAttribute(plAngle::Degree(30))),
+    PLASMA_MEMBER_PROPERTY("TwistLimitCenterAngle", m_TwistLimitCenterAngle)->AddAttributes(new plClampValueAttribute(-plAngle::Degree(170), plAngle::Degree(170))),
 
     PLASMA_MEMBER_PROPERTY("OverrideSurface", m_bOverrideSurface),
     PLASMA_MEMBER_PROPERTY("Surface", m_sSurfaceOverride)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
@@ -222,7 +222,7 @@ void plEditableSkeleton::FillResourceDescriptor(plSkeletonResourceDescriptor& re
   {
     const plUInt16 idx = sb.AddJoint(pJoint->GetName(), pJoint->m_LocalTransform);
 
-    CreateJointsRecursive(sb, ref_desc, nullptr, pJoint, idx, plQuat::MakeIdentity(), ref_desc.m_RootTransform.GetAsMat4());
+    CreateJointsRecursive(sb, ref_desc, nullptr, pJoint, idx, plQuat::IdentityQuaternion(), ref_desc.m_RootTransform.GetAsMat4());
   }
 
   sb.BuildSkeleton(ref_desc.m_Skeleton);
@@ -235,9 +235,9 @@ static void BuildOzzRawSkeleton(const plEditableSkeletonJoint& srcJoint, ozz::an
   ref_dstJoint.transform.translation.x = srcJoint.m_LocalTransform.m_vPosition.x;
   ref_dstJoint.transform.translation.y = srcJoint.m_LocalTransform.m_vPosition.y;
   ref_dstJoint.transform.translation.z = srcJoint.m_LocalTransform.m_vPosition.z;
-  ref_dstJoint.transform.rotation.x = srcJoint.m_LocalTransform.m_qRotation.x;
-  ref_dstJoint.transform.rotation.y = srcJoint.m_LocalTransform.m_qRotation.y;
-  ref_dstJoint.transform.rotation.z = srcJoint.m_LocalTransform.m_qRotation.z;
+  ref_dstJoint.transform.rotation.x = srcJoint.m_LocalTransform.m_qRotation.v.x;
+  ref_dstJoint.transform.rotation.y = srcJoint.m_LocalTransform.m_qRotation.v.y;
+  ref_dstJoint.transform.rotation.z = srcJoint.m_LocalTransform.m_qRotation.v.z;
   ref_dstJoint.transform.rotation.w = srcJoint.m_LocalTransform.m_qRotation.w;
   ref_dstJoint.transform.scale.x = srcJoint.m_LocalTransform.m_vScale.x;
   ref_dstJoint.transform.scale.y = srcJoint.m_LocalTransform.m_vScale.y;

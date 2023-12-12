@@ -57,7 +57,7 @@ plResult plRootRotationAnimNode::DeserializeNode(plStreamReader& stream)
 
 void plRootRotationAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
-  plVec3 vRootMotion = plVec3::MakeZero();
+  plVec3 vRootMotion = plVec3::ZeroVector();
   plAngle rootRotationX;
   plAngle rootRotationY;
   plAngle rootRotationZ;
@@ -66,15 +66,15 @@ void plRootRotationAnimNode::Step(plAnimController& ref_controller, plAnimGraphI
 
   if (m_InRotateX.IsConnected())
   {
-    rootRotationX += plAngle::MakeFromDegree(static_cast<float>(m_InRotateX.GetNumber(ref_graph)));
+    rootRotationX += plAngle::Degree(static_cast<float>(m_InRotateX.GetNumber(ref_graph)));
   }
   if (m_InRotateY.IsConnected())
   {
-    rootRotationY += plAngle::MakeFromDegree(static_cast<float>(m_InRotateY.GetNumber(ref_graph)));
+    rootRotationY += plAngle::Degree(static_cast<float>(m_InRotateY.GetNumber(ref_graph)));
   }
   if (m_InRotateZ.IsConnected())
   {
-    rootRotationZ += plAngle::MakeFromDegree(static_cast<float>(m_InRotateZ.GetNumber(ref_graph)));
+    rootRotationZ += plAngle::Degree(static_cast<float>(m_InRotateZ.GetNumber(ref_graph)));
   }
 
   ref_controller.SetRootMotion(vRootMotion, rootRotationX, rootRotationY, rootRotationZ);

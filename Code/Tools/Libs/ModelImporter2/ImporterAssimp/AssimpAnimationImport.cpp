@@ -34,9 +34,9 @@ namespace plModelImporter2
 
   PLASMA_FORCE_INLINE void ozz2pl(const ozz::math::Quaternion& in, plQuat& out)
   {
-    out.x = (float)in.x;
-    out.y = (float)in.y;
-    out.z = (float)in.z;
+    out.v.x = (float)in.x;
+    out.v.y = (float)in.y;
+    out.v.z = (float)in.z;
     out.w = (float)in.w;
   }
 

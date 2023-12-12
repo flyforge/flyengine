@@ -11,7 +11,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapToolbarActions(plStringView sMapping);
+  static void MapActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hToggleViews;
   static plActionDescriptorHandle s_hSpawnView;

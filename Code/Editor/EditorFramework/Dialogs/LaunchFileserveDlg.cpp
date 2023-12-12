@@ -3,13 +3,13 @@
 #include <EditorFramework/Dialogs/LaunchFileserveDlg.moc.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 
-plQtLaunchFileserveDlg::plQtLaunchFileserveDlg(QWidget* pParent)
-  : QDialog(pParent)
+plQtLaunchFileserveDlg::plQtLaunchFileserveDlg(QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 }
 
-plQtLaunchFileserveDlg::~plQtLaunchFileserveDlg() = default;
+plQtLaunchFileserveDlg::~plQtLaunchFileserveDlg() {}
 
 void plQtLaunchFileserveDlg::showEvent(QShowEvent* event)
 {

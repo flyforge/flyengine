@@ -28,7 +28,7 @@ struct plVariantType
 
     /// *** Types that are flagged as 'StandardTypes' (see DetermineTypeFlags) ***
     FirstStandardType = 1,
-    Bool,             ///< The variant stores a bool.
+    Bool,       ///< The variant stores a bool.
     Int8,             ///< The variant stores an plInt8.
     UInt8,            ///< The variant stores an plUInt8.
     Int16,            ///< The variant stores an plInt16.
@@ -95,10 +95,13 @@ struct plVariantClass
 template <typename T>
 struct plVariantTypeDeduction
 {
-  static constexpr plVariantType::Enum value = plVariantType::Invalid;
-  static constexpr bool forceSharing = false;
-  static constexpr bool hasReflectedMembers = false;
-  static constexpr plVariantClass::Enum classification = plVariantClass::Invalid;
+  enum
+  {
+    value = plVariantType::Invalid,
+    forceSharing = false,
+    hasReflectedMembers = false,
+    classification = plVariantClass::Invalid
+  };
 
   using StorageType = T;
 };
@@ -107,16 +110,18 @@ struct plVariantTypeDeduction
 ///
 /// Needs to be called from the same header that defines the type.
 /// \sa PLASMA_DEFINE_CUSTOM_VARIANT_TYPE
-#define PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(TYPE)                                               \
-  template <>                                                                              \
-  struct plVariantTypeDeduction<TYPE>                                                      \
-  {                                                                                        \
-    static constexpr plVariantType::Enum value = plVariantType::TypedObject;               \
-    static constexpr bool forceSharing = false;                                            \
-    static constexpr bool hasReflectedMembers = true;                                      \
-    static constexpr plVariantClass::Enum classification = plVariantClass::CustomTypeCast; \
-                                                                                           \
-    using StorageType = TYPE;                                                              \
+#define PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(TYPE)          \
+  template <>                                         \
+  struct plVariantTypeDeduction<TYPE>                 \
+  {                                                   \
+    enum                                              \
+    {                                                 \
+      value = plVariantType::TypedObject,             \
+      forceSharing = false,                           \
+      hasReflectedMembers = true,                     \
+      classification = plVariantClass::CustomTypeCast \
+    };                                                \
+    using StorageType = TYPE;                         \
   };
 
 #include <Foundation/Types/Implementation/VariantTypeDeduction_inl.h>

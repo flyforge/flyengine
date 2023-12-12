@@ -63,8 +63,8 @@ protected:
 
   float m_fFriction = 0.0f;
 
-  plAngle m_LowerTwistLimit = plAngle::MakeFromDegree(90);
-  plAngle m_UpperTwistLimit = plAngle::MakeFromDegree(90);
+  plAngle m_LowerTwistLimit = plAngle::Degree(90);
+  plAngle m_UpperTwistLimit = plAngle::Degree(90);
 
   // not sure whether these are useful
   // maybe just expose an 'untwist' feature, with strength/frequency and drive to position 0 ?

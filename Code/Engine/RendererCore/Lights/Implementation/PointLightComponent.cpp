@@ -14,8 +14,11 @@ PLASMA_BEGIN_COMPONENT_TYPE(plPointLightComponent, 2, plComponentMode::Static)
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Range", GetRange, SetRange)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f), new plSuffixAttribute(" m"), new plMinValueTextAttribute("Auto")),
-    //PLASMA_ACCESSOR_PROPERTY("ProjectedTexture", GetProjectedTextureFile, SetProjectedTextureFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
+    PLASMA_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f), new plSuffixAttribute(" m")),
+    PLASMA_ACCESSOR_PROPERTY("Length", GetLength, SetLength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f), new plSuffixAttribute(" m")),
+    PLASMA_ACCESSOR_PROPERTY("Range", GetRange, SetRange)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(3.0f), new plSuffixAttribute(" m")),
+    PLASMA_ACCESSOR_PROPERTY("Falloff", GetFalloff, SetFalloff)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+//PLASMA_ACCESSOR_PROPERTY("ProjectedTexture", GetProjectedTextureFile, SetProjectedTextureFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -25,7 +28,9 @@ PLASMA_BEGIN_COMPONENT_TYPE(plPointLightComponent, 2, plComponentMode::Static)
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
+    new plCapsuleManipulatorAttribute("Length", "Size"),
     new plSphereManipulatorAttribute("Range"),
+    new plSphereManipulatorAttribute("Size"),
     new plPointLightVisualizerAttribute("Range", "Intensity", "LightColor"),
   }
   PLASMA_END_ATTRIBUTES;
@@ -35,16 +40,13 @@ PLASMA_END_COMPONENT_TYPE
 
 plPointLightComponent::plPointLightComponent()
 {
-  m_fEffectiveRange = CalculateEffectiveRange(m_fRange, m_fIntensity);
 }
 
 plPointLightComponent::~plPointLightComponent() = default;
 
 plResult plPointLightComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
-  m_fEffectiveRange = CalculateEffectiveRange(m_fRange, m_fIntensity);
-
-  ref_bounds = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fEffectiveRange);
+  ref_bounds = plBoundingSphere(plVec3::ZeroVector(), m_fRange);
   return PLASMA_SUCCESS;
 }
 
@@ -60,9 +62,40 @@ float plPointLightComponent::GetRange() const
   return m_fRange;
 }
 
-float plPointLightComponent::GetEffectiveRange() const
+void plPointLightComponent::SetFalloff(float fFalloff)
 {
-  return m_fEffectiveRange;
+  m_fFalloff = fFalloff;
+
+  InvalidateCachedRenderData();
+}
+
+float plPointLightComponent::GetFalloff() const
+{
+  return m_fFalloff;
+}
+
+void plPointLightComponent::SetSize(float fSize)
+{
+  m_fSize = fSize;
+
+  InvalidateCachedRenderData();
+}
+
+float plPointLightComponent::GetSize() const
+{
+  return m_fSize;
+}
+
+void plPointLightComponent::SetLength(float fLength)
+{
+  m_fLength = fLength;
+
+  InvalidateCachedRenderData();
+}
+
+float plPointLightComponent::GetLength() const
+{
+  return m_fLength;
 }
 
 void plPointLightComponent::SetProjectedTexture(const plTextureCubeResourceHandle& hProjectedTexture)
@@ -103,19 +136,30 @@ void plPointLightComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
   if (msg.m_OverrideCategory != plInvalidRenderDataCategory || msg.m_pView->GetCameraUsageHint() == plCameraUsageHint::Shadow)
     return;
 
-  if (m_fIntensity <= 0.0f || m_fEffectiveRange <= 0.0f)
+  if (m_fIntensity <= 0.0f || m_fRange <= 0.0f)
     return;
 
   plTransform t = GetOwner()->GetGlobalTransform();
 
-  float fScreenSpaceSize = CalculateScreenSpaceSize(plBoundingSphere::MakeFromCenterAndRadius(t.m_vPosition, m_fEffectiveRange * 0.5f), *msg.m_pView->GetCullingCamera());
+  float fScreenSpaceSize = CalculateScreenSpaceSize(plBoundingSphere(t.m_vPosition, m_fRange * 0.5f), *msg.m_pView->GetCullingCamera());
 
   auto pRenderData = plCreateRenderDataForThisFrame<plPointLightRenderData>(GetOwner());
 
   pRenderData->m_GlobalTransform = t;
   pRenderData->m_LightColor = m_LightColor;
-  pRenderData->m_fIntensity = m_fIntensity;
-  pRenderData->m_fRange = m_fEffectiveRange;
+  pRenderData->m_fSpecularMultiplier = m_fSpecularMultiplier;
+  pRenderData->m_fVolumetricIntensity = m_fVolumetricIntensity;
+  pRenderData->m_fSize = m_fSize;
+  pRenderData->m_fLength = m_fLength;
+
+  if (m_LightUnit == plLightUnit::Candela)
+    pRenderData->m_fIntensity = m_fIntensity * (4.0f * plMath::Pi<float>());
+  else
+    pRenderData->m_fIntensity = m_fIntensity;
+
+  pRenderData->m_fTemperature = m_fTemperature;
+  pRenderData->m_fRange = m_fRange;
+  pRenderData->m_fFalloff = m_fFalloff;
   pRenderData->m_hProjectedTexture = m_hProjectedTexture;
   pRenderData->m_uiShadowDataOffset = m_bCastShadows ? plShadowPool::AddPointLight(this, fScreenSpaceSize, msg.m_pView) : plInvalidIndex;
 

@@ -28,7 +28,7 @@ plResult plProcessGroup::Launch(const plProcessOptions& opt)
   return process.Launch(opt);
 }
 
-plResult plProcessGroup::WaitToFinish(plTime timeout /*= plTime::MakeZero()*/)
+plResult plProcessGroup::WaitToFinish(plTime timeout /*= plTime::Zero()*/)
 {
   for (auto& process : m_Processes)
   {

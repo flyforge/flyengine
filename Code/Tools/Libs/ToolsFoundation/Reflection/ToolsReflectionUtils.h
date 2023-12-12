@@ -25,5 +25,5 @@ public:
 
   static void GatherObjectTypes(const plDocumentObject* pObject, plSet<const plRTTI*>& inout_types);
 
-  static bool DependencySortTypeDescriptorArray(plDynamicArray<plReflectedTypeDescriptor*>& ref_descriptors);
+  static bool DependencySortTypeDescriptorArray(plDynamicArray<plReflectedTypeDescriptor*>& descriptors);
 };

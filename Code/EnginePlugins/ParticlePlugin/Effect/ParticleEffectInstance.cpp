@@ -40,15 +40,15 @@ void plParticleEffectInstance::Construct(plParticleEffectHandle hEffectHandle, c
   m_bIsSharedEffect = bIsShared;
   m_bEmitterEnabled = true;
   m_bIsFinishing = false;
-  m_BoundingVolume = plBoundingBoxSphere::MakeInvalid();
-  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
-  m_EffectIsVisible = plTime::MakeZero();
+  m_BoundingVolume.SetInvalid();
+  m_ElapsedTimeSinceUpdate.SetZero();
+  m_EffectIsVisible.SetZero();
   m_iMinSimStepsToDo = 4;
   m_Transform.SetIdentity();
   m_TransformForNextFrame.SetIdentity();
   m_vVelocity.SetZero();
   m_vVelocityForNextFrame.SetZero();
-  m_TotalEffectLifeTime = plTime::MakeZero();
+  m_TotalEffectLifeTime.SetZero();
   m_pVisibleIf = nullptr;
   m_uiRandomSeed = uiRandomSeed;
 
@@ -473,7 +473,7 @@ bool plParticleEffectInstance::Update(const plTime& tDiff)
 
   // do the remainder
   const plTime tUpdateDiff = m_ElapsedTimeSinceUpdate;
-  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
+  m_ElapsedTimeSinceUpdate.SetZero();
 
   return StepSimulation(tUpdateDiff);
 }
@@ -529,7 +529,7 @@ void plParticleEffectInstance::UpdateWindSamples()
   if (m_vSampleWindLocations[uiDataIdx].IsEmpty())
     return;
 
-  m_vSampleWindResults[uiDataIdx].SetCount(m_vSampleWindLocations[uiDataIdx].GetCount(), plVec3::MakeZero());
+  m_vSampleWindResults[uiDataIdx].SetCount(m_vSampleWindLocations[uiDataIdx].GetCount(), plVec3::ZeroVector());
 
   if (auto pWind = GetWorld()->GetModuleReadOnly<plWindWorldModuleInterface>())
   {
@@ -594,7 +594,7 @@ plVec3 plParticleEffectInstance::GetWindSampleResult(plInt32 idx) const
     return m_vSampleWindResults[uiDataIdx][idx];
   }
 
-  return plVec3::MakeZero();
+  return plVec3::ZeroVector();
 }
 
 void plParticleEffectInstance::PassTransformToSystems()
@@ -639,7 +639,7 @@ void plParticleEffectInstance::GetBoundingVolume(plBoundingBoxSphere& volume) co
 {
   if (!m_BoundingVolume.IsValid())
   {
-    volume = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 0.25f);
+    volume = plBoundingSphere(plVec3::ZeroVector(), 0.25f);
     return;
   }
 
@@ -655,7 +655,8 @@ void plParticleEffectInstance::GetBoundingVolume(plBoundingBoxSphere& volume) co
 
 void plParticleEffectInstance::CombineSystemBoundingVolumes()
 {
-  plBoundingBoxSphere effectVolume = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere effectVolume;
+  effectVolume.SetInvalid();
 
   for (plUInt32 i = 0; i < m_ParticleSystems.GetCount(); ++i)
   {
@@ -714,7 +715,7 @@ void plParticleEffectInstance::ProcessEventQueues()
 plParticleEffectUpdateTask::plParticleEffectUpdateTask(plParticleEffectInstance* pEffect)
 {
   m_pEffect = pEffect;
-  m_UpdateDiff = plTime::MakeZero();
+  m_UpdateDiff.SetZero();
 }
 
 void plParticleEffectUpdateTask::Execute()

@@ -19,11 +19,11 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plAnimationClipContext::plAnimationClipContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plAnimationClipContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg0)
+void plAnimationClipContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg0)
 {
   if (auto pMsg = plDynamicCast<const plQuerySelectionBBoxMsgToEngine*>(pMsg0))
   {
@@ -106,7 +106,7 @@ void plAnimationClipContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg
     }
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pMsg0);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg0);
 }
 
 void plAnimationClipContext::OnInitialize()
@@ -124,17 +124,17 @@ void plAnimationClipContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plAnimationClipContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plAnimationClipContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plAnimationClipViewContext, this);
 }
 
-void plAnimationClipContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plAnimationClipContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
-bool plAnimationClipContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plAnimationClipContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
@@ -159,12 +159,13 @@ bool plAnimationClipContext::UpdateThumbnailViewContext(plEngineProcessViewConte
 }
 
 
-void plAnimationClipContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
+void plAnimationClipContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (m_pGameObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   {
     PLASMA_LOCK(m_pWorld->GetWriteMarker());

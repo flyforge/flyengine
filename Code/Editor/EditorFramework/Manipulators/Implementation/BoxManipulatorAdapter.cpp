@@ -9,16 +9,16 @@
 plBoxManipulatorAdapter::plBoxManipulatorAdapter() = default;
 plBoxManipulatorAdapter::~plBoxManipulatorAdapter() = default;
 
-void plBoxManipulatorAdapter::QueryGridSettings(plGridSettingsMsgToEngine& out_gridSettings)
+void plBoxManipulatorAdapter::QueryGridSettings(plGridSettingsMsgToEngine& outGridSettings)
 {
-  out_gridSettings.m_vGridCenter = m_Gizmo.GetTransformation().m_vPosition;
+  outGridSettings.m_vGridCenter = m_Gizmo.GetTransformation().m_vPosition;
 
   // if density != 0, it is enabled at least in ortho mode
-  out_gridSettings.m_fGridDensity = plSnapProvider::GetTranslationSnapValue();
+  outGridSettings.m_fGridDensity = plSnapProvider::GetTranslationSnapValue();
 
   // to be active in perspective mode, tangents have to be non-zero
-  out_gridSettings.m_vGridTangent1.SetZero();
-  out_gridSettings.m_vGridTangent2.SetZero();
+  outGridSettings.m_vGridTangent1.SetZero();
+  outGridSettings.m_vGridTangent2.SetZero();
 }
 
 void plBoxManipulatorAdapter::Finalize()
@@ -101,7 +101,9 @@ void plBoxManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
 
       plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
 
-      pObjectAccessor->GetValue(m_pObject, GetProperty(szSizeProperty), oldSize).AssertSuccess();
+      pObjectAccessor->GetValue(m_pObject, GetProperty(szSizeProperty), oldSize).IgnoreResult();
+
+      const plVec3 vOldSize = oldSize.ConvertTo<plVec3>();
 
       plVariant newValue = vNewSize;
 
@@ -109,7 +111,7 @@ void plBoxManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
 
       if (!plStringUtils::IsNullOrEmpty(szSizeProperty))
       {
-        pObjectAccessor->SetValue(m_pObject, GetProperty(szSizeProperty), newValue).AssertSuccess();
+        pObjectAccessor->SetValue(m_pObject, GetProperty(szSizeProperty), newValue).IgnoreResult();
       }
 
       if (pAttr->m_bRecenterParent)
@@ -119,6 +121,8 @@ void plBoxManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
         if (const plGameObjectDocument* pGameDoc = plDynamicCast<const plGameObjectDocument*>(pParent->GetDocumentObjectManager()->GetDocument()))
         {
           plTransform tParent = pGameDoc->GetGlobalTransform(pParent);
+
+          plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
 
           if (m_vOldSize.x != vNewSizeNeg.x)
             tParent.m_vPosition -= tParent.m_qRotation * plVec3((vNewSizeNeg.x - m_vOldSize.x) * 0.5f, 0, 0);

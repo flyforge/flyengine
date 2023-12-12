@@ -12,12 +12,13 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSimpleWindComponent, 2, plComponentMode::Static)
   {
     PLASMA_ENUM_MEMBER_PROPERTY("MinWindStrength", plWindStrength, m_MinWindStrength),
     PLASMA_ENUM_MEMBER_PROPERTY("MaxWindStrength", plWindStrength, m_MaxWindStrength),
-    PLASMA_MEMBER_PROPERTY("MaxDeviation", m_Deviation)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(180))),
+    PLASMA_MEMBER_PROPERTY("MaxDeviation", m_Deviation)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0), plAngle::Degree(180))),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Wind"),
+    new plColorAttribute(plColorScheme::Effects),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColor::DodgerBlue),
   }
   PLASMA_END_ATTRIBUTES;
@@ -109,7 +110,7 @@ void plSimpleWindComponent::OnDeactivated()
   if (pWindModule == nullptr)
     return;
 
-  pWindModule->SetFallbackWind(plVec3::MakeZero());
+  pWindModule->SetFallbackWind(plVec3::ZeroVector());
 }
 
 void plSimpleWindComponent::ComputeNextState()
@@ -134,17 +135,17 @@ void plSimpleWindComponent::ComputeNextState()
 
   const plVec3 vMainDir = GetOwner()->GetGlobalDirForwards();
 
-  if (m_Deviation < plAngle::MakeFromDegree(1))
+  if (m_Deviation < plAngle::Degree(1))
     m_vNextDirection = vMainDir;
   else
-    m_vNextDirection = plVec3::MakeRandomDeviation(rng, m_Deviation, vMainDir);
+    m_vNextDirection = plVec3::CreateRandomDeviation(rng, m_Deviation, vMainDir);
 
   plCoordinateSystem cs;
   GetWorld()->GetCoordinateSystem(GetOwner()->GetGlobalPosition(), cs);
   const float fRemoveUp = m_vNextDirection.Dot(cs.m_vUpDir);
 
   m_vNextDirection -= cs.m_vUpDir * fRemoveUp;
-  m_vNextDirection.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
+  m_vNextDirection.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
 }
 
 void plSimpleWindComponent::Initialize()

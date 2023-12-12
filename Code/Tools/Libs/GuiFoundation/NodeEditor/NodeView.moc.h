@@ -10,7 +10,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtNodeView : public QGraphicsView
 {
   Q_OBJECT
 public:
-  explicit plQtNodeView(QWidget* pParent = nullptr);
+  explicit plQtNodeView(QWidget* parent = nullptr);
   ~plQtNodeView();
 
   void SetScene(plQtNodeScene* pScene);
@@ -28,9 +28,9 @@ private:
   void UpdateView();
 
 private:
-  plQtNodeScene* m_pScene = nullptr;
-  bool m_bPanning = false;
-  plInt32 m_iPanCounter = 0;
+  plQtNodeScene* m_pScene;
+  bool m_bPanning;
+  plInt32 m_iPanCounter;
 
   QPointF m_ViewPos;
   QPointF m_ViewScale;

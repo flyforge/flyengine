@@ -9,27 +9,25 @@ struct plStandardMenuTypes
 
   enum Enum
   {
-    Project = PLASMA_BIT(0),
-    File = PLASMA_BIT(1),
-    Edit = PLASMA_BIT(2),
-    Panels = PLASMA_BIT(3),
+    File = PLASMA_BIT(0),
+    Edit = PLASMA_BIT(1),
+    Panels = PLASMA_BIT(2),
+    Project = PLASMA_BIT(3),
     Scene = PLASMA_BIT(4),
     View = PLASMA_BIT(5),
-    Tools = PLASMA_BIT(6),
-    Help = PLASMA_BIT(7),
+    Help = PLASMA_BIT(6),
 
-    Default = Project | File | Panels | Tools | Help
+    Default = 0
   };
 
   struct Bits
   {
-    StorageType Project : 1;
     StorageType File : 1;
     StorageType Edit : 1;
     StorageType Panels : 1;
+    StorageType Project : 1;
     StorageType Scene : 1;
     StorageType View : 1;
-    StorageType Tools : 1;
     StorageType Help : 1;
   };
 };
@@ -43,15 +41,14 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(plStringView sMapping, const plBitflags<plStandardMenuTypes>& menus);
+  static void MapActions(const char* szMapping, const plBitflags<plStandardMenuTypes>& Menus);
 
-  static plActionDescriptorHandle s_hMenuProject;
   static plActionDescriptorHandle s_hMenuFile;
   static plActionDescriptorHandle s_hMenuEdit;
   static plActionDescriptorHandle s_hMenuPanels;
+  static plActionDescriptorHandle s_hMenuProject;
   static plActionDescriptorHandle s_hMenuScene;
   static plActionDescriptorHandle s_hMenuView;
-  static plActionDescriptorHandle s_hMenuTools;
   static plActionDescriptorHandle s_hMenuHelp;
   static plActionDescriptorHandle s_hCheckForUpdates;
   static plActionDescriptorHandle s_hReportProblem;
@@ -67,7 +64,7 @@ public:
     : plDynamicMenuAction(context, szName, szIconPath)
   {
   }
-  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries) override;
+  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries) override;
   virtual void Execute(const plVariant& value) override;
 };
 

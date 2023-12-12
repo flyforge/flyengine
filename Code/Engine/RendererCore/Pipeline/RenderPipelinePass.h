@@ -8,7 +8,6 @@
 #include <RendererCore/Pipeline/RenderPipelineNode.h>
 
 struct plGALTextureCreationDescription;
-class plStreamWriter;
 
 /// \brief Passed to plRenderPipelinePass::InitRenderPipelinePass to inform about
 /// existing connections on each input / output pin index.
@@ -60,9 +59,6 @@ public:
   /// \brief Allows for the pass to write data back using plView::SetRenderPassReadBackProperty. E.g. picking results etc.
   virtual void ReadBackProperties(plView* pView);
 
-  virtual plResult Serialize(plStreamWriter& inout_stream) const;
-  virtual plResult Deserialize(plStreamReader& inout_stream);
-
   void RenderDataWithCategory(const plRenderViewContext& renderViewContext, plRenderData::Category category, plRenderDataBatch::Filter filter = plRenderDataBatch::Filter());
 
   PLASMA_ALWAYS_INLINE plRenderPipeline* GetPipeline() { return m_pPipeline; }
@@ -71,10 +67,10 @@ public:
 private:
   friend class plRenderPipeline;
 
-  bool m_bActive = true;
+  bool m_bActive;
 
   const bool m_bIsStereoAware;
   plHashedString m_sName;
 
-  plRenderPipeline* m_pPipeline = nullptr;
+  plRenderPipeline* m_pPipeline;
 };

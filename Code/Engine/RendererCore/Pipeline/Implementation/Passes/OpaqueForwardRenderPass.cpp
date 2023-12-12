@@ -22,12 +22,12 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plOpaqueForwardRenderPass::plOpaqueForwardRenderPass(const char* szName)
   : plForwardRenderPass(szName)
-
+  , m_bWriteDepth(true)
 {
   m_hWhiteTexture = plResourceManager::LoadResource<plTexture2DResource>("White.color");
 }
 
-plOpaqueForwardRenderPass::~plOpaqueForwardRenderPass() = default;
+plOpaqueForwardRenderPass::~plOpaqueForwardRenderPass() {}
 
 bool plOpaqueForwardRenderPass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {

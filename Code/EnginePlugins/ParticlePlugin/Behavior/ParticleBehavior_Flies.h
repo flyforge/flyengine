@@ -21,7 +21,7 @@ public:
   float m_fSpeed = 0.2f;
   float m_fPathLength = 0.2f;
   float m_fMaxEmitterDistance = 0.5f;
-  plAngle m_MaxSteeringAngle = plAngle::MakeFromDegree(30);
+  plAngle m_MaxSteeringAngle = plAngle::Degree(30);
 };
 
 
@@ -35,7 +35,7 @@ public:
   float m_fSpeed = 0.2f;
   float m_fPathLength = 0.2f;
   float m_fMaxEmitterDistance = 0.5f;
-  plAngle m_MaxSteeringAngle = plAngle::MakeFromDegree(30);
+  plAngle m_MaxSteeringAngle = plAngle::Degree(30);
 
 protected:
   virtual void Process(plUInt64 uiNumElements) override;

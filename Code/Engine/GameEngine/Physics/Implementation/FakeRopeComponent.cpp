@@ -25,6 +25,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plFakeRopeComponent, 3, plComponentMode::Static)
     PLASMA_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Effects/Ropes"),
+      new plColorAttribute(plColorScheme::Effects),
     }
     PLASMA_END_ATTRIBUTES;
   }
@@ -309,6 +310,7 @@ void plFakeRopeComponent::RuntimeUpdate()
   if (visType == plVisibilityState::Invisible)
     return;
 
+
   m_RopeSim.SimulateRope(GetWorld()->GetClock().GetTimeDiff());
 
   ++m_uiCheckEquilibriumCounter;
@@ -353,22 +355,23 @@ void plFakeRopeComponent::SendCurrentPose()
       dir.NormalizeIfNotZero<3>();
 
       tGlobal.m_vPosition = plSimdConversion::ToVec3(p0);
-      tGlobal.m_qRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), plSimdConversion::ToVec3(dir));
+      tGlobal.m_qRotation.SetShortestRotation(plVec3::UnitXAxis(), plSimdConversion::ToVec3(dir));
 
-      pieces[i] = plTransform::MakeLocalTransform(tRoot, tGlobal);
+      pieces[i].SetLocalTransform(tRoot, tGlobal);
     }
 
     {
       tGlobal.m_vPosition = plSimdConversion::ToVec3(m_RopeSim.m_Nodes.PeekBack().m_vPosition);
       // tGlobal.m_qRotation is the same as from the previous bone
 
-      pieces.PeekBack() = plTransform::MakeLocalTransform(tRoot, tGlobal);
+      pieces.PeekBack().SetLocalTransform(tRoot, tGlobal);
     }
+
 
     poseMsg.m_LinkTransforms = pieces;
   }
 
-  GetOwner()->PostMessage(poseMsg, plTime::MakeZero(), plObjectMsgQueueType::AfterInitialized);
+  GetOwner()->PostMessage(poseMsg, plTime::Zero(), plObjectMsgQueueType::AfterInitialized);
 }
 
 void plFakeRopeComponent::SetAnchor1Reference(const char* szReference)
@@ -405,9 +408,9 @@ void plFakeRopeComponent::SetAnchor2(plGameObjectHandle hActor)
   m_uiSleepCounter = 0;
 }
 
-void plFakeRopeComponent::SetSlack(float fVal)
+void plFakeRopeComponent::SetSlack(float val)
 {
-  m_fSlack = fVal;
+  m_fSlack = val;
   m_RopeSim.m_fSegmentLength = -1.0f;
   m_bIsDynamic = true;
   m_uiSleepCounter = 0;
@@ -487,3 +490,28 @@ void plFakeRopeComponentManager::Update(const plWorldModule::UpdateContext& cont
     }
   }
 }
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+#include <Foundation/Serialization/AbstractObjectGraph.h>
+#include <Foundation/Serialization/GraphPatch.h>
+
+class plFakeRopeComponentPatch_2_3 : public plGraphPatch
+{
+public:
+  plFakeRopeComponentPatch_2_3()
+    : plGraphPatch("plFakeRopeComponent", 3)
+  {
+  }
+
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  {
+    pNode->RenameProperty("Anchor", "Anchor2");
+    pNode->RenameProperty("AttachToOrigin", "AttachToAnchor1");
+    pNode->RenameProperty("AttachToAnchor", "AttachToAnchor2");
+  }
+};
+
+plFakeRopeComponentPatch_2_3 g_plFakeRopeComponentPatch_2_3;

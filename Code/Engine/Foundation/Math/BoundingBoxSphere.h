@@ -20,37 +20,17 @@ public:
   /// \brief Default constructor does not initialize anything.
   plBoundingBoxSphereTemplate(); // [tested]
 
-  plBoundingBoxSphereTemplate(const plBoundingBoxSphereTemplate& rhs);
+  /// \brief Constructs the bounds from the center position, the box half extends and the sphere radius.
+  plBoundingBoxSphereTemplate(const plVec3Template<Type>& vCenter, const plVec3Template<Type>& vBoxHalfExtents, Type fSphereRadius); // [tested]
 
-  void operator=(const plBoundingBoxSphereTemplate& rhs);
+  /// \brief Constructs the bounds from the given box and sphere.
+  plBoundingBoxSphereTemplate(const plBoundingBoxTemplate<Type>& box, const plBoundingSphereTemplate<Type>& sphere); // [tested]
 
   /// \brief Constructs the bounds from the given box. The sphere radius is calculated from the box extends.
   plBoundingBoxSphereTemplate(const plBoundingBoxTemplate<Type>& box); // [tested]
 
   /// \brief Constructs the bounds from the given sphere. The box extends are calculated from the sphere radius.
   plBoundingBoxSphereTemplate(const plBoundingSphereTemplate<Type>& sphere); // [tested]
-
-  /// \brief Creates an object with all zero values. These are valid bounds around the origin with no volume.
-  [[nodiscard]] static plBoundingBoxSphereTemplate<Type> MakeZero();
-
-  /// \brief Creates an 'invalid' object, ie one with negative extents/radius. Invalid objects can be made valid through ExpandToInclude().
-  [[nodiscard]] static plBoundingBoxSphereTemplate<Type> MakeInvalid();
-
-  /// \brief Creates an object from the given center point and extents.
-  [[nodiscard]] static plBoundingBoxSphereTemplate<Type> MakeFromCenterExtents(const plVec3Template<Type>& vCenter, const plVec3Template<Type>& vBoxHalfExtents, Type fSphereRadius);
-
-  /// \brief Creates an object that contains all the provided points.
-  [[nodiscard]] static plBoundingBoxSphereTemplate<Type> MakeFromPoints(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plVec3Template<Type>));
-
-  /// \brief Creates an object from another bounding box.
-  [[nodiscard]] static plBoundingBoxSphereTemplate<Type> MakeFromBox(const plBoundingBoxTemplate<Type>& box);
-
-  /// \brief Creates an object from another bounding sphere.
-  [[nodiscard]] static plBoundingBoxSphereTemplate<Type> MakeFromSphere(const plBoundingSphereTemplate<Type>& sphere);
-
-  /// \brief Creates an object from another bounding box and a sphere.
-  [[nodiscard]] static plBoundingBoxSphereTemplate<Type> MakeFromBoxAndSphere(const plBoundingBoxTemplate<Type>& box, const plBoundingSphereTemplate<Type>& sphere);
-
 
 #if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
@@ -60,11 +40,17 @@ public:
   }
 #endif
 
+  /// \brief Resets the bounds to an invalid state.
+  void SetInvalid(); // [tested]
+
   /// \brief Checks whether the bounds is in an invalid state.
   bool IsValid() const; // [tested]
 
   /// \brief Checks whether any component is NaN.
   bool IsNaN() const; // [tested]
+
+  /// \brief Calculates the bounds from given set of points.
+  void SetFromPoints(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plVec3Template<Type>)); // [tested]
 
   /// \brief Returns the bounding box.
   const plBoundingBoxTemplate<Type> GetBox() const; // [tested]

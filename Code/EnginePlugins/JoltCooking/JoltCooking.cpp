@@ -250,8 +250,8 @@ plResult plJoltCooking::ComputeConvexHull(const plJoltCookingMesh& mesh, plJoltC
   if (faces.GetCount() >= 255)
   {
     plConvexHullGenerator gen2;
-    gen2.SetSimplificationMinTriangleAngle(plAngle::MakeFromDegree(30));
-    gen2.SetSimplificationFlatVertexNormalThreshold(plAngle::MakeFromDegree(10));
+    gen2.SetSimplificationMinTriangleAngle(plAngle::Degree(30));
+    gen2.SetSimplificationFlatVertexNormalThreshold(plAngle::Degree(10));
     gen2.SetSimplificationMinTriangleEdgeLength(0.08f);
 
     if (gen2.Build(out_mesh.m_Vertices).Failed())
@@ -297,7 +297,8 @@ plStatus plJoltCooking::WriteResourceToStream(plChunkStreamWriter& inout_stream,
   {
     inout_stream.BeginChunk("Details", 1);
 
-    plBoundingBoxSphere aabb = plBoundingBoxSphere::MakeFromPoints(mesh.m_Vertices.GetData(), mesh.m_Vertices.GetCount());
+    plBoundingBoxSphere aabb;
+    aabb.SetFromPoints(mesh.m_Vertices.GetData(), mesh.m_Vertices.GetCount());
 
     inout_stream << aabb;
 

@@ -135,9 +135,9 @@ plResult plCompressedStreamReaderZstd::RefillReadCache()
 
 plCompressedStreamWriterZstd::plCompressedStreamWriterZstd() = default;
 
-plCompressedStreamWriterZstd::plCompressedStreamWriterZstd(plStreamWriter* pOutputStream, plUInt32 uiMaxNumWorkerThreads, Compression ratio /*= Compression::Default*/, plUInt32 uiCompressionCacheSizeKB /*= 4*/)
+plCompressedStreamWriterZstd::plCompressedStreamWriterZstd(plStreamWriter* pOutputStream, Compression ratio)
 {
-  SetOutputStream(pOutputStream, uiMaxNumWorkerThreads, ratio, uiCompressionCacheSizeKB);
+  SetOutputStream(pOutputStream, ratio);
 }
 
 plCompressedStreamWriterZstd::~plCompressedStreamWriterZstd()
@@ -159,7 +159,7 @@ plCompressedStreamWriterZstd::~plCompressedStreamWriterZstd()
   }
 }
 
-void plCompressedStreamWriterZstd::SetOutputStream(plStreamWriter* pOutputStream, plUInt32 uiMaxNumWorkerThreads, Compression ratio /*= Compression::Default*/, plUInt32 uiCompressionCacheSizeKB /*= 4*/)
+void plCompressedStreamWriterZstd::SetOutputStream(plStreamWriter* pOutputStream, Compression ratio /*= Compression::Default*/, plUInt32 uiCompressionCacheSizeKB /*= 4*/)
 {
   if (m_pOutputStream == pOutputStream)
     return;
@@ -183,7 +183,7 @@ void plCompressedStreamWriterZstd::SetOutputStream(plStreamWriter* pOutputStream
       m_pZstdCStream = ZSTD_createCStream();
     }
 
-    const plUInt32 uiCoreCount = (uiMaxNumWorkerThreads > 0) ? plMath::Clamp(plSystemInformation::Get().GetCPUCoreCount(), 1u, uiMaxNumWorkerThreads) : 0u;
+    const plUInt32 uiCoreCount = plMath::Clamp(plSystemInformation::Get().GetCPUCoreCount(), 1u, 12u);
 
     ZSTD_CCtx_reset(reinterpret_cast<ZSTD_CStream*>(m_pZstdCStream), ZSTD_reset_session_only);
     ZSTD_CCtx_refCDict(reinterpret_cast<ZSTD_CStream*>(m_pZstdCStream), nullptr);

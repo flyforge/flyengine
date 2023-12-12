@@ -15,7 +15,6 @@
 
 #include <Foundation/Basics/Compiler/Clang/Clang.h>
 #include <Foundation/Basics/Compiler/GCC/GCC.h>
-#include <Foundation/Basics/Compiler/MSVC/MSVC.h>
 
 #undef PLASMA_PLATFORM_LITTLE_ENDIAN
 #define PLASMA_PLATFORM_LITTLE_ENDIAN PLASMA_ON

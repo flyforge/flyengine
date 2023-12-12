@@ -1,5 +1,7 @@
 pl_cmake_init()
 
+
+
 # Get the name of this folder as the project name
 get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME_WE)
 
@@ -10,6 +12,7 @@ target_link_libraries(${PROJECT_NAME}
   Core
   RendererFoundation
   Texture
+  meshoptimizer
 )
 
 if (PLASMA_3RDPARTY_OZZ_SUPPORT)
@@ -18,6 +21,3 @@ if (PLASMA_3RDPARTY_OZZ_SUPPORT)
     ozz
   )
 endif()
-
-# needed for shader structure includes
-target_include_directories(${PROJECT_NAME} PRIVATE "${PLASMA_ROOT}/Data/Base")

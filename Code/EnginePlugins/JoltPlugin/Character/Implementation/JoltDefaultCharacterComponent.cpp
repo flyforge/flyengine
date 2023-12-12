@@ -34,7 +34,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltDefaultCharacterComponent, 1, plComponentMode:
     PLASMA_MEMBER_PROPERTY("MaxStepUp", m_fMaxStepUp)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.0f, 10.0f)),
     PLASMA_MEMBER_PROPERTY("MaxStepDown", m_fMaxStepDown)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.0f, 10.0f)),
     PLASMA_MEMBER_PROPERTY("JumpImpulse", m_fJumpImpulse)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.0f, 1000.0f)),
-    PLASMA_MEMBER_PROPERTY("RotateSpeed", m_RotateSpeed)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(90.0f)), new plClampValueAttribute(plAngle::MakeFromDegree(1.0f), plAngle::MakeFromDegree(360.0f))),
+    PLASMA_MEMBER_PROPERTY("RotateSpeed", m_RotateSpeed)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(90.0f)), new plClampValueAttribute(plAngle::Degree(1.0f), plAngle::Degree(360.0f))),
     PLASMA_ACCESSOR_PROPERTY("WalkSurfaceInteraction", GetWalkSurfaceInteraction, SetWalkSurfaceInteraction)->AddAttributes(new plDynamicStringEnumAttribute("SurfaceInteractionTypeEnum"), new plDefaultValueAttribute(plStringView("Footstep"))),
     PLASMA_MEMBER_PROPERTY("WalkInteractionDistance", m_fWalkInteractionDistance)->AddAttributes(new plDefaultValueAttribute(1.0f)),
     PLASMA_MEMBER_PROPERTY("RunInteractionDistance", m_fRunInteractionDistance)->AddAttributes(new plDefaultValueAttribute(3.0f)),
@@ -74,8 +74,8 @@ plJoltDefaultCharacterComponent::~plJoltDefaultCharacterComponent() = default;
 
 void plJoltDefaultCharacterComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3(0, 0, GetShapeRadius()), GetShapeRadius()), plInvalidSpatialDataCategory);
-  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3(0, 0, GetCurrentCapsuleHeight() - GetShapeRadius()), GetShapeRadius()), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingSphere(plVec3(0, 0, GetShapeRadius()), GetShapeRadius()), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingSphere(plVec3(0, 0, GetCurrentCapsuleHeight() - GetShapeRadius()), GetShapeRadius()), plInvalidSpatialDataCategory);
 }
 
 void plJoltDefaultCharacterComponent::OnApplyRootMotion(plMsgApplyRootMotion& msg)
@@ -172,7 +172,7 @@ void plJoltDefaultCharacterComponent::SetInputState(plMsgMoveCharacterController
   const float fDistanceToMove = plMath::Max(plMath::Abs((float)(ref_msg.m_fMoveForwards - ref_msg.m_fMoveBackwards)), plMath::Abs((float)(ref_msg.m_fStrafeRight - ref_msg.m_fStrafeLeft)));
 
   m_vInputDirection += plVec2((float)(ref_msg.m_fMoveForwards - ref_msg.m_fMoveBackwards), (float)(ref_msg.m_fStrafeRight - ref_msg.m_fStrafeLeft));
-  m_vInputDirection.NormalizeIfNotZero(plVec2::MakeZero()).IgnoreResult();
+  m_vInputDirection.NormalizeIfNotZero(plVec2::ZeroVector()).IgnoreResult();
   m_vInputDirection *= fDistanceToMove;
 
   m_InputRotateZ += m_RotateSpeed * (float)(ref_msg.m_fRotateRight - ref_msg.m_fRotateLeft);
@@ -273,7 +273,8 @@ void plJoltDefaultCharacterComponent::ApplyRotationZ()
   if (m_InputRotateZ.GetRadian() == 0.0f)
     return;
 
-  plQuat qRotZ = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), m_InputRotateZ);
+  plQuat qRotZ;
+  qRotZ.SetFromAxisAndAngle(plVec3(0, 0, 1), m_InputRotateZ);
   m_InputRotateZ.SetRadian(0.0);
 
   GetOwner()->SetGlobalRotation(qRotZ * GetOwner()->GetGlobalRotation());
@@ -419,9 +420,10 @@ void plJoltDefaultCharacterComponent::DebugVisualizations()
 
     if (!gnom.IsZero(0.01f))
     {
-      plQuat rot = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), gnom);
+      plQuat rot;
+      rot.SetShortestRotation(plVec3::UnitXAxis(), gnom);
 
-      plDebugRenderer::DrawCylinder(GetWorld(), 0, 0.05f, 0.2f, plColor::MakeZero(), plColor::Aquamarine, plTransform(gpos, rot));
+      plDebugRenderer::DrawCylinder(GetWorld(), 0, 0.05f, 0.2f, plColor::ZeroColor(), plColor::Aquamarine, plTransform(gpos, rot));
     }
   }
 
@@ -450,7 +452,8 @@ void plJoltDefaultCharacterComponent::CheckFeet()
   m_bFeetOnSolidGround = false;
 
   plTransform shapeTrans = GetOwner()->GetGlobalTransform();
-  plQuat shapeRot = plQuat::MakeShortestRotation(plVec3(0, 1, 0), plVec3(0, 0, 1));
+  plQuat shapeRot;
+  shapeRot.SetShortestRotation(plVec3(0, 1, 0), plVec3(0, 0, 1));
 
   const float radius = m_fFootRadius;
   const float halfHeight = plMath::Max(0.0f, m_fMaxStepDown - radius);
@@ -470,14 +473,14 @@ void plJoltDefaultCharacterComponent::CheckFeet()
 
     if (gnom.IsZero(0.01f))
     {
-      rot = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), plVec3::MakeAxisZ());
+      rot.SetShortestRotation(plVec3::UnitXAxis(), plVec3::UnitZAxis());
       color = plColor::OrangeRed;
     }
     else
     {
-      rot = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), gnom);
+      rot.SetShortestRotation(plVec3::UnitXAxis(), gnom);
 
-      if (gnom.Dot(plVec3::MakeAxisZ()) > plMath::Cos(plAngle::MakeFromDegree(40)))
+      if (gnom.Dot(plVec3::UnitZAxis()) > plMath::Cos(plAngle::Degree(40)))
       {
         m_bFeetOnSolidGround = true;
         color = plColor::GreenYellow;
@@ -486,7 +489,7 @@ void plJoltDefaultCharacterComponent::CheckFeet()
 
     if (m_DebugFlags.IsAnySet(plJoltCharacterDebugFlags::VisFootCheck))
     {
-      plDebugRenderer::DrawCylinder(GetWorld(), 0, 0.05f, 0.2f, plColor::MakeZero(), color, plTransform(gpos, rot));
+      plDebugRenderer::DrawCylinder(GetWorld(), 0, 0.05f, 0.2f, plColor::ZeroColor(), color, plTransform(gpos, rot));
     }
   }
 
@@ -596,7 +599,7 @@ void plJoltDefaultCharacterComponent::UpdateCharacter()
     cfg.m_fMaxStepDown = 0;
   }
 
-  plVec3 vGroundVelocity = plVec3::MakeZero();
+  plVec3 vGroundVelocity = plVec3::ZeroVector();
 
   ContactPoint groundContact;
   {

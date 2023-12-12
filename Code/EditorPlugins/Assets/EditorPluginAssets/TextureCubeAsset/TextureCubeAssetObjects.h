@@ -9,7 +9,7 @@ struct plPropertyMetaStateEvent;
 
 struct plTextureCubeChannelMappingEnum
 {
-  using StorageType = plInt8;
+  typedef plInt8 StorageType;
 
   enum Enum
   {

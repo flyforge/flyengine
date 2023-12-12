@@ -2,7 +2,7 @@
 
 #include <RendererCore/Components/RenderComponent.h>
 
-using plAlwaysVisibleComponentManager = plComponentManager<class plAlwaysVisibleComponent, plBlockStorageType::Compact>;
+typedef plComponentManager<class plAlwaysVisibleComponent, plBlockStorageType::Compact> plAlwaysVisibleComponentManager;
 
 /// \brief Attaching this component to a game object makes the renderer consider it always visible, ie. disables culling
 class PLASMA_RENDERERCORE_DLL plAlwaysVisibleComponent : public plRenderComponent

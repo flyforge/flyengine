@@ -118,7 +118,7 @@ public:
       decltype((static_cast<const Class*>(pInstance)->*m_GetValues)()) c = (static_cast<const Class*>(pInstance)->*m_GetValues)();
       auto it = cbegin(c);
       const plTag& value = *it;
-      Remove(pInstance, value.GetTagString().GetData());
+      Remove(pInstance, value.GetTagString());
     }
   }
 

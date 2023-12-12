@@ -43,7 +43,7 @@ public:
 private:
   plHashedString m_sCenterClip;                       // [ property ]
   plHybridArray<plAnimationClip2D, 8> m_Clips;        // [ property ]
-  plTime m_InputResponse = plTime::MakeFromMilliseconds(100); // [ property ]
+  plTime m_InputResponse = plTime::Milliseconds(100); // [ property ]
   bool m_bLoop = true;                                // [ property ]
   bool m_bApplyRootMotion = false;                    // [ property ]
   float m_fPlaybackSpeed = 1.0f;                      // [ property ]

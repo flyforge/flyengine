@@ -42,10 +42,10 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltRopeComponent, 2, plComponentMode::Dynamic)
       PLASMA_MEMBER_PROPERTY("Mass", m_fTotalMass)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, 1000.0f)),
       PLASMA_MEMBER_PROPERTY("Thickness", m_fThickness)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.01f, 0.5f)),
       PLASMA_MEMBER_PROPERTY("BendStiffness", m_fBendStiffness)->AddAttributes(new plClampValueAttribute(0.0f,   plVariant())),
-      PLASMA_MEMBER_PROPERTY("MaxBend", m_MaxBend)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30)), new plClampValueAttribute(plAngle::MakeFromDegree(5), plAngle::MakeFromDegree(90))),
-      PLASMA_MEMBER_PROPERTY("MaxTwist", m_MaxTwist)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30)), new plClampValueAttribute(plAngle::MakeFromDegree(0.01f), plAngle::MakeFromDegree(90))),
+      PLASMA_MEMBER_PROPERTY("MaxBend", m_MaxBend)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30)), new plClampValueAttribute(plAngle::Degree(5), plAngle::Degree(90))),
+      PLASMA_MEMBER_PROPERTY("MaxTwist", m_MaxTwist)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30)), new plClampValueAttribute(plAngle::Degree(0.01f), plAngle::Degree(90))),
       PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-      PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+      PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface")),
       PLASMA_ACCESSOR_PROPERTY("GravityFactor", GetGravityFactor, SetGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
       PLASMA_MEMBER_PROPERTY("SelfCollision", m_bSelfCollision),
       PLASMA_MEMBER_PROPERTY("ContinuousCollisionDetection", m_bCCD),
@@ -61,6 +61,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltRopeComponent, 2, plComponentMode::Dynamic)
     PLASMA_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Physics/Jolt/Animation"),
+    new plColorAttribute(plColorScheme::Physics),
     }
     PLASMA_END_ATTRIBUTES;
   }
@@ -208,6 +209,8 @@ void plJoltRopeComponent::CreateRope()
   if (hAnchor1 == hAnchor2)
     return;
 
+  const plTransform tRoot = GetOwner()->GetGlobalTransform();
+
   plHybridArray<plTransform, 65> nodes;
   float fPieceLength;
   if (CreateSegmentTransforms(nodes, fPieceLength, hAnchor1, hAnchor2).Failed())
@@ -242,7 +245,7 @@ void plJoltRopeComponent::CreateRope()
   JPH::RotatedTranslatedShapeSettings capsOffset;
   capsOffset.mInnerShapePtr = capsule.Create().Get();
   capsOffset.mPosition = JPH::Vec3(fPieceLength * 0.5f, 0, 0);
-  capsOffset.mRotation = JPH::Quat::sRotation(JPH::Vec3::sAxisZ(), plAngle::MakeFromDegree(-90).GetRadian());
+  capsOffset.mRotation = JPH::Quat::sRotation(JPH::Vec3::sAxisZ(), plAngle::Degree(-90).GetRadian());
   capsOffset.mUserData = reinterpret_cast<plUInt64>(pUserData);
 
   for (plUInt32 idx = 0; idx < numPieces; ++idx)
@@ -324,7 +327,7 @@ void plJoltRopeComponent::CreateRope()
   if (m_Anchor2ConstraintMode != plJoltRopeAnchorConstraintMode::None)
   {
     plTransform end = nodes.PeekBack();
-    end.m_qRotation = end.m_qRotation.GetInverse();
+    end.m_qRotation = -end.m_qRotation;
     m_pConstraintAnchor2 = CreateConstraint(hAnchor2, end, m_pRagdoll->GetBodyIDs().back().GetIndexAndSequenceNumber(), m_Anchor2ConstraintMode, m_uiAnchor2BodyID);
   }
 }
@@ -513,7 +516,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
 
   //    transforms[p].m_vPosition = ownTrans * t0.m_vPosition;
   //    transforms[p].m_vScale.Set(1);
-  //    transforms[p].m_qRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), ownTrans.m_qRotation * (t1.m_vPosition - t0.m_vPosition).GetNormalized());
+  //    transforms[p].m_qRotation.SetShortestRotation(plVec3::UnitXAxis(), ownTrans.m_qRotation * (t1.m_vPosition - t0.m_vPosition).GetNormalized());
 
   //    t0 = t1;
   //  }
@@ -625,7 +628,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
 
       transforms[idx2].m_vScale.Set(1);
       transforms[idx2].m_vPosition = plSimdConversion::ToVec3(p0);
-      transforms[idx2].m_qRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), plSimdConversion::ToVec3(dir));
+      transforms[idx2].m_qRotation.SetShortestRotation(plVec3::UnitXAxis(), plSimdConversion::ToVec3(dir));
 
       ++idx2;
       p0 = p1;
@@ -648,7 +651,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
       transforms[idx2].m_qRotation = pAnchor2->GetGlobalRotation();
 
       plVec3 dir = transforms[idx2].m_qRotation * plVec3(1, 0, 0);
-      transforms[idx2].m_qRotation = plQuat::MakeShortestRotation(plVec3(1, 0, 0), -dir);
+      transforms[idx2].m_qRotation.SetShortestRotation(plVec3(1, 0, 0), -dir);
 
       // transforms[idx2].m_qRotation.Flip();
       transforms[idx2].m_qRotation.Normalize();
@@ -777,7 +780,7 @@ void plJoltRopeComponent::Update()
       global.m_vPosition = plJoltConversionUtils::ToVec3(pBody->GetPosition());
       global.m_qRotation = plJoltConversionUtils::ToQuat(pBody->GetRotation());
 
-      poses[i] = plTransform::MakeLocalTransform(rootTransform, global);
+      poses[i].SetLocalTransform(rootTransform, global);
     }
   }
 
@@ -789,7 +792,7 @@ void plJoltRopeComponent::Update()
     tLocal.SetIdentity();
     tLocal.m_vPosition.x = (poses[uiLastIdx - 1].m_vPosition - poses[uiLastIdx - 2].m_vPosition).GetLength();
 
-    poses.PeekBack() = plTransform::MakeGlobalTransform(poses[uiLastIdx - 1], tLocal);
+    poses.PeekBack().SetGlobalTransform(poses[uiLastIdx - 1], tLocal);
   }
 
   GetOwner()->SendMessage(poseMsg);
@@ -823,11 +826,11 @@ void plJoltRopeComponent::SendPreviewPose()
 
     for (auto& n : pieces)
     {
-      n = plTransform::MakeLocalTransform(tOwner, n);
+      n.SetLocalTransform(tOwner, n);
     }
   }
 
-  GetOwner()->PostMessage(poseMsg, plTime::MakeZero(), plObjectMsgQueueType::AfterInitialized);
+  GetOwner()->PostMessage(poseMsg, plTime::Zero(), plObjectMsgQueueType::AfterInitialized);
 }
 
 void plJoltRopeComponent::SetGravityFactor(float fGravity)
@@ -964,9 +967,12 @@ void plJoltRopeComponent::SetAnchor2ConstraintMode(plEnum<plJoltRopeAnchorConstr
   }
 }
 
-void plJoltRopeComponent::OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& ref_msg)
+void plJoltRopeComponent::OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& msg)
 {
-  if (m_pConstraintAnchor1 && ref_msg.m_uiJoltBodyID == m_uiAnchor1BodyID)
+  plGameObjectHandle hBody = msg.m_pActor->GetOwner()->GetHandle();
+  plWorld* pWorld = GetWorld();
+
+  if (m_pConstraintAnchor1 && msg.m_uiJoltBodyID == m_uiAnchor1BodyID)
   {
     plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
     pModule->GetJoltSystem()->RemoveConstraint(m_pConstraintAnchor1);
@@ -975,7 +981,7 @@ void plJoltRopeComponent::OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectCons
     m_uiAnchor1BodyID = plInvalidIndex;
   }
 
-  if (m_pConstraintAnchor2 && ref_msg.m_uiJoltBodyID == m_uiAnchor2BodyID)
+  if (m_pConstraintAnchor2 && msg.m_uiJoltBodyID == m_uiAnchor2BodyID)
   {
     plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
 
@@ -1028,6 +1034,7 @@ void plJoltRopeComponentManager::Update(const plWorldModule::UpdateContext& cont
   }
 
   plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
+  auto* pSystem = pModule->GetJoltSystem();
 
   for (auto itActor : pModule->GetActiveRopes())
   {

@@ -26,6 +26,7 @@ void plMeshRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>
 void plMeshRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const
 {
   ref_categories.PushBack(plDefaultRenderDataCategories::Sky);
+  ref_categories.PushBack(plDefaultRenderDataCategories::PostSky);
   ref_categories.PushBack(plDefaultRenderDataCategories::LitOpaque);
   ref_categories.PushBack(plDefaultRenderDataCategories::LitMasked);
   ref_categories.PushBack(plDefaultRenderDataCategories::LitTransparent);
@@ -39,6 +40,7 @@ void plMeshRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData
 
 void plMeshRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
 {
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plRenderContext* pContext = renderViewContext.m_pRenderContext;
 
   const plMeshRenderData* pRenderData = batch.GetFirstData<plMeshRenderData>();

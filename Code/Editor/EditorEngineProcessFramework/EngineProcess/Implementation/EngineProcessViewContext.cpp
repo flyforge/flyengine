@@ -16,13 +16,13 @@
 #include <RendererFoundation/Device/SwapChain.h>
 #include <Texture/Image/Image.h>
 
-plEngineProcessViewContext::plEngineProcessViewContext(plEngineProcessDocumentContext* pContext)
+PlasmaEngineProcessViewContext::PlasmaEngineProcessViewContext(PlasmaEngineProcessDocumentContext* pContext)
   : m_pDocumentContext(pContext)
 {
   m_uiViewID = 0xFFFFFFFF;
 }
 
-plEngineProcessViewContext::~plEngineProcessViewContext()
+PlasmaEngineProcessViewContext::~PlasmaEngineProcessViewContext()
 {
   plRenderWorld::DeleteView(m_hView);
   m_hView.Invalidate();
@@ -30,13 +30,13 @@ plEngineProcessViewContext::~plEngineProcessViewContext()
   plActorManager::GetSingleton()->DestroyAllActors(this);
 }
 
-void plEngineProcessViewContext::SetViewID(plUInt32 uiId)
+void PlasmaEngineProcessViewContext::SetViewID(plUInt32 id)
 {
   PLASMA_ASSERT_DEBUG(m_uiViewID == 0xFFFFFFFF, "View ID may only be set once");
-  m_uiViewID = uiId;
+  m_uiViewID = id;
 }
 
-void plEngineProcessViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
+void PlasmaEngineProcessViewContext::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg)
 {
 #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP) || PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plViewRedrawMsgToEngine>())
@@ -74,7 +74,7 @@ void plEngineProcessViewContext::HandleViewMessage(const plEditorEngineViewMsg* 
 #endif
 }
 
-void plEngineProcessViewContext::SendViewMessage(plEditorEngineViewMsg* pViewMsg)
+void PlasmaEngineProcessViewContext::SendViewMessage(PlasmaEditorEngineViewMsg* pViewMsg)
 {
   pViewMsg->m_DocumentGuid = GetDocumentContext()->GetDocumentGuid();
   pViewMsg->m_uiViewID = m_uiViewID;
@@ -82,9 +82,9 @@ void plEngineProcessViewContext::SendViewMessage(plEditorEngineViewMsg* pViewMsg
   GetDocumentContext()->SendProcessMessage(pViewMsg);
 }
 
-void plEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plUInt16 uiWidth, plUInt16 uiHeight)
+void PlasmaEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plUInt16 uiWidth, plUInt16 uiHeight)
 {
-  PLASMA_LOG_BLOCK("plEngineProcessViewContext::HandleWindowUpdate");
+  PLASMA_LOG_BLOCK("PlasmaEngineProcessViewContext::HandleWindowUpdate");
 
   if (m_pEditorWndActor != nullptr)
   {
@@ -98,7 +98,7 @@ void plEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plUInt1
     if (wndSize.width == uiWidth && wndSize.height == uiHeight)
       return;
 
-    if (static_cast<plEditorProcessViewWindow*>(pWindowPlugin->GetWindow())->UpdateWindow(hWnd, uiWidth, uiHeight).Failed())
+    if (static_cast<PlasmaEditorProcessViewWindow*>(pWindowPlugin->GetWindow())->UpdateWindow(hWnd, uiWidth, uiHeight).Failed())
     {
       plLog::Error("Failed to update Editor Process View Window");
     }
@@ -114,7 +114,7 @@ void plEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plUInt1
 
     // create window
     {
-      plUniquePtr<plEditorProcessViewWindow> pWindow = PLASMA_DEFAULT_NEW(plEditorProcessViewWindow);
+      plUniquePtr<PlasmaEditorProcessViewWindow> pWindow = PLASMA_DEFAULT_NEW(PlasmaEditorProcessViewWindow);
       if (pWindow->UpdateWindow(hWnd, uiWidth, uiHeight).Succeeded())
       {
         pWindowPlugin->m_pWindow = std::move(pWindow);
@@ -143,6 +143,7 @@ void plEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plUInt1
 
     // setup render target
     {
+      plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
       plWindowOutputTargetGAL* pOutput = static_cast<plWindowOutputTargetGAL*>(pWindowPlugin->m_pWindowOutputTarget.Borrow());
 
       const plSizeU32 wndSize = pWindowPlugin->m_pWindow->GetClientAreaSize();
@@ -154,7 +155,7 @@ void plEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plUInt1
   }
 }
 
-void plEngineProcessViewContext::OnSwapChainChanged(plGALSwapChainHandle hSwapChain, plSizeU32 size)
+void PlasmaEngineProcessViewContext::OnSwapChainChanged(plGALSwapChainHandle hSwapChain, plSizeU32 size)
 {
   plView* pView = nullptr;
   if (plRenderWorld::TryGetView(m_hView, pView))
@@ -164,10 +165,10 @@ void plEngineProcessViewContext::OnSwapChainChanged(plGALSwapChainHandle hSwapCh
   }
 }
 
-void plEngineProcessViewContext::SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* pRenderTargets, plUInt16 uiWidth, plUInt16 uiHeight)
+void PlasmaEngineProcessViewContext::SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* renderTargets, plUInt16 uiWidth, plUInt16 uiHeight)
 {
-  PLASMA_LOG_BLOCK("plEngineProcessViewContext::SetupRenderTarget");
-  PLASMA_ASSERT_DEV((!hSwapChain.IsInvalidated() && pRenderTargets == nullptr) || (hSwapChain.IsInvalidated() && pRenderTargets != nullptr), "hSwapChain and pRenderTargets are mutually exclusive.");
+  PLASMA_LOG_BLOCK("PlasmaEngineProcessViewContext::SetupRenderTarget");
+  PLASMA_ASSERT_DEV(hSwapChain.IsInvalidated() || renderTargets == nullptr, "hSwapChain and renderTargetSetup are mutually exclusive.");
 
   // setup view
   {
@@ -182,13 +183,13 @@ void plEngineProcessViewContext::SetupRenderTarget(plGALSwapChainHandle hSwapCha
       if (!hSwapChain.IsInvalidated())
         pView->SetSwapChain(hSwapChain);
       else
-        pView->SetRenderTargets(*pRenderTargets);
+        pView->SetRenderTargets(*renderTargets);
       pView->SetViewport(plRectFloat(0.0f, 0.0f, (float)uiWidth, (float)uiHeight));
     }
   }
 }
 
-void plEngineProcessViewContext::Redraw(bool bRenderEditorGizmos)
+void PlasmaEngineProcessViewContext::Redraw(bool bRenderEditorGizmos)
 {
   auto pState = plGameApplicationBase::GetGameApplicationBaseInstance()->GetActiveGameStateLinkedToWorld(GetDocumentContext()->GetWorld());
 
@@ -218,17 +219,17 @@ void plEngineProcessViewContext::Redraw(bool bRenderEditorGizmos)
   }
 }
 
-bool plEngineProcessViewContext::FocusCameraOnObject(plCamera& inout_camera, const plBoundingBoxSphere& objectBounds, float fFov, const plVec3& vViewDir)
+bool PlasmaEngineProcessViewContext::FocusCameraOnObject(plCamera& camera, const plBoundingBoxSphere& objectBounds, float fFov, const plVec3& vViewDir)
 {
   if (!objectBounds.IsValid())
     return false;
 
   plVec3 vDir = vViewDir;
   bool bChanged = false;
-  plVec3 vCameraPos = inout_camera.GetCenterPosition();
+  plVec3 vCameraPos = camera.GetCenterPosition();
   plVec3 vCenterPos = objectBounds.GetSphere().m_vCenter;
 
-  const float fDist = plMath::Max(0.1f, objectBounds.GetSphere().m_fRadius) / plMath::Sin(plAngle::MakeFromDegree(fFov / 2));
+  const float fDist = plMath::Max(0.1f, objectBounds.GetSphere().m_fRadius) / plMath::Sin(plAngle::Degree(fFov / 2));
   vDir.Normalize();
   plVec3 vNewCameraPos = vCenterPos - vDir * fDist;
   if (!vNewCameraPos.IsEqual(vCameraPos, 0.01f))
@@ -242,14 +243,14 @@ bool plEngineProcessViewContext::FocusCameraOnObject(plCamera& inout_camera, con
     if (!vNewCameraPos.IsValid())
       return false;
 
-    inout_camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, fFov, 0.1f, 1000.0f);
-    inout_camera.LookAt(vNewCameraPos, vCenterPos, plVec3(0.0f, 0.0f, 1.0f));
+    camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, fFov, 0.1f, 1000.0f);
+    camera.LookAt(vNewCameraPos, vCenterPos, plVec3(0.0f, 0.0f, 1.0f));
   }
 
   return bChanged;
 }
 
-void plEngineProcessViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
+void PlasmaEngineProcessViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
   plViewRenderMode::Enum renderMode = (plViewRenderMode::Enum)pMsg->m_uiRenderMode;
 
@@ -308,17 +309,17 @@ void plEngineProcessViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
   }
 }
 
-plRenderPipelineResourceHandle plEngineProcessViewContext::CreateDefaultRenderPipeline()
+plRenderPipelineResourceHandle PlasmaEngineProcessViewContext::CreateDefaultRenderPipeline()
 {
-  return plEditorEngineProcessApp::GetSingleton()->CreateDefaultMainRenderPipeline();
+  return PlasmaEditorEngineProcessApp::GetSingleton()->CreateDefaultMainRenderPipeline();
 }
 
-plRenderPipelineResourceHandle plEngineProcessViewContext::CreateDebugRenderPipeline()
+plRenderPipelineResourceHandle PlasmaEngineProcessViewContext::CreateDebugRenderPipeline()
 {
-  return plEditorEngineProcessApp::GetSingleton()->CreateDefaultDebugRenderPipeline();
+  return PlasmaEditorEngineProcessApp::GetSingleton()->CreateDefaultDebugRenderPipeline();
 }
 
-void plEngineProcessViewContext::DrawSimpleGrid() const
+void PlasmaEngineProcessViewContext::DrawSimpleGrid() const
 {
   plDynamicArray<plDebugRenderer::Line> lines;
   lines.Reserve(2 * (10 + 1 + 10) + 4);

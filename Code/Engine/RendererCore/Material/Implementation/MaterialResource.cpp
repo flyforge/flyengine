@@ -1007,10 +1007,10 @@ void plMaterialResource::UpdateConstantBuffer(plShaderPermutationResource* pShad
     return;
 
   plTempHashedString sConstantBufferName("plMaterialConstants");
-  const plShaderResourceBinding* pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::PixelShader)->GetByteCode()->GetShaderResourceBinding(sConstantBufferName);
+  const plShaderResourceBinding* pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::PixelShader)->GetShaderResourceBinding(sConstantBufferName);
   if (pBinding == nullptr)
   {
-    pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::VertexShader)->GetByteCode()->GetShaderResourceBinding(sConstantBufferName);
+    pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::VertexShader)->GetShaderResourceBinding(sConstantBufferName);
   }
 
   const plShaderConstantBufferLayout* pLayout = pBinding != nullptr ? pBinding->m_pLayout : nullptr;
@@ -1040,7 +1040,7 @@ void plMaterialResource::UpdateConstantBuffer(plShaderPermutationResource* pShad
 
     for (auto& constant : pLayout->m_Constants)
     {
-      if (constant.m_uiOffset + plShaderConstant::s_TypeSize[constant.m_Type.GetValue()] <= data.GetCount())
+      if (constant.m_uiOffset + plShaderConstantBufferLayout::Constant::s_TypeSize[constant.m_Type.GetValue()] <= data.GetCount())
       {
         plUInt8* pDest = &data[constant.m_uiOffset];
 
@@ -1178,11 +1178,11 @@ void plMaterialResource::CachedValues::Reset()
   m_PermutationVars.Clear();
   m_Parameters.Clear();
   m_Texture2DBindings.Clear();
+  m_Texture3DBindings.Clear();
   m_TextureCubeBindings.Clear();
   m_RenderDataCategory = plInvalidRenderDataCategory;
 }
 
-// static
 plMaterialResource::CachedValues* plMaterialResource::AllocateCache(plUInt32& inout_uiCacheIndex)
 {
   PLASMA_LOCK(s_MaterialCacheMutex);
@@ -1206,7 +1206,6 @@ plMaterialResource::CachedValues* plMaterialResource::AllocateCache(plUInt32& in
   return &s_CachedValues[inout_uiCacheIndex];
 }
 
-// static
 void plMaterialResource::DeallocateCache(plUInt32 uiCacheIndex)
 {
   if (uiCacheIndex != plInvalidIndex)

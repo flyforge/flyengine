@@ -12,9 +12,9 @@ class PLASMA_GUIFOUNDATION_DLL plQtLogModel : public QAbstractItemModel
   Q_OBJECT
 
 public:
-  plQtLogModel(QObject* pParent);
+  plQtLogModel(QObject* parent);
   void Clear();
-  void SetLogLevel(plLogMsgType::Enum logLevel);
+  void SetLogLevel(plLogMsgType::Enum LogLevel);
   void SetSearchText(const char* szText);
   void AddLogMsg(const plLogEntry& msg);
 
@@ -25,10 +25,10 @@ public:
   plUInt32 GetNumWarnings() const { return m_uiNumWarnings; }
 
 public: // QAbstractItemModel interface
-  virtual QVariant data(const QModelIndex& index, int iRole) const override;
+  virtual QVariant data(const QModelIndex& index, int role) const override;
   virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
-  virtual QVariant headerData(int iSection, Qt::Orientation orientation, int iRole = Qt::DisplayRole) const override;
-  virtual QModelIndex index(int iRow, int iColumn, const QModelIndex& parent = QModelIndex()) const override;
+  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+  virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
   virtual QModelIndex parent(const QModelIndex& index) const override;
   virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
   virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;

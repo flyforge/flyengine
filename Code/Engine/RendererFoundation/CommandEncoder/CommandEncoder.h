@@ -14,10 +14,17 @@ public:
 
   void SetShader(plGALShaderHandle hShader);
 
-  void SetConstantBuffer(const plShaderResourceBinding& binding, plGALBufferHandle hBuffer);
-  void SetSamplerState(const plShaderResourceBinding& binding, plGALSamplerStateHandle hSamplerState);
-  void SetResourceView(const plShaderResourceBinding& binding, plGALResourceViewHandle hResourceView);
-  void SetUnorderedAccessView(const plShaderResourceBinding& binding, plGALUnorderedAccessViewHandle hUnorderedAccessView);
+  void SetConstantBuffer(plUInt32 uiSlot, plGALBufferHandle hBuffer);
+  void SetSamplerState(plGALShaderStage::Enum stage, plUInt32 uiSlot, plGALSamplerStateHandle hSamplerState);
+  void SetResourceView(plGALShaderStage::Enum stage, plUInt32 uiSlot, plGALResourceViewHandle hResourceView);
+  void SetUnorderedAccessView(plUInt32 uiSlot, plGALUnorderedAccessViewHandle hUnorderedAccessView);
+
+  // Returns whether a resource view has been unset for the given resource
+  bool UnsetResourceViews(const plGALResourceBase* pResource);
+  bool UnsetResourceViews(plGALResourceViewHandle hResourceView);
+  // Returns whether a unordered access view has been unset for the given resource
+  bool UnsetUnorderedAccessViews(const plGALResourceBase* pResource);
+  bool UnsetUnorderedAccessViews(plGALUnorderedAccessViewHandle hUnorderedAccessView);
 
   // Query functions
 
@@ -83,11 +90,20 @@ protected:
     PLASMA_ASSERT_DEV(plThreadUtils::IsMainThread(), "This function can only be executed on the main thread.");
   }
 
+  void CountStateChange() { m_uiStateChanges++; }
+  void CountRedundantStateChange() { m_uiRedundantStateChanges++; }
+
 private:
   friend class plMemoryUtils;
 
   // Parent Device
   plGALDevice& m_Device;
+
+  // Statistic variables
+  plUInt32 m_uiStateChanges = 0;
+  plUInt32 m_uiRedundantStateChanges = 0;
+
   plGALCommandEncoderState& m_State;
+
   plGALCommandEncoderCommonPlatformInterface& m_CommonImpl;
 };

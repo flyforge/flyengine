@@ -14,9 +14,9 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapMenuActions(plStringView sMapping);
-  static void MapToolbarActions(plStringView sMapping);
-  static void MapViewContextMenuActions(plStringView sMapping);
+  static void MapMenuActions(const char* szMapping);
+  static void MapToolbarActions(const char* szMapping);
+  static void MapViewContextMenuActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hSceneCategory;
   static plActionDescriptorHandle s_hSceneUtilsMenu;

@@ -3,7 +3,6 @@
 #include <Core/World/SpatialSystem_RegularGrid.h>
 #include <Core/World/World.h>
 #include <Foundation/Configuration/CVar.h>
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Debug/DebugRenderer.h>
 #include <RendererCore/Pipeline/ExtractedRenderData.h>
 #include <RendererCore/Pipeline/Extractor.h>
@@ -267,25 +266,6 @@ void plExtractor::PostSortAndBatch(
 {
 }
 
-
-plResult plExtractor::Serialize(plStreamWriter& inout_stream) const
-{
-  inout_stream << m_bActive;
-  inout_stream << m_sName;
-  return PLASMA_SUCCESS;
-}
-
-
-plResult plExtractor::Deserialize(plStreamReader& inout_stream)
-{
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_ASSERT_DEBUG(uiVersion == 1, "Unknown version encountered");
-
-  inout_stream >> m_bActive;
-  inout_stream >> m_sName;
-  return PLASMA_SUCCESS;
-}
-
 //////////////////////////////////////////////////////////////////////////
 
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisibleObjectsExtractor, 1, plRTTIDefaultAllocator<plVisibleObjectsExtractor>)
@@ -321,8 +301,8 @@ void plVisibleObjectsExtractor::Extract(
     if (cvar_SpatialVisBounds || cvar_SpatialVisLocalBBox || cvar_SpatialVisData)
     {
       if ((cvar_SpatialVisDataOnlyObject.GetValue().IsEmpty() ||
-            pObject->GetName().FindSubString_NoCase(cvar_SpatialVisDataOnlyObject.GetValue()) != nullptr) &&
-          !cvar_SpatialVisDataOnlySelected)
+        pObject->GetName().FindSubString_NoCase(cvar_SpatialVisDataOnlyObject.GetValue()) != nullptr) &&
+        !cvar_SpatialVisDataOnlySelected)
       {
         VisualizeObject(view, pObject);
       }
@@ -348,20 +328,6 @@ void plVisibleObjectsExtractor::Extract(
     plDebugRenderer::DrawInfoText(hView, plDebugTextPlacement::TopLeft, "ExtractionStats", sb);
   }
 #endif
-}
-
-plResult plVisibleObjectsExtractor::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  return PLASMA_SUCCESS;
-}
-
-plResult plVisibleObjectsExtractor::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  return PLASMA_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -481,20 +447,6 @@ const plDeque<plGameObjectHandle>* plSelectedObjectsExtractor::GetSelection()
     return &m_pSelectionContext->m_Objects;
 
   return nullptr;
-}
-
-plResult plSelectedObjectsExtractor::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  return PLASMA_SUCCESS;
-}
-
-plResult plSelectedObjectsExtractor::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  return PLASMA_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -14,11 +14,11 @@ bool IsArrayView(const plGALTextureCreationDescription& texDesc, const plGALReso
 
 plGALResourceViewDX11::plGALResourceViewDX11(plGALResourceBase* pResource, const plGALResourceViewCreationDescription& Description)
   : plGALResourceView(pResource, Description)
-
+  , m_pDXResourceView(nullptr)
 {
 }
 
-plGALResourceViewDX11::~plGALResourceViewDX11() = default;
+plGALResourceViewDX11::~plGALResourceViewDX11() {}
 
 plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -32,7 +32,7 @@ plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
 
   if (pTexture == nullptr && pBuffer == nullptr)
   {
-    plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
+    //plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
     return PLASMA_FAILURE;
   }
 
@@ -91,7 +91,6 @@ plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
     {
       case plGALTextureType::Texture2D:
       case plGALTextureType::Texture2DProxy:
-      case plGALTextureType::Texture2DShared:
 
         if (!bIsArrayView)
         {

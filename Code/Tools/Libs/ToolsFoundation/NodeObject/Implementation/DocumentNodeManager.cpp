@@ -19,7 +19,7 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 struct DocumentNodeManager_NodeMetaData
 {
-  plVec2 m_Pos = plVec2::MakeZero();
+  plVec2 m_Pos = plVec2::ZeroVector();
 };
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, DocumentNodeManager_NodeMetaData);
 
@@ -51,7 +51,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(DocumentNodeManager_ConnectionMetaData, plNoB
   {
     PLASMA_MEMBER_PROPERTY("Connection::Source", m_Source),
     PLASMA_MEMBER_PROPERTY("Connection::Target", m_Target),
-    PLASMA_MEMBER_PROPERTY("Connection::SourcePin", m_SourcePin),
+    PLASMA_MEMBER_PROPERTY("Connection::SourcePin", m_SourcePin),    
     PLASMA_MEMBER_PROPERTY("Connection::TargetPin", m_TargetPin),
   }
   PLASMA_END_PROPERTIES;
@@ -108,27 +108,27 @@ const plConnection& plDocumentNodeManager::GetConnection(const plDocumentObject*
   return *it.Value();
 }
 
-const plPin* plDocumentNodeManager::GetInputPinByName(const plDocumentObject* pObject, plStringView sName) const
+const plPin* plDocumentNodeManager::GetInputPinByName(const plDocumentObject* pObject, const char* szName) const
 {
   PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   auto it = m_ObjectToNode.Find(pObject->GetGuid());
   PLASMA_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
   for (auto& pPin : it.Value().m_Inputs)
   {
-    if (pPin->GetName() == sName)
+    if (plStringUtils::IsEqual(pPin->GetName(), szName))
       return pPin.Borrow();
   }
   return nullptr;
 }
 
-const plPin* plDocumentNodeManager::GetOutputPinByName(const plDocumentObject* pObject, plStringView sName) const
+const plPin* plDocumentNodeManager::GetOutputPinByName(const plDocumentObject* pObject, const char* szName) const
 {
   PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   auto it = m_ObjectToNode.Find(pObject->GetGuid());
   PLASMA_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
   for (auto& pPin : it.Value().m_Outputs)
   {
-    if (pPin->GetName() == sName)
+    if (plStringUtils::IsEqual(pPin->GetName(), szName))
       return pPin.Borrow();
   }
   return nullptr;
@@ -215,9 +215,9 @@ bool plDocumentNodeManager::IsConnected(const plPin& source, const plPin& target
   return false;
 }
 
-plStatus plDocumentNodeManager::CanConnect(const plRTTI* pObjectType, const plPin& source, const plPin& target, CanConnectResult& out_result) const
+plStatus plDocumentNodeManager::CanConnect(const plRTTI* pObjectType, const plPin& source, const plPin& target, CanConnectResult& out_Result) const
 {
-  out_result = CanConnectResult::ConnectNever;
+  out_Result = CanConnectResult::ConnectNever;
 
   if (pObjectType == nullptr || pObjectType->IsDerivedFrom(GetConnectionType()) == false)
     return plStatus("Invalid connection object type");
@@ -233,7 +233,7 @@ plStatus plDocumentNodeManager::CanConnect(const plRTTI* pObjectType, const plPi
   if (IsConnected(source, target))
     return plStatus("Pins already connected.");
 
-  return InternalCanConnect(source, target, out_result);
+  return InternalCanConnect(source, target, out_Result);
 }
 
 plStatus plDocumentNodeManager::CanDisconnect(const plConnection* pConnection) const
@@ -312,15 +312,15 @@ void plDocumentNodeManager::MoveNode(const plDocumentObject* pObject, const plVe
   m_NodeEvents.Broadcast(e);
 }
 
-void plDocumentNodeManager::AttachMetaDataBeforeSaving(plAbstractObjectGraph& ref_graph) const
+void plDocumentNodeManager::AttachMetaDataBeforeSaving(plAbstractObjectGraph& graph) const
 {
   auto pNodeMetaDataType = plGetStaticRTTI<DocumentNodeManager_NodeMetaData>();
   auto pConnectionMetaDataType = plGetStaticRTTI<DocumentNodeManager_ConnectionMetaData>();
 
   plRttiConverterContext context;
-  plRttiConverterWriter rttiConverter(&ref_graph, &context, true, true);
+  plRttiConverterWriter rttiConverter(&graph, &context, true, true);
 
-  for (auto it = ref_graph.GetAllNodes().GetIterator(); it.IsValid(); ++it)
+  for (auto it = graph.GetAllNodes().GetIterator(); it.IsValid(); ++it)
   {
     auto* pAbstractObject = it.Value();
     const plUuid& guid = pAbstractObject->GetGuid();
@@ -385,7 +385,7 @@ void plDocumentNodeManager::RestoreMetaDataAfterLoading(const plAbstractObjectGr
           plMoveNodeCommand move;
           move.m_Object = pObject->GetGuid();
           move.m_NewPos = nodeMetaData.m_Pos;
-          history->AddCommand(move).LogFailure();
+          history->AddCommand(move).IgnoreResult();
         }
         else
         {
@@ -433,26 +433,22 @@ void plDocumentNodeManager::RestoreMetaDataAfterLoading(const plAbstractObjectGr
       }
 
       plDocumentNodeManager::CanConnectResult res;
-      if (CanConnect(pObject->GetType(), *pSourcePin, *pTargetPin, res).m_Result.Failed())
+      if (CanConnect(pObject->GetType(), *pSourcePin, *pTargetPin, res).m_Result.Succeeded())
       {
-        RemoveObject(pObject);
-        DestroyObject(pObject);
-        continue;
-      }
-
-      if (bUndoable)
-      {
-        plConnectNodePinsCommand cmd;
-        cmd.m_ConnectionObject = pObject->GetGuid();
-        cmd.m_ObjectSource = connectionMetaData.m_Source;
-        cmd.m_ObjectTarget = connectionMetaData.m_Target;
-        cmd.m_sSourcePin = connectionMetaData.m_SourcePin;
-        cmd.m_sTargetPin = connectionMetaData.m_TargetPin;
-        history->AddCommand(cmd).LogFailure();
-      }
-      else
-      {
-        Connect(pObject, *pSourcePin, *pTargetPin);
+        if (bUndoable)
+        {
+          plConnectNodePinsCommand cmd;
+          cmd.m_ConnectionObject = pObject->GetGuid();
+          cmd.m_ObjectSource = connectionMetaData.m_Source;
+          cmd.m_ObjectTarget = connectionMetaData.m_Target;
+          cmd.m_sSourcePin = connectionMetaData.m_SourcePin;
+          cmd.m_sTargetPin = connectionMetaData.m_TargetPin;
+          history->AddCommand(cmd).IgnoreResult();
+        }
+        else
+        {
+          Connect(pObject, *pSourcePin, *pTargetPin);
+        }
       }
     }
   }
@@ -529,7 +525,7 @@ bool plDocumentNodeManager::CopySelectedObjects(plAbstractObjectGraph& out_objec
   return true;
 }
 
-bool plDocumentNodeManager::PasteObjects(const plArrayPtr<plDocument::PasteInfo>& info, const plAbstractObjectGraph& objectGraph, const plVec2& vPickedPosition, bool bAllowPickedPosition)
+bool plDocumentNodeManager::PasteObjects(const plArrayPtr<plDocument::PasteInfo>& info, const plAbstractObjectGraph& objectGraph, const plVec2& pickedPosition, bool bAllowPickedPosition)
 {
   bool bAddedAll = true;
   plDeque<const plDocumentObject*> AddedObjects;
@@ -566,7 +562,7 @@ bool plDocumentNodeManager::PasteObjects(const plArrayPtr<plDocument::PasteInfo>
     }
 
     vAvgPos /= (float)nodeCount;
-    const plVec2 vMoveNode = -vAvgPos + vPickedPosition;
+    const plVec2 vMoveNode = -vAvgPos + pickedPosition;
 
     for (const plDocumentObject* pObject : AddedObjects)
     {
@@ -575,7 +571,7 @@ bool plDocumentNodeManager::PasteObjects(const plArrayPtr<plDocument::PasteInfo>
         plMoveNodeCommand move;
         move.m_Object = pObject->GetGuid();
         move.m_NewPos = GetNodePos(pObject) + vMoveNode;
-        history->AddCommand(move).LogFailure();
+        history->AddCommand(move).IgnoreResult();
       }
     }
 
@@ -623,19 +619,19 @@ bool plDocumentNodeManager::WouldConnectionCreateCircle(const plPin& source, con
   return CanReachNode(pTargetNode, pSourceNode, Visited);
 }
 
-void plDocumentNodeManager::GetDynamicPinNames(const plDocumentObject* pObject, plStringView sPropertyName, plStringView sPinName, plDynamicArray<plString>& out_Names) const
+void plDocumentNodeManager::GetDynamicPinNames(const plDocumentObject* pObject, const char* szPropertyName, plStringView sPinName, plDynamicArray<plString>& out_Names) const
 {
   out_Names.Clear();
 
-  const plAbstractProperty* pProp = pObject->GetType()->FindPropertyByName(sPropertyName);
+  const plAbstractProperty* pProp = pObject->GetType()->FindPropertyByName(szPropertyName);
   if (pProp == nullptr)
   {
-    plLog::Warning("Property '{0}' not found in type '{1}'", sPropertyName, pObject->GetType()->GetTypeName());
+    plLog::Warning("Property '{0}' not found in type '{1}'", szPropertyName, pObject->GetType()->GetTypeName());
     return;
   }
 
   plStringBuilder sTemp;
-  plVariant value = pObject->GetTypeAccessor().GetValue(sPropertyName);
+  plVariant value = pObject->GetTypeAccessor().GetValue(szPropertyName);
 
   if (pProp->GetCategory() == plPropertyCategory::Member)
   {
@@ -656,20 +652,11 @@ void plDocumentNodeManager::GetDynamicPinNames(const plDocumentObject* pObject, 
     auto& a = value.Get<plVariantArray>();
     const plUInt32 uiCount = a.GetCount();
 
-    auto variantType = pArrayProp->GetSpecificType()->GetVariantType();
-    if (variantType >= plVariantType::Int8 && variantType <= plVariantType::UInt64)
+    if (pArrayProp->GetSpecificType() == plGetStaticRTTI<plString>())
     {
       for (plUInt32 i = 0; i < uiCount; ++i)
       {
-        sTemp.Format("{}", a[i]);
-        out_Names.PushBack(sTemp);
-      }
-    }
-    else if (variantType == plVariantType::String || variantType == plVariantType::HashedString)
-    {
-      for (plUInt32 i = 0; i < uiCount; ++i)
-      {
-        out_Names.PushBack(a[i].ConvertTo<plString>());
+        out_Names.PushBack(a[i].Get<plString>());
       }
     }
     else
@@ -768,8 +755,6 @@ void plDocumentNodeManager::ObjectHandler(const plDocumentObjectEvent& e)
       }
     }
     break;
-    default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED
   }
 }
 
@@ -828,9 +813,6 @@ void plDocumentNodeManager::StructureEventHandler(const plDocumentObjectStructur
 
 void plDocumentNodeManager::PropertyEventsHandler(const plDocumentObjectPropertyEvent& e)
 {
-  if (e.m_pObject == nullptr)
-    return;
-
   const plAbstractProperty* pProp = e.m_pObject->GetType()->FindPropertyByName(e.m_sProperty);
   if (pProp == nullptr)
     return;
@@ -878,7 +860,9 @@ void plDocumentNodeManager::RestoreOldMetaDataAfterLoading(const plAbstractObjec
     plDocumentNodeManager::CanConnectResult res;
     if (CanConnect(pConnectionType, *pSourcePin, *pTargetPin, res).m_Result.Succeeded())
     {
-      plDocumentObject* pConnectionObject = CreateObject(pConnectionType, plUuid::MakeUuid());
+      plUuid ObjectGuid;
+      ObjectGuid.CreateNewUuid();
+      plDocumentObject* pConnectionObject = CreateObject(pConnectionType, ObjectGuid);
 
       AddObject(pConnectionObject, nullptr, "", -1);
 

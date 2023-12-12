@@ -311,7 +311,7 @@ plUniquePtr<plWorldReader::InstantiationContextBase> plWorldReader::Instantiate(
 
   ClearHandles();
 
-  if (options.m_MaxStepTime <= plTime::MakeZero())
+  if (options.m_MaxStepTime <= plTime::Zero())
   {
     InstantiationContext context = InstantiationContext(*this, bUseTransform, rootTransform, options);
 
@@ -551,7 +551,8 @@ bool plWorldReader::InstantiationContext::CreateGameObjects(const plDynamicArray
     if (UseTransform)
     {
       plTransform tChild(desc.m_LocalPosition, desc.m_LocalRotation, desc.m_LocalScaling);
-      plTransform tFinal = plTransform::MakeGlobalTransform(m_RootTransform, tChild);
+      plTransform tFinal;
+      tFinal.SetGlobalTransform(m_RootTransform, tChild);
 
       desc.m_LocalPosition = tFinal.m_vPosition;
       desc.m_LocalRotation = tFinal.m_qRotation;

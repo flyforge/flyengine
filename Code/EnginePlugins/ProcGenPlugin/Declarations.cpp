@@ -37,10 +37,6 @@ PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProcPlacementMode, 1)
   PLASMA_ENUM_CONSTANTS(plProcPlacementMode::Raycast, plProcPlacementMode::Fixed)
 PLASMA_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProcPlacementPattern, 1)
-  PLASMA_ENUM_CONSTANTS(plProcPlacementPattern::RegularGrid, plProcPlacementPattern::HexGrid, plProcPlacementPattern::Natural)
-PLASMA_END_STATIC_REFLECTED_ENUM;
-
 PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProcVolumeImageMode, 1)
   PLASMA_ENUM_CONSTANTS(plProcVolumeImageMode::ReferenceColor, plProcVolumeImageMode::ChannelR, plProcVolumeImageMode::ChannelG, plProcVolumeImageMode::ChannelB, plProcVolumeImageMode::ChannelA)
 PLASMA_END_STATIC_REFLECTED_ENUM;

@@ -22,7 +22,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_BoxPosition, 1,
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plBoxVisualizerAttribute("Size", 1.0f, plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3(1,1,1), "PositionOffset")
+    new plBoxVisualizerAttribute("Size", 1.0f, plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "PositionOffset")
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -148,7 +148,7 @@ void plParticleInitializer_BoxPosition::InitializeElements(plUInt64 uiStartIndex
     plSimdVec4f pos;
     plSimdTransform transform;
     transform.m_Position.Load<3>(&ownerTransform.m_vPosition.x);
-    transform.m_Rotation.m_v.Load<4>(&ownerTransform.m_qRotation.x);
+    transform.m_Rotation.m_v.Load<4>(&ownerTransform.m_qRotation.v.x);
     transform.m_Scale.Load<3>(&ownerTransform.m_vScale.x);
 
     float p0[4];

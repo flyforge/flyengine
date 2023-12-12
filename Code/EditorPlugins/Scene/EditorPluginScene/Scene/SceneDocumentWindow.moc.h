@@ -14,7 +14,7 @@
 #include <Foundation/Basics.h>
 #include <GuiFoundation/PropertyGrid/Declarations.h>
 
-struct plEngineViewPreferences;
+struct PlasmaEngineViewPreferences;
 class QGridLayout;
 class plQtViewWidgetContainer;
 class plQtSceneViewWidget;
@@ -22,7 +22,7 @@ class QSettings;
 struct plManipulatorManagerEvent;
 class plPreferences;
 class plQtQuadViewWidget;
-struct plEngineWindowEvent;
+struct PlasmaEngineWindowEvent;
 class plSceneDocument;
 class QMenu;
 
@@ -52,7 +52,7 @@ public:
   ///@}
 
 protected:
-  virtual void ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg) override;
+  virtual void ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg) override;
   virtual void InternalRedraw() override;
 
   void GameObjectEventHandler(const plGameObjectEvent& e);

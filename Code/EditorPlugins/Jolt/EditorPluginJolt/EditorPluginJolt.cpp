@@ -29,20 +29,20 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("JoltCollisionMeshAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("JoltCollisionMeshAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+      plStandardMenus::MapActions("JoltCollisionMeshAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
       plProjectActions::MapActions("JoltCollisionMeshAssetMenuBar");
-      plDocumentActions::MapMenuActions("JoltCollisionMeshAssetMenuBar");
-      plAssetActions::MapMenuActions("JoltCollisionMeshAssetMenuBar");
-      plCommandHistoryActions::MapActions("JoltCollisionMeshAssetMenuBar");
+      plDocumentActions::MapActions("JoltCollisionMeshAssetMenuBar", "Menu.File", false);
+      plAssetActions::MapMenuActions("JoltCollisionMeshAssetMenuBar", "Menu.File");
+      plCommandHistoryActions::MapActions("JoltCollisionMeshAssetMenuBar", "Menu.Edit");
     }
-    
+
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("JoltCollisionMeshAssetToolBar").IgnoreResult();
-      plDocumentActions::MapToolbarActions("JoltCollisionMeshAssetToolBar");
+      plDocumentActions::MapActions("JoltCollisionMeshAssetToolBar", "", true);
       plCommandHistoryActions::MapActions("JoltCollisionMeshAssetToolBar", "");
       plAssetActions::MapToolBarActions("JoltCollisionMeshAssetToolBar", true);
-      plCommonAssetActions::MapToolbarActions("JoltCollisionMeshAssetToolBar", plCommonAssetUiState::Grid);
+      plCommonAssetActions::MapActions("JoltCollisionMeshAssetToolBar", "", plCommonAssetUiState::Grid);
     }
   }
 
@@ -91,7 +91,7 @@ void UpdateCollisionLayerDynamicEnumValues()
   // add all names and values that are valid (non-empty)
   for (plInt32 i = 0; i < 32; ++i)
   {
-    if (!cfg.GetGroupName(i).IsEmpty())
+    if (!plStringUtils::IsNullOrEmpty(cfg.GetGroupName(i)))
     {
       cfe.SetValueAndName(i, cfg.GetGroupName(i));
     }

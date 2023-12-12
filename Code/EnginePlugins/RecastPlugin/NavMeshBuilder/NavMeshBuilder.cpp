@@ -1,13 +1,13 @@
 #include <RecastPlugin/RecastPluginPCH.h>
 
 #include <Core/World/World.h>
-#include <DetourNavMesh.h>
-#include <DetourNavMeshBuilder.h>
 #include <Foundation/Time/Stopwatch.h>
 #include <Foundation/Types/ScopeExit.h>
 #include <Foundation/Utilities/GraphicsUtils.h>
 #include <Foundation/Utilities/Progress.h>
-#include <Recast.h>
+#include <Recast/DetourNavMesh.h>
+#include <Recast/DetourNavMeshBuilder.h>
+#include <Recast/Recast.h>
 #include <RecastPlugin/NavMeshBuilder/NavMeshBuilder.h>
 #include <RecastPlugin/Resources/RecastNavMeshResource.h>
 #include <RendererCore/Meshes/CpuMeshResource.h>
@@ -22,7 +22,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plRecastConfig, plNoBase, 1, plRTTIDefaultAll
     PLASMA_MEMBER_PROPERTY("AgentHeight", m_fAgentHeight)->AddAttributes(new plDefaultValueAttribute(1.5f)),
     PLASMA_MEMBER_PROPERTY("AgentRadius", m_fAgentRadius)->AddAttributes(new plDefaultValueAttribute(0.3f)),
     PLASMA_MEMBER_PROPERTY("AgentClimbHeight", m_fAgentClimbHeight)->AddAttributes(new plDefaultValueAttribute(0.4f)),
-    PLASMA_MEMBER_PROPERTY("WalkableSlope", m_WalkableSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(45))),
+    PLASMA_MEMBER_PROPERTY("WalkableSlope", m_WalkableSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(45))),
     PLASMA_MEMBER_PROPERTY("CellSize", m_fCellSize)->AddAttributes(new plDefaultValueAttribute(0.2f)),
     PLASMA_MEMBER_PROPERTY("CellHeight", m_fCellHeight)->AddAttributes(new plDefaultValueAttribute(0.2f)),
     PLASMA_MEMBER_PROPERTY("MinRegionSize", m_fMinRegionSize)->AddAttributes(new plDefaultValueAttribute(3.0f)),
@@ -40,7 +40,7 @@ PLASMA_END_STATIC_REFLECTED_TYPE;
 class plRcBuildContext : public rcContext
 {
 public:
-  plRcBuildContext() = default;
+  plRcBuildContext() {}
 
 protected:
   virtual void doLog(const rcLogCategory category, const char* msg, const int len)
@@ -69,7 +69,7 @@ plRecastNavMeshBuilder::~plRecastNavMeshBuilder() = default;
 
 void plRecastNavMeshBuilder::Clear()
 {
-  m_BoundingBox = plBoundingBox::MakeInvalid();
+  m_BoundingBox.SetInvalid();
   m_Vertices.Clear();
   m_Triangles.Clear();
   m_TriangleAreaIDs.Clear();
@@ -84,18 +84,18 @@ plResult plRecastNavMeshBuilder::ExtractWorldGeometry(const plWorld& world, plWo
 }
 
 plResult plRecastNavMeshBuilder::Build(const plRecastConfig& config, const plWorldGeoExtractionUtil::MeshObjectList& geo,
-  plRecastNavMeshResourceDescriptor& out_navMeshDesc, plProgress& ref_progress)
+  plRecastNavMeshResourceDescriptor& out_NavMeshDesc, plProgress& progress)
 {
   PLASMA_LOG_BLOCK("plRecastNavMeshBuilder::Build");
 
-  plProgressRange pg("Generating NavMesh", 4, true, &ref_progress);
+  plProgressRange pg("Generating NavMesh", 4, true, &progress);
   pg.SetStepWeighting(0, 0.1f);
   pg.SetStepWeighting(1, 0.1f);
   pg.SetStepWeighting(2, 0.6f);
   pg.SetStepWeighting(3, 0.2f);
 
   Clear();
-  out_navMeshDesc.Clear();
+  out_NavMeshDesc.Clear();
 
   plUniquePtr<plRcBuildContext> recastContext = PLASMA_DEFAULT_NEW(plRcBuildContext);
   m_pRecastContext = recastContext.Borrow();
@@ -119,15 +119,15 @@ plResult plRecastNavMeshBuilder::Build(const plRecastConfig& config, const plWor
   if (!pg.BeginNextStep("Build Poly Mesh"))
     return PLASMA_FAILURE;
 
-  out_navMeshDesc.m_pNavMeshPolygons = PLASMA_DEFAULT_NEW(rcPolyMesh);
+  out_NavMeshDesc.m_pNavMeshPolygons = PLASMA_DEFAULT_NEW(rcPolyMesh);
 
-  if (BuildRecastPolyMesh(config, *out_navMeshDesc.m_pNavMeshPolygons, ref_progress).Failed())
+  if (BuildRecastPolyMesh(config, *out_NavMeshDesc.m_pNavMeshPolygons, progress).Failed())
     return PLASMA_FAILURE;
 
   if (!pg.BeginNextStep("Build NavMesh"))
     return PLASMA_FAILURE;
 
-  if (BuildDetourNavMeshData(config, *out_navMeshDesc.m_pNavMeshPolygons, out_navMeshDesc.m_DetourNavmeshData).Failed())
+  if (BuildDetourNavMeshData(config, *out_NavMeshDesc.m_pNavMeshPolygons, out_NavMeshDesc.m_DetourNavmeshData).Failed())
     return PLASMA_FAILURE;
 
   return PLASMA_SUCCESS;
@@ -165,12 +165,11 @@ void plRecastNavMeshBuilder::GenerateTriangleMeshFromDescription(const plWorldGe
 
     // convert from pl convention (Z up) to recast convention (Y up)
     plMat3 m;
-    m.SetRow(0, plVec3(1, 0, 0));
-    m.SetRow(1, plVec3(0, 0, 1));
-    m.SetRow(2, plVec3(0, 1, 0));
+    m.SetRow(0, plVec3( 1, 0, 0));
+    m.SetRow(1, plVec3( 0, 0, 1));
+    m.SetRow(2, plVec3( 0, 1, 0));
 
-    plMat4 transform;
-    transform.SetIdentity();
+    plMat4 transform = plMat4::IdentityMatrix();
     transform.SetRotationalPart(m);
     transform = transform * object.m_GlobalTransform.GetAsMat4();
 
@@ -218,15 +217,15 @@ void plRecastNavMeshBuilder::GenerateTriangleMeshFromDescription(const plWorldGe
     {
       plUInt32 uiVertexIdx = uiVertexOffset;
 
-      for (plUInt32 p = 0; p < meshBufferDesc.GetPrimitiveCount(); ++p)
-      {
-        auto& triangle = m_Triangles.ExpandAndGetRef();
-        triangle.m_VertexIdx[0] = uiVertexIdx + 0;
-        triangle.m_VertexIdx[1] = uiVertexIdx + (flip ? 2 : 1);
-        triangle.m_VertexIdx[2] = uiVertexIdx + (flip ? 1 : 2);
+        for (plUInt32 p = 0; p < meshBufferDesc.GetPrimitiveCount(); ++p)
+        {
+          auto& triangle = m_Triangles.ExpandAndGetRef();
+          triangle.m_VertexIdx[0] = uiVertexIdx + 0;
+          triangle.m_VertexIdx[1] = uiVertexIdx + (flip ? 2 : 1);
+          triangle.m_VertexIdx[2] = uiVertexIdx + (flip ? 1 : 2);
 
-        uiVertexIdx += 3;
-      }
+          uiVertexIdx += 3;
+        }
     }
 
     uiVertexOffset += meshBufferDesc.GetVertexCount();
@@ -243,7 +242,7 @@ void plRecastNavMeshBuilder::ComputeBoundingBox()
 {
   if (!m_Vertices.IsEmpty())
   {
-    m_BoundingBox = plBoundingBox::MakeFromPoints(m_Vertices.GetData(), m_Vertices.GetCount());
+    m_BoundingBox.SetFromPoints(m_Vertices.GetData(), m_Vertices.GetCount());
   }
 }
 
@@ -489,42 +488,42 @@ plResult plRecastNavMeshBuilder::BuildDetourNavMeshData(const plRecastConfig& co
   return PLASMA_SUCCESS;
 }
 
-plResult plRecastConfig::Serialize(plStreamWriter& inout_stream) const
+plResult plRecastConfig::Serialize(plStreamWriter& stream) const
 {
-  inout_stream.WriteVersion(1);
+  stream.WriteVersion(1);
 
-  inout_stream << m_fAgentHeight;
-  inout_stream << m_fAgentRadius;
-  inout_stream << m_fAgentClimbHeight;
-  inout_stream << m_WalkableSlope;
-  inout_stream << m_fCellSize;
-  inout_stream << m_fCellHeight;
-  inout_stream << m_fMaxEdgeLength;
-  inout_stream << m_fMaxSimplificationError;
-  inout_stream << m_fMinRegionSize;
-  inout_stream << m_fRegionMergeSize;
-  inout_stream << m_fDetailMeshSampleDistanceFactor;
-  inout_stream << m_fDetailMeshSampleErrorFactor;
+  stream << m_fAgentHeight;
+  stream << m_fAgentRadius;
+  stream << m_fAgentClimbHeight;
+  stream << m_WalkableSlope;
+  stream << m_fCellSize;
+  stream << m_fCellHeight;
+  stream << m_fMaxEdgeLength;
+  stream << m_fMaxSimplificationError;
+  stream << m_fMinRegionSize;
+  stream << m_fRegionMergeSize;
+  stream << m_fDetailMeshSampleDistanceFactor;
+  stream << m_fDetailMeshSampleErrorFactor;
 
   return PLASMA_SUCCESS;
 }
 
-plResult plRecastConfig::Deserialize(plStreamReader& inout_stream)
+plResult plRecastConfig::Deserialize(plStreamReader& stream)
 {
-  inout_stream.ReadVersion(1);
+  stream.ReadVersion(1);
 
-  inout_stream >> m_fAgentHeight;
-  inout_stream >> m_fAgentRadius;
-  inout_stream >> m_fAgentClimbHeight;
-  inout_stream >> m_WalkableSlope;
-  inout_stream >> m_fCellSize;
-  inout_stream >> m_fCellHeight;
-  inout_stream >> m_fMaxEdgeLength;
-  inout_stream >> m_fMaxSimplificationError;
-  inout_stream >> m_fMinRegionSize;
-  inout_stream >> m_fRegionMergeSize;
-  inout_stream >> m_fDetailMeshSampleDistanceFactor;
-  inout_stream >> m_fDetailMeshSampleErrorFactor;
+  stream >> m_fAgentHeight;
+  stream >> m_fAgentRadius;
+  stream >> m_fAgentClimbHeight;
+  stream >> m_WalkableSlope;
+  stream >> m_fCellSize;
+  stream >> m_fCellHeight;
+  stream >> m_fMaxEdgeLength;
+  stream >> m_fMaxSimplificationError;
+  stream >> m_fMinRegionSize;
+  stream >> m_fRegionMergeSize;
+  stream >> m_fDetailMeshSampleDistanceFactor;
+  stream >> m_fDetailMeshSampleErrorFactor;
 
   return PLASMA_SUCCESS;
 }

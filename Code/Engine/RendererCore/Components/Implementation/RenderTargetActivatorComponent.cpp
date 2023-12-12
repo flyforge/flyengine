@@ -12,12 +12,13 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRenderTargetActivatorComponent, 1, plComponentMode
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("RenderTarget", GetRenderTargetFile, SetRenderTargetFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Target", plDependencyFlags::Package)),
+    PLASMA_ACCESSOR_PROPERTY("RenderTarget", GetRenderTargetFile, SetRenderTargetFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Target")),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
+    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -54,7 +55,7 @@ plResult plRenderTargetActivatorComponent::GetLocalBounds(plBoundingBoxSphere& r
 {
   if (m_hRenderTarget.IsValid())
   {
-    ref_bounds = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 0.1f);
+    ref_bounds = plBoundingSphere(plVec3::ZeroVector(), 0.1f);
     return PLASMA_SUCCESS;
   }
 

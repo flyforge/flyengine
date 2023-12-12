@@ -77,7 +77,7 @@ public:
     AllFlags = 0xFFFFFFFF
   };
 
-  plGameObjectMetaData() = default;
+  plGameObjectMetaData() {}
 
   plString m_CachedNodeName;
   QIcon m_Icon;
@@ -96,12 +96,12 @@ class PLASMA_EDITORFRAMEWORK_DLL plGameObjectDocument : public plAssetDocument
   PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectDocument, plAssetDocument);
 
 public:
-  plGameObjectDocument(plStringView sDocumentPath, plDocumentObjectManager* pObjectManager,
+  plGameObjectDocument(const char* szDocumentPath, plDocumentObjectManager* pObjectManager,
     plAssetDocEngineConnection engineConnectionType = plAssetDocEngineConnection::FullObjectMirroring);
   ~plGameObjectDocument();
 
 
-  virtual plEditorInputContext* GetEditorInputContextOverride() override;
+  virtual PlasmaEditorInputContext* GetEditorInputContextOverride() override;
 
 protected:
   void SubscribeGameObjectEventHandlers();
@@ -135,9 +135,9 @@ public:
   ///
   /// Additionally stores the current transformation. Useful to store this at the start of an operation
   /// to then do modifications on this base transformation every frame.
-  void ComputeTopLevelSelectedGameObjects(plDeque<plSelectedGameObject>& out_selection);
+  void ComputeTopLevelSelectedGameObjects(plDeque<plSelectedGameObject>& out_Selection);
 
-  virtual void HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
 
 private:
   void DeallocateEditTools();
@@ -198,10 +198,10 @@ public:
   /// \brief Sets the new global transformation of the given object.
   /// The transformationChanges bitmask (of type TransformationChanges) allows to tell the system that, e.g. only translation has changed and thus
   /// some work can be spared.
-  void SetGlobalTransform(const plDocumentObject* pObject, const plTransform& t, plUInt8 uiTransformationChanges) const;
+  void SetGlobalTransform(const plDocumentObject* pObject, const plTransform& t, plUInt8 transformationChanges) const;
 
   /// \brief Same as SetGlobalTransform, except that all children will keep their current global transform (thus their local transforms are adjusted)
-  void SetGlobalTransformParentOnly(const plDocumentObject* pObject, const plTransform& t, plUInt8 uiTransformationChanges) const;
+  void SetGlobalTransformParentOnly(const plDocumentObject* pObject, const plTransform& t, plUInt8 transformationChanges) const;
 
   /// \brief Returns a cached value for the global transform of the given object, if available. Otherwise it calls ComputeGlobalTransform().
   plTransform GetGlobalTransform(const plDocumentObject* pObject) const;
@@ -215,19 +215,19 @@ public:
   plTransform ComputeGlobalTransform(const plDocumentObject* pObject) const;
 
   /// \brief Traverses the pObject hierarchy up until it hits an plGameObject, then computes the global transform of that.
-  virtual plResult ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_result) const override;
+  virtual plResult ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_Result) const override;
 
   ///@}
   /// \name Node Names
   ///@{
 
   /// \brief Generates a good name for pObject. Queries the "Name" property, child components and asset properties, if necessary.
-  void DetermineNodeName(const plDocumentObject* pObject, const plUuid& prefabGuid, plStringBuilder& out_sResult, QIcon* out_pIcon = nullptr) const;
+  void DetermineNodeName(const plDocumentObject* pObject, const plUuid& prefabGuid, plStringBuilder& out_Result, QIcon* out_pIcon = nullptr) const;
 
   /// \brief Similar to DetermineNodeName() but prefers to return the last cached value from scene meta data. This is more efficient, but may give an
   /// outdated result.
   void QueryCachedNodeName(
-    const plDocumentObject* pObject, plStringBuilder& out_sResult, plUuid* out_pPrefabGuid = nullptr, QIcon* out_pIcon = nullptr) const;
+    const plDocumentObject* pObject, plStringBuilder& out_Result, plUuid* out_pPrefabGuid = nullptr, QIcon* out_pIcon = nullptr) const;
 
   /// \brief Creates a full "path" to a scene object for display in UIs. No guarantee for uniqueness.
   void GenerateFullDisplayName(const plDocumentObject* pRoot, plStringBuilder& out_sFullPath) const;
@@ -273,7 +273,7 @@ private:
 
   float m_fSimulationSpeed = 1.0f;
 
-  using TransformTable = plHashTable<const plDocumentObject*, plSimdTransform, plHashHelper<const plDocumentObject*>, plAlignedAllocatorWrapper>;
+  typedef plHashTable<const plDocumentObject*, plSimdTransform, plHashHelper<const plDocumentObject*>, plAlignedAllocatorWrapper> TransformTable;
   mutable TransformTable m_GlobalTransforms;
 
   // when new objects are created the engine sometimes needs to catch up creating sub-objects (e.g. for reference prefabs)

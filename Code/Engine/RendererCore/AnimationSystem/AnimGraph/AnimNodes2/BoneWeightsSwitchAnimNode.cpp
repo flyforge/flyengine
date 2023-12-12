@@ -2,6 +2,7 @@
 
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimNodes2/BoneWeightsSwitchAnimNode.h>
+#include <Foundation/Profiling/Profiling.h>
 
 // clang-format off
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSwitchBoneWeightsAnimNode, 1, plRTTIDefaultAllocator<plSwitchBoneWeightsAnimNode>)
@@ -58,6 +59,7 @@ plResult plSwitchBoneWeightsAnimNode::DeserializeNode(plStreamReader& stream)
 
 void plSwitchBoneWeightsAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
+  PLASMA_PROFILE_SCOPE("AnimNode_BoneWeightSwitch");
   if (!m_OutWeights.IsConnected() || !m_InIndex.IsConnected() || m_InWeights.IsEmpty())
     return;
 

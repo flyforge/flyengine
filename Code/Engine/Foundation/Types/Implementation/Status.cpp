@@ -6,17 +6,17 @@
 
 void plResult::AssertSuccess(const char* szMsg /*= nullptr*/, const char* szDetails /*= nullptr*/) const
 {
-  //if (Succeeded())
-  //  return;
+  if (Succeeded())
+    return;
 
-  //if (szMsg)
-  //{
-  //  PLASMA_REPORT_FAILURE(szMsg, szDetails);
-  //}
-  //else
-  //{
-  //  PLASMA_REPORT_FAILURE("An operation failed unexpectedly.");
-  //}
+  if (szMsg)
+  {
+    PLASMA_REPORT_FAILURE(szMsg, szDetails);
+  }
+  else
+  {
+    PLASMA_REPORT_FAILURE("An operation failed unexpectedly.");
+  }
 }
 
 plStatus::plStatus(const plFormatString& fmt)

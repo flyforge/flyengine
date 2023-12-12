@@ -98,12 +98,6 @@ public:
   /// Once the original string is destroyed, all iterators to them will point into invalid memory.
   reverse_iterator GetIteratorBack() const;
 
-  /// \brief Returns a std::string_view to this string.
-  std::string_view GetAsStdView() const;
-
-  /// \brief Returns a string view to this string's data.
-  operator std::string_view() const; // [tested]
-
   /// \brief Returns a string view to this string's data.
   operator plStringView() const; // [tested]
 
@@ -112,9 +106,6 @@ public:
 
   /// \brief Returns a pointer to the internal Utf8 string.
   PLASMA_ALWAYS_INLINE operator const char*() const { return InternalGetData(); }
-
-  /// \brief Returns a pointer to the internal Utf8 string.
-  PLASMA_ALWAYS_INLINE operator const char8_t*() const { return reinterpret_cast<const char8_t*>(InternalGetData()); }
 
   /// \brief Fills the given container with plStringView's which represent each found substring.
   /// If bReturnEmptyStrings is true, even empty strings between separators are returned.

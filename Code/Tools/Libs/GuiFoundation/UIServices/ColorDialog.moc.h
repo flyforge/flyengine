@@ -16,11 +16,11 @@ class PLASMA_GUIFOUNDATION_DLL plQtColorDialog : public QDialog, Ui_ColorDialog
 {
   Q_OBJECT
 public:
-  plQtColorDialog(const plColor& initial, QWidget* pParent);
+  plQtColorDialog(const plColor& initial, QWidget* parent);
   ~plQtColorDialog();
 
-  void ShowAlpha(bool bEnable);
-  void ShowHDR(bool bEnable);
+  void ShowAlpha(bool enable);
+  void ShowHDR(bool enable);
 
   static QByteArray GetLastDialogGeometry() { return s_LastDialogGeometry; }
 

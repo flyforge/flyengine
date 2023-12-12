@@ -9,8 +9,6 @@
 class PLASMA_FOUNDATION_DLL plAngle
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
-
   /// \brief Returns the constant to multiply with an angle in degree to convert it to radians.
   template <typename Type>
   constexpr static PLASMA_ALWAYS_INLINE Type DegToRadMultiplier(); // [tested]
@@ -27,14 +25,15 @@ public:
   template <typename Type>
   constexpr static Type RadToDeg(Type f); // [tested]
 
-  /// \brief Returns a zero initialized angle. Same as a default constructed object.
-  [[nodiscard]] constexpr static plAngle MakeZero() { return plAngle(); }
-
   /// \brief Creates an instance of plAngle that was initialized from degree. (Performs a conversion)
-  [[nodiscard]] constexpr static plAngle MakeFromDegree(float fDegree); // [tested]
+  constexpr static plAngle Degree(float fDegree); // [tested]
 
   /// \brief Creates an instance of plAngle that was initialized from radian. (No need for any conversion)
-  [[nodiscard]] constexpr static plAngle MakeFromRadian(float fRadian); // [tested]
+  constexpr static plAngle Radian(float fRadian); // [tested]
+
+
+
+  PLASMA_DECLARE_POD_TYPE();
 
   /// \brief Standard constructor, initializing with 0.
   constexpr plAngle()

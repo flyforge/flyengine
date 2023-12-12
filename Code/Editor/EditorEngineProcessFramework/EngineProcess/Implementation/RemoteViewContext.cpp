@@ -10,8 +10,8 @@
 plUInt32 plRemoteEngineProcessViewContext::s_uiActiveViewID = 0;
 plRemoteEngineProcessViewContext* plRemoteEngineProcessViewContext::s_pActiveRemoteViewContext = nullptr;
 
-plRemoteEngineProcessViewContext::plRemoteEngineProcessViewContext(plEngineProcessDocumentContext* pContext)
-  : plEngineProcessViewContext(pContext)
+plRemoteEngineProcessViewContext::plRemoteEngineProcessViewContext(PlasmaEngineProcessDocumentContext* pContext)
+  : PlasmaEngineProcessViewContext(pContext)
 {
 }
 
@@ -32,13 +32,13 @@ plRemoteEngineProcessViewContext::~plRemoteEngineProcessViewContext()
   m_hView.Invalidate();
 }
 
-void plRemoteEngineProcessViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
+void plRemoteEngineProcessViewContext::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plActivateRemoteViewMsgToEngine>())
   {
     if (m_hView.IsInvalidated())
     {
-      m_hView = plEditorEngineProcessApp::GetSingleton()->CreateRemoteWindowAndView(&m_Camera);
+      m_hView = PlasmaEditorEngineProcessApp::GetSingleton()->CreateRemoteWindowAndView(&m_Camera);
     }
 
     s_pActiveRemoteViewContext = this;
@@ -46,7 +46,7 @@ void plRemoteEngineProcessViewContext::HandleViewMessage(const plEditorEngineVie
     plView* pView = nullptr;
     if (plRenderWorld::TryGetView(m_hView, pView))
     {
-      plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+      PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
       pView->SetWorld(pDocumentContext->GetWorld());
       pView->SetCamera(&m_Camera);
 

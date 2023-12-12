@@ -13,6 +13,13 @@
 class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plWorldRttiConverterContext : public plRttiConverterContext
 {
 public:
+  plWorldRttiConverterContext()
+    : m_pWorld(nullptr)
+    , m_uiNextComponentPickingID(1)
+    , m_uiHighlightID(1)
+  {
+  }
+
   virtual void Clear() override;
   void DeleteExistingObjects();
 
@@ -27,14 +34,14 @@ public:
 
   virtual void OnUnknownTypeError(plStringView sTypeName) override;
 
-  plWorld* m_pWorld = nullptr;
-  plEditorGuidEngineHandleMap<plGameObjectHandle> m_GameObjectMap;
-  plEditorGuidEngineHandleMap<plComponentHandle> m_ComponentMap;
+  plWorld* m_pWorld;
+  PlasmaEditorGuidEngineHandleMap<plGameObjectHandle> m_GameObjectMap;
+  PlasmaEditorGuidEngineHandleMap<plComponentHandle> m_ComponentMap;
 
-  plEditorGuidEngineHandleMap<plUInt32> m_OtherPickingMap;
-  plEditorGuidEngineHandleMap<plUInt32> m_ComponentPickingMap;
-  plUInt32 m_uiNextComponentPickingID = 1;
-  plUInt32 m_uiHighlightID = 1;
+  PlasmaEditorGuidEngineHandleMap<plUInt32> m_OtherPickingMap;
+  PlasmaEditorGuidEngineHandleMap<plUInt32> m_ComponentPickingMap;
+  plUInt32 m_uiNextComponentPickingID;
+  plUInt32 m_uiHighlightID;
 
   struct Event
   {

@@ -16,9 +16,9 @@ protected:
 private:
   friend class plRenderPipeline;
 
-  const plRenderPipeline* m_pOwnerPipeline = nullptr;
-  void* m_pData = nullptr;
-  plUInt64 m_uiLastUpdateFrame = 0;
+  const plRenderPipeline* m_pOwnerPipeline;
+  void* m_pData;
+  plUInt64 m_uiLastUpdateFrame;
 };
 
 template <typename T>

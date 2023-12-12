@@ -65,7 +65,7 @@ namespace plJoltCollisionFiltering
       case plJoltBroadphaseLayer::Rope:
         return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope);
 
-        PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
     }
 
     return 0;
@@ -144,3 +144,4 @@ bool plJoltObjectLayerPairFilter::ShouldCollide(JPH::ObjectLayer inObject1, JPH:
 
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltCollisionFiltering);
+

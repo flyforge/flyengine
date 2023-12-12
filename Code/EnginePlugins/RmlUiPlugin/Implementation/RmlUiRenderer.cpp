@@ -94,7 +94,7 @@ void plRmlUiRenderer::RenderBatch(const plRenderViewContext& renderViewContext, 
   pRenderContext->BindConstantBuffer("plRmlUiConstants", m_hConstantBuffer);
 
   // reset cached state
-  m_mLastTransform = plMat4::MakeIdentity();
+  m_mLastTransform = plMat4::IdentityMatrix();
   m_LastRect = plRectFloat(0, 0);
 
   for (auto it = batch.GetIterator<plRmlUiRenderData>(); it.IsValid(); ++it)

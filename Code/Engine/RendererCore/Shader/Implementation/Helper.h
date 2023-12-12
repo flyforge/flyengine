@@ -20,9 +20,10 @@ namespace plShaderHelper
     struct plTextSection
     {
       plTextSection(const char* szName)
-        : m_sName(szName)
-
       {
+        m_sName = szName;
+        m_szSectionStart = nullptr;
+        m_uiFirstLine = 0;
       }
 
       void Reset()
@@ -33,9 +34,9 @@ namespace plShaderHelper
       }
 
       plString m_sName;
-      const char* m_szSectionStart = nullptr;
+      const char* m_szSectionStart;
       plStringView m_Content;
-      plUInt32 m_uiFirstLine = 0;
+      plUInt32 m_uiFirstLine;
     };
 
     plStringBuilder m_sText;

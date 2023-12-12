@@ -57,13 +57,13 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plTime, plNoBase, 1, plRTTINoAllocator)
 {
   PLASMA_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(MakeFromNanoseconds, In, "Nanoseconds")->AddFlags(plPropertyFlags::Const),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(MakeFromMicroseconds, In, "Microseconds")->AddFlags(plPropertyFlags::Const),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(MakeFromMilliseconds, In, "Milliseconds")->AddFlags(plPropertyFlags::Const),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(MakeFromSeconds, In, "Seconds")->AddFlags(plPropertyFlags::Const),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(MakeFromMinutes, In, "Minutes")->AddFlags(plPropertyFlags::Const),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(MakeFromHours, In, "Hours")->AddFlags(plPropertyFlags::Const),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(MakeZero)->AddFlags(plPropertyFlags::Const),
+    PLASMA_SCRIPT_FUNCTION_PROPERTY(Nanoseconds, In, "Nanoseconds")->AddFlags(plPropertyFlags::Const),
+    PLASMA_SCRIPT_FUNCTION_PROPERTY(Microseconds, In, "Microseconds")->AddFlags(plPropertyFlags::Const),
+    PLASMA_SCRIPT_FUNCTION_PROPERTY(Milliseconds, In, "Milliseconds")->AddFlags(plPropertyFlags::Const),
+    PLASMA_SCRIPT_FUNCTION_PROPERTY(Seconds, In, "Seconds")->AddFlags(plPropertyFlags::Const),
+    PLASMA_SCRIPT_FUNCTION_PROPERTY(Minutes, In, "Minutes")->AddFlags(plPropertyFlags::Const),
+    PLASMA_SCRIPT_FUNCTION_PROPERTY(Hours, In, "Hours")->AddFlags(plPropertyFlags::Const),
+    PLASMA_SCRIPT_FUNCTION_PROPERTY(Zero)->AddFlags(plPropertyFlags::Const),
   }
   PLASMA_END_FUNCTIONS;
 }
@@ -299,9 +299,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plQuat, plNoBase, 1, plRTTINoAllocator)
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("x", x),
-    PLASMA_MEMBER_PROPERTY("y", y),
-    PLASMA_MEMBER_PROPERTY("z", z),
+    PLASMA_MEMBER_PROPERTY("v", v),
     PLASMA_MEMBER_PROPERTY("w", w),
   }
   PLASMA_END_PROPERTIES;
@@ -380,8 +378,8 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plAngle, plNoBase, 1, plRTTINoAllocator)
 {
   PLASMA_BEGIN_FUNCTIONS
   {
-    PLASMA_FUNCTION_PROPERTY(MakeFromDegree),
-    PLASMA_FUNCTION_PROPERTY(MakeFromRadian),
+    PLASMA_FUNCTION_PROPERTY(Degree),
+    PLASMA_FUNCTION_PROPERTY(Radian),
   }
   PLASMA_END_FUNCTIONS;
 }

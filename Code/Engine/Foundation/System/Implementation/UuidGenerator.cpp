@@ -16,7 +16,7 @@
 #  error "Uuid generation functions are not implemented on current platform"
 #endif
 
-plUuid plUuid::MakeStableUuidFromString(plStringView sString)
+plUuid plUuid::StableUuidForString(plStringView sString)
 {
   plUuid NewUuid;
   NewUuid.m_uiLow = plHashingUtils::xxHash64String(sString);
@@ -25,7 +25,7 @@ plUuid plUuid::MakeStableUuidFromString(plStringView sString)
   return NewUuid;
 }
 
-plUuid plUuid::MakeStableUuidFromInt(plInt64 iInt)
+plUuid plUuid::StableUuidForInt(plInt64 iInt)
 {
   plUuid NewUuid;
   NewUuid.m_uiLow = plHashingUtils::xxHash64(&iInt, sizeof(plInt64));

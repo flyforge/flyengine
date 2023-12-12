@@ -7,18 +7,14 @@ JPH_NAMESPACE_BEGIN
 template <typename Object>
 FixedSizeFreeList<Object>::~FixedSizeFreeList()
 {
-	// Check if we got our Init call
-	if (mPages != nullptr)
-	{
-		// Ensure everything is freed before the freelist is destructed
-		JPH_ASSERT(mNumFreeObjects.load(memory_order_relaxed) == mNumPages * mPageSize);
+	// Ensure everything is freed before the freelist is destructed
+	JPH_ASSERT(mNumFreeObjects.load(memory_order_relaxed) == mNumPages * mPageSize);
 
-		// Free memory for pages
-		uint32 num_pages = mNumObjectsAllocated / mPageSize;
-		for (uint32 page = 0; page < num_pages; ++page)
-			AlignedFree(mPages[page]);
-		Free(mPages);
-	}
+	// Free memory for pages
+	uint32 num_pages = mNumObjectsAllocated / mPageSize;
+	for (uint32 page = 0; page < num_pages; ++page)
+		AlignedFree(mPages[page]);
+	Free(mPages);
 }
 
 template <typename Object>
@@ -161,7 +157,7 @@ void FixedSizeFreeList<Object>::DestructObjectBatch(Batch &ioBatch)
 				// Mark the batch as freed
 #ifdef JPH_ENABLE_ASSERTS
 				ioBatch.mNumObjects = uint32(-1);
-#endif
+#endif		
 				return;
 			}
 		}
@@ -174,7 +170,7 @@ void FixedSizeFreeList<Object>::DestructObject(uint32 inObjectIndex)
 	JPH_ASSERT(inObjectIndex != cInvalidObjectIndex);
 
 	// Call destructor
-	ObjectStorage &storage = GetStorage(inObjectIndex);
+	ObjectStorage &storage = GetStorage(inObjectIndex); 
 	storage.mObject.~Object();
 
 	// Add to object free list

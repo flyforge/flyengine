@@ -74,7 +74,7 @@ void plWorldGeoExtractionUtil::WriteWorldGeometryToOBJ(const char* szFile, const
     return;
   }
 
-  plMat4 transform = plMat4::MakeIdentity();
+  plMat4 transform = plMat4::IdentityMatrix();
   transform.SetRotationalPart(mTransform);
 
   plStringBuilder line;

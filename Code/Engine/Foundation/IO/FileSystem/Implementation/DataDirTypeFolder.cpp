@@ -210,11 +210,7 @@ namespace plDataDirectory
     if (!plPathUtils::IsAbsolutePath(sPath))
       return PLASMA_FAILURE;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
     return plOSFile::GetFileStats(sPath, out_Stats);
-#else
-    return PLASMA_FAILURE;
-#endif
   }
 
   plResult FolderType::InternalInitializeDataDirectory(plStringView sDirectory)

@@ -68,7 +68,7 @@ public:
   plArrayPtr<const KeyframeQuat> GetRotationKeyframes(const JointInfo& jointInfo) const;
   plArrayPtr<const KeyframeVec3> GetScaleKeyframes(const JointInfo& jointInfo) const;
 
-  plVec3 m_vConstantRootMotion = plVec3::MakeZero();
+  plVec3 m_vConstantRootMotion = plVec3::ZeroVector();
 
   plEventTrack m_EventTrack;
 

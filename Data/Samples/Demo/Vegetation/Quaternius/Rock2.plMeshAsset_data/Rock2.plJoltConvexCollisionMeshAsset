@@ -96,7 +96,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginJolt"}
+		s %PluginName{"PlasmaEditorPluginJolt"}
 		VarArray %Properties{}
 		s %TypeName{"plJoltConvexCollisionMeshType"}
 		u3 %TypeVersion{1}
@@ -113,7 +113,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{""}
-		s %PluginName{"plasmaEditorPluginJolt"}
+		s %PluginName{"PlasmaEditorPluginJolt"}
 		VarArray %Properties{}
 		s %TypeName{"plJoltSurfaceResourceSlot"}
 		u3 %TypeVersion{1}
@@ -130,7 +130,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginJolt"}
+		s %PluginName{"PlasmaEditorPluginJolt"}
 		VarArray %Properties{}
 		s %TypeName{"plJoltCollisionMeshAssetProperties"}
 		u3 %TypeVersion{1}

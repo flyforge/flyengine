@@ -13,7 +13,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapToolbarActions(plStringView sMapping, plUInt32 uiStateMask);
+  static void MapActions(const char* szMapping, const char* szPath, plUInt32 stateMask);
 
   static plActionDescriptorHandle s_hCategory;
   static plActionDescriptorHandle s_hPause;

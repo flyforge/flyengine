@@ -22,7 +22,7 @@ public:
   /// The return value is a sharedPtr as each implementation can decide whether to provide the same instance for all objects or whether a custom instance should be created for each object to allow for state caching (e.g. prefab root information). Returning nullptr is also valid for objects / containers for which the factory has no use (e.g. prefab default state provider on an object that does not belong to a prefab).
   /// The function is called for plDefaultObjectState usage with the pProp field left blank.
   /// For plDefaultContainerState usage pProp will point to the container property.
-  using CreateStateProviderFunc = plSharedPtr<plDefaultStateProvider> (*)(plObjectAccessorBase*, const plDocumentObject*, const plAbstractProperty*);
+  typedef plSharedPtr<plDefaultStateProvider> (*CreateStateProviderFunc)(plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp);
 
   /// \brief Registers a plDefaultStateProvider factory method. It is safe to register / unregister factories at any time.
   static void RegisterDefaultStateProvider(CreateStateProviderFunc func);

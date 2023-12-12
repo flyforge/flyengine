@@ -85,8 +85,8 @@ struct plProcGenGraphAssetDocument::GenerateContext
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenGraphAssetDocument, 6, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plProcGenGraphAssetDocument::plProcGenGraphAssetDocument(plStringView sDocumentPath)
-  : plAssetDocument(sDocumentPath, PLASMA_DEFAULT_NEW(plProcGenNodeManager), plAssetDocEngineConnection::None)
+plProcGenGraphAssetDocument::plProcGenGraphAssetDocument(const char* szDocumentPath)
+  : plAssetDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plProcGenNodeManager), plAssetDocEngineConnection::None)
 {
 }
 
@@ -106,7 +106,7 @@ void plProcGenGraphAssetDocument::SetDebugPin(const plPin* pDebugPin)
   GetObjectManager()->m_PropertyEvents.Broadcast(e);
 }
 
-plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& inout_stream, const plPlatformProfile* pAssetProfile, bool bAllowDebug) const
+plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const plPlatformProfile* pAssetProfile, bool bAllowDebug) const
 {
   GenerateContext context(GetObjectManager());
 
@@ -116,7 +116,7 @@ plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& inout_stream, c
 
   const bool bDebug = bAllowDebug && (m_pDebugPin != nullptr);
 
-  plStringDeduplicationWriteContext stringDedupContext(inout_stream);
+  plStringDeduplicationWriteContext stringDedupContext(stream);
 
   plChunkStreamWriter chunk(stringDedupContext.Begin());
   chunk.BeginStream(1);
@@ -262,50 +262,45 @@ void plProcGenGraphAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* p
         plVariant prefab = typeAccessor.GetValue("Objects", i);
         if (prefab.IsA<plString>())
         {
-          pInfo->m_PackageDependencies.Insert(prefab.Get<plString>());
-          pInfo->m_ThumbnailDependencies.Insert(prefab.Get<plString>());
+          pInfo->m_RuntimeDependencies.Insert(prefab.Get<plString>());
         }
       }
 
       plVariant colorGradient = typeAccessor.GetValue("ColorGradient");
       if (colorGradient.IsA<plString>())
       {
-        pInfo->m_PackageDependencies.Insert(colorGradient.Get<plString>());
-        pInfo->m_ThumbnailDependencies.Insert(colorGradient.Get<plString>());
+        pInfo->m_RuntimeDependencies.Insert(colorGradient.Get<plString>());
       }
     }
   }
   else
   {
-    pInfo->m_PackageDependencies.Insert(s_szSphereAssetId);
-    pInfo->m_PackageDependencies.Insert(s_szBWGradientAssetId);
-
-    pInfo->m_ThumbnailDependencies.Insert(s_szSphereAssetId);
-    pInfo->m_ThumbnailDependencies.Insert(s_szBWGradientAssetId);
+    pInfo->m_RuntimeDependencies.Insert(s_szSphereAssetId);
+    pInfo->m_RuntimeDependencies.Insert(s_szBWGradientAssetId);
   }
 }
 
-plTransformStatus plProcGenGraphAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plProcGenGraphAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  PLASMA_ASSERT_DEV(sOutputTag.IsEmpty(), "Additional output '{0}' not implemented!", sOutputTag);
+  PLASMA_ASSERT_DEV(plStringUtils::IsNullOrEmpty(szOutputTag), "Additional output '{0}' not implemented!", szOutputTag);
 
   return WriteAsset(stream, pAssetProfile, false);
 }
 
 void plProcGenGraphAssetDocument::GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const
 {
-  out_MimeTypes.PushBack("application/plEditor.ProcGenGraph");
+  out_MimeTypes.PushBack("application/PlasmaEditor.ProcGenGraph");
 }
 
 bool plProcGenGraphAssetDocument::CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const
 {
-  out_MimeType = "application/plEditor.ProcGenGraph";
+  out_MimeType = "application/PlasmaEditor.ProcGenGraph";
 
   const plDocumentNodeManager* pManager = static_cast<const plDocumentNodeManager*>(GetObjectManager());
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plProcGenGraphAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
+bool plProcGenGraphAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);

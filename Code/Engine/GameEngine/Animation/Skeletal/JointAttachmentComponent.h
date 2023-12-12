@@ -27,8 +27,8 @@ public:
   void SetJointName(const char* szName); // [ property ]
   const char* GetJointName() const;      // [ property ]
 
-  plVec3 m_vLocalPositionOffset = plVec3::MakeZero();         // [ property ]
-  plQuat m_vLocalRotationOffset = plQuat::MakeIdentity(); // [ property ]
+  plVec3 m_vLocalPositionOffset = plVec3::ZeroVector();         // [ property ]
+  plQuat m_vLocalRotationOffset = plQuat::IdentityQuaternion(); // [ property ]
 
 protected:
   void OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& msg); // [ msg handler ]

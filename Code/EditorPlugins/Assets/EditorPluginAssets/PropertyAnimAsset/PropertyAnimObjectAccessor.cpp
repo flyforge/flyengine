@@ -119,7 +119,7 @@ plStatus plPropertyAnimObjectAccessor::SetValue(
             m_pDocument->InsertCurveCpAt(trackGuid, 0, oldValue);
           });
         const auto* pTrack = m_pDocument->GetTrack(track);
-        oldEuler[c] = plAngle::MakeFromDegree(pTrack->m_FloatCurve.Evaluate(m_pDocument->GetScrubberPosition()));
+        oldEuler[c] = plAngle::Degree(pTrack->m_FloatCurve.Evaluate(m_pDocument->GetScrubberPosition()));
       }
 
       for (plUInt32 c = 0; c < 3; c++)
@@ -128,8 +128,8 @@ plStatus plPropertyAnimObjectAccessor::SetValue(
         float fDiff = (newEuler[c] - oldEuler[c]).GetDegree();
         float iRounds = plMath::RoundToMultiple(fDiff, 360.0f);
         fDiff -= iRounds;
-        newEuler[c] = oldEuler[c] + plAngle::MakeFromDegree(fDiff);
-        if (oldEuler[c].IsEqualSimple(newEuler[c], plAngle::MakeFromDegree(0.01f)))
+        newEuler[c] = oldEuler[c] + plAngle::Degree(fDiff);
+        if (oldEuler[c].IsEqualSimple(newEuler[c], plAngle::Degree(0.01f)))
           continue;
 
         PLASMA_SUCCEED_OR_RETURN(SetCurveCp(pObject, pProp, index, static_cast<plPropertyAnimTarget::Enum>((int)plPropertyAnimTarget::RotationX + c),
@@ -241,7 +241,8 @@ plStatus plPropertyAnimObjectAccessor::SetCurveCp(const plDocumentObject* pObjec
   PLASMA_SUCCEED_OR_RETURN(m_pDocument->CanAnimate(pObject, pProp, index, target));
   plUuid track = FindOrAddTrack(pObject, pProp, index, target, [this, fOldValue](const plUuid& trackGuid) {
     // add a control point at the start of the curve with the original value
-    m_pDocument->InsertCurveCpAt(trackGuid, 0, fOldValue); });
+    m_pDocument->InsertCurveCpAt(trackGuid, 0, fOldValue);
+  });
   return SetOrInsertCurveCp(track, fNewValue);
 }
 
@@ -295,17 +296,15 @@ plStatus plPropertyAnimObjectAccessor::SetOrInsertCurveCp(const plUuid& track, d
   return plStatus(PLASMA_SUCCESS);
 }
 
-plStatus plPropertyAnimObjectAccessor::SetColorCurveCp(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, const plColorGammaUB& oldValue, const plColorGammaUB& newValue)
+plStatus plPropertyAnimObjectAccessor::SetColorCurveCp(
+  const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, const plColorGammaUB& oldValue, const plColorGammaUB& newValue)
 {
   PLASMA_SUCCEED_OR_RETURN(m_pDocument->CanAnimate(pObject, pProp, index, plPropertyAnimTarget::Color));
   plUuid track = FindOrAddTrack(pObject, pProp, index, plPropertyAnimTarget::Color, [this, &oldValue](const plUuid& trackGuid) {
     // add a control point at the start of the curve with the original value
     m_pDocument->InsertGradientColorCpAt(trackGuid, 0, oldValue);
-    //
   });
-
-  PLASMA_SUCCEED_OR_RETURN(SetOrInsertColorCurveCp(track, newValue));
-
+  SetOrInsertColorCurveCp(track, newValue).IgnoreResult();
   return plStatus(PLASMA_SUCCESS);
 }
 
@@ -337,16 +336,15 @@ plStatus plPropertyAnimObjectAccessor::SetOrInsertColorCurveCp(const plUuid& tra
   return plStatus(PLASMA_SUCCESS);
 }
 
-plStatus plPropertyAnimObjectAccessor::SetAlphaCurveCp(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, plUInt8 oldValue, plUInt8 newValue)
+plStatus plPropertyAnimObjectAccessor::SetAlphaCurveCp(
+  const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, plUInt8 oldValue, plUInt8 newValue)
 {
   PLASMA_SUCCEED_OR_RETURN(m_pDocument->CanAnimate(pObject, pProp, index, plPropertyAnimTarget::Color));
   plUuid track = FindOrAddTrack(pObject, pProp, index, plPropertyAnimTarget::Color, [this, &oldValue](const plUuid& trackGuid) {
     // add a control point at the start of the curve with the original value
     m_pDocument->InsertGradientAlphaCpAt(trackGuid, 0, oldValue);
-    //
   });
-
-  PLASMA_SUCCEED_OR_RETURN(SetOrInsertAlphaCurveCp(track, newValue));
+  SetOrInsertAlphaCurveCp(track, newValue).IgnoreResult();
   return plStatus(PLASMA_SUCCESS);
 }
 
@@ -376,15 +374,14 @@ plStatus plPropertyAnimObjectAccessor::SetOrInsertAlphaCurveCp(const plUuid& tra
   return plStatus(PLASMA_SUCCESS);
 }
 
-plStatus plPropertyAnimObjectAccessor::SetIntensityCurveCp(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, float oldValue, float newValue)
+plStatus plPropertyAnimObjectAccessor::SetIntensityCurveCp(
+  const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, float oldValue, float newValue)
 {
   plUuid track = FindOrAddTrack(pObject, pProp, index, plPropertyAnimTarget::Color, [this, &oldValue](const plUuid& trackGuid) {
     // add a control point at the start of the curve with the original value
     m_pDocument->InsertGradientIntensityCpAt(trackGuid, 0, oldValue);
-    //
   });
-
-  PLASMA_SUCCEED_OR_RETURN(SetOrInsertIntensityCurveCp(track, newValue));
+  SetOrInsertIntensityCurveCp(track, newValue).IgnoreResult();
   return plStatus(PLASMA_SUCCESS);
 }
 

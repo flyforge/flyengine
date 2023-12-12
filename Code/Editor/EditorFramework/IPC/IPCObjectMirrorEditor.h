@@ -14,12 +14,12 @@ public:
   plIPCObjectMirrorEditor();
   ~plIPCObjectMirrorEditor();
 
-  void SetIPC(plEditorEngineConnection* pIPC);
-  plEditorEngineConnection* GetIPC();
-  virtual void ApplyOp(plObjectChange& ref_change) override;
+  void SetIPC(PlasmaEditorEngineConnection* pIPC);
+  PlasmaEditorEngineConnection* GetIPC();
+  virtual void ApplyOp(plObjectChange& change) override;
 
 private:
   void SendOp(plObjectChange& change);
 
-  plEditorEngineConnection* m_pIPC;
+  PlasmaEditorEngineConnection* m_pIPC;
 };

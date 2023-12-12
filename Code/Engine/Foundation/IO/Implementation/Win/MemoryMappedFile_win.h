@@ -164,11 +164,11 @@ const void* plMemoryMappedFile::GetReadPointer(plUInt64 uiOffset /*= 0*/, Offset
 
   if (base == OffsetBase::Start)
   {
-    return plMemoryUtils::AddByteOffset(m_pImpl->m_pMappedFilePtr, static_cast<std::ptrdiff_t>(uiOffset));
+    return plMemoryUtils::AddByteOffset(m_pImpl->m_pMappedFilePtr, static_cast<ptrdiff_t>(uiOffset));
   }
   else
   {
-    return plMemoryUtils::AddByteOffset(m_pImpl->m_pMappedFilePtr, static_cast<std::ptrdiff_t>(m_pImpl->m_uiFileSize - uiOffset));
+    return plMemoryUtils::AddByteOffset(m_pImpl->m_pMappedFilePtr, static_cast<ptrdiff_t>(m_pImpl->m_uiFileSize - uiOffset));
   }
 }
 
@@ -179,11 +179,11 @@ void* plMemoryMappedFile::GetWritePointer(plUInt64 uiOffset /*= 0*/, OffsetBase 
 
   if (base == OffsetBase::Start)
   {
-    return plMemoryUtils::AddByteOffset(m_pImpl->m_pMappedFilePtr, static_cast<std::ptrdiff_t>(uiOffset));
+    return plMemoryUtils::AddByteOffset(m_pImpl->m_pMappedFilePtr, static_cast<ptrdiff_t>(uiOffset));
   }
   else
   {
-    return plMemoryUtils::AddByteOffset(m_pImpl->m_pMappedFilePtr, static_cast<std::ptrdiff_t>(m_pImpl->m_uiFileSize - uiOffset));
+    return plMemoryUtils::AddByteOffset(m_pImpl->m_pMappedFilePtr, static_cast<ptrdiff_t>(m_pImpl->m_uiFileSize - uiOffset));
   }
 }
 

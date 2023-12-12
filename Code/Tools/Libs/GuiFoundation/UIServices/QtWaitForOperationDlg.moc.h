@@ -13,7 +13,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtWaitForOperationDlg : public QDialog, public 
   Q_OBJECT
 
 public:
-  plQtWaitForOperationDlg(QWidget* pParent);
+  plQtWaitForOperationDlg(QWidget* parent);
   ~plQtWaitForOperationDlg();
 
   plDelegate<bool()> m_OnIdle;

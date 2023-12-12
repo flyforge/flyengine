@@ -67,6 +67,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSpriteComponent, 3, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
+    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -84,7 +85,7 @@ plSpriteComponent::~plSpriteComponent() = default;
 
 plResult plSpriteComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
-  ref_bounds = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fSize * 0.5f);
+  ref_bounds = plBoundingSphere(plVec3::ZeroVector(), m_fSize * 0.5f);
   return PLASMA_SUCCESS;
 }
 

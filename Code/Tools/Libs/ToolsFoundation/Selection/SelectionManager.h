@@ -45,7 +45,7 @@ public:
   void AddObject(const plDocumentObject* pObject);
   void RemoveObject(const plDocumentObject* pObject, bool bRecurseChildren = false);
   void SetSelection(const plDocumentObject* pSingleObject);
-  void SetSelection(const plDeque<const plDocumentObject*>& selection);
+  void SetSelection(const plDeque<const plDocumentObject*>& Selection);
   void ToggleObject(const plDocumentObject* pObject);
 
   /// \brief Returns the last selected object in the selection or null if empty.

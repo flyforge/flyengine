@@ -22,10 +22,10 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltStaticActorComponent, 1, plComponentMode::Stat
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Triangle", plDependencyFlags::Package)),
+    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Triangle")),
     PLASMA_MEMBER_PROPERTY("IncludeInNavmesh", m_bIncludeInNavmesh)->AddAttributes(new plDefaultValueAttribute(true)),
     PLASMA_MEMBER_PROPERTY("PullSurfacesFromGraphicsMesh", m_bPullSurfacesFromGraphicsMesh),
-    PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+    PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface")),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -59,7 +59,7 @@ void plJoltStaticActorComponent::SerializeComponent(plWorldWriter& inout_stream)
 void plJoltStaticActorComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 
@@ -134,7 +134,7 @@ void plJoltStaticActorComponent::CreateShapes(plDynamicArray<plJoltSubShape>& ou
 
       plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
       sub.m_pShape = pShape;
-      sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+      sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
     }
   }
 
@@ -157,7 +157,7 @@ void plJoltStaticActorComponent::CreateShapes(plDynamicArray<plJoltSubShape>& ou
 
     plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
     sub.m_pShape = pNewShape;
-    sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+    sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
   }
 }
 

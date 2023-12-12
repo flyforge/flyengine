@@ -10,7 +10,6 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceBufferMemoryRequirements(
 }
 
 #include <Foundation/Basics/Platform/Win/IncludeWindows.h>
-#include <Foundation/Types/UniquePtr.h>
 
 #define VMA_VULKAN_VERSION 1001000
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
@@ -19,7 +18,7 @@ VKAPI_ATTR void VKAPI_CALL vkGetDeviceBufferMemoryRequirements(
 
 
 //
-// #define VMA_DEBUG_LOG(format, ...)   \
+//#define VMA_DEBUG_LOG(format, ...)   \
 //  do                                 \
 //  {                                  \
 //    plStringBuilder tmp;             \
@@ -58,25 +57,11 @@ PLASMA_CHECK_AT_COMPILETIME(sizeof(plVulkanAllocation) == sizeof(VmaAllocation))
 
 PLASMA_CHECK_AT_COMPILETIME(sizeof(plVulkanAllocationInfo) == sizeof(VmaAllocationInfo));
 
-PLASMA_DEFINE_AS_POD_TYPE(VkExportMemoryAllocateInfo);
-
-namespace
-{
-  struct ExportedSharedPool
-  {
-    VmaPool m_pool = nullptr;
-    plUniquePtr<vk::ExportMemoryAllocateInfo> m_exportInfo; // must outlive the pool and remain at the same address.
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-    plUniquePtr<vk::ExportMemoryWin32HandleInfoKHR> m_exportInfoWin32;
-#endif
-  };
-} // namespace
 
 struct plMemoryAllocatorVulkan::Impl
 {
+  PLASMA_DECLARE_POD_TYPE();
   VmaAllocator m_allocator;
-  plMutex m_exportedSharedPoolsMutex;
-  plHashTable<uint32_t, ExportedSharedPool> m_exportedSharedPools;
 };
 
 plMemoryAllocatorVulkan::Impl* plMemoryAllocatorVulkan::m_pImpl = nullptr;
@@ -102,7 +87,6 @@ vk::Result plMemoryAllocatorVulkan::Initialize(vk::PhysicalDevice physicalDevice
   {
     PLASMA_DEFAULT_DELETE(m_pImpl);
   }
-
   return res;
 }
 
@@ -110,17 +94,6 @@ void plMemoryAllocatorVulkan::DeInitialize()
 {
   PLASMA_ASSERT_DEV(m_pImpl != nullptr, "plMemoryAllocatorVulkan is not initialized.");
 
-  for (auto it : m_pImpl->m_exportedSharedPools)
-  {
-    vmaDestroyPool(m_pImpl->m_allocator, it.Value().m_pool);
-  }
-  m_pImpl->m_exportedSharedPools.Clear();
-
-  // Uncomment below to debug leaks in VMA.
-  /*
-  char* pStats = nullptr;
-  vmaBuildStatsString(m_pImpl->m_allocator, &pStats, true);
-  */
   vmaDestroyAllocator(m_pImpl->m_allocator);
   PLASMA_DEFAULT_DELETE(m_pImpl);
 }
@@ -131,54 +104,6 @@ vk::Result plMemoryAllocatorVulkan::CreateImage(const vk::ImageCreateInfo& image
   allocCreateInfo.usage = (VmaMemoryUsage)allocationCreateInfo.m_usage.GetValue();
   allocCreateInfo.flags = allocationCreateInfo.m_flags.GetValue() | VMA_ALLOCATION_CREATE_USER_DATA_COPY_STRING_BIT;
   allocCreateInfo.pUserData = (void*)allocationCreateInfo.m_pUserData;
-
-  if (allocationCreateInfo.m_bExportSharedAllocation)
-  {
-    allocCreateInfo.flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-
-    PLASMA_LOCK(m_pImpl->m_exportedSharedPoolsMutex);
-
-    uint32_t memoryTypeIndex = 0;
-    if (auto res = vmaFindMemoryTypeIndexForImageInfo(m_pImpl->m_allocator, reinterpret_cast<const VkImageCreateInfo*>(&imageCreateInfo), &allocCreateInfo, &memoryTypeIndex); res != VK_SUCCESS)
-    {
-      return (vk::Result)res;
-    }
-
-    ExportedSharedPool* pool = m_pImpl->m_exportedSharedPools.GetValue(memoryTypeIndex);
-    if (pool == nullptr)
-    {
-      ExportedSharedPool newPool;
-      {
-        newPool.m_exportInfo = PLASMA_DEFAULT_NEW(vk::ExportMemoryAllocateInfo);
-        vk::ExportMemoryAllocateInfo& exportInfo = *newPool.m_exportInfo.Borrow();
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-        exportInfo.handleTypes = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd;
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-        newPool.m_exportInfoWin32 = PLASMA_DEFAULT_NEW(vk::ExportMemoryWin32HandleInfoKHR);
-        vk::ExportMemoryWin32HandleInfoKHR& exportInfoWin = *newPool.m_exportInfoWin32.Borrow();
-        exportInfoWin.dwAccess = GENERIC_ALL;
-
-        exportInfo.handleTypes = vk::ExternalMemoryHandleTypeFlagBits::eOpaqueWin32;
-        exportInfo.pNext = &exportInfoWin;
-#else
-        PLASMA_ASSERT_NOT_IMPLEMENTED
-#endif
-      }
-
-      VmaPoolCreateInfo poolCreateInfo = {};
-      poolCreateInfo.memoryTypeIndex = memoryTypeIndex;
-      poolCreateInfo.pMemoryAllocateNext = newPool.m_exportInfo.Borrow();
-
-      if (auto res = vmaCreatePool(m_pImpl->m_allocator, &poolCreateInfo, &newPool.m_pool); res != VK_SUCCESS)
-      {
-        return (vk::Result)res;
-      }
-      m_pImpl->m_exportedSharedPools.Insert(memoryTypeIndex, std::move(newPool));
-      pool = m_pImpl->m_exportedSharedPools.GetValue(memoryTypeIndex);
-    }
-
-    allocCreateInfo.pool = pool->m_pool;
-  }
 
   return (vk::Result)vmaCreateImage(m_pImpl->m_allocator, reinterpret_cast<const VkImageCreateInfo*>(&imageCreateInfo), &allocCreateInfo, reinterpret_cast<VkImage*>(&out_image), reinterpret_cast<VmaAllocation*>(&out_alloc), reinterpret_cast<VmaAllocationInfo*>(pAllocInfo));
 }

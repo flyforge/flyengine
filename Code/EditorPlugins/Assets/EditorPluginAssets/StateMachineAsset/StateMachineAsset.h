@@ -8,16 +8,16 @@ class plStateMachineAssetDocument : public plAssetDocument
   PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineAssetDocument, plAssetDocument);
 
 public:
-  plStateMachineAssetDocument(plStringView sDocumentPath);
+  plStateMachineAssetDocument(const char* szDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   virtual void GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const override;
   virtual bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const override;
   virtual bool Paste(
-    const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType) override;
+    const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType) override;
 
   virtual void InternalGetMetaDataHash(const plDocumentObject* pObject, plUInt64& inout_uiHash) const override;
   virtual void AttachMetaDataBeforeSaving(plAbstractObjectGraph& graph) const override;

@@ -4,7 +4,7 @@
 
 class plParticleContext;
 
-class plParticleViewContext : public plEngineProcessViewContext
+class plParticleViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plParticleViewContext(plParticleContext* pParticleContext);

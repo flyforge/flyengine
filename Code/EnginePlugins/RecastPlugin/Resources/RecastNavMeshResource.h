@@ -25,8 +25,8 @@ struct PLASMA_RECASTPLUGIN_DLL plRecastNavMeshResourceDescriptor
 
   void Clear();
 
-  plResult Serialize(plStreamWriter& inout_stream) const;
-  plResult Deserialize(plStreamReader& inout_stream);
+  plResult Serialize(plStreamWriter& stream) const;
+  plResult Deserialize(plStreamReader& stream);
 };
 
 class PLASMA_RECASTPLUGIN_DLL plRecastNavMeshResource : public plResource

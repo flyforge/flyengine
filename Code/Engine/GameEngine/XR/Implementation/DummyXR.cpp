@@ -195,7 +195,7 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
         {
           const float fAspectRatio = (float)m_Info.m_vEyeRenderTargetSize.width / (float)m_Info.m_vEyeRenderTargetSize.height;
 
-          plMat4 mProj = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovX(plAngle::MakeFromDegree(pCameraComponent->GetFieldOfView()), fAspectRatio,
+          plMat4 mProj = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovX(plAngle::Degree(pCameraComponent->GetFieldOfView()), fAspectRatio,
             pCameraComponent->GetNearPlane(), plMath::Max(pCameraComponent->GetNearPlane() + 0.00001f, pCameraComponent->GetFarPlane()));
 
           m_pCameraToSynchronize->SetStereoProjection(mProj, mProj, fAspectRatio);
@@ -228,7 +228,7 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
             // Update device state
             plQuat rot;
             rot.SetIdentity();
-            plVec3 pos = plVec3::MakeZero();
+            plVec3 pos = plVec3::ZeroVector();
             if (m_StageSpace == plXRStageSpace::Standing)
             {
               pos.z = m_fHeadHeight;
@@ -248,11 +248,13 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
           {
             const float fHeight = m_StageSpace == plXRStageSpace::Standing ? m_fHeadHeight : 0.0f;
             const plMat4 mStageTransform = add.GetInverse().GetAsMat4();
-            plMat4 poseLeft = plMat4::MakeTranslation(plVec3(0, -m_fEyeOffset, fHeight));
-            plMat4 poseRight = plMat4::MakeTranslation(plVec3(0, m_fEyeOffset, fHeight));
+            plMat4 poseLeft;
+            poseLeft.SetTranslationMatrix(plVec3(0, -m_fEyeOffset, fHeight));
+            plMat4 poseRight;
+            poseRight.SetTranslationMatrix(plVec3(0, m_fEyeOffset, fHeight));
 
             // PLASMA Forward is +X, need to add this to align the forward projection
-            const plMat4 viewMatrix = plGraphicsUtils::CreateLookAtViewMatrix(plVec3::MakeZero(), plVec3(1, 0, 0), plVec3(0, 0, 1));
+            const plMat4 viewMatrix = plGraphicsUtils::CreateLookAtViewMatrix(plVec3::ZeroVector(), plVec3(1, 0, 0), plVec3(0, 0, 1));
             const plMat4 mViewTransformLeft = viewMatrix * mStageTransform * poseLeft.GetInverse();
             const plMat4 mViewTransformRight = viewMatrix * mStageTransform * poseRight.GetInverse();
 

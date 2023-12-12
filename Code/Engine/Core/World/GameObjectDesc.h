@@ -18,8 +18,8 @@ struct PLASMA_CORE_DLL plGameObjectDesc
   plHashedString m_sName;       ///< See plGameObject::SetName().
   plGameObjectHandle m_hParent; ///< An optional parent object to attach this object to as a child.
 
-  plVec3 m_LocalPosition = plVec3::MakeZero();         ///< The local position relative to the parent (or the world)
-  plQuat m_LocalRotation = plQuat::MakeIdentity(); ///< The local rotation relative to the parent (or the world)
+  plVec3 m_LocalPosition = plVec3::ZeroVector();         ///< The local position relative to the parent (or the world)
+  plQuat m_LocalRotation = plQuat::IdentityQuaternion(); ///< The local rotation relative to the parent (or the world)
   plVec3 m_LocalScaling = plVec3(1, 1, 1);               ///< The local scaling relative to the parent (or the world)
   float m_LocalUniformScaling = 1.0f;                    ///< An additional local uniform scaling relative to the parent (or the world)
   plTagSet m_Tags;                                       ///< See plGameObject::GetTags()

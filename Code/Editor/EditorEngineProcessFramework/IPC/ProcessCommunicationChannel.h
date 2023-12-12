@@ -4,11 +4,9 @@
 #include <Foundation/Communication/Event.h>
 #include <Foundation/Time/Time.h>
 #include <Foundation/Types/Delegate.h>
-#include <Foundation/Types/UniquePtr.h>
 
 class plIpcChannel;
 class plProcessMessage;
-class plIpcProcessMessageProtocol;
 
 class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plProcessCommunicationChannel
 {
@@ -16,13 +14,13 @@ public:
   plProcessCommunicationChannel();
   ~plProcessCommunicationChannel();
 
-  bool SendMessage(plProcessMessage* pMessage);
+  void SendMessage(plProcessMessage* pMessage);
 
   /// /brief Callback for 'wait for...' functions. If true is returned, the message is accepted to match the wait criteria and
   ///        the waiting ends. If false is returned the wait for the message continues.
-  using WaitForMessageCallback = plDelegate<bool(plProcessMessage*)>;
-  plResult WaitForMessage(const plRTTI* pMessageType, plTime timeout, WaitForMessageCallback* pMessageCallack = nullptr);
-  plResult WaitForConnection(plTime timeout);
+  typedef plDelegate<bool(plProcessMessage*)> WaitForMessageCallback;
+  plResult WaitForMessage(const plRTTI* pMessageType, plTime tTimeout, WaitForMessageCallback* pMessageCallack = nullptr);
+  plResult WaitForConnection(plTime tTimeout);
 
   /// \brief Returns true if any message was processed
   bool ProcessMessages();
@@ -35,11 +33,10 @@ public:
 
   plEvent<const Event&> m_Events;
 
-  void MessageFunc(const plProcessMessage* pMsg);
+  void MessageFunc(const plProcessMessage* msg);
 
 protected:
-  plUniquePtr<plIpcProcessMessageProtocol> m_pProtocol;
-  plUniquePtr<plIpcChannel> m_pChannel;
+  plIpcChannel* m_pChannel = nullptr;
   const plRTTI* m_pFirstAllowedMessageType = nullptr;
 
 private:

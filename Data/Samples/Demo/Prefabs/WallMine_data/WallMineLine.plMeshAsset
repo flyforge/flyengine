@@ -98,7 +98,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMeshPrimitive"}
 		u3 %TypeVersion{1}
@@ -115,7 +115,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMeshAssetProperties"}
 		u3 %TypeVersion{3}
@@ -149,7 +149,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{""}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"PlasmaEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMaterialResourceSlot"}
 		u3 %TypeVersion{1}

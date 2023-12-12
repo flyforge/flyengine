@@ -9,7 +9,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Splitter using center of bounding box with longest axis
-class JPH_EXPORT TriangleSplitterLongestAxis : public TriangleSplitter
+class TriangleSplitterLongestAxis : public TriangleSplitter
 {
 public:
 	/// Constructor

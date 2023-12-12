@@ -123,7 +123,7 @@ void plRemoteInterfaceEnetImpl::InternalShutdownConnection()
 
     // process the network messages (e.g. send the disconnect messages)
     UpdateRemoteInterface();
-    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
+    plThreadUtils::Sleep(plTime::Milliseconds(10));
   }
 
   // finally close the network connection
@@ -142,7 +142,7 @@ plTime plRemoteInterfaceEnetImpl::InternalGetPingToServer()
   PLASMA_ASSERT_DEV(m_pEnetConnectionToServer != nullptr, "Client has not connected to server");
 
   enet_peer_ping(m_pEnetConnectionToServer);
-  return plTime::MakeFromMilliseconds(m_pEnetConnectionToServer->lastRoundTripTime);
+  return plTime::Milliseconds(m_pEnetConnectionToServer->lastRoundTripTime);
 }
 
 plResult plRemoteInterfaceEnetImpl::InternalTransmit(plRemoteTransmitMode tm, const plArrayPtr<const plUInt8>& data)

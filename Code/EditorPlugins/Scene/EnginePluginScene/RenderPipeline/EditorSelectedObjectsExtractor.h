@@ -8,13 +8,13 @@
 class plSceneContext;
 class plCameraComponent;
 
-class plEditorSelectedObjectsExtractor : public plSelectedObjectsExtractorBase
+class PlasmaEditorSelectedObjectsExtractor : public plSelectedObjectsExtractorBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditorSelectedObjectsExtractor, plSelectedObjectsExtractorBase);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorSelectedObjectsExtractor, plSelectedObjectsExtractorBase);
 
 public:
-  plEditorSelectedObjectsExtractor();
-  ~plEditorSelectedObjectsExtractor();
+  PlasmaEditorSelectedObjectsExtractor();
+  ~PlasmaEditorSelectedObjectsExtractor();
 
   virtual const plDeque<plGameObjectHandle>* GetSelection() override;
 

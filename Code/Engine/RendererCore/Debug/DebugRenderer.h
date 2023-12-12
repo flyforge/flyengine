@@ -116,31 +116,31 @@ public:
   };
 
   /// \brief Renders the given set of lines for one frame.
-  static void DrawLines(const plDebugRendererContext& context, plArrayPtr<const Line> lines, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
+  static void DrawLines(const plDebugRendererContext& context, plArrayPtr<const Line> lines, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
 
   /// \brief Renders the given set of lines in 2D (screen-space) for one frame.
   static void Draw2DLines(const plDebugRendererContext& context, plArrayPtr<const Line> lines, const plColor& color);
 
   /// \brief Renders a cross for one frame.
-  static void DrawCross(const plDebugRendererContext& context, const plVec3& vGlobalPosition, float fLineLength, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
+  static void DrawCross(const plDebugRendererContext& context, const plVec3& vGlobalPosition, float fLineLength, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
 
   /// \brief Renders a wireframe box for one frame.
-  static void DrawLineBox(const plDebugRendererContext& context, const plBoundingBox& box, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
+  static void DrawLineBox(const plDebugRendererContext& context, const plBoundingBox& box, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
 
   /// \brief Renders the corners of a wireframe box for one frame.
-  static void DrawLineBoxCorners(const plDebugRendererContext& context, const plBoundingBox& box, float fCornerFraction, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
+  static void DrawLineBoxCorners(const plDebugRendererContext& context, const plBoundingBox& box, float fCornerFraction, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
 
   /// \brief Renders a wireframe sphere for one frame.
-  static void DrawLineSphere(const plDebugRendererContext& context, const plBoundingSphere& sphere, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
+  static void DrawLineSphere(const plDebugRendererContext& context, const plBoundingSphere& sphere, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
 
   /// \brief Renders an upright wireframe capsule for one frame.
-  static void DrawLineCapsuleZ(const plDebugRendererContext& context, float fLength, float fRadius, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
+  static void DrawLineCapsuleZ(const plDebugRendererContext& context, float fLength, float fRadius, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
 
   /// \brief Renders a wireframe frustum for one frame.
   static void DrawLineFrustum(const plDebugRendererContext& context, const plFrustum& frustum, const plColor& color, bool bDrawPlaneNormals = false);
 
   /// \brief Renders a solid box for one frame.
-  static void DrawSolidBox(const plDebugRendererContext& context, const plBoundingBox& box, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
+  static void DrawSolidBox(const plDebugRendererContext& context, const plBoundingBox& box, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
 
   /// \brief Renders the set of filled triangles for one frame.
   static void DrawSolidTriangles(const plDebugRendererContext& context, plArrayPtr<Triangle> triangles, const plColor& color);
@@ -199,10 +199,10 @@ public:
   /// The rotation goes around the given \a rotationAxis.
   /// An angle of zero is pointing into forwardAxis direction.
   /// Both angles may be negative.
-  static void DrawAngle(const plDebugRendererContext& context, plAngle startAngle, plAngle endAngle, const plColor& solidColor, const plColor& lineColor, const plTransform& transform, plVec3 vForwardAxis = plVec3::MakeAxisX(), plVec3 vRotationAxis = plVec3::MakeAxisZ());
+  static void DrawAngle(const plDebugRendererContext& context, plAngle startAngle, plAngle endAngle, const plColor& solidColor, const plColor& lineColor, const plTransform& transform, plVec3 vForwardAxis = plVec3::UnitXAxis(), plVec3 vRotationAxis = plVec3::UnitZAxis());
 
   /// \brief Renders a cone with the tip at the center position, opening up with the given angle.
-  static void DrawOpeningCone(const plDebugRendererContext& context, plAngle halfAngle, const plColor& colorInside, const plColor& colorOutside, const plTransform& transform, plVec3 vForwardAxis = plVec3::MakeAxisX());
+  static void DrawOpeningCone(const plDebugRendererContext& context, plAngle halfAngle, const plColor& colorInside, const plColor& colorOutside, const plTransform& transform, plVec3 vForwardAxis = plVec3::UnitXAxis());
 
   /// \brief Renders a bent cone with the tip at the center position, pointing into the +X direction opening up with halfAngle1 and halfAngle2 along the Y and Z axis.
   ///

@@ -132,13 +132,13 @@ namespace plOpenDdlUtils
   ///
   /// \a pElement maybe be a primitives list of exactly 1 string.
   /// It may also be a group that contains such a primitives list as the only child.
-  PLASMA_FOUNDATION_DLL plResult ConvertToHashedString(const plOpenDdlReaderElement* pElement, plHashedString& out_sResult); // [tested]
+  PLASMA_FOUNDATION_DLL plResult ConvertToHashedString(const plOpenDdlReaderElement* pElement, plHashedString& out_result); // [tested]
 
   /// \brief Converts the data that \a pElement points to to an plTempHashedString.
   ///
   /// \a pElement maybe be a primitives list of exactly 1 uint64.
   /// It may also be a group that contains such a primitives list as the only child.
-  PLASMA_FOUNDATION_DLL plResult ConvertToTempHashedString(const plOpenDdlReaderElement* pElement, plTempHashedString& out_sResult); // [tested]
+  PLASMA_FOUNDATION_DLL plResult ConvertToTempHashedString(const plOpenDdlReaderElement* pElement, plTempHashedString& out_result); // [tested]
 
   /// \brief Uses the elements custom type name to infer which type the object holds and reads it into the plVariant.
   ///

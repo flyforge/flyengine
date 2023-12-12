@@ -36,6 +36,7 @@ public:
   PLASMA_ALWAYS_INLINE plVulkanAllocation GetAllocation() const;
   PLASMA_ALWAYS_INLINE const plVulkanAllocationInfo& GetAllocationInfo() const;
 
+  PLASMA_ALWAYS_INLINE bool GetFormatOverrideEnabled() const;
   PLASMA_ALWAYS_INLINE bool IsLinearLayout() const;
 
   vk::Extent3D GetMipLevelSize(plUInt32 uiMipLevel) const;
@@ -52,20 +53,17 @@ protected:
   friend class plGALDeviceVulkan;
   friend class plMemoryUtils;
 
-  plGALTextureVulkan(const plGALTextureCreationDescription& Description, bool bLinearCPU, bool bStaging);
+  plGALTextureVulkan(const plGALTextureCreationDescription& Description);
+  plGALTextureVulkan(const plGALTextureCreationDescription& Description, vk::Format OverrideFormat, bool bLinearCPU);
 
   ~plGALTextureVulkan();
 
   virtual plResult InitPlatform(plGALDevice* pDevice, plArrayPtr<plGALSystemMemoryDescription> pInitialData) override;
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
+
   virtual void SetDebugNamePlatform(const char* szName) const override;
 
-  static vk::Format ComputeImageFormat(plGALDeviceVulkan* pDevice, plEnum<plGALResourceFormat> galFormat, vk::ImageCreateInfo& ref_createInfo, vk::ImageFormatListCreateInfo& ref_imageFormats, bool bStaging);
-  static void ComputeCreateInfo(plGALDeviceVulkan* pDevice, const plGALTextureCreationDescription& description, vk::ImageCreateInfo& ref_createInfo, vk::PipelineStageFlags& ref_stages, vk::AccessFlags& ref_access, vk::ImageLayout& ref_preferredLayout);
-  static void ComputeCreateInfoLinear(vk::ImageCreateInfo& ref_createInfo, vk::PipelineStageFlags& ref_stages, vk::AccessFlags& ref_access);
-  static void ComputeAllocInfo(bool bLinearCPU, plVulkanAllocationCreateInfo& ref_allocInfo);
-  static StagingMode ComputeStagingMode(plGALDeviceVulkan* pDevice, const plGALTextureCreationDescription& description, const vk::ImageCreateInfo& createInfo);
-
+  StagingMode ComputeStagingMode(const vk::ImageCreateInfo& createInfo) const;
   plResult CreateStagingBuffer(const vk::ImageCreateInfo& createInfo);
 
   vk::Image m_image;
@@ -78,15 +76,14 @@ protected:
   plVulkanAllocationInfo m_allocInfo;
 
   plGALDeviceVulkan* m_pDevice = nullptr;
+  void* m_pExisitingNativeObject = nullptr;
 
+  bool m_formatOverride = false;
   bool m_bLinearCPU = false;
-  bool m_bStaging = false;
 
   StagingMode m_stagingMode = StagingMode::None;
   plGALTextureHandle m_hStagingTexture;
   plGALBufferHandle m_hStagingBuffer;
 };
-
-
 
 #include <RendererVulkan/Resources/Implementation/TextureVulkan_inl.h>

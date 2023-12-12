@@ -6,6 +6,10 @@ ALL
 CAMERA_MODE
 TOPOLOGY
 
+[MATERIALCONFIG]
+
+RenderDataCategory = SimpleOpaque
+
 [RENDERSTATE]
 
 BlendingEnabled0 = true

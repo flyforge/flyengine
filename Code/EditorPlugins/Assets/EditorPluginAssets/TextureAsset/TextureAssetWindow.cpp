@@ -53,6 +53,8 @@ plTextureLodSliderAction::plTextureLodSliderAction(const plActionContext& contex
 
 void plTextureLodSliderAction::Execute(const plVariant& value)
 {
+  const plInt32 iValue = value.Get<plInt32>();
+
   m_pDocument->m_iTextureLod = value.Get<plInt32>();
 }
 
@@ -76,13 +78,13 @@ void plTextureAssetActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hLodSlider);
 }
 
-void plTextureAssetActions::MapToolbarActions(plStringView sMapping)
+void plTextureAssetActions::MapActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  pMap->MapAction(s_hLodSlider, "", 14.0f);
-  pMap->MapAction(s_hTextureChannelMode, "", 15.0f);
+  pMap->MapAction(s_hLodSlider, szPath, 14.0f);
+  pMap->MapAction(s_hTextureChannelMode, szPath, 15.0f);
 }
 
 
@@ -133,7 +135,7 @@ plQtTextureAssetDocumentWindow::plQtTextureAssetDocumentWindow(plTextureAssetDoc
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("TextureAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Texture Properties");
+    pPropertyPanel->setWindowTitle("TEXTURE PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -149,7 +151,7 @@ plQtTextureAssetDocumentWindow::plQtTextureAssetDocumentWindow(plTextureAssetDoc
 
 void plQtTextureAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -157,7 +159,7 @@ void plQtTextureAssetDocumentWindow::InternalRedraw()
 void plQtTextureAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {

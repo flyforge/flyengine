@@ -5,12 +5,12 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 plDecalViewContext::plDecalViewContext(plDecalContext* pDecalContext)
-  : plEngineProcessViewContext(pDecalContext)
+  : PlasmaEngineProcessViewContext(pDecalContext)
 {
   m_pDecalContext = pDecalContext;
 }
 
-plDecalViewContext::~plDecalViewContext() = default;
+plDecalViewContext::~plDecalViewContext() {}
 
 plViewHandle plDecalViewContext::CreateView()
 {
@@ -20,7 +20,7 @@ plViewHandle plDecalViewContext::CreateView()
 
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
 
-  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   return pView->GetHandle();

@@ -98,7 +98,7 @@ float plRopeSimulator::GetTotalLength() const
 plSimdVec4f plRopeSimulator::GetPositionAtLength(float length) const
 {
   if (m_Nodes.IsEmpty())
-    return plSimdVec4f::MakeZero();
+    return plSimdVec4f::ZeroVector();
 
   plSimdVec4f prev = m_Nodes[0].m_vPosition;
   for (plUInt32 i = 1; i < m_Nodes.GetCount(); ++i)
@@ -128,7 +128,7 @@ plSimdVec4f plRopeSimulator::MoveTowards(const plSimdVec4f posThis, const plSimd
 
   if (fLen < m_fSegmentLength)
   {
-    return plSimdVec4f::MakeZero();
+    return plSimdVec4f::ZeroVector();
   }
 
   vDir /= fLen;
@@ -155,7 +155,7 @@ plSimdFloat plRopeSimulator::EnforceDistanceConstraint()
   auto& firstNode = m_Nodes[0];
   auto& lastNode = m_Nodes.PeekBack();
 
-  plSimdFloat fError = plSimdFloat::MakeZero();
+  plSimdFloat fError = plSimdFloat::Zero();
 
   if (!m_bFirstNodeIsFixed)
   {

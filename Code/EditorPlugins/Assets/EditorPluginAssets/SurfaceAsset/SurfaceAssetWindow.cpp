@@ -34,7 +34,7 @@ plQtSurfaceAssetDocumentWindow::plQtSurfaceAssetDocumentWindow(plDocument* pDocu
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("SurfaceAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Surface Properties");
+    pPropertyPanel->setWindowTitle("SURFACE PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);

@@ -7,10 +7,10 @@
 
 struct PLASMA_TOOLSFOUNDATION_DLL plToolsTag
 {
-  plToolsTag() = default;
-  plToolsTag(plStringView sCategory, plStringView sName, bool bBuiltIn = false)
-    : m_sCategory(sCategory)
-    , m_sName(sName)
+  plToolsTag() {}
+  plToolsTag(const char* szCategory, const char* szName, bool bBuiltIn = false)
+    : m_sCategory(szCategory)
+    , m_sName(szName)
     , m_bBuiltInTag(bBuiltIn)
   {
   }
@@ -26,11 +26,11 @@ public:
   /// \brief Removes all tags that are not specified as 'built-in'
   static void Clear();
 
-  static void WriteToDDL(plStreamWriter& inout_stream);
-  static plStatus ReadFromDDL(plStreamReader& inout_stream);
+  static void WriteToDDL(plStreamWriter& stream);
+  static plStatus ReadFromDDL(plStreamReader& stream);
 
   static bool AddTag(const plToolsTag& tag);
-  static bool RemoveTag(plStringView sName);
+  static bool RemoveTag(const char* szName);
 
   static void GetAllTags(plHybridArray<const plToolsTag*, 16>& out_tags);
   static void GetTagsByCategory(const plArrayPtr<plStringView>& categories, plHybridArray<const plToolsTag*, 16>& out_tags);

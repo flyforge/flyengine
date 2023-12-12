@@ -38,5 +38,5 @@ protected:
   void Update();
 
   plVec3 m_vRotationAxis = plVec3(0, 0, 1);
-  plQuat m_qLastRotation = plQuat::MakeIdentity();
+  plQuat m_qLastRotation = plQuat::IdentityQuaternion();
 };

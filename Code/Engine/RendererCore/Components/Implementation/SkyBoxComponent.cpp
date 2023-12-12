@@ -13,7 +13,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSkyBoxComponent, 4, plComponentMode::Static)
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_ACCESSOR_PROPERTY("CubeMap", GetCubeMapFile, SetCubeMapFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
-    PLASMA_ACCESSOR_PROPERTY("ExposureBias", GetExposureBias, SetExposureBias)->AddAttributes(new plClampValueAttribute(-32.0f, 32.0f)),
+    PLASMA_ACCESSOR_PROPERTY("ExposureBias", GetExposureBias, SetExposureBias)->AddAttributes(new plDefaultValueAttribute(64000.0f)),
     PLASMA_ACCESSOR_PROPERTY("InverseTonemap", GetInverseTonemap, SetInverseTonemap),
     PLASMA_ACCESSOR_PROPERTY("UseFog", GetUseFog, SetUseFog)->AddAttributes(new plDefaultValueAttribute(true)),
     PLASMA_ACCESSOR_PROPERTY("VirtualDistance", GetVirtualDistance, SetVirtualDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1000.0f)),
@@ -21,7 +21,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSkyBoxComponent, 4, plComponentMode::Static)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering"),
+    new plCategoryAttribute("Effects/Sky"),
+    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -95,6 +96,8 @@ void plSkyBoxComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) cons
 
   plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(GetOwner());
   {
+    pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
+    pRenderData->m_LastGlobalTransform.m_vPosition.SetZero(); // skybox should always be at the origin
     pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
     pRenderData->m_GlobalTransform.m_vPosition.SetZero(); // skybox should always be at the origin
     pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();

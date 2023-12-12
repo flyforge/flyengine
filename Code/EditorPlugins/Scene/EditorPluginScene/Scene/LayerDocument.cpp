@@ -9,8 +9,8 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerDocument, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plLayerDocument::plLayerDocument(plStringView sDocumentPath, plScene2Document* pParentScene)
-  : plSceneDocument(sDocumentPath, plSceneDocument::DocumentType::Layer)
+plLayerDocument::plLayerDocument(const char* szDocumentPath, plScene2Document* pParentScene)
+  : plSceneDocument(szDocumentPath, plSceneDocument::DocumentType::Layer)
 {
   m_pHostDocument = pParentScene;
 }

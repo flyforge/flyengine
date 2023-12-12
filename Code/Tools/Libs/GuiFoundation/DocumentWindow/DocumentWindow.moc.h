@@ -63,11 +63,11 @@ public:
   void ScheduleRestoreWindowLayout();
 
   bool IsVisibleInContainer() const { return m_bIsVisibleInContainer; }
-  void SetTargetFramerate(plInt16 iTargetFPS);
+  void SetTargetFramerate(plInt16 uiTargetFPS);
 
   void TriggerRedraw();
 
-  virtual void RequestWindowTabContextMenu(const QPoint& globalPos);
+  virtual void RequestWindowTabContextMenu(const QPoint& GlobalPos);
 
   static const plDynamicArray<plQtDocumentWindow*>& GetAllDocumentWindows() { return s_AllDocumentWindows; }
 
@@ -75,10 +75,10 @@ public:
   plQtContainerWindow* GetContainerWindow() const;
 
   /// \brief Shows the given message for the given duration in the statusbar, then shows the permanent message again.
-  void ShowTemporaryStatusBarMsg(const plFormatString& text, plTime duration = plTime::MakeFromSeconds(5));
+  void ShowTemporaryStatusBarMsg(const plFormatString& sText, plTime duration = plTime::Seconds(5));
 
   /// \brief Sets which text to show permanently in the statusbar. Set an empty string to clear the message.
-  void SetPermanentStatusBarMsg(const plFormatString& text);
+  void SetPermanentStatusBarMsg(const plFormatString& sText);
 
   /// \brief For unit tests to take a screenshot of the window (may include multiple views) to do image comparisons.
   virtual void CreateImageCapture(const char* szOutputPath);

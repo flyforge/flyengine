@@ -18,7 +18,7 @@ public:
     Documentation
   };
 
-  plQtDashboardDlg(QWidget* pParent, DashboardTab activeTab = DashboardTab::Projects);
+  plQtDashboardDlg(QWidget* parent, DashboardTab activeTab = DashboardTab::Projects);
 
 private:
 

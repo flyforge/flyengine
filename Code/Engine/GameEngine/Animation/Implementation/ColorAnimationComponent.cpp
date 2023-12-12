@@ -21,6 +21,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plColorAnimationComponent, 2, plComponentMode::Stati
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
+    new plColorAttribute(plColorScheme::Animation),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -122,7 +123,7 @@ void plColorAnimationComponent::SetRandomStartOffset(bool value)
 
 void plColorAnimationComponent::Update()
 {
-  if (!m_hGradient.IsValid() || m_Duration <= plTime::MakeZero())
+  if (!m_hGradient.IsValid() || m_Duration <= plTime::Zero())
     return;
 
   plTime tDiff = GetWorld()->GetClock().GetTimeDiff();
@@ -160,7 +161,7 @@ void plColorAnimationComponent::Update()
 
         m_CurAnimTime = m_Duration - tOver;
       }
-      else if (m_CurAnimTime < plTime::MakeZero())
+      else if (m_CurAnimTime < plTime::Zero())
       {
         SetUserFlag(0, !bReverse);
 

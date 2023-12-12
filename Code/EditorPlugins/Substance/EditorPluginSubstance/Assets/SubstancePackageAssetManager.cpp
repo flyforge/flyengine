@@ -1,6 +1,5 @@
 #include <EditorPluginSubstance/EditorPluginSubstancePCH.h>
 
-#include <EditorFramework/Assets/AssetCurator.h>
 #include <EditorPluginSubstance/Assets/SubstancePackageAsset.h>
 #include <EditorPluginSubstance/Assets/SubstancePackageAssetManager.h>
 #include <EditorPluginSubstance/Assets/SubstancePackageAssetWindow.moc.h>
@@ -17,13 +16,13 @@ plSubstancePackageAssetDocumentManager::plSubstancePackageAssetDocumentManager()
     m_PackageTypeDesc.m_sDocumentTypeName = "Substance Package";
     m_PackageTypeDesc.m_sFileExtension = "plSubstancePackageAsset";
     m_PackageTypeDesc.m_sIcon = ":/AssetIcons/SubstanceDesigner.svg";
-    m_PackageTypeDesc.m_sAssetCategory = "Rendering";
+    m_TextureTypeDesc.m_IconColorGroup = plColorScheme::ColorGroup::Rendering;
     m_PackageTypeDesc.m_pDocumentType = plGetStaticRTTI<plSubstancePackageAssetDocument>();
     m_PackageTypeDesc.m_pManager = this;
     m_PackageTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Substance_Package");
 
     m_PackageTypeDesc.m_sResourceFileExtension = "plSubstancePackage";
-    m_PackageTypeDesc.m_AssetDocumentFlags = plAssetDocumentFlags::SubAssetsAutoThumbnailOnTransform;
+    m_PackageTypeDesc.m_AssetDocumentFlags = plAssetDocumentFlags::None;
 
     plQtImageCache::GetSingleton()->RegisterTypeImage("Substance Package", QPixmap(":/AssetIcons/SubstanceDesigner.svg"));
   }
@@ -33,12 +32,12 @@ plSubstancePackageAssetDocumentManager::plSubstancePackageAssetDocumentManager()
     m_TextureTypeDesc.m_sDocumentTypeName = "Substance Texture";
     m_TextureTypeDesc.m_sFileExtension = "plSubstanceTextureAsset";
     m_TextureTypeDesc.m_sIcon = ":/AssetIcons/SubstanceDesigner.svg";
-    m_TextureTypeDesc.m_sAssetCategory = "Rendering";
+    m_TextureTypeDesc.m_IconColorGroup = plColorScheme::ColorGroup::Rendering;
     m_TextureTypeDesc.m_pManager = this;
     m_TextureTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Texture_2D");
 
     m_TextureTypeDesc.m_sResourceFileExtension = "plTexture2D";
-    m_TextureTypeDesc.m_AssetDocumentFlags = plAssetDocumentFlags::AutoThumbnailOnTransform;
+    // m_TextureTypeDesc.m_AssetDocumentFlags = plAssetDocumentFlags::AutoThumbnailOnTransform;
   }
 }
 
@@ -62,17 +61,17 @@ void plSubstancePackageAssetDocumentManager::FillOutSubAssetList(const plAssetDo
   }
 }
 
-plString plSubstancePackageAssetDocumentManager::GetAssetTableEntry(const plSubAsset* pSubAsset, plStringView sDataDirectory, const plPlatformProfile* pAssetProfile) const
+plString plSubstancePackageAssetDocumentManager::GetAssetTableEntry(const plSubAsset* pSubAsset, const char* szDataDirectory, const plPlatformProfile* pAssetProfile) const
 {
   if (pSubAsset->m_bMainAsset)
   {
-    return SUPER::GetAssetTableEntry(pSubAsset, sDataDirectory, pAssetProfile);
+    return SUPER::GetAssetTableEntry(pSubAsset, szDataDirectory, pAssetProfile);
   }
 
-  plStringBuilder sTargetFile = pSubAsset->m_pAssetInfo->m_Path.GetAbsolutePath().GetFileDirectory();
+  plStringBuilder sTargetFile = pSubAsset->m_pAssetInfo->m_sAbsolutePath.GetFileDirectory();
   sTargetFile.Append(pSubAsset->m_Data.m_sName);
 
-  return GetRelativeOutputFileName(&m_TextureTypeDesc, sDataDirectory, sTargetFile, "", pAssetProfile);
+  return GetRelativeOutputFileName(&m_TextureTypeDesc, szDataDirectory, sTargetFile, "", pAssetProfile);
 }
 
 void plSubstancePackageAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager::Event& e)
@@ -93,9 +92,10 @@ void plSubstancePackageAssetDocumentManager::OnDocumentManagerEvent(const plDocu
   }
 }
 
-void plSubstancePackageAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plSubstancePackageAssetDocumentManager::InternalCreateDocument(
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plSubstancePackageAssetDocument(sPath);
+  out_pDocument = new plSubstancePackageAssetDocument(szPath);
 }
 
 void plSubstancePackageAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

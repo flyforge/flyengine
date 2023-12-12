@@ -15,8 +15,10 @@ plActionDescriptorHandle plCommandHistoryActions::s_hRedo;
 void plCommandHistoryActions::RegisterActions()
 {
   s_hCommandHistoryCategory = PLASMA_REGISTER_CATEGORY("CmdHistoryCategory");
-  s_hUndo = PLASMA_REGISTER_ACTION_AND_DYNAMIC_MENU_1("Document.Undo", plActionScope::Document, "Document", "Ctrl+Z", plCommandHistoryAction, plCommandHistoryAction::ButtonType::Undo);
-  s_hRedo = PLASMA_REGISTER_ACTION_AND_DYNAMIC_MENU_1("Document.Redo", plActionScope::Document, "Document", "Ctrl+Y", plCommandHistoryAction, plCommandHistoryAction::ButtonType::Redo);
+  s_hUndo = PLASMA_REGISTER_ACTION_AND_DYNAMIC_MENU_1(
+    "Document.Undo", plActionScope::Document, "Document", "Ctrl+Z", plCommandHistoryAction, plCommandHistoryAction::ButtonType::Undo);
+  s_hRedo = PLASMA_REGISTER_ACTION_AND_DYNAMIC_MENU_1(
+    "Document.Redo", plActionScope::Document, "Document", "Ctrl+Y", plCommandHistoryAction, plCommandHistoryAction::ButtonType::Redo);
 }
 
 void plCommandHistoryActions::UnregisterActions()
@@ -26,14 +28,16 @@ void plCommandHistoryActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hRedo);
 }
 
-void plCommandHistoryActions::MapActions(plStringView sMapping, plStringView sTargetMenu)
+void plCommandHistoryActions::MapActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  pMap->MapAction(s_hCommandHistoryCategory, sTargetMenu, 3.0f);
-  pMap->MapAction(s_hUndo, sTargetMenu, "CmdHistoryCategory", 1.0f);
-  pMap->MapAction(s_hRedo, sTargetMenu, "CmdHistoryCategory", 2.0f);
+  plStringBuilder sSubPath(szPath, "/CmdHistoryCategory");
+
+  pMap->MapAction(s_hCommandHistoryCategory, szPath, 3.0f);
+  pMap->MapAction(s_hUndo, sSubPath, 1.0f);
+  pMap->MapAction(s_hRedo, sSubPath, 2.0f);
 }
 
 plCommandHistoryAction::plCommandHistoryAction(const plActionContext& context, const char* szName, ButtonType button)
@@ -61,9 +65,9 @@ plCommandHistoryAction::~plCommandHistoryAction()
   m_Context.m_pDocument->GetCommandHistory()->m_Events.RemoveEventHandler(plMakeDelegate(&plCommandHistoryAction::CommandHistoryEventHandler, this));
 }
 
-void plCommandHistoryAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries)
+void plCommandHistoryAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries)
 {
-  out_entries.Clear();
+  out_Entries.Clear();
 
   plCommandHistory* pHistory = m_Context.m_pDocument->GetCommandHistory();
 
@@ -74,7 +78,7 @@ void plCommandHistoryAction::GetEntries(plHybridArray<plDynamicMenuAction::Item,
     plDynamicMenuAction::Item entryItem;
     entryItem.m_sDisplay = pTransaction->m_sDisplayString;
     entryItem.m_UserValue = (plUInt32)i + 1; // Number of steps to undo / redo.
-    out_entries.PushBack(entryItem);
+    out_Entries.PushBack(entryItem);
   }
 }
 

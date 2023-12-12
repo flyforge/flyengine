@@ -148,7 +148,7 @@ void plDataTransfer::TelemetryMessage(void* pPassThrough)
 
   while (plTelemetry::RetrieveMessage('DTRA', Msg) == PLASMA_SUCCESS)
   {
-    if (Msg.GetMessageID() == ' REQ')
+    if (Msg.GetMessageID() == 'REQ')
     {
       plStringBuilder sName;
       Msg.GetReader() >> sName;

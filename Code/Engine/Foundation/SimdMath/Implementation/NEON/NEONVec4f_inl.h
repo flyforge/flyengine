@@ -508,6 +508,12 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetOrthogonalVector() const
 }
 
 // static
+PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::ZeroVector()
+{
+  return vmovq_n_f32(0.0f);
+}
+
+// static
 PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulAdd(const plSimdVec4f& a, const plSimdVec4f& b, const plSimdVec4f& c)
 {
   return vfmaq_f32(c.m_v, a.m_v, b.m_v);

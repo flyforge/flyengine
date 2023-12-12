@@ -14,10 +14,10 @@ class StreamIn;
 class StreamOut;
 
 /// Abstract class that checks if two CollisionGroups collide
-class JPH_EXPORT GroupFilter : public SerializableObject, public RefTarget<GroupFilter>
+class GroupFilter : public SerializableObject, public RefTarget<GroupFilter>
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_ABSTRACT(JPH_EXPORT, GroupFilter)
+	JPH_DECLARE_SERIALIZABLE_ABSTRACT(GroupFilter)
 
 	/// Virtual destructor
 	virtual						~GroupFilter() override = default;

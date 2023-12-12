@@ -6,13 +6,13 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 plKrautTreeViewContext::plKrautTreeViewContext(plKrautTreeContext* pKrautTreeContext)
-  : plEngineProcessViewContext(pKrautTreeContext)
+  : PlasmaEngineProcessViewContext(pKrautTreeContext)
 {
   m_pKrautTreeContext = pKrautTreeContext;
 
   // Start with something valid.
   m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, 45.0f, 0.05f, 10000.0f);
-  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::MakeZero(), plVec3(0.0f, 0.0f, 1.0f));
+  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::ZeroVector(), plVec3(0.0f, 0.0f, 1.0f));
 }
 
 plKrautTreeViewContext::~plKrautTreeViewContext() {}
@@ -30,7 +30,7 @@ plViewHandle plKrautTreeViewContext::CreateView()
 
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
 
-  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   pView->SetCameraUsageHint(plCameraUsageHint::Thumbnail);
@@ -39,11 +39,12 @@ plViewHandle plKrautTreeViewContext::CreateView()
 
 void plKrautTreeViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
-  plEngineProcessViewContext::SetCamera(pMsg);
+  PlasmaEngineProcessViewContext::SetCamera(pMsg);
 
   const plUInt32 viewHeight = pMsg->m_uiWindowHeight;
 
-  plBoundingBox bbox = plBoundingBox::MakeFromCenterAndHalfExtents(plVec3::MakeZero(), plVec3::MakeZero());
+  plBoundingBox bbox;
+  bbox.SetCenterAndHalfExtents(plVec3::ZeroVector(), plVec3::ZeroVector());
 
   auto hResource = m_pKrautTreeContext->GetResource();
   if (hResource.IsValid())

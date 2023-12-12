@@ -14,76 +14,30 @@ PLASMA_FORCE_INLINE plBoundingSphereTemplate<Type>::plBoundingSphereTemplate()
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE plBoundingSphereTemplate<Type> plBoundingSphereTemplate<Type>::MakeZero()
+PLASMA_FORCE_INLINE plBoundingSphereTemplate<Type>::plBoundingSphereTemplate(const plVec3Template<Type>& vCenter, Type fRadius)
+  : m_vCenter(vCenter)
+  , m_fRadius(fRadius)
 {
-  plBoundingSphereTemplate<Type> res;
-  res.m_vCenter.SetZero();
-  res.m_fRadius = 0.0f;
-  return res;
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE plBoundingSphereTemplate<Type> plBoundingSphereTemplate<Type>::MakeInvalid(const plVec3Template<Type>& vCenter)
+void plBoundingSphereTemplate<Type>::SetZero()
 {
-  plBoundingSphereTemplate<Type> res;
-  res.m_vCenter = vCenter;
-  res.m_fRadius = -plMath::SmallEpsilon<Type>(); // has to be very small for ExpandToInclude to work
-  return res;
-}
-
-template <typename Type>
-PLASMA_FORCE_INLINE plBoundingSphereTemplate<Type> plBoundingSphereTemplate<Type>::MakeFromCenterAndRadius(const plVec3Template<Type>& vCenter, Type fRadius)
-{
-  plBoundingSphereTemplate<Type> res;
-  res.m_vCenter = vCenter;
-  res.m_fRadius = fRadius;
-  PLASMA_ASSERT_DEBUG(res.IsValid(), "The sphere was created with invalid values.");
-  return res;
-}
-
-template <typename Type>
-PLASMA_FORCE_INLINE plBoundingSphereTemplate<Type> plBoundingSphereTemplate<Type>::MakeFromPoints(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /*= sizeof(plVec3Template<Type>)*/)
-{
-  PLASMA_ASSERT_DEBUG(pPoints != nullptr, "The array must not be empty.");
-  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "The data must not overlap.");
-  PLASMA_ASSERT_DEBUG(uiNumPoints > 0, "The array must contain at least one point.");
-
-  const plVec3Template<Type>* pCur = &pPoints[0];
-
-  plVec3Template<Type> vCenter(0.0f);
-
-  for (plUInt32 i = 0; i < uiNumPoints; ++i)
-  {
-    vCenter += *pCur;
-    pCur = plMemoryUtils::AddByteOffset(pCur, uiStride);
-  }
-
-  vCenter /= (Type)uiNumPoints;
-
-  Type fMaxDistSQR = 0.0f;
-
-  pCur = &pPoints[0];
-  for (plUInt32 i = 0; i < uiNumPoints; ++i)
-  {
-    const Type fDistSQR = (*pCur - vCenter).GetLengthSquared();
-    fMaxDistSQR = plMath::Max(fMaxDistSQR, fDistSQR);
-
-    pCur = plMemoryUtils::AddByteOffset(pCur, uiStride);
-  }
-
-  plBoundingSphereTemplate<Type> res;
-  res.m_vCenter = vCenter;
-  res.m_fRadius = plMath::Sqrt(fMaxDistSQR);
-
-  PLASMA_ASSERT_DEBUG(res.IsValid(), "The point cloud contained corrupted data.");
-
-  return res;
+  m_vCenter.SetZero();
+  m_fRadius = 0.0f;
 }
 
 template <typename Type>
 bool plBoundingSphereTemplate<Type>::IsZero(Type fEpsilon /* = plMath::DefaultEpsilon<Type>() */) const
 {
   return m_vCenter.IsZero(fEpsilon) && plMath::IsZero(m_fRadius, fEpsilon);
+}
+
+template <typename Type>
+void plBoundingSphereTemplate<Type>::SetInvalid()
+{
+  m_vCenter.SetZero();
+  m_fRadius = -plMath::SmallEpsilon<Type>();
 }
 
 template <typename Type>
@@ -96,6 +50,15 @@ template <typename Type>
 bool plBoundingSphereTemplate<Type>::IsNaN() const
 {
   return (m_vCenter.IsNaN() || plMath::IsNaN(m_fRadius));
+}
+
+template <typename Type>
+PLASMA_FORCE_INLINE void plBoundingSphereTemplate<Type>::SetElements(const plVec3Template<Type>& vCenter, Type fRadius)
+{
+  m_vCenter = vCenter;
+  m_fRadius = fRadius;
+
+  PLASMA_ASSERT_DEBUG(IsValid(), "The sphere was created with invalid values.");
 }
 
 template <typename Type>
@@ -245,7 +208,8 @@ const plVec3Template<Type> plBoundingSphereTemplate<Type>::GetClampedPoint(const
 }
 
 template <typename Type>
-bool plBoundingSphereTemplate<Type>::Contains(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */) const
+bool plBoundingSphereTemplate<Type>::Contains(
+  const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */) const
 {
   PLASMA_ASSERT_DEBUG(pPoints != nullptr, "The array must not be empty.");
   PLASMA_ASSERT_DEBUG(uiNumPoints > 0, "The array must contain at least one point.");
@@ -267,7 +231,8 @@ bool plBoundingSphereTemplate<Type>::Contains(const plVec3Template<Type>* pPoint
 }
 
 template <typename Type>
-bool plBoundingSphereTemplate<Type>::Overlaps(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */) const
+bool plBoundingSphereTemplate<Type>::Overlaps(
+  const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */) const
 {
   PLASMA_ASSERT_DEBUG(pPoints != nullptr, "The array must not be empty.");
   PLASMA_ASSERT_DEBUG(uiNumPoints > 0, "The array must contain at least one point.");
@@ -289,7 +254,45 @@ bool plBoundingSphereTemplate<Type>::Overlaps(const plVec3Template<Type>* pPoint
 }
 
 template <typename Type>
-void plBoundingSphereTemplate<Type>::ExpandToInclude(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */)
+void plBoundingSphereTemplate<Type>::SetFromPoints(
+  const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */)
+{
+  PLASMA_ASSERT_DEBUG(pPoints != nullptr, "The array must not be empty.");
+  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "The data must not overlap.");
+  PLASMA_ASSERT_DEBUG(uiNumPoints > 0, "The array must contain at least one point.");
+
+  const plVec3Template<Type>* pCur = &pPoints[0];
+
+  plVec3Template<Type> vCenter(0.0f);
+
+  for (plUInt32 i = 0; i < uiNumPoints; ++i)
+  {
+    vCenter += *pCur;
+    pCur = plMemoryUtils::AddByteOffset(pCur, uiStride);
+  }
+
+  vCenter /= (Type)uiNumPoints;
+
+  Type fMaxDistSQR = 0.0f;
+
+  pCur = &pPoints[0];
+  for (plUInt32 i = 0; i < uiNumPoints; ++i)
+  {
+    const Type fDistSQR = (*pCur - vCenter).GetLengthSquared();
+    fMaxDistSQR = plMath::Max(fMaxDistSQR, fDistSQR);
+
+    pCur = plMemoryUtils::AddByteOffset(pCur, uiStride);
+  }
+
+  m_vCenter = vCenter;
+  m_fRadius = plMath::Sqrt(fMaxDistSQR);
+
+  PLASMA_ASSERT_DEBUG(IsValid(), "The point cloud contained corrupted data.");
+}
+
+template <typename Type>
+void plBoundingSphereTemplate<Type>::ExpandToInclude(
+  const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */)
 {
   PLASMA_ASSERT_DEBUG(pPoints != nullptr, "The array must not be empty.");
   PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "The data must not overlap.");
@@ -311,7 +314,8 @@ void plBoundingSphereTemplate<Type>::ExpandToInclude(const plVec3Template<Type>*
 }
 
 template <typename Type>
-Type plBoundingSphereTemplate<Type>::GetDistanceTo(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */) const
+Type plBoundingSphereTemplate<Type>::GetDistanceTo(
+  const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof(plVec3Template) */) const
 {
   PLASMA_ASSERT_DEBUG(pPoints != nullptr, "The array must not be empty.");
   PLASMA_ASSERT_DEBUG(uiNumPoints > 0, "The array must contain at least one point.");

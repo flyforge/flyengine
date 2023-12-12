@@ -70,12 +70,12 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetDocument, 5, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plDecalAssetDocument::plDecalAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plDecalAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
+plDecalAssetDocument::plDecalAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plDecalAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
 }
 
-plTransformStatus plDecalAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plDecalAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   return static_cast<plDecalAssetDocumentManager*>(GetAssetDocumentManager())->GenerateDecalTexture(pAssetProfile);
 }
@@ -172,42 +172,42 @@ plDecalAssetDocumentGenerator::plDecalAssetDocumentGenerator()
   AddSupportedFileType("png");
 }
 
-plDecalAssetDocumentGenerator::~plDecalAssetDocumentGenerator() = default;
+plDecalAssetDocumentGenerator::~plDecalAssetDocumentGenerator() {}
 
-void plDecalAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
+void plDecalAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const
 {
-  const plStringBuilder baseFilename = sAbsInputFile.GetFileName();
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
 
+  const plStringBuilder baseFilename = baseOutputFile.GetFileName();
+
+  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
+
+  /// \todo Make this configurable
   const bool isDecal = (baseFilename.FindSubString_NoCase("decal") != nullptr);
 
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
     info.m_Priority = isDecal ? plAssetDocGeneratorPriority::HighPriority : plAssetDocGeneratorPriority::LowPriority;
     info.m_sName = "DecalImport.All";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Decal.svg";
   }
 }
 
-plStatus plDecalAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plDecalAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
-
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
 
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
   plDecalAssetDocument* pAssetDoc = plDynamicCast<plDecalAssetDocument*>(out_pGeneratedDocument);
+  if (pAssetDoc == nullptr)
+    return plStatus("Target document is not a valid plDecalAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("BaseColor", sInputFileRel.GetView());
+  accessor.SetValue("BaseColor", sDataDirRelativePath);
 
   return plStatus(PLASMA_SUCCESS);
 }

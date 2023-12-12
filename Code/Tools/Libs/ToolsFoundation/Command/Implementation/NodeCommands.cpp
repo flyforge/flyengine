@@ -276,14 +276,14 @@ plStatus plDisconnectNodePinsCommand::UndoInternal(bool bFireEvents)
 ////////////////////////////////////////////////////////////////////////
 
 // static
-plStatus plNodeCommands::AddAndConnectCommand(plCommandHistory* pHistory, const plRTTI* pConnectionType, const plPin& sourcePin, const plPin& targetPin)
+plStatus plNodeCommands::AddAndConnectCommand(plCommandHistory* history, const plRTTI* pConnectionType, const plPin& sourcePin, const plPin& targetPin)
 {
   plAddObjectCommand cmd;
   cmd.m_pType = pConnectionType;
-  cmd.m_NewObjectGuid = plUuid::MakeUuid();
+  cmd.m_NewObjectGuid.CreateNewUuid();
   cmd.m_Index = -1;
 
-  plStatus res = pHistory->AddCommand(cmd);
+  plStatus res = history->AddCommand(cmd);
   if (res.m_Result.Succeeded())
   {
     plConnectNodePinsCommand connect;
@@ -293,25 +293,25 @@ plStatus plNodeCommands::AddAndConnectCommand(plCommandHistory* pHistory, const 
     connect.m_sSourcePin = sourcePin.GetName();
     connect.m_sTargetPin = targetPin.GetName();
 
-    res = pHistory->AddCommand(connect);
+    res = history->AddCommand(connect);
   }
 
   return res;
 }
 
 // static
-plStatus plNodeCommands::DisconnectAndRemoveCommand(plCommandHistory* pHistory, const plUuid& connectionObject)
+plStatus plNodeCommands::DisconnectAndRemoveCommand(plCommandHistory* history, const plUuid& connectionObject)
 {
   plDisconnectNodePinsCommand cmd;
   cmd.m_ConnectionObject = connectionObject;
 
-  plStatus res = pHistory->AddCommand(cmd);
+  plStatus res = history->AddCommand(cmd);
   if (res.m_Result.Succeeded())
   {
     plRemoveObjectCommand remove;
     remove.m_Object = cmd.m_ConnectionObject;
 
-    res = pHistory->AddCommand(remove);
+    res = history->AddCommand(remove);
   }
 
   return res;

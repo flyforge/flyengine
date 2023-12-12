@@ -16,7 +16,7 @@ plUInt32 plMeshResource::s_uiMeshBufferNameSuffix = 0;
 plMeshResource::plMeshResource()
   : plResource(DoUpdate::OnAnyThread, 1)
 {
-  m_Bounds = plBoundingBoxSphere::MakeInvalid();
+  m_Bounds.SetInvalid();
 }
 
 plResourceLoadDesc plMeshResource::UnloadData(Unload WhatToUnload)

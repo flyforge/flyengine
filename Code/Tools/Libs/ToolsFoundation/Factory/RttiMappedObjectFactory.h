@@ -17,7 +17,7 @@ public:
   plRttiMappedObjectFactory();
   ~plRttiMappedObjectFactory();
 
-  using CreateObjectFunc = Object* (*)(const plRTTI*);
+  typedef Object* (*CreateObjectFunc)(const plRTTI* pType);
 
   void RegisterCreator(const plRTTI* pType, CreateObjectFunc creator);
   void UnregisterCreator(const plRTTI* pType);

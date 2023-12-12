@@ -20,21 +20,12 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBlackboardTemplateAssetDocument, 1, plRTTI
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plBlackboardTemplateAssetDocument::plBlackboardTemplateAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plBlackboardTemplateAssetObject>(sDocumentPath, plAssetDocEngineConnection::None)
+plBlackboardTemplateAssetDocument::plBlackboardTemplateAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plBlackboardTemplateAssetObject>(szDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-plStatus plBlackboardTemplateAssetDocument::WriteAsset(plStreamWriter& inout_stream, const plPlatformProfile* pAssetProfile) const
-{
-  plBlackboardTemplateResourceDescriptor desc;
-  PLASMA_SUCCEED_OR_RETURN(RetrieveState(GetProperties(), desc));
-  PLASMA_SUCCEED_OR_RETURN(desc.Serialize(inout_stream));
-
-  return plStatus(PLASMA_SUCCESS);
-}
-
-plStatus plBlackboardTemplateAssetDocument::RetrieveState(const plBlackboardTemplateAssetObject* pProp, plBlackboardTemplateResourceDescriptor& inout_Desc) const
+plStatus plBlackboardTemplateAssetDocument::RetrieveState(const plBlackboardTemplateAssetObject* pProp, plBlackboardTemplateResourceDescriptor& inout_Desc)
 {
   for (const plString& sTempl : pProp->m_BaseTemplates)
   {
@@ -48,7 +39,7 @@ plStatus plBlackboardTemplateAssetDocument::RetrieveState(const plBlackboardTemp
     }
 
     plDocument* pDoc;
-    PLASMA_SUCCEED_OR_RETURN(pOther->m_pAssetInfo->GetManager()->OpenDocument(pOther->m_Data.m_sSubAssetsDocumentTypeName, pOther->m_pAssetInfo->m_Path, pDoc, plDocumentFlags::None, nullptr));
+    PLASMA_SUCCEED_OR_RETURN(pOther->m_pAssetInfo->GetManager()->OpenDocument(pOther->m_Data.m_sSubAssetsDocumentTypeName, pOther->m_pAssetInfo->m_sAbsolutePath, pDoc, plDocumentFlags::None, nullptr));
 
     if (plBlackboardTemplateAssetDocument* pTmpDoc = plDynamicCast<plBlackboardTemplateAssetDocument*>(pDoc))
     {
@@ -77,7 +68,16 @@ plStatus plBlackboardTemplateAssetDocument::RetrieveState(const plBlackboardTemp
   return plStatus(PLASMA_SUCCESS);
 }
 
-plTransformStatus plBlackboardTemplateAssetDocument::InternalTransformAsset(plStreamWriter& inout_stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plBlackboardTemplateAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  return WriteAsset(inout_stream, pAssetProfile);
+  plBlackboardTemplateResourceDescriptor desc;
+  const plStatus s = RetrieveState(GetProperties(), desc);
+  if (s.Failed())
+  {
+    return plTransformStatus(s);
+  }
+
+  PLASMA_SUCCEED_OR_RETURN(desc.Serialize(stream));
+
+  return plStatus(PLASMA_SUCCESS);
 }

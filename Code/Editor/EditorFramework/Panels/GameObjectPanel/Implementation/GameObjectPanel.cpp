@@ -24,6 +24,7 @@ plQtGameObjectWidget::plQtGameObjectWidget(QWidget* pParent, plGameObjectDocumen
   m_pTreeWidget = new plQtDocumentTreeView(this, pDocument, std::move(pCustomModel), pSelection);
   m_pTreeWidget->SetAllowDragDrop(true);
   m_pTreeWidget->SetAllowDeleteObjects(true);
+  m_pTreeWidget->setFont(QApplication::font());
   layout()->addWidget(m_pTreeWidget);
 
   m_pDocument->m_GameObjectEvents.AddEventHandler(plMakeDelegate(&plQtGameObjectWidget::DocumentSceneEventHandler, this));
@@ -88,10 +89,12 @@ plQtGameObjectPanel::plQtGameObjectPanel(
   : plQtDocumentPanel(pParent, pDocument)
 {
   setObjectName("ScenegraphPanel");
-  setWindowTitle("Scenegraph");
+  setWindowTitle("SCENEGRAPH");
 
   m_pMainWidget = new plQtGameObjectWidget(this, pDocument, szContextMenuMapping, std::move(pCustomModel));
   setWidget(m_pMainWidget);
 }
 
-plQtGameObjectPanel::~plQtGameObjectPanel() = default;
+plQtGameObjectPanel::~plQtGameObjectPanel()
+{
+}

@@ -228,12 +228,6 @@ public:
   /// \brief Checks whether the given file exists.
   static bool ExistsDirectory(plStringView sDirectory); // [tested]
 
-  /// \brief If the given file already exists, determines a file path that doesn't exist yet.
-  ///
-  /// If the original file already exists, sSuffix is appended and then a number starting at 1.
-  /// Loops until it finds a filename that is not yet taken.
-  static void FindFreeFilename(plStringBuilder& inout_sPath, plStringView sSuffix = "-");
-
   /// \brief Deletes the given file. Returns PLASMA_SUCCESS, if the file was deleted or did not exist in the first place. Returns PLASMA_FAILURE
   static plResult DeleteFile(plStringView sFile); // [tested]
 
@@ -295,16 +289,6 @@ public:
   ///
   /// If szSubFolder is specified, it will be appended to the result.
   static plString GetTempDataFolder(plStringView sSubFolder = {});
-
-  /// \brief Returns the folder into which the user may want to store documents.
-  /// Append a sub-folder for your application.
-  ///
-  /// On Windows this is the 'Documents' directory.
-  /// On Posix systems this is the '~' (home) directory.
-  ///
-  /// If szSubFolder is specified, it will be appended to the result.
-  static plString GetUserDocumentsFolder(plStringView sSubFolder = {});
-
 
 public:
   /// \brief Describes the types of events that plOSFile sends.
@@ -413,9 +397,6 @@ private:
 
   /// \brief The path where temp data is stored on this OS
   static plString64 s_sTempDataPath;
-
-  /// \brief The path where user data documents are stored on this OS
-  static plString64 s_sUserDocumentsPath;
 
   /// \brief Counts how many different files are touched.225
   static plAtomicInteger32 s_iFileCounter;

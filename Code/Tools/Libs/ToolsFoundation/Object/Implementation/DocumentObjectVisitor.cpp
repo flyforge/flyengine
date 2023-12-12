@@ -4,13 +4,13 @@
 #include <ToolsFoundation/Object/DocumentObjectVisitor.h>
 
 plDocumentObjectVisitor::plDocumentObjectVisitor(
-  const plDocumentObjectManager* pManager, plStringView sChildrenProperty /*= "Children"*/, plStringView sRootProperty /*= "Children"*/)
+  const plDocumentObjectManager* pManager, const char* szChildrenProperty /*= "Children"*/, const char* szRootProperty /*= "Children"*/)
   : m_pManager(pManager)
-  , m_sChildrenProperty(sChildrenProperty)
-  , m_sRootProperty(sRootProperty)
+  , m_sChildrenProperty(szChildrenProperty)
+  , m_sRootProperty(szRootProperty)
 {
-  const plAbstractProperty* pRootProp = m_pManager->GetRootObject()->GetType()->FindPropertyByName(sRootProperty);
-  PLASMA_ASSERT_DEV(pRootProp, "Given root property '{0}' does not exist on root object", sRootProperty);
+  const plAbstractProperty* pRootProp = m_pManager->GetRootObject()->GetType()->FindPropertyByName(szRootProperty);
+  PLASMA_ASSERT_DEV(pRootProp, "Given root property '{0}' does not exist on root object", szRootProperty);
   PLASMA_ASSERT_DEV(pRootProp->GetCategory() == plPropertyCategory::Set || pRootProp->GetCategory() == plPropertyCategory::Array,
     "Traverser only works on arrays and sets.");
 
@@ -22,25 +22,25 @@ plDocumentObjectVisitor::plDocumentObjectVisitor(
 
 void plDocumentObjectVisitor::Visit(const plDocumentObject* pObject, bool bVisitStart, VisitorFunction function)
 {
-  plStringView sProperty = m_sChildrenProperty;
+  const char* szProperty = m_sChildrenProperty;
   if (pObject == nullptr || pObject == m_pManager->GetRootObject())
   {
     pObject = m_pManager->GetRootObject();
-    sProperty = m_sRootProperty;
+    szProperty = m_sRootProperty;
   }
 
   if (!bVisitStart || function(pObject))
   {
-    TraverseChildren(pObject, sProperty, function);
+    TraverseChildren(pObject, szProperty, function);
   }
 }
 
-void plDocumentObjectVisitor::TraverseChildren(const plDocumentObject* pObject, plStringView sProperty, VisitorFunction& function)
+void plDocumentObjectVisitor::TraverseChildren(const plDocumentObject* pObject, const char* szProperty, VisitorFunction& function)
 {
-  const plInt32 iChildren = pObject->GetTypeAccessor().GetCount(sProperty);
+  const plInt32 iChildren = pObject->GetTypeAccessor().GetCount(szProperty);
   for (plInt32 i = 0; i < iChildren; i++)
   {
-    plVariant obj = pObject->GetTypeAccessor().GetValue(sProperty, i);
+    plVariant obj = pObject->GetTypeAccessor().GetValue(szProperty, i);
     PLASMA_ASSERT_DEBUG(obj.IsValid() && obj.IsA<plUuid>(), "null obj found during traversal.");
     const plDocumentObject* pChild = m_pManager->GetObject(obj.Get<plUuid>());
     if (function(pChild))

@@ -8,7 +8,7 @@ struct plMeshBufferResourceDescriptor;
 
 struct plMeshNormalPrecision
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -30,7 +30,7 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plMeshNormalPrecision);
 
 struct plMeshTexCoordPrecision
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -65,6 +65,7 @@ struct plMeshBoneWeigthPrecision
 };
 
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plMeshBoneWeigthPrecision);
+
 
 struct PLASMA_RENDERERCORE_DLL plMeshBufferUtils
 {

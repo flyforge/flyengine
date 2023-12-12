@@ -35,20 +35,20 @@ static void ConfigureAnimationGraphAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("AnimationGraphAssetMenuBar").AssertSuccess();
+    plActionMapManager::RegisterActionMap("AnimationGraphAssetMenuBar").IgnoreResult();
 
-    plStandardMenus::MapActions("AnimationGraphAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plStandardMenus::MapActions("AnimationGraphAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("AnimationGraphAssetMenuBar");
-    plDocumentActions::MapMenuActions("AnimationGraphAssetMenuBar");
-    plAssetActions::MapMenuActions("AnimationGraphAssetMenuBar");
-    plCommandHistoryActions::MapActions("AnimationGraphAssetMenuBar");
-    plEditActions::MapActions("AnimationGraphAssetMenuBar", false, false);
+    plDocumentActions::MapActions("AnimationGraphAssetMenuBar", "Menu.File", false);
+    plAssetActions::MapMenuActions("AnimationGraphAssetMenuBar", "Menu.File");
+    plCommandHistoryActions::MapActions("AnimationGraphAssetMenuBar", "Menu.Edit");
+    plEditActions::MapActions("AnimationGraphAssetMenuBar", "Menu.Edit", false, false);
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("AnimationGraphAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("AnimationGraphAssetToolBar");
+    plActionMapManager::RegisterActionMap("AnimationGraphAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("AnimationGraphAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("AnimationGraphAssetToolBar", "");
     plAssetActions::MapToolBarActions("AnimationGraphAssetToolBar", true);
   }
@@ -62,21 +62,20 @@ static void ConfigureTexture2DAsset()
 
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("TextureAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("TextureAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("TextureAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("TextureAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("TextureAssetMenuBar");
-    plDocumentActions::MapMenuActions("TextureAssetMenuBar");
-    plAssetActions::MapMenuActions("TextureAssetMenuBar");
-    plCommandHistoryActions::MapActions("TextureAssetMenuBar");
+    plDocumentActions::MapActions("TextureAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("TextureAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("TextureAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("TextureAssetToolBar");
+    plActionMapManager::RegisterActionMap("TextureAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("TextureAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("TextureAssetToolBar", "");
     plAssetActions::MapToolBarActions("TextureAssetToolBar", true);
-    plTextureAssetActions::MapToolbarActions("TextureAssetToolBar");
+    plTextureAssetActions::MapActions("TextureAssetToolBar", "");
   }
 }
 
@@ -84,23 +83,24 @@ static void ConfigureTextureCubeAsset()
 {
   plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plTextureCubeAssetProperties::PropertyMetaStateEventHandler);
 
+  plTextureCubeAssetActions::RegisterActions();
+
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("TextureCubeAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("TextureCubeAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("TextureCubeAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("TextureCubeAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("TextureCubeAssetMenuBar");
-    plDocumentActions::MapMenuActions("TextureCubeAssetMenuBar");
-    plAssetActions::MapMenuActions("TextureCubeAssetMenuBar");
-    plCommandHistoryActions::MapActions("TextureCubeAssetMenuBar");
+    plDocumentActions::MapActions("TextureCubeAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("TextureCubeAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("TextureCubeAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("TextureCubeAssetToolBar");
+    plActionMapManager::RegisterActionMap("TextureCubeAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("TextureCubeAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("TextureCubeAssetToolBar", "");
     plAssetActions::MapToolBarActions("TextureCubeAssetToolBar", true);
-    plTextureAssetActions::MapToolbarActions("TextureCubeAssetToolBar");
+    plTextureAssetActions::MapActions("TextureCubeAssetToolBar", "");
   }
 }
 
@@ -112,18 +112,17 @@ static void ConfigureLUTAsset()
 
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("LUTAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("LUTAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("LUTAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("LUTAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("LUTAssetMenuBar");
-    plDocumentActions::MapMenuActions("LUTAssetMenuBar");
-    plAssetActions::MapMenuActions("LUTAssetMenuBar");
-    plCommandHistoryActions::MapActions("LUTAssetMenuBar");
+    plDocumentActions::MapActions("LUTAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("LUTAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("LUTAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("LUTAssetToolBar");
+    plActionMapManager::RegisterActionMap("LUTAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("LUTAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("LUTAssetToolBar", "");
     plAssetActions::MapToolBarActions("LUTAssetToolBar", true);
   }
@@ -135,25 +134,24 @@ static void ConfigureMaterialAsset()
 
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("MaterialAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("MaterialAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("MaterialAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("MaterialAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("MaterialAssetMenuBar");
-    plDocumentActions::MapMenuActions("MaterialAssetMenuBar");
-    plDocumentActions::MapToolsActions("MaterialAssetMenuBar");
-    plAssetActions::MapMenuActions("MaterialAssetMenuBar");
-    plCommandHistoryActions::MapActions("MaterialAssetMenuBar");
-    plEditActions::MapActions("MaterialAssetMenuBar", false, false);
+    plDocumentActions::MapActions("MaterialAssetMenuBar", "Menu.File", false);
+    plDocumentActions::MapToolsActions("MaterialAssetMenuBar", "Menu.Tools");
+    plCommandHistoryActions::MapActions("MaterialAssetMenuBar", "Menu.Edit");
+    plEditActions::MapActions("MaterialAssetMenuBar", "Menu.Edit", false, false);
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("MaterialAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("MaterialAssetToolBar");
+    plActionMapManager::RegisterActionMap("MaterialAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("MaterialAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("MaterialAssetToolBar", "");
     plAssetActions::MapToolBarActions("MaterialAssetToolBar", true);
 
     plMaterialAssetActions::RegisterActions();
-    plMaterialAssetActions::MapToolbarActions("MaterialAssetToolBar");
+    plMaterialAssetActions::MapActions("MaterialAssetToolBar", "");
 
     plVisualShaderActions::RegisterActions();
     plVisualShaderActions::MapActions("MaterialAssetToolBar");
@@ -161,9 +159,9 @@ static void ConfigureMaterialAsset()
 
   // View Tool Bar
   {
-    plActionMapManager::RegisterActionMap("MaterialAssetViewToolBar").AssertSuccess();
-    plViewActions::MapToolbarActions("MaterialAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-    plViewLightActions::MapToolbarActions("MaterialAssetViewToolBar");
+    plActionMapManager::RegisterActionMap("MaterialAssetViewToolBar").IgnoreResult();
+    plViewActions::MapActions("MaterialAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+    plViewLightActions::MapActions("MaterialAssetViewToolBar", "");
   }
 }
 
@@ -171,20 +169,19 @@ static void ConfigureRenderPipelineAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("RenderPipelineAssetMenuBar").AssertSuccess();
+    plActionMapManager::RegisterActionMap("RenderPipelineAssetMenuBar").IgnoreResult();
 
-    plStandardMenus::MapActions("RenderPipelineAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plStandardMenus::MapActions("RenderPipelineAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("RenderPipelineAssetMenuBar");
-    plDocumentActions::MapMenuActions("RenderPipelineAssetMenuBar");
-    plAssetActions::MapMenuActions("RenderPipelineAssetMenuBar");
-    plCommandHistoryActions::MapActions("RenderPipelineAssetMenuBar");
-    plEditActions::MapActions("RenderPipelineAssetMenuBar", false, false);
+    plDocumentActions::MapActions("RenderPipelineAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("RenderPipelineAssetMenuBar", "Menu.Edit");
+    plEditActions::MapActions("RenderPipelineAssetMenuBar", "Menu.Edit", false, false);
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("RenderPipelineAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("RenderPipelineAssetToolBar");
+    plActionMapManager::RegisterActionMap("RenderPipelineAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("RenderPipelineAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("RenderPipelineAssetToolBar", "");
     plAssetActions::MapToolBarActions("RenderPipelineAssetToolBar", true);
   }
@@ -196,28 +193,27 @@ static void ConfigureMeshAsset()
 
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("MeshAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("MeshAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("MeshAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("MeshAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("MeshAssetMenuBar");
-    plDocumentActions::MapMenuActions("MeshAssetMenuBar");
-    plAssetActions::MapMenuActions("MeshAssetMenuBar");
-    plCommandHistoryActions::MapActions("MeshAssetMenuBar");
+    plDocumentActions::MapActions("MeshAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("MeshAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("MeshAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("MeshAssetToolBar");
+    plActionMapManager::RegisterActionMap("MeshAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("MeshAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("MeshAssetToolBar", "");
     plAssetActions::MapToolBarActions("MeshAssetToolBar", true);
-    plCommonAssetActions::MapToolbarActions("MeshAssetToolBar", plCommonAssetUiState::Grid);
+    plCommonAssetActions::MapActions("MeshAssetToolBar", "", plCommonAssetUiState::Grid);
   }
 
   // View Tool Bar
   {
-    plActionMapManager::RegisterActionMap("MeshAssetViewToolBar").AssertSuccess();
-    plViewActions::MapToolbarActions("MeshAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-    plViewLightActions::MapToolbarActions("MeshAssetViewToolBar");
+    plActionMapManager::RegisterActionMap("MeshAssetViewToolBar").IgnoreResult();
+    plViewActions::MapActions("MeshAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+    plViewLightActions::MapActions("MeshAssetViewToolBar", "");
   }
 }
 
@@ -225,19 +221,18 @@ static void ConfigureSurfaceAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("SurfaceAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("SurfaceAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("SurfaceAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("SurfaceAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("SurfaceAssetMenuBar");
-    plDocumentActions::MapMenuActions("SurfaceAssetMenuBar");
-    plAssetActions::MapMenuActions("SurfaceAssetMenuBar");
-    plDocumentActions::MapToolsActions("SurfaceAssetMenuBar");
-    plCommandHistoryActions::MapActions("SurfaceAssetMenuBar");
+    plDocumentActions::MapActions("SurfaceAssetMenuBar", "Menu.File", false);
+    plDocumentActions::MapToolsActions("SurfaceAssetMenuBar", "Menu.Tools");
+    plCommandHistoryActions::MapActions("SurfaceAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("SurfaceAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("SurfaceAssetToolBar");
+    plActionMapManager::RegisterActionMap("SurfaceAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("SurfaceAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("SurfaceAssetToolBar", "");
     plAssetActions::MapToolBarActions("SurfaceAssetToolBar", true);
   }
@@ -247,19 +242,18 @@ static void ConfigureCollectionAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("CollectionAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("CollectionAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("CollectionAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("CollectionAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("CollectionAssetMenuBar");
-    plDocumentActions::MapMenuActions("CollectionAssetMenuBar");
-    plAssetActions::MapMenuActions("CollectionAssetMenuBar");
-    plDocumentActions::MapToolsActions("CollectionAssetMenuBar");
-    plCommandHistoryActions::MapActions("CollectionAssetMenuBar");
+    plDocumentActions::MapActions("CollectionAssetMenuBar", "Menu.File", false);
+    plDocumentActions::MapToolsActions("CollectionAssetMenuBar", "Menu.Tools");
+    plCommandHistoryActions::MapActions("CollectionAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("CollectionAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("CollectionAssetToolBar");
+    plActionMapManager::RegisterActionMap("CollectionAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("CollectionAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("CollectionAssetToolBar", "");
     plAssetActions::MapToolBarActions("CollectionAssetToolBar", true);
   }
@@ -269,19 +263,18 @@ static void ConfigureColorGradientAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("ColorGradientAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("ColorGradientAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("ColorGradientAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("ColorGradientAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("ColorGradientAssetMenuBar");
-    plDocumentActions::MapMenuActions("ColorGradientAssetMenuBar");
-    plAssetActions::MapMenuActions("ColorGradientAssetMenuBar");
-    plDocumentActions::MapToolsActions("ColorGradientAssetMenuBar");
-    plCommandHistoryActions::MapActions("ColorGradientAssetMenuBar");
+    plDocumentActions::MapActions("ColorGradientAssetMenuBar", "Menu.File", false);
+    plDocumentActions::MapToolsActions("ColorGradientAssetMenuBar", "Menu.Tools");
+    plCommandHistoryActions::MapActions("ColorGradientAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("ColorGradientAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("ColorGradientAssetToolBar");
+    plActionMapManager::RegisterActionMap("ColorGradientAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("ColorGradientAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("ColorGradientAssetToolBar", "");
     plAssetActions::MapToolBarActions("ColorGradientAssetToolBar", true);
   }
@@ -291,19 +284,18 @@ static void ConfigureCurve1DAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("Curve1DAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("Curve1DAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("Curve1DAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("Curve1DAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("Curve1DAssetMenuBar");
-    plDocumentActions::MapMenuActions("Curve1DAssetMenuBar");
-    plAssetActions::MapMenuActions("Curve1DAssetMenuBar");
-    plDocumentActions::MapToolsActions("Curve1DAssetMenuBar");
-    plCommandHistoryActions::MapActions("Curve1DAssetMenuBar");
+    plDocumentActions::MapActions("Curve1DAssetMenuBar", "Menu.File", false);
+    plDocumentActions::MapToolsActions("Curve1DAssetMenuBar", "Menu.Tools");
+    plCommandHistoryActions::MapActions("Curve1DAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("Curve1DAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("Curve1DAssetToolBar");
+    plActionMapManager::RegisterActionMap("Curve1DAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("Curve1DAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("Curve1DAssetToolBar", "");
     plAssetActions::MapToolBarActions("Curve1DAssetToolBar", true);
   }
@@ -313,43 +305,42 @@ static void ConfigurePropertyAnimAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("PropertyAnimAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("PropertyAnimAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit | plStandardMenuTypes::Scene | plStandardMenuTypes::View);
+    plActionMapManager::RegisterActionMap("PropertyAnimAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("PropertyAnimAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Scene | plStandardMenuTypes::View | plStandardMenuTypes::Help);
     plProjectActions::MapActions("PropertyAnimAssetMenuBar");
-    plDocumentActions::MapMenuActions("PropertyAnimAssetMenuBar");
-    plAssetActions::MapMenuActions("PropertyAnimAssetMenuBar");
-    plDocumentActions::MapToolsActions("PropertyAnimAssetMenuBar");
-    plCommandHistoryActions::MapActions("PropertyAnimAssetMenuBar");
-    plGameObjectSelectionActions::MapActions("PropertyAnimAssetMenuBar");
-    plGameObjectDocumentActions::MapMenuActions("PropertyAnimAssetMenuBar");
-    plGameObjectDocumentActions::MapMenuSimulationSpeed("PropertyAnimAssetMenuBar");
-    plTransformGizmoActions::MapMenuActions("PropertyAnimAssetMenuBar");
-    plTranslateGizmoAction::MapActions("PropertyAnimAssetMenuBar");
+    plDocumentActions::MapActions("PropertyAnimAssetMenuBar", "Menu.File", false);
+    plDocumentActions::MapToolsActions("PropertyAnimAssetMenuBar", "Menu.Tools");
+    plCommandHistoryActions::MapActions("PropertyAnimAssetMenuBar", "Menu.Edit");
+    plGameObjectSelectionActions::MapActions("PropertyAnimAssetMenuBar", "Menu.Edit");
+    plGameObjectDocumentActions::MapMenuActions("PropertyAnimAssetMenuBar", "Menu.View");
+    plGameObjectDocumentActions::MapMenuSimulationSpeed("PropertyAnimAssetMenuBar", "Menu.Scene");
+    plTransformGizmoActions::MapMenuActions("PropertyAnimAssetMenuBar", "Menu.Edit");
+    plTranslateGizmoAction::MapActions("PropertyAnimAssetMenuBar", "Menu.Edit/Gizmo.Menu");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("PropertyAnimAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("PropertyAnimAssetToolBar");
+    plActionMapManager::RegisterActionMap("PropertyAnimAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("PropertyAnimAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("PropertyAnimAssetToolBar", "");
     plAssetActions::MapToolBarActions("PropertyAnimAssetToolBar", true);
-    plGameObjectContextActions::MapToolbarActions("PropertyAnimAssetToolBar");
-    plGameObjectDocumentActions::MapToolbarActions("PropertyAnimAssetToolBar");
-    plTransformGizmoActions::MapToolbarActions("PropertyAnimAssetToolBar");
+    plGameObjectContextActions::MapToolbarActions("PropertyAnimAssetToolBar", "");
+    plGameObjectDocumentActions::MapToolbarActions("PropertyAnimAssetToolBar", "");
+    plTransformGizmoActions::MapToolbarActions("PropertyAnimAssetToolBar", "");
   }
 
   // View Tool Bar
   {
-    plActionMapManager::RegisterActionMap("PropertyAnimAssetViewToolBar").AssertSuccess();
-    plViewActions::MapToolbarActions("PropertyAnimAssetViewToolBar", plViewActions::PerspectiveMode | plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-    plQuadViewActions::MapToolbarActions("PropertyAnimAssetViewToolBar");
+    plActionMapManager::RegisterActionMap("PropertyAnimAssetViewToolBar").IgnoreResult();
+    plViewActions::MapActions("PropertyAnimAssetViewToolBar", "", plViewActions::PerspectiveMode | plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+    plQuadViewActions::MapActions("PropertyAnimAssetViewToolBar", "");
   }
 
   // SceneGraph Context Menu
   {
-    plActionMapManager::RegisterActionMap("PropertyAnimAsset_ScenegraphContextMenu").AssertSuccess();
-    plGameObjectSelectionActions::MapContextMenuActions("PropertyAnimAsset_ScenegraphContextMenu");
-    plGameObjectContextActions::MapContextMenuActions("PropertyAnimAsset_ScenegraphContextMenu");
+    plActionMapManager::RegisterActionMap("PropertyAnimAsset_ScenegraphContextMenu").IgnoreResult();
+    plGameObjectSelectionActions::MapContextMenuActions("PropertyAnimAsset_ScenegraphContextMenu", "");
+    plGameObjectContextActions::MapContextMenuActions("PropertyAnimAsset_ScenegraphContextMenu", "");
   }
 }
 
@@ -359,27 +350,26 @@ static void ConfigureDecalAsset()
 
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("DecalAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("DecalAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("DecalAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("DecalAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("DecalAssetMenuBar");
-    plDocumentActions::MapMenuActions("DecalAssetMenuBar");
-    plAssetActions::MapMenuActions("DecalAssetMenuBar");
-    plCommandHistoryActions::MapActions("DecalAssetMenuBar");
+    plDocumentActions::MapActions("DecalAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("DecalAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("DecalAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("DecalAssetToolBar");
+    plActionMapManager::RegisterActionMap("DecalAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("DecalAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("DecalAssetToolBar", "");
     plAssetActions::MapToolBarActions("DecalAssetToolBar", true);
   }
 
   // View Tool Bar
   {
-    plActionMapManager::RegisterActionMap("DecalAssetViewToolBar").AssertSuccess();
-    plViewActions::MapToolbarActions("DecalAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-    plViewLightActions::MapToolbarActions("DecalAssetViewToolBar");
+    plActionMapManager::RegisterActionMap("DecalAssetViewToolBar").IgnoreResult();
+    plViewActions::MapActions("DecalAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+    plViewLightActions::MapActions("DecalAssetViewToolBar", "");
   }
 }
 
@@ -389,28 +379,27 @@ static void ConfigureAnimationClipAsset()
 
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("AnimationClipAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("AnimationClipAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("AnimationClipAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("AnimationClipAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("AnimationClipAssetMenuBar");
-    plDocumentActions::MapMenuActions("AnimationClipAssetMenuBar");
-    plAssetActions::MapMenuActions("AnimationClipAssetMenuBar");
-    plCommandHistoryActions::MapActions("AnimationClipAssetMenuBar");
+    plDocumentActions::MapActions("AnimationClipAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("AnimationClipAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("AnimationClipAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("AnimationClipAssetToolBar");
+    plActionMapManager::RegisterActionMap("AnimationClipAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("AnimationClipAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("AnimationClipAssetToolBar", "");
     plAssetActions::MapToolBarActions("AnimationClipAssetToolBar", true);
-    plCommonAssetActions::MapToolbarActions("AnimationClipAssetToolBar", plCommonAssetUiState::Loop | plCommonAssetUiState::Pause | plCommonAssetUiState::Restart | plCommonAssetUiState::SimulationSpeed | plCommonAssetUiState::Grid);
+    plCommonAssetActions::MapActions("AnimationClipAssetToolBar", "", plCommonAssetUiState::Loop | plCommonAssetUiState::Pause | plCommonAssetUiState::Restart | plCommonAssetUiState::SimulationSpeed | plCommonAssetUiState::Grid);
   }
 
   // View Tool Bar
   {
-    plActionMapManager::RegisterActionMap("AnimationClipAssetViewToolBar").AssertSuccess();
-    plViewActions::MapToolbarActions("AnimationClipAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-    plViewLightActions::MapToolbarActions("AnimationClipAssetViewToolBar");
+    plActionMapManager::RegisterActionMap("AnimationClipAssetViewToolBar").IgnoreResult();
+    plViewActions::MapActions("AnimationClipAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+    plViewLightActions::MapActions("AnimationClipAssetViewToolBar", "");
   }
 }
 
@@ -422,29 +411,28 @@ static void ConfigureSkeletonAsset()
 
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("SkeletonAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("SkeletonAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("SkeletonAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("SkeletonAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("SkeletonAssetMenuBar");
-    plDocumentActions::MapMenuActions("SkeletonAssetMenuBar");
-    plAssetActions::MapMenuActions("SkeletonAssetMenuBar");
-    plCommandHistoryActions::MapActions("SkeletonAssetMenuBar");
+    plDocumentActions::MapActions("SkeletonAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("SkeletonAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("SkeletonAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("SkeletonAssetToolBar");
+    plActionMapManager::RegisterActionMap("SkeletonAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("SkeletonAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("SkeletonAssetToolBar", "");
     plAssetActions::MapToolBarActions("SkeletonAssetToolBar", true);
-    plCommonAssetActions::MapToolbarActions("SkeletonAssetToolBar", plCommonAssetUiState::Grid);
-    plSkeletonActions::MapActions("SkeletonAssetToolBar");
+    plCommonAssetActions::MapActions("SkeletonAssetToolBar", "", plCommonAssetUiState::Grid);
+    plSkeletonActions::MapActions("SkeletonAssetToolBar", "");
   }
 
   // View Tool Bar
   {
-    plActionMapManager::RegisterActionMap("SkeletonAssetViewToolBar").AssertSuccess();
-    plViewActions::MapToolbarActions("SkeletonAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-    plViewLightActions::MapToolbarActions("SkeletonAssetViewToolBar");
+    plActionMapManager::RegisterActionMap("SkeletonAssetViewToolBar").IgnoreResult();
+    plViewActions::MapActions("SkeletonAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+    plViewLightActions::MapActions("SkeletonAssetViewToolBar", "");
   }
 }
 
@@ -452,28 +440,27 @@ static void ConfigureAnimatedMeshAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("AnimatedMeshAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("AnimatedMeshAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("AnimatedMeshAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("AnimatedMeshAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("AnimatedMeshAssetMenuBar");
-    plDocumentActions::MapMenuActions("AnimatedMeshAssetMenuBar");
-    plAssetActions::MapMenuActions("AnimatedMeshAssetMenuBar");
-    plCommandHistoryActions::MapActions("AnimatedMeshAssetMenuBar");
+    plDocumentActions::MapActions("AnimatedMeshAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("AnimatedMeshAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("AnimatedMeshAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("AnimatedMeshAssetToolBar");
+    plActionMapManager::RegisterActionMap("AnimatedMeshAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("AnimatedMeshAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("AnimatedMeshAssetToolBar", "");
     plAssetActions::MapToolBarActions("AnimatedMeshAssetToolBar", true);
-    plCommonAssetActions::MapToolbarActions("AnimatedMeshAssetToolBar", plCommonAssetUiState::Grid);
+    plCommonAssetActions::MapActions("AnimatedMeshAssetToolBar", "", plCommonAssetUiState::Grid);
   }
 
   // View Tool Bar
   {
-    plActionMapManager::RegisterActionMap("AnimatedMeshAssetViewToolBar").AssertSuccess();
-    plViewActions::MapToolbarActions("AnimatedMeshAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-    plViewLightActions::MapToolbarActions("AnimatedMeshAssetViewToolBar");
+    plActionMapManager::RegisterActionMap("AnimatedMeshAssetViewToolBar").IgnoreResult();
+    plViewActions::MapActions("AnimatedMeshAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+    plViewLightActions::MapActions("AnimatedMeshAssetViewToolBar", "");
   }
 }
 
@@ -481,27 +468,26 @@ static void ConfigureImageDataAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("ImageDataAssetMenuBar").AssertSuccess();
-    plStandardMenus::MapActions("ImageDataAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plActionMapManager::RegisterActionMap("ImageDataAssetMenuBar").IgnoreResult();
+    plStandardMenus::MapActions("ImageDataAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("ImageDataAssetMenuBar");
-    plDocumentActions::MapMenuActions("ImageDataAssetMenuBar");
-    plAssetActions::MapMenuActions("ImageDataAssetMenuBar");
-    plCommandHistoryActions::MapActions("ImageDataAssetMenuBar");
+    plDocumentActions::MapActions("ImageDataAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("ImageDataAssetMenuBar", "Menu.Edit");
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("ImageDataAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("ImageDataAssetToolBar");
+    plActionMapManager::RegisterActionMap("ImageDataAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("ImageDataAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("ImageDataAssetToolBar", "");
     plAssetActions::MapToolBarActions("ImageDataAssetToolBar", true);
   }
 
   // View Tool Bar
   {
-    plActionMapManager::RegisterActionMap("ImageDataAssetViewToolBar").AssertSuccess();
-    plViewActions::MapToolbarActions("ImageDataAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-    plViewLightActions::MapToolbarActions("ImageDataAssetViewToolBar");
+    plActionMapManager::RegisterActionMap("ImageDataAssetViewToolBar").IgnoreResult();
+    plViewActions::MapActions("ImageDataAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+    plViewLightActions::MapActions("ImageDataAssetViewToolBar", "");
   }
 }
 
@@ -509,42 +495,42 @@ static void ConfigureStateMachineAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("StateMachineAssetMenuBar").AssertSuccess();
+    plActionMapManager::RegisterActionMap("StateMachineAssetMenuBar").IgnoreResult();
 
-    plStandardMenus::MapActions("StateMachineAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plStandardMenus::MapActions("StateMachineAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("StateMachineAssetMenuBar");
-    plDocumentActions::MapMenuActions("StateMachineAssetMenuBar");
-    plAssetActions::MapMenuActions("StateMachineAssetMenuBar");
-    plCommandHistoryActions::MapActions("StateMachineAssetMenuBar");
-    plEditActions::MapActions("StateMachineAssetMenuBar", false, false);
+    plDocumentActions::MapActions("StateMachineAssetMenuBar", "Menu.File", false);
+    plCommandHistoryActions::MapActions("StateMachineAssetMenuBar", "Menu.Edit");
+    plEditActions::MapActions("StateMachineAssetMenuBar", "Menu.Edit", false, false);
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("StateMachineAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("StateMachineAssetToolBar");
+    plActionMapManager::RegisterActionMap("StateMachineAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("StateMachineAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("StateMachineAssetToolBar", "");
     plAssetActions::MapToolBarActions("StateMachineAssetToolBar", true);
   }
 }
+
 static void ConfigureBlackboardTemplateAsset()
 {
   // Menu Bar
   {
-    plActionMapManager::RegisterActionMap("BlackboardTemplateAssetMenuBar").AssertSuccess();
+    plActionMapManager::RegisterActionMap("BlackboardTemplateAssetMenuBar").IgnoreResult();
 
-    plStandardMenus::MapActions("BlackboardTemplateAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
+    plStandardMenus::MapActions("BlackboardTemplateAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
     plProjectActions::MapActions("BlackboardTemplateAssetMenuBar");
-    plDocumentActions::MapMenuActions("BlackboardTemplateAssetMenuBar");
-    plAssetActions::MapMenuActions("BlackboardTemplateAssetMenuBar");
-    plCommandHistoryActions::MapActions("BlackboardTemplateAssetMenuBar");
-    plEditActions::MapActions("BlackboardTemplateAssetMenuBar", false, false);
+    plDocumentActions::MapActions("BlackboardTemplateAssetMenuBar", "Menu.File", false);
+    plAssetActions::MapMenuActions("BlackboardTemplateAssetMenuBar", "Menu.File");
+    plCommandHistoryActions::MapActions("BlackboardTemplateAssetMenuBar", "Menu.Edit");
+    plEditActions::MapActions("BlackboardTemplateAssetMenuBar", "Menu.Edit", false, false);
   }
 
   // Tool Bar
   {
-    plActionMapManager::RegisterActionMap("BlackboardTemplateAssetToolBar").AssertSuccess();
-    plDocumentActions::MapToolbarActions("BlackboardTemplateAssetToolBar");
+    plActionMapManager::RegisterActionMap("BlackboardTemplateAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("BlackboardTemplateAssetToolBar", "", true);
     plCommandHistoryActions::MapActions("BlackboardTemplateAssetToolBar", "");
     plAssetActions::MapToolBarActions("BlackboardTemplateAssetToolBar", true);
   }
@@ -599,6 +585,7 @@ void OnLoadPlugin()
 void OnUnloadPlugin()
 {
   plTextureAssetActions::UnregisterActions();
+  plTextureCubeAssetActions::UnregisterActions();
   plLUTAssetActions::UnregisterActions();
   plVisualShaderActions::UnregisterActions();
   plMaterialAssetActions::UnregisterActions();

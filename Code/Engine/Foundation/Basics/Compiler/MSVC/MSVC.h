@@ -68,13 +68,4 @@
 #    define PLASMA_VA_NUM_ARGS(...) PLASMA_VA_NUM_ARGS_HELPER PLASMA_LEFT_PARENTHESIS __VA_ARGS__, PLASMA_VA_NUM_ARGS_REVERSE_SEQUENCE PLASMA_RIGHT_PARENTHESIS
 #  endif
 
-#  define PLASMA_WARNING_PUSH() __pragma(warning(push))
-#  define PLASMA_WARNING_POP() __pragma(warning(pop))
-#  define PLASMA_WARNING_DISABLE_MSVC(_x) __pragma(warning(disable \
-                                                       : _x))
-
-#else
-
-#  define PLASMA_WARNING_DISABLE_MSVC(_x)
-
 #endif

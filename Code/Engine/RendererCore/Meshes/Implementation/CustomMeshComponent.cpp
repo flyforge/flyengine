@@ -16,11 +16,12 @@
 #include <RendererFoundation/Device/Device.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plCustomMeshComponent, 2, plComponentMode::Static)
+PLASMA_BEGIN_COMPONENT_TYPE(plCustomMeshComponent, 1, plComponentMode::Static)
 {
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
+    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_PROPERTIES
@@ -43,7 +44,7 @@ plAtomicInteger32 s_iCustomMeshResources;
 
 plCustomMeshComponent::plCustomMeshComponent()
 {
-  m_Bounds = plBoundingBoxSphere::MakeInvalid();
+  m_Bounds.SetInvalid();
 }
 
 plCustomMeshComponent::~plCustomMeshComponent() = default;
@@ -186,6 +187,7 @@ void plCustomMeshComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
 
   plCustomMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plCustomMeshRenderData>(GetOwner());
   {
+    pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
     pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
     pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
     pRenderData->m_hMesh = m_hDynamicMesh;
@@ -201,6 +203,7 @@ void plCustomMeshComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
   plResourceLock<plMaterialResource> pMaterial(m_hMaterial, plResourceAcquireMode::AllowLoadingFallback);
   plRenderData::Category category = pMaterial->GetRenderDataCategory();
   bool bDontCacheYet = pMaterial.GetAcquireResult() == plResourceAcquireResult::LoadingFallback;
+
 
   msg.AddRenderData(pRenderData, category, bDontCacheYet ? plRenderData::Caching::Never : plRenderData::Caching::IfStatic);
 }
@@ -240,7 +243,7 @@ void plCustomMeshComponent::OnActivated()
       ind[i * 3 + 2] = geo.GetPolygons()[i].m_Vertices[2];
     }
 
-    SetBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 1.5f));
+    SetBounds(plBoundingSphere(plVec3::ZeroVector(), 1.5f));
   }
 }
 
@@ -300,6 +303,7 @@ void plCustomMeshRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTT
 void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
 {
   plRenderContext* pRenderContext = renderViewContext.m_pRenderContext;
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plGALCommandEncoder* pGALCommandEncoder = pRenderContext->GetCommandEncoder();
 
   plInstanceData* pInstanceData = pPass->GetPipeline()->GetFrameDataProvider<plInstanceDataProvider>()->GetData(renderViewContext);
@@ -333,9 +337,17 @@ void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewCont
     instanceData[0].Color = pRenderData->m_Color;
     instanceData[0].ObjectToWorld = pRenderData->m_GlobalTransform;
 
+    #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+      instanceData[0].LastObjectToWorld = pRenderData->m_LastGlobalTransform;
+    #endif
+
     if (pRenderData->m_uiUniformScale)
     {
       instanceData[0].ObjectToWorldNormal = instanceData[0].ObjectToWorld;
+
+      #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+        instanceData[0].LastObjectToWorldNormal = instanceData[0].LastObjectToWorld;
+      #endif
     }
     else
     {
@@ -346,6 +358,16 @@ void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewCont
       // we explicitly ignore the return value here (success / failure)
       // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
       instanceData[0].ObjectToWorldNormal = mInverse.GetTranspose();
+
+      #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+        objectToWorld = pRenderData->m_LastGlobalTransform.GetAsMat4();
+
+        mInverse = objectToWorld.GetRotationalPart();
+        mInverse.Invert(0.0f).IgnoreResult();
+        // we explicitly ignore the return value here (success / failure)
+        // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
+        instanceData[0].LastObjectToWorldNormal = mInverse.GetTranspose();
+      #endif
     }
 
     pInstanceData->UpdateInstanceData(pRenderContext, 1);

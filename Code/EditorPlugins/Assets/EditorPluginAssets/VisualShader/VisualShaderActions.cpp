@@ -16,10 +16,10 @@ void plVisualShaderActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hCleanGraph);
 }
 
-void plVisualShaderActions::MapActions(plStringView sMapping)
+void plVisualShaderActions::MapActions(const char* szMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
   pMap->MapAction(s_hCleanGraph, "", 30.0f);
 }
@@ -34,7 +34,7 @@ plVisualShaderAction::plVisualShaderAction(const plActionContext& context, const
   SetIconPath(":/EditorPluginAssets/Cleanup.svg");
 }
 
-plVisualShaderAction::~plVisualShaderAction() = default;
+plVisualShaderAction::~plVisualShaderAction() {}
 
 void plVisualShaderAction::Execute(const plVariant& value)
 {

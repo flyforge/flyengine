@@ -49,7 +49,7 @@ public:
   void SetCollapseState(plQtGroupBoxBase* pBox);
 
 Q_SIGNALS:
-  void ExtendContextMenu(QMenu& ref_menu, const plHybridArray<plPropertySelection, 8>& items, const plAbstractProperty* pProp);
+  void ExtendContextMenu(QMenu& menu, const plHybridArray<plPropertySelection, 8>& items, const plAbstractProperty* pProp);
 
 public Q_SLOTS:
   void OnCollapseStateChanged(bool bCollapsed);

@@ -6,7 +6,7 @@
 
 struct plMsgExtractRenderData;
 
-using plRenderTargetComponentManager = plComponentManager<class plRenderTargetActivatorComponent, plBlockStorageType::Compact>;
+typedef plComponentManager<class plRenderTargetActivatorComponent, plBlockStorageType::Compact> plRenderTargetComponentManager;
 
 class PLASMA_RENDERERCORE_DLL plRenderTargetActivatorComponent : public plRenderComponent
 {

@@ -15,8 +15,8 @@ public:
   static void Initialize(plGALDeviceVulkan* pDevice);
   static void DeInitialize();
 
-  static const plGALResourceViewVulkan* GetFallbackResourceView(plGALShaderDescriptorType::Enum descriptorType, plGALShaderTextureType::Enum textureType, bool bDepth);
-  static const plGALUnorderedAccessViewVulkan* GetFallbackUnorderedAccessView(plGALShaderDescriptorType::Enum descriptorType, plGALShaderTextureType::Enum textureType);
+  static const plGALResourceViewVulkan* GetFallbackResourceView(vk::DescriptorType descriptorType, plShaderResourceType::Enum plType, bool bDepth);
+  static const plGALUnorderedAccessViewVulkan* GetFallbackUnorderedAccessView(vk::DescriptorType descriptorType, plShaderResourceType::Enum plType);
 
 private:
   static void GALDeviceEventHandler(const plGALDeviceEvent& e);
@@ -27,8 +27,8 @@ private:
   struct Key
   {
     PLASMA_DECLARE_POD_TYPE();
-    plEnum<plGALShaderDescriptorType> m_descriptorType;
-    plEnum<plGALShaderTextureType> m_plType;
+    vk::DescriptorType m_descriptorType;
+    plShaderResourceType::Enum m_plType;
     bool m_bDepth = false;
   };
 

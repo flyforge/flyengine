@@ -46,7 +46,7 @@ private:
 
   plParticleEffectAssetDocument* m_pAssetDoc;
 
-  plEngineViewConfig m_ViewConfig;
+  PlasmaEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget;
 
   QComboBox* m_pSystemsCombo = nullptr;

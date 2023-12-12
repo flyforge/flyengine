@@ -70,7 +70,9 @@ plReflectionProbeUpdater::ProbeUpdateInfo::~ProbeUpdateInfo()
 //////////////////////////////////////////////////////////////////////////
 /// plReflectionProbeUpdater
 
-plReflectionProbeUpdater::plReflectionProbeUpdater() = default;
+plReflectionProbeUpdater::plReflectionProbeUpdater()
+{
+}
 
 plReflectionProbeUpdater::~plReflectionProbeUpdater()
 {
@@ -371,6 +373,8 @@ void plReflectionProbeUpdater::AddViewToRender(const ProbeUpdateInfo::Step& step
     plVec3(0.0f, 0.0f, 1.0f),
   };
 
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
+
   // Setup view and camera
   {
     ReflectionView* pReflectionView = nullptr;
@@ -397,6 +401,7 @@ void plReflectionProbeUpdater::AddViewToRender(const ProbeUpdateInfo::Step& step
     plGALRenderTargets renderTargets;
     if (step.m_UpdateStep == UpdateStep::Filter)
     {
+      const plUInt32 uiWorldIndex = pWorld->GetIndex();
       renderTargets.m_hRTs[0] = updateInfo.m_TargetSlot.m_hSpecularOutputTexture;
 
       if (updateInfo.m_flags.IsSet(plReflectionProbeUpdaterFlags::SkyLight))

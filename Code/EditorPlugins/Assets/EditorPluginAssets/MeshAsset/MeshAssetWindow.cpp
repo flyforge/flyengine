@@ -55,7 +55,7 @@ plQtMeshAssetDocumentWindow::plQtMeshAssetDocumentWindow(plMeshAssetDocument* pD
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("MeshAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Mesh Properties");
+    pPropertyPanel->setWindowTitle("MESH PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -91,7 +91,7 @@ plMeshAssetDocument* plQtMeshAssetDocumentWindow::GetMeshDocument()
 void plQtMeshAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   for (auto pView : m_ViewWidgets)
@@ -104,7 +104,7 @@ void plQtMeshAssetDocumentWindow::SendRedrawMsg()
   QueryObjectBBox();
 }
 
-void plQtMeshAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose /*= 0*/)
+void plQtMeshAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose)
 {
   plQuerySelectionBBoxMsgToEngine msg;
   msg.m_uiViewID = 0xFFFFFFFF;
@@ -114,7 +114,7 @@ void plQtMeshAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose /*= 0*/)
 
 void plQtMeshAssetDocumentWindow::PropertyEventHandler(const plDocumentObjectPropertyEvent& e)
 {
-  // if (e.m_sProperty == "Resource") // any material change
+  //if (e.m_sProperty == "Resource") // any material change
   {
     UpdatePreview();
   }
@@ -122,7 +122,7 @@ void plQtMeshAssetDocumentWindow::PropertyEventHandler(const plDocumentObjectPro
 
 bool plQtMeshAssetDocumentWindow::UpdatePreview()
 {
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return false;
 
   if (GetMeshDocument()->GetProperties() == nullptr)
@@ -130,7 +130,7 @@ bool plQtMeshAssetDocumentWindow::UpdatePreview()
 
   const auto& materials = GetMeshDocument()->GetProperties()->m_Slots;
 
-  plEditorEngineSetMaterialsMsg msg;
+  PlasmaEditorEngineSetMaterialsMsg msg;
   msg.m_Materials.SetCount(materials.GetCount());
 
   plUInt32 uiSlot = 0;
@@ -159,12 +159,12 @@ bool plQtMeshAssetDocumentWindow::UpdatePreview()
 
 void plQtMeshAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
 
-void plQtMeshAssetDocumentWindow::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
+void plQtMeshAssetDocumentWindow::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plQuerySelectionBBoxResultMsgToEditor>())
   {

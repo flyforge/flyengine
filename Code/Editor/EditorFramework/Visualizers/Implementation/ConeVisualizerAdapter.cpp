@@ -4,9 +4,9 @@
 #include <EditorFramework/Visualizers/ConeVisualizerAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plConeVisualizerAdapter::plConeVisualizerAdapter() = default;
+plConeVisualizerAdapter::plConeVisualizerAdapter() {}
 
-plConeVisualizerAdapter::~plConeVisualizerAdapter() = default;
+plConeVisualizerAdapter::~plConeVisualizerAdapter() {}
 
 void plConeVisualizerAdapter::Finalize()
 {
@@ -16,7 +16,7 @@ void plConeVisualizerAdapter::Finalize()
 
   const plConeVisualizerAttribute* pAttr = static_cast<const plConeVisualizerAttribute*>(m_pVisualizerAttr);
 
-  m_hGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::Cone, pAttr->m_Color, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
+  m_hGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::Cone, pAttr->m_Color, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
 
   pAssetDocument->AddSyncObject(&m_hGizmo);
   m_hGizmo.SetVisible(m_bVisualizerIsVisible);
@@ -31,7 +31,7 @@ void plConeVisualizerAdapter::Update()
   if (!pAttr->GetAngleProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetAngleProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetAngleProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plAngle>(), "Invalid property bound to plConeVisualizerAttribute 'angle'");
     m_fAngleScale = plMath::Tan(value.ConvertTo<plAngle>() * 0.5f);
@@ -40,7 +40,7 @@ void plConeVisualizerAdapter::Update()
   if (!pAttr->GetColorProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plConeVisualizerAttribute 'color'");
     m_hGizmo.SetColor(value.ConvertTo<plColor>());
@@ -50,7 +50,7 @@ void plConeVisualizerAdapter::Update()
   if (!pAttr->GetRadiusProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetRadiusProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetRadiusProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plConeVisualizerAttribute 'radius'");
     m_fFinalScale *= value.ConvertTo<float>();

@@ -51,7 +51,7 @@ struct plBakedProbesComponent::RenderDebugViewTask : public plTask
   plBakingInterface* m_pBakingInterface = nullptr;
 
   const plWorld* m_pWorld = nullptr;
-  plMat4 m_InverseViewProjection = plMat4::MakeIdentity();
+  plMat4 m_InverseViewProjection = plMat4::IdentityMatrix();
   plUInt32 m_uiWidth = 0;
   plUInt32 m_uiHeight = 0;
   plDynamicArray<plColorGammaUB> m_PixelData;
@@ -196,7 +196,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plBakedProbesComponent, 1, plComponentMode::Static)
   PLASMA_END_FUNCTIONS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Lighting/Baking"),
+    new plCategoryAttribute("Rendering/Baking"),
+    new plColorAttribute(plColorScheme::Lighting),
     new plLongOpAttribute("plLongOpProxy_BakeScene"),
     new plTransformManipulatorAttribute("TestPosition"),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
@@ -300,7 +301,7 @@ void plBakedProbesComponent::OnExtractRenderData(plMsgExtractRenderData& ref_msg
   auto pManager = static_cast<const plBakedProbesComponentManager*>(GetOwningManager());
 
   auto addProbeRenderData = [&](const plVec3& vPosition, plCompressedSkyVisibility skyVisibility, plRenderData::Caching::Enum caching) {
-    plTransform transform = plTransform::MakeIdentity();
+    plTransform transform = plTransform::IdentityTransform();
     transform.m_vPosition = vPosition;
 
     plColor encodedSkyVisibility = plColor::Black;
@@ -309,7 +310,7 @@ void plBakedProbesComponent::OnExtractRenderData(plMsgExtractRenderData& ref_msg
     plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(pOwner);
     {
       pRenderData->m_GlobalTransform = transform;
-      pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
+      pRenderData->m_GlobalBounds.SetInvalid();
       pRenderData->m_hMesh = pManager->m_hDebugSphere;
       pRenderData->m_hMaterial = pManager->m_hDebugMaterial;
       pRenderData->m_Color = encodedSkyVisibility;
@@ -325,7 +326,7 @@ void plBakedProbesComponent::OnExtractRenderData(plMsgExtractRenderData& ref_msg
   if (m_bUseTestPosition)
   {
     plBakedProbesWorldModule::ProbeIndexData indexData;
-    if (pModule->GetProbeIndexData(m_vTestPosition, plVec3::MakeAxisZ(), indexData).Failed())
+    if (pModule->GetProbeIndexData(m_vTestPosition, plVec3::UnitZAxis(), indexData).Failed())
       return;
 
     if (true)

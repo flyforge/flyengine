@@ -3,6 +3,75 @@
 #include <RendererFoundation/Resources/ResourceFormats.h>
 
 // clang-format off
+PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plGALResourceFormat, 1)
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAFloat),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAUInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBFloat),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBUInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::B5G6R5UNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BGRAUByteNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BGRAUByteNormalizedsRGB),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAHalf),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAUShort),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAUShortNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAShort),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAShortNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGFloat),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGUInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGB10A2UInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGB10A2UIntNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RG11B10Float),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAUByteNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAUByteNormalizedsRGB),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAUByte),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAByteNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGBAByte),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGHalf),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGUShort),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGUShortNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGShort),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGShortNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGUByte),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGUByteNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGByte),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RGByteNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::DFloat),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RFloat),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RUInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RInt),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RHalf),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RUShort),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RUShortNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RShort),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RShortNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RUByte),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RUByteNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RByte),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::RByteNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::AUByteNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::D16),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::D24S8),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC1),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC1sRGB),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC2),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC2sRGB),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC3),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC3sRGB),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC4UNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC4Normalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC5UNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC5Normalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC6UFloat),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC6Float),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC7UNormalized),
+  PLASMA_ENUM_CONSTANT(plGALResourceFormat::BC7UNormalizedsRGB)
+PLASMA_END_STATIC_REFLECTED_ENUM;
+// clang-format on
+
+// clang-format off
 const plUInt8 plGALResourceFormat::s_BitsPerElement[plGALResourceFormat::ENUM_COUNT] =
 {
   0, // Invalid
@@ -177,7 +246,6 @@ const plUInt8 plGALResourceFormat::s_ChannelCount[plGALResourceFormat::ENUM_COUN
   4, // BC7UNormalized
   4  // BC7UNormalizedsRGB
 };
-
 // clang-format off
 
 

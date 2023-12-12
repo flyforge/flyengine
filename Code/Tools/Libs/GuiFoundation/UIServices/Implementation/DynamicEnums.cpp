@@ -9,9 +9,9 @@ void plDynamicEnum::Clear()
   m_ValidValues.Clear();
 }
 
-void plDynamicEnum::SetValueAndName(plInt32 iValue, plStringView sNewName)
+void plDynamicEnum::SetValueAndName(plInt32 iValue, const char* szNewName)
 {
-  m_ValidValues[iValue] = sNewName;
+  m_ValidValues[iValue] = szNewName;
 }
 
 void plDynamicEnum::RemoveValue(plInt32 iValue)
@@ -24,7 +24,7 @@ bool plDynamicEnum::IsValueValid(plInt32 iValue) const
   return m_ValidValues.Find(iValue).IsValid();
 }
 
-plStringView plDynamicEnum::GetValueName(plInt32 iValue) const
+const char* plDynamicEnum::GetValueName(plInt32 iValue) const
 {
   auto it = m_ValidValues.Find(iValue);
 

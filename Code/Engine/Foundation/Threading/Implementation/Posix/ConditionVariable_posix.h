@@ -3,7 +3,6 @@ PLASMA_FOUNDATION_INTERNAL_HEADER
 
 #include <errno.h>
 #include <pthread.h>
-#include <sys/time.h>
 
 plConditionVariable::plConditionVariable()
 {

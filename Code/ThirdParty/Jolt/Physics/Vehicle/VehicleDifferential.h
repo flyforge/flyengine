@@ -10,10 +10,10 @@
 
 JPH_NAMESPACE_BEGIN
 
-class JPH_EXPORT VehicleDifferentialSettings
+class VehicleDifferentialSettings
 {
 public:
-	JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(JPH_EXPORT, VehicleDifferentialSettings)
+	JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(VehicleDifferentialSettings)
 
 	/// Saves the contents in binary form to inStream.
 	void					SaveBinaryState(StreamOut &inStream) const;

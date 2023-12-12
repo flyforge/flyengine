@@ -70,7 +70,7 @@ protected:
 private:
   PLASMA_NODISCARD const char* _DoNotCall() const;
 
-  plVec3 m_vListenerPositionOffset{plVec3::MakeZero()};
+  plVec3 m_vListenerPositionOffset{plVec3::ZeroVector()};
 
   plGameObjectHandle m_hListenerPositionObject;
   plGameObjectHandle m_hListenerRotationObject;

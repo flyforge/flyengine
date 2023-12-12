@@ -6,9 +6,9 @@
 
 class plView;
 class plViewRedrawMsgToEngine;
-class plEngineProcessDocumentContext;
-class plEditorEngineDocumentMsg;
-class plEditorRenderPass;
+class PlasmaEngineProcessDocumentContext;
+class PlasmaEditorEngineDocumentMsg;
+class PlasmaEditorRenderPass;
 class plSelectedObjectsExtractorBase;
 class plSceneContext;
 using plRenderPipelineResourceHandle = plTypedResourceHandle<class plRenderPipelineResource>;
@@ -20,13 +20,13 @@ struct ObjectData
   float m_PickingID[4];
 };
 
-class plSceneViewContext : public plEngineProcessViewContext
+class plSceneViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plSceneViewContext(plSceneContext* pSceneContext);
   ~plSceneViewContext();
 
-  virtual void HandleViewMessage(const plEditorEngineViewMsg* pMsg) override;
+  virtual void HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg) override;
   virtual void SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* renderTargets, plUInt16 uiWidth, plUInt16 uiHeight) override;
 
   bool UpdateThumbnailCamera(const plBoundingBoxSphere& bounds);

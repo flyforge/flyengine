@@ -72,8 +72,8 @@ public:
   static plInt32 SuggestContainerWindow(plDocument* pDoc);
   /// \brief Resolve document GUID into an absolute path.
   plStringBuilder GetPathForDocumentGuid(const plUuid& guid);
-  static plStatus OpenProject(plStringView sProjectPath);
-  static plStatus CreateProject(plStringView sProjectPath);
+  static plStatus OpenProject(const char* szProjectPath);
+  static plStatus CreateProject(const char* szProjectPath);
 
   /// \brief Broadcasts the SaveAll event, though otherwise has no direct effect.
   static void BroadcastSaveAll();
@@ -97,20 +97,20 @@ public:
   plString GetProjectDataFolder() const;
 
   /// \brief Starts at the  given document and then searches the tree upwards until it finds an plProject file.
-  static plString FindProjectDirectoryForDocument(plStringView sDocumentPath);
+  static plString FindProjectDirectoryForDocument(const char* szDocumentPath);
 
-  bool IsDocumentInAllowedRoot(plStringView sDocumentPath, plString* out_pRelativePath = nullptr) const;
+  bool IsDocumentInAllowedRoot(const char* szDocumentPath, plString* out_RelativePath = nullptr) const;
 
-  void AddAllowedDocumentRoot(plStringView sPath);
+  void AddAllowedDocumentRoot(const char* szPath);
 
   /// \brief Makes sure the given sub-folder exists inside the project directory
-  void CreateSubFolder(plStringView sFolder) const;
+  void CreateSubFolder(const char* szFolder) const;
 
 private:
-  static plStatus CreateOrOpenProject(plStringView sProjectPath, bool bCreate);
+  static plStatus CreateOrOpenProject(const char* szProjectPath, bool bCreate);
 
 private:
-  plToolsProject(plStringView sProjectPath);
+  plToolsProject(const char* szProjectPath);
   ~plToolsProject();
 
   plStatus Create();

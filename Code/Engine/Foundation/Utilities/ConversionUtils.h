@@ -263,6 +263,7 @@ namespace plConversionUtils
   /// \brief Converts a temp hashed string to a string. Will print the hash value since the original string can't be restored from a temp hashed string.
   PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plTempHashedString& value, plStringBuilder& out_sResult);
 
+
   /// \brief Converts a plVariantArray to a string
   PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plDynamicArray<plVariant>& value, plStringBuilder& out_sResult);
 

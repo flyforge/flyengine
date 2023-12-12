@@ -223,13 +223,13 @@ static int __CPP_Component_SendMessage(duk_context* pDuk)
 
   if (duk.GetFunctionMagicValue() == 0) // SendMessage
   {
-    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::MakeZero());
+    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::Zero());
     pComponent->SendMessage(*pMsg);
 
     if (duk.GetBoolValue(3)) // expect the message to have result values
     {
       // sync msg back to TS
-      plTypeScriptBinding::SyncPlasmaObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
+      plTypeScriptBinding::SyncEzObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
     }
   }
   else // PostMessage
@@ -251,7 +251,7 @@ static int __CPP_TsComponent_BroadcastEvent(duk_context* pDuk)
 
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(duk);
 
-  plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::MakeZero());
+  plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::Zero());
   pComponent->BroadcastEventMsg(plStaticCast<plEventMessage&>(*pMsg));
 
   PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);

@@ -149,13 +149,13 @@ void plLongOpWorkerManager::RemoveOperation(plUuid opGuid)
   }
 }
 
-plLongOpWorkerManager::WorkerOpInfo* plLongOpWorkerManager::GetOperation(const plUuid& opGuid) const
+plLongOpWorkerManager::WorkerOpInfo* plLongOpWorkerManager::GetOperation(const plUuid& guid) const
 {
   PLASMA_LOCK(m_Mutex);
 
   for (auto& opInfoPtr : m_WorkerOps)
   {
-    if (opInfoPtr->m_OperationGuid == opGuid)
+    if (opInfoPtr->m_OperationGuid == guid)
       return opInfoPtr.Borrow();
   }
 

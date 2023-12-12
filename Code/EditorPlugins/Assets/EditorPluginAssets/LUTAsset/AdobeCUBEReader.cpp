@@ -10,42 +10,42 @@
 
 namespace
 {
-  bool GetVec3FromLine(plHybridArray<const plToken*, 32> line, plUInt32 uiSkip, plVec3& ref_vOut)
+  bool GetVec3FromLine(plHybridArray<const plToken*, 32> line, plUInt32 skip, plVec3& out)
   {
-    if (line.GetCount() < (uiSkip + 3 + 2))
+    if (line.GetCount() < (skip + 3 + 2))
     {
       return false;
     }
 
-    if ((line[uiSkip + 0]->m_iType != plTokenType::Float && line[uiSkip + 0]->m_iType != plTokenType::Integer) ||
-        line[uiSkip + 1]->m_iType != plTokenType::Whitespace ||
-        (line[uiSkip + 2]->m_iType != plTokenType::Float && line[uiSkip + 2]->m_iType != plTokenType::Integer) ||
-        line[uiSkip + 3]->m_iType != plTokenType::Whitespace ||
-        (line[uiSkip + 4]->m_iType != plTokenType::Float && line[uiSkip + 4]->m_iType != plTokenType::Integer))
+    if ((line[skip + 0]->m_iType != plTokenType::Float && line[skip + 0]->m_iType != plTokenType::Integer) ||
+        line[skip + 1]->m_iType != plTokenType::Whitespace ||
+        (line[skip + 2]->m_iType != plTokenType::Float && line[skip + 2]->m_iType != plTokenType::Integer) ||
+        line[skip + 3]->m_iType != plTokenType::Whitespace ||
+        (line[skip + 4]->m_iType != plTokenType::Float && line[skip + 4]->m_iType != plTokenType::Integer))
     {
       return false;
     }
 
     double res = 0;
-    plString sVal = line[uiSkip + 0]->m_DataView;
+    plString sVal = line[skip + 0]->m_DataView;
 
     if (plConversionUtils::StringToFloat(sVal, res).Failed())
       return false;
 
-    ref_vOut.x = static_cast<float>(res);
+    out.x = static_cast<float>(res);
 
-    sVal = line[uiSkip + 2]->m_DataView;
+    sVal = line[skip + 2]->m_DataView;
     if (plConversionUtils::StringToFloat(sVal, res).Failed())
       return false;
 
-    ref_vOut.y = static_cast<float>(res);
+    out.y = static_cast<float>(res);
 
 
-    sVal = line[uiSkip + 4]->m_DataView;
+    sVal = line[skip + 4]->m_DataView;
     if (plConversionUtils::StringToFloat(sVal, res).Failed())
       return false;
 
-    ref_vOut.z = static_cast<float>(res);
+    out.z = static_cast<float>(res);
 
     return true;
   }
@@ -54,10 +54,10 @@ namespace
 plAdobeCUBEReader::plAdobeCUBEReader() = default;
 plAdobeCUBEReader::~plAdobeCUBEReader() = default;
 
-plStatus plAdobeCUBEReader::ParseFile(plStreamReader& inout_stream, plLogInterface* pLog /*= nullptr*/)
+plStatus plAdobeCUBEReader::ParseFile(plStreamReader& Stream, plLogInterface* pLog /*= nullptr*/)
 {
   plString sContent;
-  sContent.ReadAll(inout_stream);
+  sContent.ReadAll(Stream);
 
   plTokenizer tokenizer;
   tokenizer.SetTreatHashSignAsLineComment(true);

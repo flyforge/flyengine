@@ -1,6 +1,5 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Lights/Implementation/ReflectionPool.h>
 #include <RendererCore/Pipeline/Passes/ReflectionFilterPass.h>
 #include <RendererCore/Pipeline/View.h>
@@ -32,7 +31,9 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plReflectionFilterPass::plReflectionFilterPass()
   : plRenderPipelinePass("ReflectionFilterPass")
-
+  , m_fIntensity(1.0f)
+  , m_fSaturation(1.0f)
+  , m_uiIrradianceOutputIndex(0)
 {
   {
     m_hFilteredSpecularConstantBuffer = plRenderContext::CreateConstantBufferStorage<plReflectionFilteredSpecularConstants>();
@@ -158,29 +159,6 @@ void plReflectionFilterPass::Execute(const plRenderViewContext& renderViewContex
 
     renderViewContext.m_pRenderContext->Dispatch(1).IgnoreResult();
   }
-}
-
-plResult plReflectionFilterPass::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  inout_stream << m_fIntensity;
-  inout_stream << m_fSaturation;
-  inout_stream << m_uiSpecularOutputIndex;
-  inout_stream << m_uiIrradianceOutputIndex;
-  // inout_stream << m_hInputCubemap; Runtime only property
-  return PLASMA_SUCCESS;
-}
-
-plResult plReflectionFilterPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  inout_stream >> m_fIntensity;
-  inout_stream >> m_fSaturation;
-  inout_stream >> m_uiSpecularOutputIndex;
-  inout_stream >> m_uiIrradianceOutputIndex;
-  return PLASMA_SUCCESS;
 }
 
 plUInt32 plReflectionFilterPass::GetInputCubemap() const

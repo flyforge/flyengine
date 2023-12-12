@@ -52,7 +52,7 @@ PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plJoltMeshResource);
 plJoltMeshResource::plJoltMeshResource()
   : plResource(DoUpdate::OnMainThread, 1)
 {
-  m_Bounds = plBoundingBoxSphere::MakeFromCenterExtents(plVec3::MakeZero(), plVec3::MakeZero(), 0);
+  m_Bounds = plBoundingBoxSphere(plVec3::ZeroVector(), plVec3::ZeroVector(), 0);
 
   ModifyMemoryUsage().m_uiMemoryCPU = sizeof(plJoltMeshResource);
 }

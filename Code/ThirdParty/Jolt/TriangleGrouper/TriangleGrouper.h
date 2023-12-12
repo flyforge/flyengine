@@ -5,12 +5,11 @@
 #pragma once
 
 #include <Jolt/Geometry/IndexedTriangle.h>
-#include <Jolt/Core/NonCopyable.h>
 
 JPH_NAMESPACE_BEGIN
 
 /// A class that groups triangles in batches of N (according to closeness)
-class JPH_EXPORT TriangleGrouper : public NonCopyable
+class TriangleGrouper
 {
 public:
 	/// Virtual destructor

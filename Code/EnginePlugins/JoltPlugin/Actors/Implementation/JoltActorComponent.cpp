@@ -35,6 +35,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltActorComponent, 2)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Actors"),
+    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -56,7 +57,7 @@ void plJoltActorComponent::SerializeComponent(plWorldWriter& inout_stream) const
 void plJoltActorComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 
@@ -87,11 +88,7 @@ void plJoltActorComponent::OnDeactivated()
     auto* pSystem = pModule->GetJoltSystem();
     auto* pBodies = &pSystem->GetBodyInterface();
 
-    if (pBodies->IsAdded(bodyId))
-    {
-      pBodies->RemoveBody(bodyId);
-    }
-
+    pBodies->RemoveBody(bodyId);
     pBodies->DestroyBody(bodyId);
     m_uiJoltBodyID = JPH::BodyID::cInvalidBodyID;
   }
@@ -184,7 +181,7 @@ plResult plJoltActorComponent::CreateShape(JPH::BodyCreationSettings* pSettings,
       pShape = pScaledShape;
     }
 
-    if (!shapes[0].m_Transform.m_vPosition.IsZero(0.01f) || shapes[0].m_Transform.m_qRotation != plQuat::MakeIdentity())
+    if (!shapes[0].m_Transform.m_vPosition.IsZero(0.01f) || shapes[0].m_Transform.m_qRotation != plQuat::IdentityQuaternion())
     {
       JPH::RotatedTranslatedShapeSettings opt(plJoltConversionUtils::ToVec3(shapes[0].m_Transform.m_vPosition), plJoltConversionUtils::ToQuat(shapes[0].m_Transform.m_qRotation), pShape);
 

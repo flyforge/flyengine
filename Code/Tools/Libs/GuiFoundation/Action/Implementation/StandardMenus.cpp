@@ -6,78 +6,74 @@
 #include <GuiFoundation/DockPanels/ApplicationPanel.moc.h>
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 
-plActionDescriptorHandle plStandardMenus::s_hMenuProject;
 plActionDescriptorHandle plStandardMenus::s_hMenuFile;
 plActionDescriptorHandle plStandardMenus::s_hMenuEdit;
 plActionDescriptorHandle plStandardMenus::s_hMenuPanels;
+plActionDescriptorHandle plStandardMenus::s_hMenuProject;
 plActionDescriptorHandle plStandardMenus::s_hMenuScene;
 plActionDescriptorHandle plStandardMenus::s_hMenuView;
-plActionDescriptorHandle plStandardMenus::s_hMenuTools;
 plActionDescriptorHandle plStandardMenus::s_hMenuHelp;
 plActionDescriptorHandle plStandardMenus::s_hCheckForUpdates;
 plActionDescriptorHandle plStandardMenus::s_hReportProblem;
 
 void plStandardMenus::RegisterActions()
 {
-  s_hMenuProject = PLASMA_REGISTER_MENU("G.Project");
-  s_hMenuFile = PLASMA_REGISTER_MENU("G.File");
-  s_hMenuEdit = PLASMA_REGISTER_MENU("G.Edit");
-  s_hMenuPanels = PLASMA_REGISTER_DYNAMIC_MENU("G.Panels", plApplicationPanelsMenuAction, "");
-  s_hMenuScene = PLASMA_REGISTER_MENU("G.Scene");
-  s_hMenuView = PLASMA_REGISTER_MENU("G.View");
-  s_hMenuTools = PLASMA_REGISTER_MENU("G.Tools");
-  s_hMenuHelp = PLASMA_REGISTER_MENU("G.Help");
-  s_hCheckForUpdates = PLASMA_REGISTER_ACTION_1("Help.CheckForUpdates", plActionScope::Global, "Help", "", plHelpActions, plHelpActions::ButtonType::CheckForUpdates);
-  s_hReportProblem = PLASMA_REGISTER_ACTION_1("Help.ReportProblem", plActionScope::Global, "Help", "", plHelpActions, plHelpActions::ButtonType::ReportProblem);
+  s_hMenuFile = PLASMA_REGISTER_MENU("Menu.File");
+  s_hMenuEdit = PLASMA_REGISTER_MENU("Menu.Edit");
+  s_hMenuPanels = PLASMA_REGISTER_DYNAMIC_MENU("Menu.Panels", plApplicationPanelsMenuAction, "");
+  s_hMenuProject = PLASMA_REGISTER_MENU("Menu.Project");
+  s_hMenuScene = PLASMA_REGISTER_MENU("Menu.Scene");
+  s_hMenuView = PLASMA_REGISTER_MENU("Menu.View");
+  s_hMenuHelp = PLASMA_REGISTER_MENU("Menu.Help");
+  s_hCheckForUpdates =
+    PLASMA_REGISTER_ACTION_1("Help.CheckForUpdates", plActionScope::Global, "Help", "", plHelpActions, plHelpActions::ButtonType::CheckForUpdates);
+  s_hReportProblem =
+    PLASMA_REGISTER_ACTION_1("Help.ReportProblem", plActionScope::Global, "Help", "", plHelpActions, plHelpActions::ButtonType::ReportProblem);
 }
 
 void plStandardMenus::UnregisterActions()
 {
-  plActionManager::UnregisterAction(s_hMenuProject);
   plActionManager::UnregisterAction(s_hMenuFile);
   plActionManager::UnregisterAction(s_hMenuEdit);
   plActionManager::UnregisterAction(s_hMenuPanels);
+  plActionManager::UnregisterAction(s_hMenuProject);
   plActionManager::UnregisterAction(s_hMenuScene);
   plActionManager::UnregisterAction(s_hMenuView);
-  plActionManager::UnregisterAction(s_hMenuTools);
   plActionManager::UnregisterAction(s_hMenuHelp);
   plActionManager::UnregisterAction(s_hCheckForUpdates);
   plActionManager::UnregisterAction(s_hReportProblem);
 }
 
-void plStandardMenus::MapActions(plStringView sMapping, const plBitflags<plStandardMenuTypes>& menus)
+void plStandardMenus::MapActions(const char* szMapping, const plBitflags<plStandardMenuTypes>& Menus)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "'{0}' does not exist", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "'{0}' does not exist", szMapping);
 
   plActionMapDescriptor md;
 
-  if (menus.IsAnySet(plStandardMenuTypes::Project))
-    pMap->MapAction(s_hMenuProject, "", -10000.0f);
-
-  if (menus.IsAnySet(plStandardMenuTypes::File))
+  if (Menus.IsAnySet(plStandardMenuTypes::File))
     pMap->MapAction(s_hMenuFile, "", 1.0f);
 
-  if (menus.IsAnySet(plStandardMenuTypes::Edit))
+  if (Menus.IsAnySet(plStandardMenuTypes::Edit))
     pMap->MapAction(s_hMenuEdit, "", 2.0f);
 
-  if (menus.IsAnySet(plStandardMenuTypes::Scene))
-    pMap->MapAction(s_hMenuScene, "", 3.0f);
+  if (Menus.IsAnySet(plStandardMenuTypes::Project))
+    pMap->MapAction(s_hMenuProject, "", 3.0f);
 
-  if (menus.IsAnySet(plStandardMenuTypes::View))
-    pMap->MapAction(s_hMenuView, "", 4.0f);
+  if (Menus.IsAnySet(plStandardMenuTypes::Scene))
+    pMap->MapAction(s_hMenuScene, "", 4.0f);
 
-  if (menus.IsAnySet(plStandardMenuTypes::Tools))
-    pMap->MapAction(s_hMenuTools, "", 5.0f);
+  if (Menus.IsAnySet(plStandardMenuTypes::View))
+    pMap->MapAction(s_hMenuView, "", 5.0f);
 
-  if (menus.IsAnySet(plStandardMenuTypes::Panels))
+  if (Menus.IsAnySet(plStandardMenuTypes::Panels))
     pMap->MapAction(s_hMenuPanels, "", 6.0f);
 
-  if (menus.IsAnySet(plStandardMenuTypes::Help))
+  if (Menus.IsAnySet(plStandardMenuTypes::Help))
   {
     pMap->MapAction(s_hMenuHelp, "", 7.0f);
-    pMap->MapAction(s_hReportProblem, "G.Help", 3.0f);
-    pMap->MapAction(s_hCheckForUpdates, "G.Help", 10.0f);
+    pMap->MapAction(s_hReportProblem, "Menu.Help", 3.0f);
+    pMap->MapAction(s_hCheckForUpdates, "Menu.Help", 10.0f);
   }
 }
 
@@ -103,9 +99,9 @@ struct plComparePanels
 };
 
 
-void plApplicationPanelsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries)
+void plApplicationPanelsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries)
 {
-  out_entries.Clear();
+  out_Entries.Clear();
 
   for (auto* pPanel : plQtApplicationPanel::GetAllApplicationPanels())
   {
@@ -115,12 +111,12 @@ void plApplicationPanelsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction
     item.m_Icon = pPanel->icon();
     item.m_CheckState = pPanel->isClosed() ? plDynamicMenuAction::Item::CheckMark::Unchecked : plDynamicMenuAction::Item::CheckMark::Checked;
 
-    out_entries.PushBack(item);
+    out_Entries.PushBack(item);
   }
 
   // make sure the panels appear in alphabetical order in the menu
   plComparePanels cp;
-  out_entries.Sort<plComparePanels>(cp);
+  out_Entries.Sort<plComparePanels>(cp);
 }
 
 void plApplicationPanelsMenuAction::Execute(const plVariant& value)
@@ -161,7 +157,7 @@ void plHelpActions::Execute(const plVariant& value)
 {
   if (m_ButtonType == ButtonType::ReportProblem)
   {
-    QDesktopServices::openUrl(QUrl("https://github.com/plEngine/plEngine/issues"));
+    QDesktopServices::openUrl(QUrl("https://github.com/PlasmaEngine/PlasmaEngine/issues"));
   }
   if (m_ButtonType == ButtonType::CheckForUpdates)
   {

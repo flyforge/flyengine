@@ -8,11 +8,12 @@
 
 plGALBufferDX11::plGALBufferDX11(const plGALBufferCreationDescription& Description)
   : plGALBuffer(Description)
-
+  , m_pDXBuffer(nullptr)
+  , m_IndexFormat(DXGI_FORMAT_UNKNOWN)
 {
 }
 
-plGALBufferDX11::~plGALBufferDX11() = default;
+plGALBufferDX11::~plGALBufferDX11() {}
 
 plResult plGALBufferDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<const plUInt8> pInitialData)
 {
@@ -47,6 +48,9 @@ plResult plGALBufferDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<const pl
 
   if (m_Description.m_bAllowUAV)
     BufferDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+
+  if (m_Description.m_bStreamOutputTarget)
+    BufferDesc.BindFlags |= D3D11_BIND_STREAM_OUTPUT;
 
   BufferDesc.ByteWidth = m_Description.m_uiTotalSize;
   BufferDesc.CPUAccessFlags = 0;

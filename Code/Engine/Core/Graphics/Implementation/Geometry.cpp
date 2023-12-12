@@ -692,22 +692,23 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
 
   // create icosahedron
   {
-    plMat3 mRotX = plMat3::MakeRotationX(plAngle::MakeFromDegree(360.0f / 6.0f));
-    plMat3 mRotZ = plMat3::MakeRotationZ(plAngle::MakeFromDegree(-360.0f / 5.0f));
-    plMat3 mRotZh = plMat3::MakeRotationZ(plAngle::MakeFromDegree(-360.0f / 10.0f));
+    plMat3 mRotX, mRotZ, mRotZh;
+    mRotX.SetRotationMatrixX(plAngle::Degree(360.0f / 6.0f));
+    mRotZ.SetRotationMatrixZ(plAngle::Degree(-360.0f / 5.0f));
+    mRotZh.SetRotationMatrixZ(plAngle::Degree(-360.0f / 10.0f));
 
     plUInt32 vert[12];
     plVec3 vDir(0, 0, 1);
 
     vDir.Normalize();
-    vert[0] = AddVertex(vDir * fRadius, vDir, plVec2::MakeZero(), options.m_Color, boneIndices);
+    vert[0] = AddVertex(vDir * fRadius, vDir, plVec2::ZeroVector(), options.m_Color, boneIndices);
 
     vDir = mRotX * vDir;
 
     for (plInt32 i = 0; i < 5; ++i)
     {
       vDir.Normalize();
-      vert[1 + i] = AddVertex(vDir * fRadius, vDir, plVec2::MakeZero(), options.m_Color, boneIndices);
+      vert[1 + i] = AddVertex(vDir * fRadius, vDir, plVec2::ZeroVector(), options.m_Color, boneIndices);
       vDir = mRotZ * vDir;
     }
 
@@ -717,13 +718,13 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
     for (plInt32 i = 0; i < 5; ++i)
     {
       vDir.Normalize();
-      vert[6 + i] = AddVertex(vDir * fRadius, vDir, plVec2::MakeZero(), options.m_Color, boneIndices);
+      vert[6 + i] = AddVertex(vDir * fRadius, vDir, plVec2::ZeroVector(), options.m_Color, boneIndices);
       vDir = mRotZ * vDir;
     }
 
     vDir.Set(0, 0, -1);
     vDir.Normalize();
-    vert[11] = AddVertex(vDir * fRadius, vDir, plVec2::MakeZero(), options.m_Color, boneIndices);
+    vert[11] = AddVertex(vDir * fRadius, vDir, plVec2::ZeroVector(), options.m_Color, boneIndices);
 
 
     Tris[0].PushBack(Triangle(vert[0], vert[2], vert[1]));
@@ -780,7 +781,7 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
         else
         {
           const plVec3 vCenter = (m_Vertices[Edges[i].m_uiVertex[0]].m_vPosition + m_Vertices[Edges[i].m_uiVertex[1]].m_vPosition).GetNormalized();
-          uiNewVert[i] = AddVertex(vCenter * fRadius, vCenter, plVec2::MakeZero(), options.m_Color, boneIndices);
+          uiNewVert[i] = AddVertex(vCenter * fRadius, vCenter, plVec2::ZeroVector(), options.m_Color, boneIndices);
 
           NewVertices[Edges[i]] = uiNewVert[i];
         }
@@ -805,17 +806,17 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
   TransformVertices(options.m_Transform, uiFirstVertex);
 }
 
-void plGeometry::AddCylinder(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, bool bCapTop, bool bCapBottom, plUInt16 uiSegments, const GeoOptions& options, plAngle fraction /*= plAngle::MakeFromDegree(360.0f)*/)
+void plGeometry::AddCylinder(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, bool bCapTop, bool bCapBottom, plUInt16 uiSegments, const GeoOptions& options, plAngle fraction /*= plAngle::Degree(360.0f)*/)
 {
   PLASMA_ASSERT_DEV(uiSegments >= 3, "Cannot create a cylinder with only {0} segments", uiSegments);
   PLASMA_ASSERT_DEV(fraction.GetDegree() >= -0.01f, "A cylinder cannot be built with more less than 0 degree");
   PLASMA_ASSERT_DEV(fraction.GetDegree() <= 360.01f, "A cylinder cannot be built with more than 360 degree");
 
-  fraction = plMath::Clamp(fraction, plAngle(), plAngle::MakeFromDegree(360.0f));
+  fraction = plMath::Clamp(fraction, plAngle(), plAngle::Degree(360.0f));
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
   const bool bIsFraction = fraction.GetDegree() < 360.0f;
-  const plAngle fDegStep = plAngle::MakeFromDegree(fraction.GetDegree() / uiSegments);
+  const plAngle fDegStep = plAngle::Degree(fraction.GetDegree() / uiSegments);
 
   const plVec3 vTopCenter(0, 0, fPositiveLength);
   const plVec3 vBottomCenter(0, 0, -fNegativeLength);
@@ -983,7 +984,7 @@ void plGeometry::AddCylinderOnePiece(float fRadiusTop, float fRadiusBottom, floa
   PLASMA_ASSERT_DEV(uiSegments >= 3, "Cannot create a cylinder with only {0} segments", uiSegments);
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
-  const plAngle fDegStep = plAngle::MakeFromDegree(360.0f / uiSegments);
+  const plAngle fDegStep = plAngle::Degree(360.0f / uiSegments);
 
   const plVec3 vTopCenter(0, 0, fPositiveLength);
   const plVec3 vBottomCenter(0, 0, -fNegativeLength);
@@ -1032,7 +1033,7 @@ void plGeometry::AddCone(float fRadius, float fHeight, bool bCap, plUInt16 uiSeg
 
   plHybridArray<plUInt32, 512> VertsBottom;
 
-  const plAngle fDegStep = plAngle::MakeFromDegree(360.0f / uiSegments);
+  const plAngle fDegStep = plAngle::Degree(360.0f / uiSegments);
 
   const plUInt32 uiTip = AddVertex(plVec3(0, 0, fHeight), plVec3(0, 0, 1), plVec2(0), options);
 
@@ -1071,15 +1072,15 @@ void plGeometry::AddSphere(float fRadius, plUInt16 uiSegments, plUInt16 uiStacks
   PLASMA_ASSERT_DEV(uiStacks >= 2, "Sphere must have at least 2 stacks");
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
-  const plAngle fDegreeDiffSegments = plAngle::MakeFromDegree(360.0f / (float)(uiSegments));
-  const plAngle fDegreeDiffStacks = plAngle::MakeFromDegree(180.0f / (float)(uiStacks));
+  const plAngle fDegreeDiffSegments = plAngle::Degree(360.0f / (float)(uiSegments));
+  const plAngle fDegreeDiffStacks = plAngle::Degree(180.0f / (float)(uiStacks));
 
   const plUInt32 uiFirstVertex = m_Vertices.GetCount();
 
   // first create all the vertex positions
   for (plUInt32 st = 1; st < uiStacks; ++st)
   {
-    const plAngle fDegreeStack = plAngle::MakeFromDegree(-90.0f + (st * fDegreeDiffStacks.GetDegree()));
+    const plAngle fDegreeStack = plAngle::Degree(-90.0f + (st * fDegreeDiffStacks.GetDegree()));
     const float fCosDS = plMath::Cos(fDegreeStack);
     const float fSinDS = plMath::Sin(fDegreeStack);
     const float fY = -fSinDS * fRadius;
@@ -1156,15 +1157,15 @@ void plGeometry::AddHalfSphere(float fRadius, plUInt16 uiSegments, plUInt16 uiSt
   PLASMA_ASSERT_DEV(uiStacks >= 1, "Sphere must have at least 1 stacks");
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
-  const plAngle fDegreeDiffSegments = plAngle::MakeFromDegree(360.0f / (float)(uiSegments));
-  const plAngle fDegreeDiffStacks = plAngle::MakeFromDegree(90.0f / (float)(uiStacks));
+  const plAngle fDegreeDiffSegments = plAngle::Degree(360.0f / (float)(uiSegments));
+  const plAngle fDegreeDiffStacks = plAngle::Degree(90.0f / (float)(uiStacks));
 
   const plUInt32 uiFirstVertex = m_Vertices.GetCount();
 
   // first create all the vertex positions
   for (plUInt32 st = 0; st < uiStacks; ++st)
   {
-    const plAngle fDegreeStack = plAngle::MakeFromDegree(-90.0f + ((st + 1) * fDegreeDiffStacks.GetDegree()));
+    const plAngle fDegreeStack = plAngle::Degree(-90.0f + ((st + 1) * fDegreeDiffStacks.GetDegree()));
     const float fCosDS = plMath::Cos(fDegreeStack);
     const float fSinDS = plMath::Sin(fDegreeStack);
     const float fY = -fSinDS * fRadius;
@@ -1241,7 +1242,7 @@ void plGeometry::AddCapsule(float fRadius, float fHeight, plUInt16 uiSegments, p
   PLASMA_ASSERT_DEV(fHeight >= 0.0f, "Height must be positive");
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
-  const plAngle fDegreeDiffStacks = plAngle::MakeFromDegree(90.0f / (float)(uiStacks));
+  const plAngle fDegreeDiffStacks = plAngle::Degree(90.0f / (float)(uiStacks));
 
   const plUInt32 uiFirstVertex = m_Vertices.GetCount();
 
@@ -1254,14 +1255,14 @@ void plGeometry::AddCapsule(float fRadius, float fHeight, plUInt16 uiSegments, p
   {
     for (plUInt32 st = 0; st < uiStacks; ++st)
     {
-      const plAngle fDegreeStack = plAngle::MakeFromDegree(-90.0f + ((st + 1) * fDegreeDiffStacks.GetDegree()));
+      const plAngle fDegreeStack = plAngle::Degree(-90.0f + ((st + 1) * fDegreeDiffStacks.GetDegree()));
       const float fCosDS = plMath::Cos(fDegreeStack);
       const float fSinDS = plMath::Sin(fDegreeStack);
       const float fY = -fSinDS * fRadius;
 
       for (plUInt32 sp = 0; sp < uiSegments; ++sp)
       {
-        const plAngle fDegree = plAngle::MakeFromDegree(sp * fDegreeStepSlices);
+        const plAngle fDegree = plAngle::Degree(sp * fDegreeStepSlices);
 
         plVec3 vPos;
         vPos.x = plMath::Cos(fDegree) * fRadius * fCosDS;
@@ -1276,14 +1277,14 @@ void plGeometry::AddCapsule(float fRadius, float fHeight, plUInt16 uiSegments, p
 
     for (plUInt32 st = 0; st < uiStacks; ++st)
     {
-      const plAngle fDegreeStack = plAngle::MakeFromDegree(0.0f - (st * fDegreeDiffStacks.GetDegree()));
+      const plAngle fDegreeStack = plAngle::Degree(0.0f - (st * fDegreeDiffStacks.GetDegree()));
       const float fCosDS = plMath::Cos(fDegreeStack);
       const float fSinDS = plMath::Sin(fDegreeStack);
       const float fY = fSinDS * fRadius;
 
       for (plUInt32 sp = 0; sp < uiSegments; ++sp)
       {
-        const plAngle fDegree = plAngle::MakeFromDegree(sp * fDegreeStepSlices);
+        const plAngle fDegree = plAngle::Degree(sp * fDegreeStepSlices);
 
         plVec3 vPos;
         vPos.x = plMath::Cos(fDegree) * fRadius * fCosDS;
@@ -1352,8 +1353,8 @@ void plGeometry::AddTorus(float fInnerRadius, float fOuterRadius, plUInt16 uiSeg
   const float fCylinderRadius = (fOuterRadius - fInnerRadius) * 0.5f;
   const float fLoopRadius = fInnerRadius + fCylinderRadius;
 
-  const plAngle fAngleStepSegment = plAngle::MakeFromDegree(360.0f / uiSegments);
-  const plAngle fAngleStepCylinder = plAngle::MakeFromDegree(360.0f / uiSegmentDetail);
+  const plAngle fAngleStepSegment = plAngle::Degree(360.0f / uiSegments);
+  const plAngle fAngleStepCylinder = plAngle::Degree(360.0f / uiSegmentDetail);
 
   const plUInt16 uiFirstVertex = static_cast<plUInt16>(m_Vertices.GetCount());
 
@@ -1494,7 +1495,7 @@ void plGeometry::AddStairs(const plVec3& size, plUInt32 uiNumSteps, plAngle curv
 {
   const bool bFlipWinding = options.IsFlipWindingNecessary();
 
-  curvature = plMath::Clamp(curvature, -plAngle::MakeFromDegree(360), plAngle::MakeFromDegree(360));
+  curvature = plMath::Clamp(curvature, -plAngle::Degree(360), plAngle::Degree(360));
   const plAngle curveStep = curvature / (float)uiNumSteps;
 
   const float fStepDiv = 1.0f / uiNumSteps;
@@ -1525,7 +1526,8 @@ void plGeometry::AddStairs(const plVec3& size, plUInt32 uiNumSteps, plAngle curv
   plVec3 vSideNormal1(0, 1, 0);
   plVec3 vStepFrontNormal(-1, 0, 0);
 
-  plQuat qRot = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), curveStep);
+  plQuat qRot;
+  qRot.SetFromAxisAndAngle(plVec3(0, 0, 1), curveStep);
 
   for (plUInt32 step = 0; step < uiNumSteps; ++step)
   {
@@ -1628,9 +1630,9 @@ void plGeometry::AddArch(const plVec3& size, plUInt32 uiNumSegments, float fThic
   // sanitize input values
   {
     if (angle.GetRadian() == 0.0f)
-      angle = plAngle::MakeFromDegree(360);
+      angle = plAngle::Degree(360);
 
-    angle = plMath::Clamp(angle, plAngle::MakeFromDegree(-360.0f), plAngle::MakeFromDegree(360.0f));
+    angle = plMath::Clamp(angle, plAngle::Degree(-360.0f), plAngle::Degree(360.0f));
 
     fThickness = plMath::Clamp(fThickness, 0.01f, plMath::Min(size.x, size.y) * 0.45f);
 
@@ -1686,7 +1688,7 @@ void plGeometry::AddArch(const plVec3& size, plUInt32 uiNumSegments, float fThic
     }
   }
 
-  const bool isFullCircle = plMath::Abs(angle.GetRadian()) >= plAngle::MakeFromDegree(360).GetRadian();
+  const bool isFullCircle = plMath::Abs(angle.GetRadian()) >= plAngle::Degree(360).GetRadian();
 
   const float fOuterUstep = 3.0f / uiNumSegments;
   for (plUInt32 segment = 0; segment < uiNumSegments; ++segment)

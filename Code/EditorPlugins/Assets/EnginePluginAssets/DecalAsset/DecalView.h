@@ -4,7 +4,7 @@
 
 class plDecalContext;
 
-class plDecalViewContext : public plEngineProcessViewContext
+class plDecalViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plDecalViewContext(plDecalContext* pDecalContext);

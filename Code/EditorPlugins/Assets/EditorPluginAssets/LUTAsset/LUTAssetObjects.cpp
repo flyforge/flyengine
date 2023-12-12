@@ -7,7 +7,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLUTAssetProperties, 1, plRTTIDefaultAlloca
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Input", GetInputFile, SetInputFile)->AddAttributes(new plFileBrowserAttribute("Select CUBE file", "*.cube")),
+    PLASMA_ACCESSOR_PROPERTY("Input", GetInputFile, SetInputFile)->AddAttributes(new plFileBrowserAttribute("Select CUBE file", "*.cube;*.dds")),
   }
   PLASMA_END_PROPERTIES;
 }
@@ -19,6 +19,8 @@ void plLUTAssetProperties::PropertyMetaStateEventHandler(plPropertyMetaStateEven
   if (e.m_pObject->GetTypeAccessor().GetType() == plGetStaticRTTI<plLUTAssetProperties>())
   {
     auto& props = *e.m_pPropertyStates;
+
+    const bool isRenderTarget = e.m_pObject->GetTypeAccessor().GetValue("IsRenderTarget").ConvertTo<bool>();
 
     props["Input"].m_Visibility = plPropertyUiState::Default;
     props["Input"].m_sNewLabelText = "plLUTAssetProperties::CUBEfile";

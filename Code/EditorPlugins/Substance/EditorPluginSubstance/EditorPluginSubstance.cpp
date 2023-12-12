@@ -20,18 +20,18 @@ void OnLoadPlugin()
   plActionMapManager::RegisterActionMap(szMenuBar).IgnoreResult();
   plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
   plProjectActions::MapActions(szMenuBar);
-  plDocumentActions::MapMenuActions(szMenuBar);
-  plAssetActions::MapMenuActions(szMenuBar);
+  plDocumentActions::MapActions(szMenuBar, "Menu.File", false);
+  plAssetActions::MapMenuActions(szMenuBar, "Menu.File");
   plCommandHistoryActions::MapActions(szMenuBar, "Menu.Edit");
 
-  plEditActions::MapActions("SubstanceAssetMenuBar", false, false);
+  plEditActions::MapActions("SubstanceAssetMenuBar", "Menu.Edit", false, false);
 }
 
 // Tool Bar
 {
   const char* szToolBar = "SubstanceAssetToolBar";
   plActionMapManager::RegisterActionMap(szToolBar).IgnoreResult();
-  plDocumentActions::MapToolbarActions(szToolBar);
+  plDocumentActions::MapActions(szToolBar, "", true);
   plCommandHistoryActions::MapActions(szToolBar, "");
   plAssetActions::MapToolBarActions(szToolBar, true);
 }

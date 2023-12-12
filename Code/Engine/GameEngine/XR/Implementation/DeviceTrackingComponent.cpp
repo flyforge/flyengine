@@ -28,6 +28,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plDeviceTrackingComponent, 3, plComponentMode::Dynam
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("XR"),
+    new plColorAttribute(plColorScheme::XR),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Alpha),
   }
   PLASMA_END_ATTRIBUTES;
@@ -151,7 +152,7 @@ void plDeviceTrackingComponent::Update()
         plTransform local;
         if (GetOwner()->GetParent() != nullptr)
         {
-          local = plTransform::MakeLocalTransform(GetOwner()->GetParent()->GetGlobalTransform(), global);
+          local.SetLocalTransform(GetOwner()->GetParent()->GetGlobalTransform(), global);
         }
         else
         {

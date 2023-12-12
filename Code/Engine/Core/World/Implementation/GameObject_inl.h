@@ -586,7 +586,7 @@ PLASMA_ALWAYS_INLINE void plGameObject::TransformationData::UpdateGlobalTransfor
 
   const plSimdVec4f vScale = m_localScaling * m_localScaling.w();
   const plSimdTransform localTransform(m_localPosition, m_localRotation, vScale);
-  m_globalTransform = plSimdTransform::MakeGlobalTransform(m_pParentData->m_globalTransform, localTransform);
+  m_globalTransform.SetGlobalTransform(m_pParentData->m_globalTransform, localTransform);
 }
 
 PLASMA_FORCE_INLINE void plGameObject::TransformationData::UpdateGlobalBounds()

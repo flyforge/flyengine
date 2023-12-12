@@ -14,20 +14,20 @@ class PLASMA_TOOLSFOUNDATION_DLL plReflectedTypeStorageAccessor : public plIRefl
   friend class plReflectedTypeStorageManager;
 
 public:
-  plReflectedTypeStorageAccessor(const plRTTI* pReflectedType, plDocumentObject* pOwner); // [tested]
+  plReflectedTypeStorageAccessor(const plRTTI* hReflectedType, plDocumentObject* pOwner); // [tested]
   ~plReflectedTypeStorageAccessor();
 
-  virtual const plVariant GetValue(plStringView sProperty, plVariant index = plVariant(), plStatus* pRes = nullptr) const override; // [tested]
-  virtual bool SetValue(plStringView sProperty, const plVariant& value, plVariant index = plVariant()) override;                    // [tested]
+  virtual const plVariant GetValue(const char* szProperty, plVariant index = plVariant(), plStatus* res = nullptr) const override; // [tested]
+  virtual bool SetValue(const char* szProperty, const plVariant& value, plVariant index = plVariant()) override;                   // [tested]
 
-  virtual plInt32 GetCount(plStringView sProperty) const override;
-  virtual bool GetKeys(plStringView sProperty, plDynamicArray<plVariant>& out_keys) const override;
+  virtual plInt32 GetCount(const char* szProperty) const override;
+  virtual bool GetKeys(const char* szProperty, plDynamicArray<plVariant>& out_keys) const override;
 
-  virtual bool InsertValue(plStringView sProperty, plVariant index, const plVariant& value) override;
-  virtual bool RemoveValue(plStringView sProperty, plVariant index) override;
-  virtual bool MoveValue(plStringView sProperty, plVariant oldIndex, plVariant newIndex) override;
+  virtual bool InsertValue(const char* szProperty, plVariant index, const plVariant& value) override;
+  virtual bool RemoveValue(const char* szProperty, plVariant index) override;
+  virtual bool MoveValue(const char* szProperty, plVariant oldIndex, plVariant newIndex) override;
 
-  virtual plVariant GetPropertyChildIndex(plStringView sProperty, const plVariant& value) const override;
+  virtual plVariant GetPropertyChildIndex(const char* szProperty, const plVariant& value) const override;
 
 private:
   plDynamicArray<plVariant> m_Data;

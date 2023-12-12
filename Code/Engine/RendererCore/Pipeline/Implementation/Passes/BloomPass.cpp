@@ -1,27 +1,24 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/GPUResourcePool/GPUResourcePool.h>
 #include <RendererCore/Pipeline/Passes/BloomPass.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderContext/RenderContext.h>
 #include <RendererFoundation/Profiling/Profiling.h>
 
-#include <RendererCore/../../../Data/Base/Shaders/Pipeline/BloomConstants.h>
+#include "../../../../../../Data/Base/Shaders/Pipeline/BloomConstants.h"
+#include "../../../../../../Data/Base/Shaders/Pipeline/AmdSPDConstants.h"
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBloomPass, 1, plRTTIDefaultAllocator<plBloomPass>)
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBloomPass, 2, plRTTIDefaultAllocator<plBloomPass>)
 {
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("Input", m_PinInput),
     PLASMA_MEMBER_PROPERTY("Output", m_PinOutput),
-    PLASMA_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.01f, 1.0f)),
-    PLASMA_MEMBER_PROPERTY("Threshold", m_fThreshold)->AddAttributes(new plDefaultValueAttribute(1.0f)),
     PLASMA_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(0.3f)),
-    PLASMA_MEMBER_PROPERTY("InnerTintColor", m_InnerTintColor),
-    PLASMA_MEMBER_PROPERTY("MidTintColor", m_MidTintColor),
-    PLASMA_MEMBER_PROPERTY("OuterTintColor", m_OuterTintColor),
+    PLASMA_MEMBER_PROPERTY("BloomThreshold", m_fBloomThreshold)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PLASMA_MEMBER_PROPERTY("MipCount", m_uiMipCount)->AddAttributes(new plClampValueAttribute(1, 12), new plDefaultValueAttribute(6)),
   }
   PLASMA_END_PROPERTIES;
 }
@@ -30,22 +27,58 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plBloomPass::plBloomPass()
   : plRenderPipelinePass("BloomPass", true)
+  , m_fIntensity(0.3f)
+  , m_fBloomThreshold(1.0f)
+  , m_uiMipCount(6)
 {
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
+
+  // Load bloom shader.
   {
-    // Load shader.
-    m_hShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/Bloom.plShader");
-    PLASMA_ASSERT_DEV(m_hShader.IsValid(), "Could not load bloom shader!");
+    m_hBloomShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/Bloom.plShader");
+    PLASMA_ASSERT_DEV(m_hBloomShader.IsValid(), "Could not load bloom shader!");
   }
 
+    // Load spd shader.
   {
-    m_hConstantBuffer = plRenderContext::CreateConstantBufferStorage<plBloomConstants>();
+    m_hDownscaleShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/AmdSPD.plShader");
+    PLASMA_ASSERT_DEV(m_hDownscaleShader.IsValid(), "Could not load spd shader!");
+  }
+
+  // Load resources.
+  {
+    m_hBloomConstantBuffer = plRenderContext::CreateConstantBufferStorage<plBloomConstants>();
+    m_hSPDConstantBuffer = plRenderContext::CreateConstantBufferStorage<plAmdSPDConstants>();
+
+    plGALBufferCreationDescription desc;
+    desc.m_uiStructSize = sizeof(plUInt32);
+    desc.m_uiTotalSize = desc.m_uiStructSize;
+    desc.m_BufferType = plGALBufferType::Generic;
+    desc.m_bAllowUAV = true;
+    desc.m_bUseAsStructuredBuffer = true;
+    desc.m_bAllowShaderResourceView = true;
+    desc.m_ResourceAccess.m_bImmutable = false;
+
+    m_DownsampleAtomicCounter = PLASMA_NEW_ARRAY(plAlignedAllocatorWrapper::GetAllocator(), plUInt32, 1);
+    m_DownsampleAtomicCounter[0] = 0;
+
+    m_hDownsampleAtomicCounterBuffer = pDevice->CreateBuffer(desc, m_DownsampleAtomicCounter.ToByteArray());
   }
 }
 
 plBloomPass::~plBloomPass()
 {
-  plRenderContext::DeleteConstantBufferStorage(m_hConstantBuffer);
-  m_hConstantBuffer.Invalidate();
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
+  pDevice->DestroyBuffer(m_hDownsampleAtomicCounterBuffer);
+
+  PLASMA_DELETE_ARRAY(plAlignedAllocatorWrapper::GetAllocator(), m_DownsampleAtomicCounter);
+  m_hDownsampleAtomicCounterBuffer.Invalidate();
+
+  plRenderContext::DeleteConstantBufferStorage(m_hBloomConstantBuffer);
+  m_hBloomConstantBuffer.Invalidate();
+
+  plRenderContext::DeleteConstantBufferStorage(m_hSPDConstantBuffer);
+  m_hSPDConstantBuffer.Invalidate();
 }
 
 bool plBloomPass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
@@ -58,14 +91,6 @@ bool plBloomPass::GetRenderTargetDescriptions(const plView& view, const plArrayP
       plLog::Error("'{0}' input must allow shader resource view.", GetName());
       return false;
     }
-
-    // Output is half-res
-    plGALTextureCreationDescription desc = *inputs[m_PinInput.m_uiInputIndex];
-    desc.m_uiWidth = desc.m_uiWidth / 2;
-    desc.m_uiHeight = desc.m_uiHeight / 2;
-    desc.m_Format = plGALResourceFormat::RG11B10Float;
-
-    outputs[m_PinOutput.m_uiOutputIndex] = desc;
   }
   else
   {
@@ -73,231 +98,296 @@ bool plBloomPass::GetRenderTargetDescriptions(const plView& view, const plArrayP
     return false;
   }
 
+  // Bloom Output
+  {
+    plGALTextureCreationDescription desc = *inputs[m_PinInput.m_uiInputIndex];
+    desc.m_bAllowUAV = true;
+    desc.m_bAllowShaderResourceView = true;
+
+    outputs[m_PinOutput.m_uiOutputIndex] = std::move(desc);
+  }
+
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
+
+  {
+    plGALTextureCreationDescription desc = *inputs[m_PinInput.m_uiInputIndex];
+    desc.m_uiMipLevelCount = m_uiMipCount;
+    desc.m_bAllowUAV = true;
+    desc.m_bAllowShaderResourceView = true;
+    desc.m_Format = plGALResourceFormat::RG11B10Float;
+    m_hBloomTexture = pDevice->CreateTexture(desc);
+  }
+
   return true;
 }
 
 void plBloomPass::Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs)
 {
-  auto pColorInput = inputs[m_PinInput.m_uiInputIndex];
-  auto pColorOutput = outputs[m_PinOutput.m_uiOutputIndex];
-  if (pColorInput == nullptr || pColorOutput == nullptr)
+  const auto* const pInput = inputs[m_PinInput.m_uiInputIndex];
+  const auto* const pOutput = outputs[m_PinOutput.m_uiOutputIndex];
+
+  if (pInput == nullptr || pOutput == nullptr)
   {
     return;
   }
 
+  plTempHashedString sLuminancePass = "BLOOM_PASS_MODE_LUMINANCE";
+  plTempHashedString sUpscaleBlendPass = "BLOOM_PASS_MODE_UPSCALE_BLEND_MIP";
+  plTempHashedString sColorBlendPass = "BLOOM_PASS_MODE_BLEND_FRAME";
+
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
-  plGALPass* pGALPass = pDevice->BeginPass(GetName());
-  PLASMA_SCOPE_EXIT(pDevice->EndPass(pGALPass));
 
-  plUInt32 uiWidth = pColorInput->m_Desc.m_uiWidth;
-  plUInt32 uiHeight = pColorInput->m_Desc.m_uiHeight;
-  bool bFastDownscale = plMath::IsEven(uiWidth) && plMath::IsEven(uiHeight);
+  plResourceManager::ForceLoadResourceNow(m_hBloomShader);
 
-  const float fMaxRes = (float)plMath::Max(uiWidth, uiHeight);
-  const float fRadius = plMath::Clamp(m_fRadius, 0.01f, 1.0f);
-  const float fDownscaledSize = 4.0f / fRadius;
-  const float fNumBlurPasses = plMath::Log2(fMaxRes / fDownscaledSize);
-  const plUInt32 uiNumBlurPasses = (plUInt32)plMath::Ceil(fNumBlurPasses);
+  const bool bAllowAsyncShaderLoading = renderViewContext.m_pRenderContext->GetAllowAsyncShaderLoading();
+  renderViewContext.m_pRenderContext->SetAllowAsyncShaderLoading(false);
 
-  // Find temp targets
-  plHybridArray<plVec2, 8> targetSizes;
-  plHybridArray<plGALTextureHandle, 8> tempDownscaleTextures;
-  plHybridArray<plGALTextureHandle, 8> tempUpscaleTextures;
+  plGALPass* pPass = pDevice->BeginPass(GetName());
+  PLASMA_SCOPE_EXIT(
+    pDevice->EndPass(pPass);
+    renderViewContext.m_pRenderContext->SetAllowAsyncShaderLoading(bAllowAsyncShaderLoading););
 
-  for (plUInt32 i = 0; i < uiNumBlurPasses; ++i)
+  const plUInt32 uiWidth = pOutput->m_Desc.m_uiWidth;
+  const plUInt32 uiHeight = pOutput->m_Desc.m_uiHeight;
+
+  // Luminance pass
   {
-    uiWidth = plMath::Max(uiWidth / 2, 1u);
-    uiHeight = plMath::Max(uiHeight / 2, 1u);
-    targetSizes.PushBack(plVec2((float)uiWidth, (float)uiHeight));
-    auto uiSliceCount = pColorOutput->m_Desc.m_uiArraySize;
+    auto pCommandEncoder = plRenderContext::BeginComputeScope(pPass, renderViewContext, "Luminance");
 
-    tempDownscaleTextures.PushBack(plGPUResourcePool::GetDefaultInstance()->GetRenderTarget(uiWidth, uiHeight, plGALResourceFormat::RG11B10Float, plGALMSAASampleCount::None, uiSliceCount));
+    renderViewContext.m_pRenderContext->BindShader(m_hBloomShader);
 
-    // biggest upscale target is the output and lowest is not needed
-    if (i > 0 && i < uiNumBlurPasses - 1)
+    plGALUnorderedAccessViewHandle hLuminanceOutput;
     {
-      tempUpscaleTextures.PushBack(plGPUResourcePool::GetDefaultInstance()->GetRenderTarget(uiWidth, uiHeight, plGALResourceFormat::RG11B10Float, plGALMSAASampleCount::None, uiSliceCount));
+      plGALUnorderedAccessViewCreationDescription desc;
+      desc.m_hTexture = m_hBloomTexture;
+      desc.m_uiMipLevelToUse = 0;
+      hLuminanceOutput = pDevice->CreateUnorderedAccessView(desc);
     }
-    else
+
+    renderViewContext.m_pRenderContext->BindUAV("Output", hLuminanceOutput);
+    renderViewContext.m_pRenderContext->BindTexture2D("ColorTexture", pDevice->GetDefaultResourceView(pInput->m_TextureHandle));
+    renderViewContext.m_pRenderContext->BindConstantBuffer("plBloomConstants", m_hBloomConstantBuffer);
+
+    renderViewContext.m_pRenderContext->SetShaderPermutationVariable("BLOOM_PASS_MODE", sLuminancePass);
+
+    const plUInt32 uiDispatchX = (uiWidth + POSTPROCESS_BLOCKSIZE  - 1) / POSTPROCESS_BLOCKSIZE ;
+    const plUInt32 uiDispatchY = (uiHeight + POSTPROCESS_BLOCKSIZE  - 1) / POSTPROCESS_BLOCKSIZE ;
+
+    UpdateBloomConstantBuffer(plVec2(1.0f / static_cast<float>(uiWidth), 1.0f / static_cast<float>(uiHeight)));
+
+    renderViewContext.m_pRenderContext->Dispatch(uiDispatchX, uiDispatchY, 1).IgnoreResult();
+  }
+
+  // Downsample pass
+  {
+    // AMD FidelityFX Single Pass Downsampler.
+    // Provides an RDNA™-optimized solution for generating up to 12 MIP levels of a texture.
+    // GitHub:        https://github.com/GPUOpen-Effects/FidelityFX-SPD
+    // Documentation: https://github.com/GPUOpen-Effects/FidelityFX-SPD/blob/master/docs/FidelityFX_SPD.pdf
+
+    const plUInt32 uiOutputMipCount = m_uiMipCount - 1;
+    const plUInt32 uiSmallestWidth = uiWidth >> uiOutputMipCount;
+    const plUInt32 uiSmallestHeight = uiWidth >> uiOutputMipCount;
+
+    // Ensure that the input texture meets the requirements.
+    PLASMA_ASSERT_DEV(uiOutputMipCount + 1 <= 12, "AMD FidelityFX Single Pass Downsampler can't generate more than 12 mipmap levels."); // As per documentation (page 22)
+
+    auto pCommandEncoder = plRenderContext::BeginComputeScope(pPass, renderViewContext, "Downsample");
+
+    renderViewContext.m_pRenderContext->BindShader(m_hDownscaleShader);
+
+    plGALResourceViewHandle hBloomInput;
     {
-      tempUpscaleTextures.PushBack(plGALTextureHandle());
+      plGALResourceViewCreationDescription desc;
+      desc.m_hTexture = m_hBloomTexture;
+      desc.m_uiMostDetailedMipLevel = 0;
+      desc.m_uiMipLevelsToUse = 1;
+      desc.m_bUnsetUAV = false;
+      hBloomInput = pDevice->CreateResourceView(desc);
+    }
+
+    renderViewContext.m_pRenderContext->BindTexture2D("ColorTexture", hBloomInput);
+
+    renderViewContext.m_pRenderContext->BindConstantBuffer("plAmdSPDConstants", m_hSPDConstantBuffer);
+
+    plGALUnorderedAccessViewHandle hAtomicCounter;
+    {
+      plGALUnorderedAccessViewCreationDescription desc;
+      desc.m_OverrideViewFormat = plGALResourceFormat::RUInt;
+      desc.m_hBuffer = m_hDownsampleAtomicCounterBuffer;
+      desc.m_uiNumElements = 1;
+      desc.m_uiFirstElement = 0;
+      hAtomicCounter = pDevice->CreateUnorderedAccessView(desc);
+    }
+
+    renderViewContext.m_pRenderContext->BindUAV("AtomicCounter", hAtomicCounter);
+
+    for (plUInt32 i = 0; i < uiOutputMipCount; ++i)
+    {
+      plStringBuilder sSlotName;
+      sSlotName.Format("DownsampleOutput[{}]", i);
+
+      plGALUnorderedAccessViewHandle hDownsampleOutput;
+      {
+        plGALUnorderedAccessViewCreationDescription desc;
+        desc.m_hTexture = m_hBloomTexture;
+        desc.m_uiMipLevelToUse = i + 1;
+        desc.m_bUnsetResourceView = false;
+        hDownsampleOutput = pDevice->CreateUnorderedAccessView(desc);
+      }
+
+      renderViewContext.m_pRenderContext->BindUAV(sSlotName.GetView(), hDownsampleOutput);
+    }
+
+    // As per documentation (page 22)
+    const plUInt32 uiDispatchX = (uiWidth + 63) >> 6;
+    const plUInt32 uiDispatchY = (uiHeight + 63) >> 6;
+
+    UpdateSPDConstantBuffer(uiDispatchX * uiDispatchY);
+
+    renderViewContext.m_pRenderContext->Dispatch(uiDispatchX, uiDispatchY, 1).IgnoreResult();
+  }
+
+  // Upsample and Blend pass
+  {
+    for (plUInt32 i = m_uiMipCount - 1; i > 0; --i)
+    {
+      plStringBuilder sb;
+      auto pCommandEncoder = plRenderContext::BeginComputeScope(pPass, renderViewContext, plFmt("UpscaleBlend Mip {}", i).GetTextCStr(sb));
+
+      renderViewContext.m_pRenderContext->BindShader(m_hBloomShader);
+
+      plUInt32 uiMipSmall = i;
+      plUInt32 uiMipLarge = i - 1;
+
+      plUInt32 uiMipLargeWidth = uiWidth >> uiMipLarge;
+      plUInt32 uiMipLargeHeight = uiHeight >> uiMipLarge;
+
+      plGALResourceViewHandle hUpscaleBlendInput;
+      {
+        plGALResourceViewCreationDescription desc;
+        desc.m_hTexture = m_hBloomTexture;
+        desc.m_uiMostDetailedMipLevel = uiMipSmall;
+        desc.m_uiMipLevelsToUse = 1;
+        desc.m_bUnsetUAV = false;
+        hUpscaleBlendInput = pDevice->CreateResourceView(desc);
+      }
+
+      plGALUnorderedAccessViewHandle hUpscaleBlendOutput;
+      {
+        plGALUnorderedAccessViewCreationDescription desc;
+        desc.m_hTexture = m_hBloomTexture;
+        desc.m_uiMipLevelToUse = uiMipLarge;
+        desc.m_bUnsetResourceView = false;
+        hUpscaleBlendOutput = pDevice->CreateUnorderedAccessView(desc);
+      }
+
+      renderViewContext.m_pRenderContext->BindUAV("Output", hUpscaleBlendOutput);
+      renderViewContext.m_pRenderContext->BindTexture2D("ColorTexture", hUpscaleBlendInput);
+      renderViewContext.m_pRenderContext->BindConstantBuffer("plBloomConstants", m_hBloomConstantBuffer);
+
+      renderViewContext.m_pRenderContext->SetShaderPermutationVariable("BLOOM_PASS_MODE", sUpscaleBlendPass);
+
+      const auto uiDispatchX = static_cast<plUInt32>(plMath::Ceil(static_cast<float>(uiMipLargeWidth) / POSTPROCESS_BLOCKSIZE ));
+      const auto uiDispatchY = static_cast<plUInt32>(plMath::Ceil(static_cast<float>(uiMipLargeHeight) / POSTPROCESS_BLOCKSIZE ));
+
+      UpdateBloomConstantBuffer(plVec2(1.0f / static_cast<float>(uiMipLargeWidth), 1.0f / static_cast<float>(uiMipLargeHeight)));
+
+      renderViewContext.m_pRenderContext->Dispatch(uiDispatchX, uiDispatchY, 1).IgnoreResult();
     }
   }
 
-  renderViewContext.m_pRenderContext->BindConstantBuffer("plBloomConstants", m_hConstantBuffer);
-  renderViewContext.m_pRenderContext->BindShader(m_hShader);
-
-  renderViewContext.m_pRenderContext->BindMeshBuffer(plGALBufferHandle(), plGALBufferHandle(), nullptr, plGALPrimitiveTopology::Triangles, 1);
-
-  // Downscale passes
+  // Color Blend
   {
-    plTempHashedString sInitialDownscale = "BLOOM_PASS_MODE_INITIAL_DOWNSCALE";
-    plTempHashedString sInitialDownscaleFast = "BLOOM_PASS_MODE_INITIAL_DOWNSCALE_FAST";
-    plTempHashedString sDownscale = "BLOOM_PASS_MODE_DOWNSCALE";
-    plTempHashedString sDownscaleFast = "BLOOM_PASS_MODE_DOWNSCALE_FAST";
+    auto pCommandEncoder = plRenderContext::BeginComputeScope(pPass, renderViewContext, "ColorBlend");
 
-    for (plUInt32 i = 0; i < uiNumBlurPasses; ++i)
+    renderViewContext.m_pRenderContext->BindShader(m_hBloomShader);
+
+    plGALResourceViewHandle hBloomInput;
     {
-      plGALTextureHandle hInput;
-      if (i == 0)
-      {
-        hInput = pColorInput->m_TextureHandle;
-        renderViewContext.m_pRenderContext->SetShaderPermutationVariable("BLOOM_PASS_MODE", bFastDownscale ? sInitialDownscaleFast : sInitialDownscale);
-      }
-      else
-      {
-        hInput = tempDownscaleTextures[i - 1];
-        renderViewContext.m_pRenderContext->SetShaderPermutationVariable("BLOOM_PASS_MODE", bFastDownscale ? sDownscaleFast : sDownscale);
-      }
-
-      plGALTextureHandle hOutput = tempDownscaleTextures[i];
-      plVec2 targetSize = targetSizes[i];
-
-      plGALRenderingSetup renderingSetup;
-      renderingSetup.m_RenderTargetSetup.SetRenderTarget(0, pDevice->GetDefaultRenderTargetView(hOutput));
-      renderViewContext.m_pRenderContext->BeginRendering(pGALPass, renderingSetup, plRectFloat(targetSize.x, targetSize.y), "Downscale", renderViewContext.m_pCamera->IsStereoscopic());
-
-      plColor tintColor = (i == uiNumBlurPasses - 1) ? plColor(m_OuterTintColor) : plColor::White;
-      UpdateConstantBuffer(plVec2(1.0f).CompDiv(targetSize), tintColor);
-
-      renderViewContext.m_pRenderContext->BindTexture2D("ColorTexture", pDevice->GetDefaultResourceView(hInput));
-      renderViewContext.m_pRenderContext->DrawMeshBuffer().IgnoreResult();
-
-      renderViewContext.m_pRenderContext->EndRendering();
-
-      bFastDownscale = plMath::IsEven((plInt32)targetSize.x) && plMath::IsEven((plInt32)targetSize.y);
+      plGALResourceViewCreationDescription desc;
+      desc.m_hTexture = m_hBloomTexture;
+      desc.m_uiMostDetailedMipLevel = 0;
+      desc.m_uiMipLevelsToUse = 1;
+      hBloomInput = pDevice->CreateResourceView(desc);
     }
-  }
 
-  // Upscale passes
-  {
-    const float fBlurRadius = 2.0f * fNumBlurPasses / uiNumBlurPasses;
-    const float fMidPass = (uiNumBlurPasses - 1.0f) / 2.0f;
-
-    renderViewContext.m_pRenderContext->SetShaderPermutationVariable("BLOOM_PASS_MODE", "BLOOM_PASS_MODE_UPSCALE");
-
-    for (plUInt32 i = uiNumBlurPasses - 1; i-- > 0;)
+    plGALUnorderedAccessViewHandle hColorBlendOutput;
     {
-      plGALTextureHandle hNextInput = tempDownscaleTextures[i];
-      plGALTextureHandle hInput;
-      if (i == uiNumBlurPasses - 2)
-      {
-        hInput = tempDownscaleTextures[i + 1];
-      }
-      else
-      {
-        hInput = tempUpscaleTextures[i + 1];
-      }
-
-      plGALTextureHandle hOutput;
-      if (i == 0)
-      {
-        hOutput = pColorOutput->m_TextureHandle;
-      }
-      else
-      {
-        hOutput = tempUpscaleTextures[i];
-      }
-
-      plVec2 targetSize = targetSizes[i];
-
-      plGALRenderingSetup renderingSetup;
-      renderingSetup.m_RenderTargetSetup.SetRenderTarget(0, pDevice->GetDefaultRenderTargetView(hOutput));
-      renderViewContext.m_pRenderContext->BeginRendering(pGALPass, renderingSetup, plRectFloat(targetSize.x, targetSize.y), "Upscale", renderViewContext.m_pCamera->IsStereoscopic());
-
-      plColor tintColor;
-      float fPass = (float)i;
-      if (fPass < fMidPass)
-      {
-        tintColor = plMath::Lerp<plColor>(m_InnerTintColor, m_MidTintColor, fPass / fMidPass);
-      }
-      else
-      {
-        tintColor = plMath::Lerp<plColor>(m_MidTintColor, m_OuterTintColor, (fPass - fMidPass) / fMidPass);
-      }
-
-      UpdateConstantBuffer(plVec2(fBlurRadius).CompDiv(targetSize), tintColor);
-
-      renderViewContext.m_pRenderContext->BindTexture2D("NextColorTexture", pDevice->GetDefaultResourceView(hNextInput));
-      renderViewContext.m_pRenderContext->BindTexture2D("ColorTexture", pDevice->GetDefaultResourceView(hInput));
-      renderViewContext.m_pRenderContext->DrawMeshBuffer().IgnoreResult();
-
-      renderViewContext.m_pRenderContext->EndRendering();
+      plGALUnorderedAccessViewCreationDescription desc;
+      desc.m_hTexture = pOutput->m_TextureHandle;
+      desc.m_uiMipLevelToUse = 0;
+      hColorBlendOutput = pDevice->CreateUnorderedAccessView(desc);
     }
-  }
 
-  // Return temp targets
-  for (auto hTexture : tempDownscaleTextures)
-  {
-    if (!hTexture.IsInvalidated())
-    {
-      plGPUResourcePool::GetDefaultInstance()->ReturnRenderTarget(hTexture);
-    }
-  }
+    renderViewContext.m_pRenderContext->BindUAV("Output", hColorBlendOutput);
+    renderViewContext.m_pRenderContext->BindTexture2D("ColorTexture", pDevice->GetDefaultResourceView(pInput->m_TextureHandle));
+    renderViewContext.m_pRenderContext->BindTexture2D("MipTexture", hBloomInput);
+    renderViewContext.m_pRenderContext->BindConstantBuffer("plBloomConstants", m_hBloomConstantBuffer);
 
-  for (auto hTexture : tempUpscaleTextures)
-  {
-    if (!hTexture.IsInvalidated())
-    {
-      plGPUResourcePool::GetDefaultInstance()->ReturnRenderTarget(hTexture);
-    }
+    renderViewContext.m_pRenderContext->SetShaderPermutationVariable("BLOOM_PASS_MODE", sColorBlendPass);
+
+    const plUInt32 uiDispatchX = (uiWidth + POSTPROCESS_BLOCKSIZE  - 1) / POSTPROCESS_BLOCKSIZE ;
+    const plUInt32 uiDispatchY = (uiHeight + POSTPROCESS_BLOCKSIZE  - 1) / POSTPROCESS_BLOCKSIZE ;
+
+    UpdateBloomConstantBuffer(plVec2(1.0f / static_cast<float>(uiWidth), 1.0f / static_cast<float>(uiHeight)));
+
+    renderViewContext.m_pRenderContext->Dispatch(uiDispatchX, uiDispatchY, 1).IgnoreResult();
   }
 }
 
 void plBloomPass::ExecuteInactive(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs)
 {
-  auto pColorOutput = outputs[m_PinOutput.m_uiOutputIndex];
-  if (pColorOutput == nullptr)
+  const auto* const pInput = inputs[m_PinInput.m_uiInputIndex];
+  const auto* const pOutput = outputs[m_PinOutput.m_uiOutputIndex];
+
+  if (pInput == nullptr || pOutput == nullptr)
   {
     return;
   }
 
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
+  auto pCommandEncoder = plRenderContext::BeginPassAndComputeScope(renderViewContext, GetName());
 
-  plGALRenderingSetup renderingSetup;
-  renderingSetup.m_RenderTargetSetup.SetRenderTarget(0, pDevice->GetDefaultRenderTargetView(pColorOutput->m_TextureHandle));
-  renderingSetup.m_uiRenderTargetClearMask = 0xFFFFFFFF;
-  renderingSetup.m_ClearColor = plColor::Black;
-
-  auto pCommandEncoder = plRenderContext::BeginPassAndRenderingScope(renderViewContext, renderingSetup, "Clear");
+  pCommandEncoder->CopyTexture(pOutput->m_TextureHandle, pInput->m_TextureHandle);
 }
 
-plResult plBloomPass::Serialize(plStreamWriter& inout_stream) const
+void plBloomPass::UpdateBloomConstantBuffer(plVec2 pixelSize) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  inout_stream << m_fRadius;
-  inout_stream << m_fThreshold;
-  inout_stream << m_fIntensity;
-  inout_stream << m_InnerTintColor;
-  inout_stream << m_MidTintColor;
-  inout_stream << m_OuterTintColor;
-  return PLASMA_SUCCESS;
-}
-
-plResult plBloomPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  inout_stream >> m_fRadius;
-  inout_stream >> m_fThreshold;
-  inout_stream >> m_fIntensity;
-  inout_stream >> m_InnerTintColor;
-  inout_stream >> m_MidTintColor;
-  inout_stream >> m_OuterTintColor;
-  return PLASMA_SUCCESS;
-}
-
-void plBloomPass::UpdateConstantBuffer(plVec2 pixelSize, const plColor& tintColor)
-{
-  plBloomConstants* constants = plRenderContext::GetConstantBufferData<plBloomConstants>(m_hConstantBuffer);
+  auto* constants = plRenderContext::GetConstantBufferData<plBloomConstants>(m_hBloomConstantBuffer);
   constants->PixelSize = pixelSize;
-  constants->BloomThreshold = m_fThreshold;
   constants->BloomIntensity = m_fIntensity;
-
-  constants->TintColor = tintColor;
+  constants->BloomThreshold = m_fBloomThreshold;
 }
 
+void plBloomPass::UpdateSPDConstantBuffer(plUInt32 uiWorkGroupCount)
+{
+  auto constants = plRenderContext::GetConstantBufferData<plAmdSPDConstants>(m_hSPDConstantBuffer);
+  constants->MipCount = m_uiMipCount;
+  constants->WorkGroupCount = uiWorkGroupCount;
+}
 
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+#include <Foundation/Serialization/AbstractObjectGraph.h>
+#include <Foundation/Serialization/GraphPatch.h>
+
+class plBloomPassPatch_1_2 : public plGraphPatch
+{
+public:
+  plBloomPassPatch_1_2()
+    : plGraphPatch("plBloomPass", 2)
+  {
+  }
+
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  {
+    pNode->AddProperty("BloomThreshold", 1);
+    pNode->AddProperty("MipCount", 6);
+  }
+};
+
+plBloomPassPatch_1_2 g_plBloomPassPatch_1_2;
 
 PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_BloomPass);

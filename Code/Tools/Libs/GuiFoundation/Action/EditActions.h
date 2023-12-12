@@ -10,9 +10,9 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(plStringView sMapping, bool bDeleteAction, bool bAdvancedPasteActions);
-  static void MapContextMenuActions(plStringView sMapping);
-  static void MapViewContextMenuActions(plStringView sMapping);
+  static void MapActions(const char* szMapping, const char* szPath, bool bDeleteAction, bool bAdvancedPasteActions);
+  static void MapContextMenuActions(const char* szMapping, const char* szPath);
+  static void MapViewContextMenuActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hEditCategory;
   static plActionDescriptorHandle s_hCopy;

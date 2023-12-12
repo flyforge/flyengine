@@ -41,7 +41,7 @@ bool plProcGenNodeManager::InternalIsNode(const plDocumentObject* pObject) const
   return pObject->GetType()->IsDerivedFrom(plGetStaticRTTI<plProcGenNodeBase>());
 }
 
-void plProcGenNodeManager::InternalCreatePins(const plDocumentObject* pObject, NodeInternal& ref_node)
+void plProcGenNodeManager::InternalCreatePins(const plDocumentObject* pObject, NodeInternal& node)
 {
   const plRTTI* pNodeBaseType = plGetStaticRTTI<plProcGenNodeBase>();
 
@@ -70,35 +70,35 @@ void plProcGenNodeManager::InternalCreatePins(const plDocumentObject* pObject, N
     if (pPropType->IsDerivedFrom<plRenderPipelineNodeInputPin>())
     {
       auto pPin = PLASMA_DEFAULT_NEW(plProcGenPin, plPin::Type::Input, pProp->GetPropertyName(), pinColor, pObject);
-      ref_node.m_Inputs.PushBack(pPin);
+      node.m_Inputs.PushBack(pPin);
     }
     else if (pPropType->IsDerivedFrom<plRenderPipelineNodeOutputPin>())
     {
       auto pPin = PLASMA_DEFAULT_NEW(plProcGenPin, plPin::Type::Output, pProp->GetPropertyName(), pinColor, pObject);
-      ref_node.m_Outputs.PushBack(pPin);
+      node.m_Outputs.PushBack(pPin);
     }
   }
 }
 
-void plProcGenNodeManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const
+void plProcGenNodeManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const
 {
   plRTTI::ForEachDerivedType<plProcGenNodeBase>(
-    [&](const plRTTI* pRtti) { ref_types.PushBack(pRtti); },
+    [&](const plRTTI* pRtti) { Types.PushBack(pRtti); },
     plRTTI::ForEachOptions::ExcludeAbstract);
 }
 
-plStringView plProcGenNodeManager::GetTypeCategory(const plRTTI* pRtti) const
+const char* plProcGenNodeManager::GetTypeCategory(const plRTTI* pRtti) const
 {
   if (const plCategoryAttribute* pAttr = pRtti->GetAttributeByType<plCategoryAttribute>())
   {
     return pAttr->GetCategory();
   }
 
-  return {};
+  return nullptr;
 }
 
-plStatus plProcGenNodeManager::InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_result) const
+plStatus plProcGenNodeManager::InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_Result) const
 {
-  out_result = CanConnectResult::ConnectNto1;
+  out_Result = CanConnectResult::ConnectNto1;
   return plStatus(PLASMA_SUCCESS);
 }

@@ -22,7 +22,7 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11UnorderedAccessView* m_pDXUnorderedAccessView = nullptr;
+  ID3D11UnorderedAccessView* m_pDXUnorderedAccessView;
 };
 
 #include <RendererDX11/Resources/Implementation/UnorderedAccessViewDX11_inl.h>

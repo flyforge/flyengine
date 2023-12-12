@@ -15,11 +15,11 @@ bool IsArrayView(const plGALTextureCreationDescription& texDesc, const plGALUnor
 plGALUnorderedAccessViewDX11::plGALUnorderedAccessViewDX11(
   plGALResourceBase* pResource, const plGALUnorderedAccessViewCreationDescription& Description)
   : plGALUnorderedAccessView(pResource, Description)
-
+  , m_pDXUnorderedAccessView(nullptr)
 {
 }
 
-plGALUnorderedAccessViewDX11::~plGALUnorderedAccessViewDX11() = default;
+plGALUnorderedAccessViewDX11::~plGALUnorderedAccessViewDX11() {}
 
 plResult plGALUnorderedAccessViewDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -83,7 +83,6 @@ plResult plGALUnorderedAccessViewDX11::InitPlatform(plGALDevice* pDevice)
     {
       case plGALTextureType::Texture2D:
       case plGALTextureType::Texture2DProxy:
-      case plGALTextureType::Texture2DShared:
 
         if (!bIsArrayView)
         {

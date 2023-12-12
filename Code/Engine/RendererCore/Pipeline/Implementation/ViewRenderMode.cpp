@@ -27,6 +27,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plViewRenderMode, 1)
   PLASMA_ENUM_CONSTANT(plViewRenderMode::EmissiveColor),
   PLASMA_ENUM_CONSTANT(plViewRenderMode::Roughness)->AddAttributes(new plGroupAttribute("Surface")),
   PLASMA_ENUM_CONSTANT(plViewRenderMode::Occlusion),
+  PLASMA_ENUM_CONSTANT(plViewRenderMode::MotionVectors),
   PLASMA_ENUM_CONSTANT(plViewRenderMode::Depth),
   PLASMA_ENUM_CONSTANT(plViewRenderMode::BoneWeights)->AddAttributes(new plGroupAttribute("Animation")),
 PLASMA_END_STATIC_REFLECTED_ENUM;
@@ -111,6 +112,9 @@ int plViewRenderMode::GetRenderPassForShader(Enum renderMode)
 
     case plViewRenderMode::Occlusion:
       return EDITOR_RENDER_PASS_OCCLUSION;
+
+    case plViewRenderMode::MotionVectors:
+      return EDITOR_RENDER_PASS_MOTIONVECTORS;
 
     case plViewRenderMode::Depth:
       return EDITOR_RENDER_PASS_DEPTH;

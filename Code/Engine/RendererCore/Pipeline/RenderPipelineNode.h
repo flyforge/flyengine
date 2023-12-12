@@ -12,7 +12,7 @@ struct plRenderPipelineNodePin
 
   struct Type
   {
-    using StorageType = plUInt8;
+    typedef plUInt8 StorageType;
 
     enum Enum
     {
@@ -57,7 +57,7 @@ class PLASMA_RENDERERCORE_DLL plRenderPipelineNode : public plReflectedClass
   PLASMA_ADD_DYNAMIC_REFLECTION(plRenderPipelineNode, plReflectedClass);
 
 public:
-  virtual ~plRenderPipelineNode() = default;
+  virtual ~plRenderPipelineNode() {}
 
   void InitializePins();
 

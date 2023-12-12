@@ -33,15 +33,9 @@ PLASMA_ALWAYS_INLINE plSimdFloat::operator float() const
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdFloat::MakeZero()
+PLASMA_ALWAYS_INLINE plSimdFloat plSimdFloat::Zero()
 {
   return plSimdFloat(0.0f);
-}
-
-// static
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdFloat::MakeNaN()
-{
-  return plSimdFloat(plMath::NaN<float>());
 }
 
 PLASMA_ALWAYS_INLINE plSimdFloat plSimdFloat::operator+(const plSimdFloat& f) const

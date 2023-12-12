@@ -15,7 +15,7 @@ void plSphereVisualizerAdapter::Finalize()
 
   const plSphereVisualizerAttribute* pAttr = static_cast<const plSphereVisualizerAttribute*>(m_pVisualizerAttr);
 
-  m_hGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::Sphere, pAttr->m_Color, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
+  m_hGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::Sphere, pAttr->m_Color, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
 
   pAssetDocument->AddSyncObject(&m_hGizmo);
   m_hGizmo.SetVisible(m_bVisualizerIsVisible);
@@ -32,7 +32,7 @@ void plSphereVisualizerAdapter::Update()
   if (!pAttr->GetRadiusProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetRadiusProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetRadiusProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plSphereVisualizerAttribute 'radius'");
     m_fScale = value.ConvertTo<float>();
@@ -41,7 +41,7 @@ void plSphereVisualizerAdapter::Update()
   if (!pAttr->GetColorProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plSphereVisualizerAttribute 'color'");
     m_hGizmo.SetColor(value.ConvertTo<plColor>() * pAttr->m_Color);
@@ -52,7 +52,7 @@ void plSphereVisualizerAdapter::Update()
   if (!pAttr->GetOffsetProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetOffsetProperty()), value).AssertSuccess();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetOffsetProperty()), value).IgnoreResult();
 
     PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plVec3>(), "Invalid property bound to plSphereVisualizerAttribute 'offset'");
 
@@ -72,7 +72,7 @@ void plSphereVisualizerAdapter::UpdateGizmoTransform()
   t.m_vScale.Set(m_fScale);
   t.m_vPosition = m_vPositionOffset;
 
-  plVec3 vOffset = plVec3::MakeZero();
+  plVec3 vOffset = plVec3::ZeroVector();
 
   if (m_Anchor.IsSet(plVisualizerAnchor::PosX))
     vOffset.x -= t.m_vScale.x;

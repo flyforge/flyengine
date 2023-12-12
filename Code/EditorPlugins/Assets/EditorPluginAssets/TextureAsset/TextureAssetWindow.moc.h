@@ -24,7 +24,7 @@ private:
   virtual void InternalRedraw() override;
   void SendRedrawMsg();
 
-  plEngineViewConfig m_ViewConfig;
+  PlasmaEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget;
 };
 
@@ -57,7 +57,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapToolbarActions(plStringView sMapping);
+  static void MapActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hTextureChannelMode;
   static plActionDescriptorHandle s_hLodSlider;

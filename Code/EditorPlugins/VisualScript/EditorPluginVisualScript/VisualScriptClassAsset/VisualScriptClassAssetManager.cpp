@@ -14,7 +14,7 @@ plVisualScriptClassAssetManager::plVisualScriptClassAssetManager()
   m_DocTypeDesc.m_sDocumentTypeName = "VisualScriptClass";
   m_DocTypeDesc.m_sFileExtension = "plVisualScriptClassAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/VisualScript.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Scripting";
+  //m_DocTypeDesc.m_sAssetCategory = "Scripting";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plVisualScriptClassAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_ScriptClass");
@@ -49,9 +49,9 @@ void plVisualScriptClassAssetManager::OnDocumentManagerEvent(const plDocumentMan
 }
 
 void plVisualScriptClassAssetManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plVisualScriptClassAssetDocument(sPath);
+  out_pDocument = new plVisualScriptClassAssetDocument(szPath);
 }
 
 void plVisualScriptClassAssetManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

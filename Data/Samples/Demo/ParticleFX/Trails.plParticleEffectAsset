@@ -258,7 +258,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plParticleBehaviorFactory"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleBehaviorFactory_Gravity"}
 		u3 %TypeVersion{1}
@@ -275,7 +275,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plParticleInitializerFactory"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleInitializerFactory_RandomColor"}
 		u3 %TypeVersion{1}
@@ -292,7 +292,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plParticleInitializerFactory"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleInitializerFactory_VelocityCone"}
 		u3 %TypeVersion{2}
@@ -309,7 +309,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plQuadParticleOrientation"}
 		u3 %TypeVersion{2}
@@ -326,7 +326,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plParticleTypeFactory"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleTypeQuadFactory"}
 		u3 %TypeVersion{2}
@@ -343,7 +343,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleBehaviorFactory"}
 		u3 %TypeVersion{1}
@@ -360,7 +360,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleTextureAtlasType"}
 		u3 %TypeVersion{1}
@@ -428,7 +428,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleSystemDescriptor"}
 		u3 %TypeVersion{2}
@@ -445,7 +445,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plParticleInitializerFactory"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleInitializerFactory_RandomSize"}
 		u3 %TypeVersion{2}
@@ -462,7 +462,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleEventReactionFactory"}
 		u3 %TypeVersion{1}
@@ -479,7 +479,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plParticleBehaviorFactory"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleBehaviorFactory_FadeOut"}
 		u3 %TypeVersion{1}
@@ -496,7 +496,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plParticleTypeFactory"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleTypeLightFactory"}
 		u3 %TypeVersion{1}
@@ -513,7 +513,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleEmitterFactory"}
 		u3 %TypeVersion{1}
@@ -547,7 +547,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleTypeRenderMode"}
 		u3 %TypeVersion{1}
@@ -564,7 +564,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleEffectDescriptor"}
 		u3 %TypeVersion{2}
@@ -581,7 +581,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleTypeFactory"}
 		u3 %TypeVersion{1}
@@ -615,7 +615,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleInitializerFactory"}
 		u3 %TypeVersion{1}
@@ -632,7 +632,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plParticleEmitterFactory"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plParticleEmitterFactory_Burst"}
 		u3 %TypeVersion{1}
@@ -666,7 +666,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginParticle"}
+		s %PluginName{"PlasmaEditorPluginParticle"}
 		VarArray %Properties{}
 		s %TypeName{"plEffectInvisibleUpdateRate"}
 		u3 %TypeVersion{1}

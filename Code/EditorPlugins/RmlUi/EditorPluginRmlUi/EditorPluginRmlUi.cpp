@@ -15,23 +15,19 @@ void OnLoadPlugin()
   {
     // Menu Bar
     {
-      // Menu Bar
-      {
-        plActionMapManager::RegisterActionMap("RmlUiAssetMenuBar").IgnoreResult();
-        plStandardMenus::MapActions("RmlUiAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
-        plProjectActions::MapActions("RmlUiAssetMenuBar");
-        plDocumentActions::MapMenuActions("RmlUiAssetMenuBar");
-        plAssetActions::MapMenuActions("RmlUiAssetMenuBar");
-        plCommandHistoryActions::MapActions("RmlUiAssetMenuBar");
-      }
+      plActionMapManager::RegisterActionMap("RmlUiAssetMenuBar").IgnoreResult();
+      plStandardMenus::MapActions("RmlUiAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+      plProjectActions::MapActions("RmlUiAssetMenuBar");
+      plDocumentActions::MapActions("RmlUiAssetMenuBar", "Menu.File", false);
+      plCommandHistoryActions::MapActions("RmlUiAssetMenuBar", "Menu.Edit");
+    }
 
-      // Tool Bar
-      {
-        plActionMapManager::RegisterActionMap("RmlUiAssetToolBar").IgnoreResult();
-        plDocumentActions::MapToolbarActions("RmlUiAssetToolBar");
-        plCommandHistoryActions::MapActions("RmlUiAssetToolBar", "");
-        plAssetActions::MapToolBarActions("RmlUiAssetToolBar", true);
-      }
+    // Tool Bar
+    {
+      plActionMapManager::RegisterActionMap("RmlUiAssetToolBar").IgnoreResult();
+      plDocumentActions::MapActions("RmlUiAssetToolBar", "", true);
+      plCommandHistoryActions::MapActions("RmlUiAssetToolBar", "");
+      plAssetActions::MapToolBarActions("RmlUiAssetToolBar", true);
     }
   }
 }

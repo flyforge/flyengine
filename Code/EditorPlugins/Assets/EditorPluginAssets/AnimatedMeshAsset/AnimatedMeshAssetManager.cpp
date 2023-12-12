@@ -13,7 +13,6 @@ plAnimatedMeshAssetDocumentManager::plAnimatedMeshAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Animated Mesh";
   m_DocTypeDesc.m_sFileExtension = "plAnimatedMeshAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Animated_Mesh.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plAnimatedMeshAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Mesh_Static");
@@ -36,7 +35,8 @@ void plAnimatedMeshAssetDocumentManager::OnDocumentManagerEvent(const plDocument
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plAnimatedMeshAssetDocument>())
       {
-        new plQtAnimatedMeshAssetDocumentWindow(static_cast<plAnimatedMeshAssetDocument*>(e.m_pDocument)); // NOLINT
+        plQtAnimatedMeshAssetDocumentWindow* pDocWnd =
+          new plQtAnimatedMeshAssetDocumentWindow(static_cast<plAnimatedMeshAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -46,9 +46,10 @@ void plAnimatedMeshAssetDocumentManager::OnDocumentManagerEvent(const plDocument
   }
 }
 
-void plAnimatedMeshAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plAnimatedMeshAssetDocumentManager::InternalCreateDocument(
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plAnimatedMeshAssetDocument(sPath);
+  out_pDocument = new plAnimatedMeshAssetDocument(szPath);
 }
 
 void plAnimatedMeshAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

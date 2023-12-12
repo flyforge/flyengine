@@ -58,7 +58,7 @@ plQtColorGradientWidget::plQtColorGradientWidget(QWidget* pParent)
 }
 
 
-plQtColorGradientWidget::~plQtColorGradientWidget() = default;
+plQtColorGradientWidget::~plQtColorGradientWidget() {}
 
 void plQtColorGradientWidget::SetScrubberPosition(double fPosition)
 {
@@ -68,45 +68,45 @@ void plQtColorGradientWidget::SetScrubberPosition(double fPosition)
   update();
 }
 
-void plQtColorGradientWidget::setColorGradientData(const plColorGradient* pGradient)
+void plQtColorGradientWidget::setColorGradientData(const plColorGradient* gradient)
 {
-  m_pColorGradientData = pGradient;
+  m_pColorGradientData = gradient;
   FrameExtents();
 
   update();
 }
 
 
-void plQtColorGradientWidget::setEditMode(bool bEdit)
+void plQtColorGradientWidget::setEditMode(bool edit)
 {
-  m_bEditMode = bEdit;
+  m_bEditMode = edit;
 
   setMouseTracking(m_bEditMode);
   setCursor(m_bEditMode ? Qt::ArrowCursor : Qt::PointingHandCursor);
 }
 
-void plQtColorGradientWidget::setShowColorCPs(bool bShow)
+void plQtColorGradientWidget::setShowColorCPs(bool show)
 {
-  m_bShowColorCPs = bShow;
+  m_bShowColorCPs = show;
 }
 
 
-void plQtColorGradientWidget::setShowAlphaCPs(bool bShow)
+void plQtColorGradientWidget::setShowAlphaCPs(bool show)
 {
-  m_bShowAlphaCPs = bShow;
+  m_bShowAlphaCPs = show;
 }
 
 
-void plQtColorGradientWidget::setShowIntensityCPs(bool bShow)
+void plQtColorGradientWidget::setShowIntensityCPs(bool show)
 {
-  m_bShowIntensityCPs = bShow;
+  m_bShowIntensityCPs = show;
 }
 
 
-void plQtColorGradientWidget::setShowCoords(bool bTop, bool bBottom)
+void plQtColorGradientWidget::setShowCoords(bool top, bool bottom)
 {
-  m_bShowCoordsTop = bTop;
-  m_bShowCoordsBottom = bBottom;
+  m_bShowCoordsTop = top;
+  m_bShowCoordsBottom = bottom;
 }
 
 void plQtColorGradientWidget::ClearSelectedCP()
@@ -114,7 +114,7 @@ void plQtColorGradientWidget::ClearSelectedCP()
   SelectCP(-1, -1, -1);
 }
 
-void plQtColorGradientWidget::SelectCP(plInt32 iColorCP, plInt32 iAlphaCP, plInt32 iIntensityCP)
+void plQtColorGradientWidget::SelectCP(plInt32 colorCP, plInt32 alphaCP, plInt32 intensityCP)
 {
   m_bDraggingCP = false;
 
@@ -126,21 +126,21 @@ void plQtColorGradientWidget::SelectCP(plInt32 iColorCP, plInt32 iAlphaCP, plInt
 
   bool changed = false;
 
-  if (iColorCP != m_iSelectedColorCP)
+  if (colorCP != m_iSelectedColorCP)
   {
-    m_iSelectedColorCP = iColorCP;
+    m_iSelectedColorCP = colorCP;
     changed = true;
   }
 
-  if (iAlphaCP != m_iSelectedAlphaCP)
+  if (alphaCP != m_iSelectedAlphaCP)
   {
-    m_iSelectedAlphaCP = iAlphaCP;
+    m_iSelectedAlphaCP = alphaCP;
     changed = true;
   }
 
-  if (iIntensityCP != m_iSelectedIntensityCP)
+  if (intensityCP != m_iSelectedIntensityCP)
   {
-    m_iSelectedIntensityCP = iIntensityCP;
+    m_iSelectedIntensityCP = intensityCP;
     changed = true;
   }
 
@@ -217,6 +217,9 @@ void plQtColorGradientWidget::PaintColorGradient(QPainter& p) const
 
     for (plInt32 posX = 0; posX < width; ++posX)
     {
+
+      const plInt32 xPos = GradientArea.left() + posX;
+
       plColorGammaUB rgba;
       float intensity;
 
@@ -527,7 +530,7 @@ void plQtColorGradientWidget::mousePressEvent(QMouseEvent* event)
   {
     if (event->button() == Qt::MouseButton::RightButton)
     {
-      m_LastMousePosition = event->globalPosition();
+      m_LastMousePosition = event->globalPos();
     }
 
     if (event->buttons() == Qt::MouseButton::LeftButton)
@@ -667,8 +670,8 @@ void plQtColorGradientWidget::mouseMoveEvent(QMouseEvent* event)
         // scroll displayed area
         if (m_fDisplayExtentMinX < m_fDisplayExtentMaxX)
         {
-          const QPointF mouseMove = event->globalPosition() - m_LastMousePosition;
-          m_LastMousePosition = event->globalPosition();
+          const QPoint mouseMove = event->globalPos() - m_LastMousePosition;
+          m_LastMousePosition = event->globalPos();
 
           const double range = m_fDisplayExtentMaxX - m_fDisplayExtentMinX;
 

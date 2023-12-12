@@ -27,6 +27,30 @@ plEvent<const plRenderWorldExtractionEvent&, plMutex> plRenderWorld::s_Extractio
 plEvent<const plRenderWorldRenderEvent&, plMutex> plRenderWorld::s_RenderEvent;
 plUInt64 plRenderWorld::s_uiFrameCounter;
 
+bool plRenderWorld::s_bOverridePipelineSettings = false;
+
+// TAA
+bool plRenderWorld::s_bTAAEnabled = false;
+bool plRenderWorld::s_bTAAUpscaleEnabled = false;
+// Depth of field
+bool plRenderWorld::s_bDOFEnabled = false;
+float plRenderWorld::s_bDOFRadius = 5.5;
+
+// Motion blur
+bool plRenderWorld::s_bMotionBlurEnabled = false;
+float plRenderWorld::s_MotionBlurSamples = 32.0f;
+float plRenderWorld::s_MotionBlurStrength = 0.1f;
+plEnum<plMotionBlurMode> plRenderWorld::s_eMotionBlurMode = plMotionBlurMode::ObjectBased;
+
+// Bloom
+bool plRenderWorld::s_bBloomEnabled = false;
+float plRenderWorld::s_BloomThreshold = 1.0;
+float plRenderWorld::s_BloomIntensity = 1.0;
+int plRenderWorld::s_BloomMipCount = 10;
+
+// Tonemapping
+plEnum<plTonemapMode> plRenderWorld::s_eTonemapMode = plTonemapMode::AMD;
+
 namespace
 {
   static bool s_bInExtract;
@@ -59,7 +83,7 @@ namespace
   static plProxyAllocator* s_pCacheAllocator;
 
   static plMutex s_CachedRenderDataMutex;
-  using CachedRenderDataPerComponent = plHybridArray<const plRenderData*, 4>;
+  typedef plHybridArray<const plRenderData*, 4> CachedRenderDataPerComponent;
   static plHashTable<plComponentHandle, CachedRenderDataPerComponent> s_CachedRenderData;
   static plDynamicArray<const plRenderData*> s_DeletedRenderData;
 
@@ -87,7 +111,7 @@ namespace plInternal
 
     struct PerObjectCache
     {
-      PerObjectCache() = default;
+      PerObjectCache() {}
 
       PerObjectCache(plAllocatorBase* pAllocator)
         : m_Entries(pAllocator)
@@ -552,7 +576,7 @@ void plRenderWorld::Render(plRenderContext* pRenderContext)
   {
     // Executed via WriteRenderPipelineDgml console command.
     s_bWriteRenderPipelineDgml = false;
-    const plDateTime dt = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
+    const plDateTime dt = plTimestamp::CurrentTimestamp();
     for (plUInt32 i = 0; i < filteredRenderPipelines.GetCount(); ++i)
     {
       auto& pRenderPipeline = filteredRenderPipelines[i];

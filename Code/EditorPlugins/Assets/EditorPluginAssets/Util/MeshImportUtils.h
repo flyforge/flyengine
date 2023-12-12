@@ -26,7 +26,7 @@ namespace plMeshImportUtils
 
   // PLASMA_EDITORPLUGINASSETS_DLL void AddMeshToDescriptor(plMeshResourceDescriptor& meshDescriptor, const plModelImporter::Scene& scene, const plModelImporter::Mesh& mesh, const plHybridArray<plMaterialResourceSlot, 8>& materialSlots);
 
-  // PLASMA_EDITORPLUGINASSETS_DLL void UpdateMaterialSlots(plStringView sDocumentPath, const plModelImporter::Scene& scene, const plModelImporter::Mesh& mesh, bool bImportMaterials, bool bUseSubFolderForImportedMaterials, const char* szMeshFile, plHybridArray<plMaterialResourceSlot, 8>& inout_MaterialSlots);
+  // PLASMA_EDITORPLUGINASSETS_DLL void UpdateMaterialSlots(const char* szDocumentPath, const plModelImporter::Scene& scene, const plModelImporter::Mesh& mesh, bool bImportMaterials, bool bUseSubFolderForImportedMaterials, const char* szMeshFile, plHybridArray<plMaterialResourceSlot, 8>& inout_MaterialSlots);
 
   // PLASMA_EDITORPLUGINASSETS_DLL void PrepareMeshForImport(plModelImporter::Mesh& mesh, bool bRecalculateNormals, plProgressRange& range);
 
@@ -34,7 +34,7 @@ namespace plMeshImportUtils
 
   // PLASMA_EDITORPLUGINASSETS_DLL plStatus TryImportMesh(plSharedPtr<plModelImporter::Scene>& out_pScene, plModelImporter::Mesh*& out_pMesh, const char* szMeshFile, const char* szSubMeshName, const plMat3& mMeshTransform, bool bRecalculateNormals, bool bInvertNormals, plMeshNormalPrecision::Enum normalPrecision, plMeshTexCoordPrecision::Enum texCoordPrecision, plProgressRange& range, plMeshResourceDescriptor& meshDescriptor, bool bSkinnedMesh);
 
-  PLASMA_EDITORPLUGINASSETS_DLL void SetMeshAssetMaterialSlots(plHybridArray<plMaterialResourceSlot, 8>& inout_materialSlots, const plModelImporter2::Importer* pImporter);
-  PLASMA_EDITORPLUGINASSETS_DLL void CopyMeshAssetMaterialSlotToResource(plMeshResourceDescriptor& ref_desc, const plHybridArray<plMaterialResourceSlot, 8>& materialSlots);
-  PLASMA_EDITORPLUGINASSETS_DLL void ImportMeshAssetMaterials(plHybridArray<plMaterialResourceSlot, 8>& inout_materialSlots, plStringView sDocumentDirectory, const plModelImporter2::Importer* pImporter);
+  PLASMA_EDITORPLUGINASSETS_DLL void SetMeshAssetMaterialSlots(plHybridArray<plMaterialResourceSlot, 8>& inout_MaterialSlots, const plModelImporter2::Importer* pImporter);
+  PLASMA_EDITORPLUGINASSETS_DLL void CopyMeshAssetMaterialSlotToResource(plMeshResourceDescriptor& desc, const plHybridArray<plMaterialResourceSlot, 8>& materialSlots);
+  PLASMA_EDITORPLUGINASSETS_DLL void ImportMeshAssetMaterials(plHybridArray<plMaterialResourceSlot, 8>& inout_MaterialSlots, const char* szDocumentDirectory, const plModelImporter2::Importer* pImporter);
 } // namespace plMeshImportUtils

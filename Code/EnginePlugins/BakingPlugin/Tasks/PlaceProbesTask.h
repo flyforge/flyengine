@@ -25,8 +25,8 @@ namespace plBakingInternal
     plBoundingBox m_Bounds;
     plArrayPtr<const Volume> m_Volumes;
 
-    plVec3 m_vGridOrigin = plVec3::MakeZero();
-    plVec3U32 m_vProbeCount = plVec3U32::MakeZero();
+    plVec3 m_vGridOrigin = plVec3::ZeroVector();
+    plVec3U32 m_vProbeCount = plVec3U32::ZeroVector();
     plDynamicArray<plVec3> m_ProbePositions;
   };
 } // namespace plBakingInternal

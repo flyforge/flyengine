@@ -23,7 +23,7 @@ struct plVisualShaderPinDescriptor
 
 struct plVisualShaderNodeType
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -51,6 +51,7 @@ struct plVisualShaderNodeDescriptor
   plString m_sShaderCodePermutations;
   plString m_sShaderCodeMaterialParams;
   plString m_sShaderCodeMaterialCB;
+  plString m_sShaderCodeRenderConfig;
   plString m_sShaderCodeRenderState;
   plString m_sShaderCodeVertexShader;
   plString m_sShaderCodeGeometryShader;

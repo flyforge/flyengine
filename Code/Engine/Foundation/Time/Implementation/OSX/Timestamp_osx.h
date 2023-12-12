@@ -11,7 +11,7 @@ const plTimestamp plTimestamp::CurrentTimestamp()
   timeval currentTime;
   gettimeofday(&currentTime, nullptr);
 
-  return plTimestamp::MakeFromInt(currentTime.tv_sec * 1000000LL + currentTime.tv_usec, plSIUnitOfTime::Microsecond);
+  return plTimestamp(currentTime.tv_sec * 1000000LL + currentTime.tv_usec, plSIUnitOfTime::Microsecond);
 }
 
 const plTimestamp plDateTime::GetTimestamp() const
@@ -28,7 +28,7 @@ const plTimestamp plDateTime::GetTimestamp() const
 
     if (year < yearMin.location || year > yearMax.length)
     {
-      return plTimestamp::MakeInvalid();
+      return plTimestamp();
     }
   }
 
@@ -38,7 +38,7 @@ const plTimestamp plDateTime::GetTimestamp() const
 
     if (month < monthMin.location || month > monthMax.length)
     {
-      return plTimestamp::MakeInvalid();
+      return plTimestamp();
     }
   }
 
@@ -48,20 +48,20 @@ const plTimestamp plDateTime::GetTimestamp() const
 
     if (day < dayMin.location || day > dayMax.length)
     {
-      return plTimestamp::MakeInvalid();
+      return plTimestamp();
     }
   }
 
   CFAbsoluteTime absTime;
   if (CFCalendarComposeAbsoluteTime(calendar, &absTime, "yMdHms", year, month, day, hour, minute, second) == FALSE)
   {
-    return plTimestamp::MakeInvalid();
+    return plTimestamp();
   }
 
-  return plTimestamp::MakeFromInt(static_cast<plInt64>((absTime + kCFAbsoluteTimeIntervalSince1970) * 1000000.0), plSIUnitOfTime::Microsecond);
+  return plTimestamp(static_cast<plInt64>((absTime + kCFAbsoluteTimeIntervalSince1970) * 1000000.0), plSIUnitOfTime::Microsecond);
 }
 
-plResult plDateTime::SetFromTimestamp(plTimestamp timestamp)
+bool plDateTime::SetTimestamp(plTimestamp timestamp)
 {
   // Round the microseconds to the full second so that we can reconstruct the right date / time afterwards
   plInt64 us = timestamp.GetInt64(plSIUnitOfTime::Microsecond);
@@ -77,7 +77,7 @@ plResult plDateTime::SetFromTimestamp(plTimestamp timestamp)
 
   if (CFCalendarDecomposeAbsoluteTime(calendar, at, "yMdHmsE", &year, &month, &day, &hour, &minute, &second, &dayOfWeek) == FALSE)
   {
-    return PLASMA_FAILURE;
+    return false;
   }
 
   m_iYear = (plInt16)year;
@@ -88,5 +88,5 @@ plResult plDateTime::SetFromTimestamp(plTimestamp timestamp)
   m_uiMinute = (plUInt8)minute;
   m_uiSecond = (plUInt8)second;
   m_uiMicroseconds = (plUInt32)microseconds;
-  return PLASMA_SUCCESS;
+  return true;
 }

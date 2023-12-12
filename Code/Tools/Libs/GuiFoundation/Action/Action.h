@@ -16,9 +16,9 @@ struct plActionDescriptor;
 class plAction;
 struct plActionContext;
 
-using plActionId = plGenericId<24, 8>;
-using CreateActionFunc = plAction* (*)(const plActionContext&);
-using DeleteActionFunc = void (*)(plAction*);
+typedef plGenericId<24, 8> plActionId;
+typedef plAction* (*CreateActionFunc)(const plActionContext& context);
+typedef void (*DeleteActionFunc)(plAction* pAction);
 
 /// \brief Handle for a plAction.
 ///
@@ -27,7 +27,7 @@ class PLASMA_GUIFOUNDATION_DLL plActionDescriptorHandle
 {
 public:
   using StorageType = plUInt32;
-
+  
   PLASMA_DECLARE_HANDLE_TYPE(plActionDescriptorHandle, plActionId);
   friend class plActionManager;
 
@@ -45,7 +45,7 @@ struct plActionScope
     Window,
     Default = Global
   };
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 };
 
 ///
@@ -59,14 +59,14 @@ struct plActionType
     ActionAndMenu,
     Default = Action
   };
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 };
 
 ///
 struct PLASMA_GUIFOUNDATION_DLL plActionContext
 {
   plActionContext() = default;
-  plActionContext(plDocument* pDoc) { m_pDocument = pDoc; }
+  plActionContext(plDocument* doc) { m_pDocument = doc; }
 
   plDocument* m_pDocument = nullptr;
   plString m_sMapping;
@@ -77,8 +77,7 @@ struct PLASMA_GUIFOUNDATION_DLL plActionContext
 ///
 struct PLASMA_GUIFOUNDATION_DLL plActionDescriptor
 {
-  plActionDescriptor() = default;
-  ;
+  plActionDescriptor(){};
   plActionDescriptor(plActionType::Enum type, plActionScope::Enum scope, const char* szName, const char* szCategoryPath, const char* szShortcut,
     CreateActionFunc createAction, DeleteActionFunc deleteAction = nullptr);
 

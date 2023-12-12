@@ -3,21 +3,14 @@
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <Foundation/Utilities/CommandLineOptions.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-#  include <shellscalingapi.h>
-#endif
-
-class plEditorApplication : public plApplication
+class PlasmaEditorApplication : public plApplication
 {
 public:
-  using SUPER = plApplication;
+  typedef plApplication SUPER;
 
-  plEditorApplication()
+  PlasmaEditorApplication()
     : plApplication("PlasmaEditor")
   {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-#endif
     EnableMemoryLeakReporting(true);
 
     m_pEditorApp = new plQtEditorApp;
@@ -67,4 +60,4 @@ private:
   plQtEditorApp* m_pEditorApp;
 };
 
-PLASMA_APPLICATION_ENTRY_POINT(plEditorApplication);
+PLASMA_APPLICATION_ENTRY_POINT(PlasmaEditorApplication);

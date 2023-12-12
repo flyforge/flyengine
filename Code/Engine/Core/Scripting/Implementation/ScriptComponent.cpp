@@ -10,7 +10,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plScriptComponent, 1, plComponentMode::Static)
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("UpdateInterval", GetUpdateInterval, SetUpdateInterval)->AddAttributes(new plClampValueAttribute(plTime::MakeZero(), plVariant())),
+    PLASMA_ACCESSOR_PROPERTY("UpdateInterval", GetUpdateInterval, SetUpdateInterval)->AddAttributes(new plClampValueAttribute(plTime::Zero(), plVariant())),
     PLASMA_ACCESSOR_PROPERTY("ScriptClass", GetScriptClassFile, SetScriptClassFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ScriptClass")),
     PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("ScriptClass")),
   }
@@ -18,6 +18,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plScriptComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Scripting"),
+    new plColorAttribute(plColorScheme::Scripting),
   }
   PLASMA_END_ATTRIBUTES;
 }

@@ -10,7 +10,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCollectionAssetEntry, 1, plRTTIDefaultAllo
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("Name", m_sLookupName),
-    PLASMA_MEMBER_PROPERTY("Asset", m_sRedirectionAsset)->AddAttributes(new plAssetBrowserAttribute("", plDependencyFlags::Package))
+    PLASMA_MEMBER_PROPERTY("Asset", m_sRedirectionAsset)->AddAttributes(new plAssetBrowserAttribute(""))
   }
   PLASMA_END_PROPERTIES;
 }
@@ -30,14 +30,14 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCollectionAssetDocument, 1, plRTTINoAlloca
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plCollectionAssetDocument::plCollectionAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plCollectionAssetData>(sDocumentPath, plAssetDocEngineConnection::None)
+plCollectionAssetDocument::plCollectionAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plCollectionAssetData>(szDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-static bool InsertEntry(plStringView sID, plStringView sLookupName, plMap<plString, plCollectionEntry>& inout_found)
+static bool InsertEntry(plStringView sID, plStringView sLookupName, plMap<plString, plCollectionEntry>& inout_Found)
 {
-  auto it = inout_found.Find(sID);
+  auto it = inout_Found.Find(sID);
 
   if (it.IsValid())
   {
@@ -61,7 +61,7 @@ static bool InsertEntry(plStringView sID, plStringView sLookupName, plMap<plStri
 
   // insert item itself
   {
-    plCollectionEntry& entry = inout_found[sID];
+    plCollectionEntry& entry = inout_Found[sID];
     entry.m_sOptionalNiceLookupName = sLookupName;
     entry.m_sResourceID = sID;
     entry.m_sAssetTypeName = pInfo->m_Data.m_sSubAssetsDocumentTypeName;
@@ -71,17 +71,46 @@ static bool InsertEntry(plStringView sID, plStringView sLookupName, plMap<plStri
   {
     const plAssetDocumentInfo* pDocInfo = pInfo->m_pAssetInfo->m_Info.Borrow();
 
-    for (const plString& doc : pDocInfo->m_PackageDependencies)
+    for (const plString& doc : pDocInfo->m_AssetTransformDependencies)
+    {
+      InsertEntry(doc, {}, inout_Found);
+    }
+
+    for (const plString& doc : pDocInfo->m_RuntimeDependencies)
     {
       // ignore return value, we are only interested in top-level information
-      InsertEntry(doc, {}, inout_found);
+      InsertEntry(doc, {}, inout_Found);
     }
   }
 
   return true;
 }
 
-plTransformStatus plCollectionAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+void plCollectionAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const
+{
+  // TODO: why are collections not marked as needs-transform, out of the box, when a dependency changes ?
+
+  SUPER::UpdateAssetDocumentInfo(pInfo);
+
+  const plCollectionAssetData* pProp = GetProperties();
+
+  plMap<plString, plCollectionEntry> entries;
+
+  for (const auto& e : pProp->m_Entries)
+  {
+    if (e.m_sRedirectionAsset.IsEmpty())
+      continue;
+
+    InsertEntry(e.m_sRedirectionAsset, e.m_sLookupName, entries);
+  }
+
+  for (auto it : entries)
+  {
+    pInfo->m_AssetTransformDependencies.Insert(it.Value().m_sResourceID);
+  }
+}
+
+plTransformStatus plCollectionAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   const plCollectionAssetData* pProp = GetProperties();
 

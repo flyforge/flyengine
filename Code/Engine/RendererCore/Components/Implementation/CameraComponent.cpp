@@ -149,14 +149,14 @@ void plCameraComponentManager::OnCameraConfigsChanged(void* dummy)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plCameraComponent, 10, plComponentMode::Static)
+PLASMA_BEGIN_COMPONENT_TYPE(plCameraComponent, 11, plComponentMode::Static)
 {
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("EditorShortcut", m_iEditorShortcut)->AddAttributes(new plDefaultValueAttribute(-1), new plClampValueAttribute(-1, 9)),
     PLASMA_ENUM_ACCESSOR_PROPERTY("UsageHint", plCameraUsageHint, GetUsageHint, SetUsageHint),
     PLASMA_ENUM_ACCESSOR_PROPERTY("Mode", plCameraMode, GetCameraMode, SetCameraMode),
-    PLASMA_ACCESSOR_PROPERTY("RenderTarget", GetRenderTargetFile, SetRenderTargetFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Target", plDependencyFlags::Package)),
+    PLASMA_ACCESSOR_PROPERTY("RenderTarget", GetRenderTargetFile, SetRenderTargetFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Target")),
     PLASMA_ACCESSOR_PROPERTY("RenderTargetOffset", GetRenderTargetRectOffset, SetRenderTargetRectOffset)->AddAttributes(new plClampValueAttribute(plVec2(0.0f), plVec2(0.9f))),
     PLASMA_ACCESSOR_PROPERTY("RenderTargetSize", GetRenderTargetRectSize, SetRenderTargetRectSize)->AddAttributes(new plDefaultValueAttribute(plVec2(1.0f)), new plClampValueAttribute(plVec2(0.1f), plVec2(1.0f))),
     PLASMA_ACCESSOR_PROPERTY("NearPlane", GetNearPlane, SetNearPlane)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.01f, 4.0f)),
@@ -167,17 +167,19 @@ PLASMA_BEGIN_COMPONENT_TYPE(plCameraComponent, 10, plComponentMode::Static)
     PLASMA_SET_MEMBER_PROPERTY("ExcludeTags", m_ExcludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
     PLASMA_ACCESSOR_PROPERTY("CameraRenderPipeline", GetRenderPipelineEnum, SetRenderPipelineEnum)->AddAttributes(new plDynamicStringEnumAttribute("CameraPipelines")),
     PLASMA_ACCESSOR_PROPERTY("Aperture", GetAperture, SetAperture)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(1.0f, 32.0f), new plSuffixAttribute(" f-stop(s)")),
-    PLASMA_ACCESSOR_PROPERTY("ShutterTime", GetShutterTime, SetShutterTime)->AddAttributes(new plDefaultValueAttribute(plTime::MakeFromSeconds(1.0)), new plClampValueAttribute(plTime::MakeFromSeconds(1.0f / 100000.0f), plTime::MakeFromSeconds(600.0f))),
+    PLASMA_ACCESSOR_PROPERTY("ShutterTime", GetShutterTime, SetShutterTime)->AddAttributes(new plDefaultValueAttribute(plTime::Seconds(0.005)), new plClampValueAttribute(plTime::Seconds(1.0f / 100000.0f), plTime::Seconds(600.0f))),
     PLASMA_ACCESSOR_PROPERTY("ISO", GetISO, SetISO)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(50.0f, 64000.0f)),
+    PLASMA_ACCESSOR_PROPERTY("FocusDistance", GetFocusDistance, SetFocusDistance)->AddAttributes(new plDefaultValueAttribute(0.2f)),
     PLASMA_ACCESSOR_PROPERTY("ExposureCompensation", GetExposureCompensation, SetExposureCompensation)->AddAttributes(new plClampValueAttribute(-32.0f, 32.0f)),
     PLASMA_MEMBER_PROPERTY("ShowStats", m_bShowStats),
-    //PLASMA_ACCESSOR_PROPERTY_READ_ONLY("EV100", GetEV100),
-    //PLASMA_ACCESSOR_PROPERTY_READ_ONLY("FinalExposure", GetExposure),
+    PLASMA_ACCESSOR_PROPERTY_READ_ONLY("EV100", GetEV100),
+    PLASMA_ACCESSOR_PROPERTY_READ_ONLY("FinalExposure", GetExposure),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
+    new plColorAttribute(plColorScheme::Rendering),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 1.0f, plColor::DarkSlateBlue),
     new plCameraVisualizerAttribute("Mode", "FOV", "Dimensions", "NearPlane", "FarPlane"),
   }
@@ -226,6 +228,9 @@ void plCameraComponent::SerializeComponent(plWorldWriter& inout_stream) const
 
   // Version 10
   s << m_bShowStats;
+
+  // Version 11
+  s << m_fFocusDistance;
 }
 
 void plCameraComponent::DeserializeComponent(plWorldReader& inout_stream)
@@ -260,7 +265,7 @@ void plCameraComponent::DeserializeComponent(plWorldReader& inout_stream)
     s >> m_fAperture;
     float shutterTime;
     s >> shutterTime;
-    m_ShutterTime = plTime::MakeFromSeconds(shutterTime);
+    m_ShutterTime = plTime::Seconds(shutterTime);
     s >> m_fISO;
     s >> m_fExposureCompensation;
   }
@@ -290,6 +295,11 @@ void plCameraComponent::DeserializeComponent(plWorldReader& inout_stream)
   if (uiVersion >= 10)
   {
     s >> m_bShowStats;
+  }
+
+  if (uiVersion >= 11)
+  {
+    s >> m_fFocusDistance;
   }
 
   MarkAsModified();
@@ -348,7 +358,8 @@ void plCameraComponent::ShowStats(plView* pView)
     plMat4 projectionMatrix = pView->GetProjectionMatrix(plCameraEye::Left); // todo: Stereo support
     plMat4 viewProjectionMatrix = projectionMatrix * viewMatrix;
 
-    plFrustum frustum = plFrustum::MakeFromMVP(viewProjectionMatrix);
+    plFrustum frustum;
+    frustum.SetFrustum(viewProjectionMatrix);
 
     // TODO: limit far plane to 10 meters
 
@@ -518,6 +529,15 @@ void plCameraComponent::SetISO(float fISO)
   MarkAsModified();
 }
 
+void plCameraComponent::SetFocusDistance(float fFocusDistance)
+{
+  if (m_fFocusDistance == fFocusDistance)
+    return;
+  m_fFocusDistance = fFocusDistance;
+
+  MarkAsModified();
+}
+
 void plCameraComponent::SetExposureCompensation(float fEC)
 {
   if (m_fExposureCompensation == fEC)
@@ -565,7 +585,11 @@ void plCameraComponent::ApplySettingsToView(plView* pView) const
 
   plCamera* pCamera = pView->GetCamera();
   pCamera->SetCameraMode(m_Mode, fFovOrDim, m_fNearPlane, plMath::Max(m_fNearPlane + 0.00001f, m_fFarPlane));
+  pCamera->SetShutterSpeed(GetShutterTime().AsFloatInSeconds());
   pCamera->SetExposure(GetExposure());
+  pCamera->SetAperture(GetAperture());
+  pCamera->SetISO(GetISO());
+  pCamera->SetFocusDistance(GetFocusDistance());
 
   pView->m_IncludeTags = m_IncludeTags;
   pView->m_ExcludeTags = m_ExcludeTags;
@@ -772,7 +796,7 @@ public:
       if (pProp->m_Value.IsA<float>())
       {
         const float shutterTime = pProp->m_Value.Get<float>();
-        pProp->m_Value = plTime::MakeFromSeconds(shutterTime);
+        pProp->m_Value = plTime::Seconds(shutterTime);
       }
     }
   }

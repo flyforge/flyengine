@@ -25,18 +25,25 @@ public:
   /// \brief Initializes the vector with x,y,z,w
   plVec4Template(Type x, Type y, Type z, Type w); // [tested]
 
-  /// \brief Initializes the vector from a vec3 and a float.
-  plVec4Template(plVec3Template<Type> xyz, Type w);
-
   /// \brief Initializes all 4 components with xyzw
   explicit plVec4Template(Type v); // [tested]
   // no copy-constructor and operator= since the default-generated ones will be faster
 
-  /// \brief Returns a vector with all components set to Not-a-Number (NaN).
-  [[nodiscard]] static plVec4Template<Type> MakeNaN() { return plVec4Template<Type>(plMath::NaN<Type>()); }
-
   /// \brief Returns a vector with all components set to zero.
-  [[nodiscard]] static plVec4Template<Type> MakeZero() { return plVec4Template<Type>(0); } // [tested]
+  static const plVec4Template<Type> ZeroVector() { return plVec4Template<Type>(0); } // [tested]
+  /// \brief Returns a vector with all components set to one.
+  static const plVec4Template<Type> OneVector() { return plVec4Template<Type>(1); }
+
+  /// \brief Returns a vector initialized to the origin point (0, 0, 0, 1).
+  static const plVec4Template<Type> OriginPoint() { return plVec4Template<Type>(0, 0, 0, 1); }
+  /// \brief Returns a vector initialized to the x unit vector (1, 0, 0, 0).
+  static const plVec4Template<Type> UnitXAxis() { return plVec4Template<Type>(1, 0, 0, 0); }
+  /// \brief Returns a vector initialized to the y unit vector (0, 1, 0, 0).
+  static const plVec4Template<Type> UnitYAxis() { return plVec4Template<Type>(0, 1, 0, 0); }
+  /// \brief Returns a vector initialized to the z unit vector (1, 0, 0, 0).
+  static const plVec4Template<Type> UnitZAxis() { return plVec4Template<Type>(0, 0, 1, 0); }
+  /// \brief Returns a vector initialized to the w unit vector (0, 0, 0, 1).
+  static const plVec4Template<Type> UnitWAxis() { return plVec4Template<Type>(0, 0, 0, 1); }
 
 #if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
@@ -157,6 +164,8 @@ public:
   /// brief Returns the component-wise absolute of *this.
   const plVec4Template<Type> Abs() const; // [tested]
 };
+
+
 
 // *** Operators ***
 

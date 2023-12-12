@@ -12,11 +12,13 @@ PLASMA_DEFINE_AS_POD_TYPE(plSimplifiedDataConstants);
 
 plSimplifiedDataGPU::plSimplifiedDataGPU()
 {
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   m_hConstantBuffer = plRenderContext::CreateConstantBufferStorage<plSimplifiedDataConstants>();
 }
 
 plSimplifiedDataGPU::~plSimplifiedDataGPU()
 {
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plRenderContext::DeleteConstantBufferStorage(m_hConstantBuffer);
 }
 
@@ -40,9 +42,9 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSimplifiedDataProvider, 1, plRTTIDefaultAl
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plSimplifiedDataProvider::plSimplifiedDataProvider() = default;
+plSimplifiedDataProvider::plSimplifiedDataProvider() {}
 
-plSimplifiedDataProvider::~plSimplifiedDataProvider() = default;
+plSimplifiedDataProvider::~plSimplifiedDataProvider() {}
 
 void* plSimplifiedDataProvider::UpdateData(const plRenderViewContext& renderViewContext, const plExtractedRenderData& extractedData)
 {

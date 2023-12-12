@@ -17,7 +17,7 @@ namespace JPH
 struct plJoltSubShape
 {
   JPH::Shape* m_pShape = nullptr;
-  plTransform m_Transform = plTransform::MakeIdentity();
+  plTransform m_Transform = plTransform::IdentityTransform();
 };
 
 class PLASMA_JOLTPLUGIN_DLL plJoltShapeComponent : public plComponent

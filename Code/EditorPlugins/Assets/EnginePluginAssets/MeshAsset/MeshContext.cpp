@@ -18,14 +18,14 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMeshContext::plMeshContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_pMeshObject = nullptr;
 }
 
-void plMeshContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
+void plMeshContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocMsg)
 {
-  if (auto* pMsg = plDynamicCast<const plEditorEngineSetMaterialsMsg*>(pDocMsg))
+  if (auto* pMsg = plDynamicCast<const PlasmaEditorEngineSetMaterialsMsg*>(pDocMsg))
   {
     plMeshComponent* pMesh;
     if (m_pMeshObject && m_pMeshObject->TryGetComponentOfBaseType(pMesh))
@@ -64,7 +64,7 @@ void plMeshContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
     }
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pDocMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pDocMsg);
 }
 
 void plMeshContext::OnInitialize()
@@ -96,17 +96,17 @@ void plMeshContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plMeshContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plMeshContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plMeshViewContext, this);
 }
 
-void plMeshContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plMeshContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
-bool plMeshContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plMeshContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   if (m_bBoundsDirty)
   {
@@ -123,12 +123,13 @@ bool plMeshContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThum
 }
 
 
-void plMeshContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
+void plMeshContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (m_pMeshObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   {
     PLASMA_LOCK(m_pWorld->GetWriteMarker());

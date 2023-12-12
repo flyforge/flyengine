@@ -7,14 +7,14 @@
 class QWidget;
 class plCamera;
 
-class PLASMA_EDITORFRAMEWORK_DLL plOrthoGizmoContext : public plEditorInputContext
+class PLASMA_EDITORFRAMEWORK_DLL plOrthoGizmoContext : public PlasmaEditorInputContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plOrthoGizmoContext, plEditorInputContext);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plOrthoGizmoContext, PlasmaEditorInputContext);
 
 public:
   plOrthoGizmoContext(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView, const plCamera* pCamera);
 
-  void SetWindowConfig(const plVec2I32& vViewport) { m_vViewport = vViewport; }
+  void SetWindowConfig(const plVec2I32& viewport) { m_vViewport = viewport; }
 
   virtual void FocusLost(bool bCancel);
 
@@ -26,9 +26,9 @@ public:
   float GetScalingResult() const { return m_fScalingResult; }
 
 protected:
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override {}
 

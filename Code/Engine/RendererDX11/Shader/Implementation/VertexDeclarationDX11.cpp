@@ -8,7 +8,7 @@
 
 plGALVertexDeclarationDX11::plGALVertexDeclarationDX11(const plGALVertexDeclarationCreationDescription& Description)
   : plGALVertexDeclaration(Description)
-
+  , m_pDXInputLayout(nullptr)
 {
 }
 

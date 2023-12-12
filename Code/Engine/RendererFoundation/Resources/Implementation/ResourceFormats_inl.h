@@ -30,49 +30,6 @@ PLASMA_FORCE_INLINE bool plGALResourceFormat::IsSrgb(plGALResourceFormat::Enum f
          format == BC7UNormalizedsRGB;
 }
 
-PLASMA_FORCE_INLINE bool plGALResourceFormat::IsIntegerFormat(Enum format)
-{
-  switch (format)
-  {
-    // D16 is actually a 16 bit unorm format
-    case plGALResourceFormat::D16:
-    // 32bit, 4 channel
-    case plGALResourceFormat::RGBAUInt:
-    case plGALResourceFormat::RGBAInt:
-    // 32bit, 3 channel
-    case plGALResourceFormat::RGBUInt:
-    case plGALResourceFormat::RGBInt:
-    // 16bit, 4 channel
-    case plGALResourceFormat::RGBAUShort:
-    case plGALResourceFormat::RGBAShort:
-    // 16bit, 2 channel
-    case plGALResourceFormat::RGUInt:
-    case plGALResourceFormat::RGInt:
-    // packed 32bit, 4 channel
-    case plGALResourceFormat::RGB10A2UInt:
-    // 8bit, 4 channel
-    case plGALResourceFormat::RGBAUByte:
-    case plGALResourceFormat::RGBAByte:
-    // 16bit, 2 channel
-    case plGALResourceFormat::RGUShort:
-    case plGALResourceFormat::RGShort:
-    // 8bit, 2 channel
-    case plGALResourceFormat::RGUByte:
-    case plGALResourceFormat::RGByte:
-    // 32bit, 1 channel
-    case plGALResourceFormat::RUInt:
-    case plGALResourceFormat::RInt:
-    // 16bit, 1 channel
-    case plGALResourceFormat::RUShort:
-    case plGALResourceFormat::RShort:
-    // 8bit, 1 channel
-    case plGALResourceFormat::RUByte:
-    case plGALResourceFormat::RByte:
-      return true;
-    default:
-      return false;
-  }
-}
 
 template <typename NativeFormatType, NativeFormatType InvalidFormat>
 plGALFormatLookupEntry<NativeFormatType, InvalidFormat>::plGALFormatLookupEntry()

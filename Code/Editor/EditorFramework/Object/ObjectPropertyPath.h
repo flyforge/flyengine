@@ -38,7 +38,7 @@ public:
     plStringBuilder& out_sComponentType, plStringBuilder& out_sPropertyPath);
   static plStatus CreatePropertyPath(const plObjectPropertyPathContext& context, const plPropertyReference& prop, plStringBuilder& out_sPropertyPath);
 
-  static plStatus ResolvePath(const plObjectPropertyPathContext& context, plDynamicArray<plPropertyReference>& out_keys,
+  static plStatus ResolvePath(const plObjectPropertyPathContext& context, plHybridArray<plPropertyReference, 1>& out_keys,
     const char* szObjectSearchSequence, const char* szComponentType, const char* szPropertyPath);
   static plStatus ResolvePropertyPath(const plObjectPropertyPathContext& context, const char* szPropertyPath, plPropertyReference& out_key);
 

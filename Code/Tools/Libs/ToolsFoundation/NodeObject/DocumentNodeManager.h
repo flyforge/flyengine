@@ -112,8 +112,8 @@ public:
   plVec2 GetNodePos(const plDocumentObject* pObject) const;
   const plConnection& GetConnection(const plDocumentObject* pObject) const;
 
-  const plPin* GetInputPinByName(const plDocumentObject* pObject, plStringView sName) const;
-  const plPin* GetOutputPinByName(const plDocumentObject* pObject, plStringView sName) const;
+  const plPin* GetInputPinByName(const plDocumentObject* pObject, const char* szName) const;
+  const plPin* GetOutputPinByName(const plDocumentObject* pObject, const char* szName) const;
   plArrayPtr<const plUniquePtr<const plPin>> GetInputPins(const plDocumentObject* pObject) const;
   plArrayPtr<const plUniquePtr<const plPin>> GetOutputPins(const plDocumentObject* pObject) const;
 
@@ -133,8 +133,7 @@ public:
   plArrayPtr<const plConnection* const> GetConnections(const plPin& pin) const;
   bool HasConnections(const plPin& pin) const;
   bool IsConnected(const plPin& source, const plPin& target) const;
-
-  plStatus CanConnect(const plRTTI* pObjectType, const plPin& source, const plPin& target, CanConnectResult& ref_result) const;
+  plStatus CanConnect(const plRTTI* pObjectType, const plPin& source, const plPin& target, CanConnectResult& result) const;
   plStatus CanDisconnect(const plConnection* pConnection) const;
   plStatus CanDisconnect(const plDocumentObject* pObject) const;
   plStatus CanMoveNode(const plDocumentObject* pObject, const plVec2& vPos) const;
@@ -143,12 +142,12 @@ public:
   void Disconnect(const plDocumentObject* pObject);
   void MoveNode(const plDocumentObject* pObject, const plVec2& vPos);
 
-  void AttachMetaDataBeforeSaving(plAbstractObjectGraph& ref_graph) const;
+  void AttachMetaDataBeforeSaving(plAbstractObjectGraph& graph) const;
   void RestoreMetaDataAfterLoading(const plAbstractObjectGraph& graph, bool bUndoable);
 
   void GetMetaDataHash(const plDocumentObject* pObject, plUInt64& inout_uiHash) const;
   bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph) const;
-  bool PasteObjects(const plArrayPtr<plDocument::PasteInfo>& info, const plAbstractObjectGraph& objectGraph, const plVec2& vPickedPosition, bool bAllowPickedPosition);
+  bool PasteObjects(const plArrayPtr<plDocument::PasteInfo>& info, const plAbstractObjectGraph& objectGraph, const plVec2& pickedPosition, bool bAllowPickedPosition);
 
 protected:
   /// \brief Tests whether pTarget can be reached from pSource by following the pin connections
@@ -157,12 +156,12 @@ protected:
   /// \brief Returns true if adding a connection between the two pins would create a circular graph
   bool WouldConnectionCreateCircle(const plPin& source, const plPin& target) const;
 
-  void GetDynamicPinNames(const plDocumentObject* pObject, plStringView sPropertyName, plStringView sPinName, plDynamicArray<plString>& out_Names) const;
+  void GetDynamicPinNames(const plDocumentObject* pObject, const char* szPropertyName, plStringView sPinName, plDynamicArray<plString>& out_Names) const;
   virtual bool TryRecreatePins(const plDocumentObject* pObject);
 
   struct NodeInternal
   {
-    plVec2 m_vPos = plVec2::MakeZero();
+    plVec2 m_vPos = plVec2::ZeroVector();
     plHybridArray<plUniquePtr<plPin>, 6> m_Inputs;
     plHybridArray<plUniquePtr<plPin>, 6> m_Outputs;
   };

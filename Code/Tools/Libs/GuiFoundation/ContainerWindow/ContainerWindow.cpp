@@ -60,7 +60,7 @@ plQtContainerWindow::plQtContainerWindow()
 
   s_pContainerWindow = this;
 
-  setObjectName("plEditor");
+  setObjectName("PlasmaEditor");
   setWindowIcon(QIcon(QStringLiteral(":/GuiFoundation/PLASMA-logo.svg")));
 
   plQtDocumentWindow::s_Events.AddEventHandler(plMakeDelegate(&plQtContainerWindow::DocumentWindowEventHandler, this));
@@ -112,7 +112,7 @@ void plQtContainerWindow::UpdateWindowTitle()
 
   sTitle.Append(plApplication::GetApplicationInstance()->GetApplicationName().GetView());
 
-  setWindowTitle(QString::fromUtf8(sTitle.GetData()));
+  setWindowTitle(QString::fromUtf8(sTitle.GetData()).toUpper());
 }
 
 void plQtContainerWindow::ScheduleRestoreWindowLayout()
@@ -173,8 +173,10 @@ void plQtContainerWindow::SaveWindowLayout()
   plStringBuilder sProjectFile;
   GetProjectLayoutPath(sProjectFile, true);
 
+  const bool bMaximized = isMaximized();
+
   QSettings Settings(plToolsProject::IsProjectOpen() ? sProjectFile.GetData() : sFile.GetData(), QSettings::IniFormat);
-  Settings.beginGroup(QString::fromUtf8("ContainerWnd_plEditor"));
+  Settings.beginGroup(QString::fromUtf8("ContainerWnd_PlasmaEditor"));
   {
     Settings.setValue("DockManagerState", m_pDockManager->saveState(1));
     Settings.setValue("WindowGeometry", saveGeometry());
@@ -203,8 +205,7 @@ void plQtContainerWindow::RestoreWindowLayout()
   if (m_iWindowLayoutRestoreScheduled > 0)
     return;
 
-  bool bCreteDefaultLayout = true;
-  PLASMA_SCOPE_EXIT(bCreteDefaultLayout ? showMaximized() : show(););
+  show();
 
   plStringBuilder sFile;
   if (!GetProjectLayoutPath(sFile, false))
@@ -218,53 +219,21 @@ void plQtContainerWindow::RestoreWindowLayout()
 
   {
     QSettings Settings(sFile.GetData(), QSettings::IniFormat);
-    Settings.beginGroup(QString::fromUtf8("ContainerWnd_plEditor"));
+    Settings.beginGroup(QString::fromUtf8("ContainerWnd_PlasmaEditor"));
     {
-      QByteArray geom = Settings.value("WindowGeometry", QByteArray()).toByteArray();
-      if (!geom.isEmpty())
+      restoreGeometry(Settings.value("WindowGeometry", saveGeometry()).toByteArray());
+      restoreState(Settings.value("WindowState", saveState()).toByteArray());
+      auto dockState = Settings.value("DockManagerState");
+      if (dockState.isValid() && dockState.type() == QVariant::ByteArray)
       {
-        bCreteDefaultLayout = false;
-        restoreGeometry(geom);
-        restoreState(Settings.value("WindowState", saveState()).toByteArray());
-        auto dockState = Settings.value("DockManagerState");
-        if (dockState.isValid() && dockState.typeId() == QMetaType::QByteArray)
+        m_pDockManager->restoreState(dockState.toByteArray(), 1);
+        // As document windows can't be in a closed state (as pressing x destroys them),
+        // we need to fix any document window that was accidentally saved in its closed state.
+        for (ads::CDockWidget* dock : m_DocumentDocks)
         {
-          m_pDockManager->restoreState(dockState.toByteArray(), 1);
-          // As document windows can't be in a closed state (as pressing x destroys them),
-          // we need to fix any document window that was accidentally saved in its closed state.
-          for (ads::CDockWidget* dock : m_DocumentDocks)
+          if (dock->isClosed())
           {
-            if (dock->isClosed())
-            {
-              if (dock->dockContainer() == nullptr)
-              {
-                if (m_DocumentDocks.GetCount() >= 2)
-                {
-                  // If we can (we are not the only dock window), we are going to attach to a window that isn't us, ideally the settings window.
-                  plUInt32 uiBestIndex = 0;
-                  for (plUInt32 i = 0; i < m_DocumentDocks.GetCount(); i++)
-                  {
-                    if (plStringUtils::IsEqual(m_DocumentWindows[i]->GetUniqueName(), "Settings"))
-                    {
-                      uiBestIndex = i;
-                      break;
-                    }
-                    else if (m_DocumentDocks[i] != dock)
-                    {
-                      uiBestIndex = i;
-                    }
-                  }
-
-                  ads::CDockAreaWidget* dockArea = m_DocumentDocks[uiBestIndex]->dockAreaWidget();
-                  m_pDockManager->addDockWidgetTabToArea(dock, dockArea);
-                }
-                else
-                {
-                  m_pDockManager->addDockWidgetTab(ads::LeftDockWidgetArea, dock);
-                }
-              }
-              dock->toggleView();
-            }
+            dock->toggleView();
           }
         }
       }
@@ -309,7 +278,7 @@ void plQtContainerWindow::UpdateWindowDecoration(plQtDocumentWindow* pDocWindow)
 
   dock->setTabToolTip(QString::fromUtf8(pDocWindow->GetDisplayName().GetData()));
   dock->setIcon(plQtUiServices::GetCachedIconResource(pDocWindow->GetWindowIcon().GetData()));
-  dock->setWindowTitle(QString::fromUtf8(pDocWindow->GetDisplayNameShort().GetData()));
+  dock->setWindowTitle(QString::fromUtf8(pDocWindow->GetDisplayNameShort().GetData()).toUpper());
 
   // this is a hacky way to detect the plQtSettingsTab
   if (pDocWindow->GetDisplayNameShort().IsEmpty())
@@ -322,7 +291,7 @@ void plQtContainerWindow::UpdateWindowDecoration(plQtDocumentWindow* pDocWindow)
 
   if (dock->isFloating())
   {
-    dock->dockContainer()->floatingWidget()->setWindowTitle(dock->windowTitle());
+    dock->dockContainer()->floatingWidget()->setWindowTitle(dock->windowTitle().toUpper());
     dock->dockContainer()->floatingWidget()->setWindowIcon(dock->icon());
   }
 }
@@ -413,7 +382,7 @@ void plQtContainerWindow::AddDocumentWindow(plQtDocumentWindow* pDocWindow)
   }
   else
   {
-    m_pDockManager->addDockWidgetTab(ads::LeftDockWidgetArea, dock);
+    m_pDockManager->addDockWidgetTab(ads::TopDockWidgetArea, dock);
   }
   m_DocumentDocks.PushBack(dock);
   connect(dock, &ads::CDockWidget::closed, this, &plQtContainerWindow::SlotDocumentTabCloseRequested);
@@ -426,22 +395,6 @@ void plQtContainerWindow::AddDocumentWindow(plQtDocumentWindow* pDocWindow)
   // we cannot call virtual functions on pDocWindow here, because the object might still be under construction
   // so we delay it until later
   QMetaObject::invokeMethod(this, "SlotUpdateWindowDecoration", Qt::ConnectionType::QueuedConnection, Q_ARG(void*, pDocWindow));
-}
-
-void plQtContainerWindow::DocumentWindowRenamed(plQtDocumentWindow* pDocWindow)
-{
-  const plUInt32 uiListIndex = m_DocumentWindows.IndexOf(pDocWindow);
-  if (uiListIndex == plInvalidIndex)
-    return;
-
-  ads::CDockWidget* dock = m_DocumentDocks[uiListIndex];
-  PLASMA_ASSERT_DEV(m_DockNames.contains(dock->objectName()), "Object name must not change during lifetime.");
-  m_DockNames.remove(dock->objectName());
-
-  dock->setObjectName(pDocWindow->GetUniqueName());
-  PLASMA_ASSERT_DEV(!dock->objectName().isEmpty(), "Dock name must not be empty.");
-  PLASMA_ASSERT_DEV(!m_DockNames.contains(dock->objectName()), "Dock name must be unique.");
-  m_DockNames.insert(dock->objectName());
 }
 
 void plQtContainerWindow::AddApplicationPanel(plQtApplicationPanel* pPanel)
@@ -508,9 +461,9 @@ plResult plQtContainerWindow::EnsureVisibleAnyContainer(plDocument* pDocument)
   return PLASMA_FAILURE;
 }
 
-void plQtContainerWindow::GetDocumentWindows(plHybridArray<plQtDocumentWindow*, 16>& ref_windows)
+void plQtContainerWindow::GetDocumentWindows(plHybridArray<plQtDocumentWindow*, 16>& windows)
 {
-  ref_windows = m_DocumentWindows;
+  windows = m_DocumentWindows;
 }
 
 bool plQtContainerWindow::eventFilter(QObject* obj, QEvent* e)

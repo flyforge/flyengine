@@ -626,30 +626,6 @@ void plStringBuilder::operator=(plStringView rhs)
   m_uiCharacterCount = uiCharacters;
 }
 
-void plStringBuilder::operator=(const std::string_view& rhs)
-{
-  if (rhs.empty())
-  {
-    Clear();
-  }
-  else
-  {
-    *this = plStringView(rhs.data(), rhs.data() + rhs.size());
-  }
-}
-
-void plStringBuilder::operator=(const std::string& rhs)
-{
-  if (rhs.empty())
-  {
-    Clear();
-  }
-  else
-  {
-    *this = plStringView(rhs.data(), rhs.data() + rhs.size());
-  }
-}
-
 enum PathUpState
 {
   NotStarted,

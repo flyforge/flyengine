@@ -117,7 +117,7 @@ QMenu* plQtAddSubElementButton::CreateCategoryMenu(const char* szCategory, plMap
   sPath = szCategory;
   sPath = sPath.GetFileName();
 
-  QMenu* pNewMenu = pParentMenu->addMenu(plMakeQString(plTranslate(sPath)));
+  QMenu* pNewMenu = pParentMenu->addMenu(plTranslate(sPath.GetData()));
   existingMenus[szCategory] = pNewMenu;
 
   return pNewMenu;
@@ -210,33 +210,30 @@ void plQtAddSubElementButton::onMenuAboutToShow()
       const plInDevelopmentAttribute* pInDev = pRtti->GetAttributeByType<plInDevelopmentAttribute>();
       const plColorAttribute* pColA = pRtti->GetAttributeByType<plColorAttribute>();
 
-      plColor iconColor = plColor::MakeZero();
+      plColor iconColor = plColor::ZeroColor();
 
       if (pColA)
       {
-        iconColor = pColA->GetColor();
-      }
-      else if (pCatA && iconColor == plColor::MakeZero())
-      {
-        iconColor = plColorScheme::GetCategoryColor(pCatA->GetCategory(), plColorScheme::CategoryColorUsage::MenuEntryIcon);
+        if (pColA->m_iColorGroup != -1)
+          iconColor = plColorScheme::GetGroupColor((plColorScheme::ColorGroup)pColA->m_iColorGroup, 2);
+        else
+          iconColor = pColA->GetColor();
       }
 
       const QIcon actionIcon = plQtUiServices::GetCachedIconResource(sIconName.GetData(), iconColor);
 
-
       if (m_pSearchableMenu != nullptr)
       {
-        plStringBuilder sFullPath;
-        sFullPath = pCatA ? pCatA->GetCategory() : "";
-        sFullPath.AppendPath(pRtti->GetTypeName());
+        plStringBuilder fullName;
+        fullName = pCatA ? pCatA->GetCategory() : "";
+        fullName.AppendPath(plTranslate(pRtti->GetTypeName().GetData(tmp)));
 
-        plStringBuilder sDisplayName = plTranslate(pRtti->GetTypeName().GetData(tmp));
         if (pInDev)
         {
-          sDisplayName.AppendFormat(" [ {} ]", pInDev->GetString());
+          fullName.AppendFormat(" [ {} ]", pInDev->GetString());
         }
 
-        m_pSearchableMenu->AddItem(sDisplayName, sFullPath, QVariant::fromValue((void*)pRtti), actionIcon);
+        m_pSearchableMenu->AddItem(fullName, QVariant::fromValue((void*)pRtti), actionIcon);
       }
       else
       {
@@ -269,7 +266,7 @@ void plQtAddSubElementButton::onMenuAboutToShow()
         m_pMenu->close(); });
 
       connect(m_pSearchableMenu, &plQtSearchableMenu::SearchTextChanged, m_pMenu,
-        [this](const QString& sText) { s_sLastMenuSearch = sText.toUtf8().data(); });
+        [this](const QString& text) { s_sLastMenuSearch = text.toUtf8().data(); });
 
       m_pMenu->addAction(m_pSearchableMenu);
 
@@ -285,7 +282,7 @@ void plQtAddSubElementButton::onMenuAboutToShow()
     for (auto& item : m_Items)
     {
       plInt32 iCount = 0;
-      m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).AssertSuccess();
+      m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).IgnoreResult();
 
       if (iCount >= (plInt32)m_uiMaxElements)
       {
@@ -325,7 +322,7 @@ void plQtAddSubElementButton::onMenuAboutToShow()
     for (auto& item : m_Items)
     {
       plInt32 iCount = 0;
-      m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).AssertSuccess();
+      m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).IgnoreResult();
 
       for (plInt32 i = 0; i < iCount; ++i)
       {
@@ -423,7 +420,7 @@ void plQtAddSubElementButton::OnAction(const plRTTI* pRtti)
       plHybridArray<plPropertySelection, 1> selection;
       selection.PushBack({m_pObjectAccessor->GetObject(guid), plVariant()});
       plDefaultObjectState defaultState(m_pObjectAccessor, selection);
-      defaultState.RevertObject().AssertSuccess();
+      defaultState.RevertObject().IgnoreResult();
     }
   }
 

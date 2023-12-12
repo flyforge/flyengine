@@ -32,15 +32,12 @@ JPH_ALLOC_SCOPE void JPH_ALLOC_FN(Free)(void *inBlock)
 JPH_ALLOC_SCOPE void *JPH_ALLOC_FN(AlignedAllocate)(size_t inSize, size_t inAlignment)
 {
 #if defined(JPH_PLATFORM_WINDOWS)
-	// Microsoft doesn't implement posix_memalign
+	// Microsoft doesn't implement C++17 std::aligned_alloc
 	return _aligned_malloc(inSize, inAlignment);
+#elif defined(JPH_PLATFORM_ANDROID)
+	return memalign(inAlignment, AlignUp(inSize, inAlignment));
 #else
-	void *block = nullptr;
-	JPH_SUPPRESS_WARNING_PUSH
-	JPH_GCC_SUPPRESS_WARNING("-Wunused-result")
-	posix_memalign(&block, inAlignment, inSize);
-	JPH_SUPPRESS_WARNING_POP
-	return block;
+	return std::aligned_alloc(inAlignment, AlignUp(inSize, inAlignment));
 #endif
 }
 
@@ -48,8 +45,10 @@ JPH_ALLOC_SCOPE void JPH_ALLOC_FN(AlignedFree)(void *inBlock)
 {
 #if defined(JPH_PLATFORM_WINDOWS)
 	_aligned_free(inBlock);
-#else
+#elif defined(JPH_PLATFORM_ANDROID)
 	free(inBlock);
+#else
+	std::free(inBlock);
 #endif
 }
 

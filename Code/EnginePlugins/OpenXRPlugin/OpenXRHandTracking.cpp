@@ -126,7 +126,7 @@ plXRHandTrackingInterface::HandPartTrackingState plOpenXRHandTracking::TryGetBon
         for (plXRHandBone& bone : out_bones)
         {
           plTransform local = bone.m_Transform;
-          bone.m_Transform = plTransform::MakeGlobalTransform(globalStageTransform, local);
+          bone.m_Transform.SetGlobalTransform(globalStageTransform, local);
         }
       }
     }

@@ -8,16 +8,16 @@ class PLASMA_GUIFOUNDATION_DLL plQtColorAreaWidget : public QWidget
 {
   Q_OBJECT
 public:
-  plQtColorAreaWidget(QWidget* pParent);
+  plQtColorAreaWidget(QWidget* parent);
 
   float GetHue() const { return m_fHue; }
-  void SetHue(float fHue);
+  void SetHue(float hue);
 
   float GetSaturation() const { return m_fSaturation; }
-  void SetSaturation(float fSat);
+  void SetSaturation(float sat);
 
   float GetValue() const { return m_fValue; }
-  void SetValue(float fVal);
+  void SetValue(float val);
 
 Q_SIGNALS:
   void valueChanged(double x, double y);
@@ -39,10 +39,10 @@ class PLASMA_GUIFOUNDATION_DLL plQtColorRangeWidget : public QWidget
 {
   Q_OBJECT
 public:
-  plQtColorRangeWidget(QWidget* pParent);
+  plQtColorRangeWidget(QWidget* parent);
 
   float GetHue() const { return m_fHue; }
-  void SetHue(float fHue);
+  void SetHue(float hue);
 
 Q_SIGNALS:
   void valueChanged(double x);
@@ -62,7 +62,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtColorCompareWidget : public QWidget
 {
   Q_OBJECT
 public:
-  plQtColorCompareWidget(QWidget* pParent);
+  plQtColorCompareWidget(QWidget* parent);
 
   void SetNewColor(const plColor& color);
   void SetInitialColor(const plColor& color);

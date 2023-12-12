@@ -34,6 +34,21 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCategoryAttribute, 1, plRTTIDefaultAllocat
 }
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorAttribute, 1, plRTTIDefaultAllocator<plColorAttribute>)
+{
+  PLASMA_BEGIN_PROPERTIES
+  {
+    PLASMA_MEMBER_PROPERTY("Color", m_Color),
+  }
+  PLASMA_END_PROPERTIES;
+  PLASMA_BEGIN_FUNCTIONS
+  {
+    PLASMA_CONSTRUCTOR_PROPERTY(plColor),
+  }
+  PLASMA_END_FUNCTIONS;
+}
+PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInDevelopmentAttribute, 1, plRTTIDefaultAllocator<plInDevelopmentAttribute>)
 {
   PLASMA_BEGIN_PROPERTIES
@@ -76,21 +91,6 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTitleAttribute, 1, plRTTIDefaultAllocator<
   PLASMA_BEGIN_FUNCTIONS
   {
     PLASMA_CONSTRUCTOR_PROPERTY(const char*),
-  }
-  PLASMA_END_FUNCTIONS;
-}
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorAttribute, 1, plRTTIDefaultAllocator<plColorAttribute>)
-{
-  PLASMA_BEGIN_PROPERTIES
-  {
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
-  }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
-  {
-    PLASMA_CONSTRUCTOR_PROPERTY(plColor),
   }
   PLASMA_END_FUNCTIONS;
 }
@@ -276,8 +276,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plFileBrowserAttribute, 1, plRTTIDefaultAllo
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(plStringView, plStringView),
-    PLASMA_CONSTRUCTOR_PROPERTY(plStringView, plStringView, plStringView),
+    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*),
   }
   PLASMA_END_FUNCTIONS;
 }
@@ -1120,3 +1119,9 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 //////////////////////////////////////////////////////////////////////////
 
 PLASMA_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_PropertyAttributes);
+
+plColorAttribute::plColorAttribute(plInt32 iColorGroup)
+  : m_iColorGroup(iColorGroup)
+{
+  m_Color = plColorScheme::GetGroupColor((plColorScheme::ColorGroup)iColorGroup);
+}

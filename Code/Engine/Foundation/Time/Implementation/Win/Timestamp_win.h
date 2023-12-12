@@ -31,7 +31,7 @@ const plTimestamp plTimestamp::CurrentTimestamp()
 {
   FILETIME fileTime;
   GetSystemTimeAsFileTime(&fileTime);
-  return plTimestamp::MakeFromInt(FileTimeToEpoch(fileTime), plSIUnitOfTime::Microsecond);
+  return plTimestamp(FileTimeToEpoch(fileTime), plSIUnitOfTime::Microsecond);
 }
 
 const plTimestamp plDateTime::GetTimestamp() const
@@ -50,19 +50,19 @@ const plTimestamp plDateTime::GetTimestamp() const
   BOOL res = SystemTimeToFileTime(&st, &fileTime);
   plTimestamp timestamp;
   if (res != 0)
-    timestamp = plTimestamp::MakeFromInt(FileTimeToEpoch(fileTime), plSIUnitOfTime::Microsecond);
+    timestamp.SetInt64(FileTimeToEpoch(fileTime), plSIUnitOfTime::Microsecond);
 
   return timestamp;
 }
 
-plResult plDateTime::SetFromTimestamp(plTimestamp timestamp)
+bool plDateTime::SetTimestamp(plTimestamp timestamp)
 {
   FILETIME fileTime = EpochToFileTime(timestamp.GetInt64(plSIUnitOfTime::Microsecond));
 
   SYSTEMTIME st;
   BOOL res = FileTimeToSystemTime(&fileTime, &st);
   if (res == 0)
-    return PLASMA_FAILURE;
+    return false;
 
   m_iYear = (plInt16)st.wYear;
   m_uiMonth = (plUInt8)st.wMonth;
@@ -72,5 +72,5 @@ plResult plDateTime::SetFromTimestamp(plTimestamp timestamp)
   m_uiMinute = (plUInt8)st.wMinute;
   m_uiSecond = (plUInt8)st.wSecond;
   m_uiMicroseconds = plUInt32(st.wMilliseconds * 1000);
-  return PLASMA_SUCCESS;
+  return true;
 }

@@ -8,6 +8,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plForwardEventsToGameStateComponent, 1 /* version */
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"),
+    new plColorAttribute(plColorScheme::Logic),
   }
   PLASMA_END_ATTRIBUTES;
 }

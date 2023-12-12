@@ -10,7 +10,8 @@ bool plIntersectionUtils::RayPolygonIntersection(const plVec3& vRayStartPos, con
   PLASMA_ASSERT_DEBUG(uiNumVertices >= 3, "A polygon must have at least three vertices.");
   PLASMA_ASSERT_DEBUG(uiVertexStride >= sizeof(plVec3), "The vertex stride is invalid.");
 
-  plPlane p = plPlane::MakeFromPoints(*pPolygonVertices, *plMemoryUtils::AddByteOffset(pPolygonVertices, uiVertexStride), *plMemoryUtils::AddByteOffset(pPolygonVertices, uiVertexStride * 2));
+  plPlane p(*pPolygonVertices, *plMemoryUtils::AddByteOffset(pPolygonVertices, uiVertexStride),
+    *plMemoryUtils::AddByteOffset(pPolygonVertices, uiVertexStride * 2));
 
   PLASMA_ASSERT_DEBUG(p.IsValid(), "The given polygon's plane is invalid (computed from the first three vertices only).");
 
@@ -30,7 +31,7 @@ bool plIntersectionUtils::RayPolygonIntersection(const plVec3& vRayStartPos, con
   {
     const plVec3 vThisPoint = *plMemoryUtils::AddByteOffset(pPolygonVertices, plMath::SafeMultiply32(uiVertexStride, i));
 
-    plPlane EdgePlane = plPlane::MakeFromPoints(vThisPoint, vPrevPoint, vPrevPoint + p.m_vNormal);
+    const plPlane EdgePlane(vThisPoint, vPrevPoint, vPrevPoint + p.m_vNormal);
 
     // if the intersection point is outside of any of the edge planes, it is not inside the (convex) polygon
     if (EdgePlane.GetPointPosition(vIntersection) == plPositionOnPlane::Back)

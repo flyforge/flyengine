@@ -11,14 +11,14 @@ class plQtEngineDocumentWindow;
 class QGridLayout;
 class plQtViewWidgetContainer;
 class plQtEngineViewWidget;
-struct plEngineViewConfig;
-struct plEngineViewPreferences;
+struct PlasmaEngineViewConfig;
+struct PlasmaEngineViewPreferences;
 
 class PLASMA_EDITORFRAMEWORK_DLL plQtQuadViewWidget : public QWidget
 {
   Q_OBJECT
 public:
-  using ViewFactory = plDelegate<plQtEngineViewWidget*(plQtEngineDocumentWindow*, plEngineViewConfig*)>;
+  typedef plDelegate<plQtEngineViewWidget*(plQtEngineDocumentWindow*, PlasmaEngineViewConfig*)> ViewFactory;
   plQtQuadViewWidget(plAssetDocument* pDocument, plQtEngineDocumentWindow* pWindow, ViewFactory viewFactory, const char* szViewToolBarMapping);
   ~plQtQuadViewWidget();
 
@@ -28,8 +28,8 @@ public Q_SLOTS:
   void ToggleViews(QWidget* pView);
 
 protected:
-  void SaveViewConfig(const plEngineViewConfig& cfg, plEngineViewPreferences& pref) const;
-  void LoadViewConfig(plEngineViewConfig& cfg, plEngineViewPreferences& pref);
+  void SaveViewConfig(const PlasmaEngineViewConfig& cfg, PlasmaEngineViewPreferences& pref) const;
+  void LoadViewConfig(PlasmaEngineViewConfig& cfg, PlasmaEngineViewPreferences& pref);
   void SaveViewConfigs() const;
   void LoadViewConfigs();
   void CreateViews(bool bQuad);
@@ -40,8 +40,8 @@ private:
   ViewFactory m_ViewFactory;
   plString m_sViewToolBarMapping;
 
-  plEngineViewConfig m_ViewConfigSingle;
-  plEngineViewConfig m_ViewConfigQuad[4];
+  PlasmaEngineViewConfig m_ViewConfigSingle;
+  PlasmaEngineViewConfig m_ViewConfigQuad[4];
   plHybridArray<plQtViewWidgetContainer*, 4> m_ActiveMainViews;
   QGridLayout* m_pViewLayout;
 };

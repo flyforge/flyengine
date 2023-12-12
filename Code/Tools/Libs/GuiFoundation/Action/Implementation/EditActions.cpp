@@ -45,51 +45,57 @@ void plEditActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hDelete);
 }
 
-void plEditActions::MapActions(plStringView sMapping, bool bDeleteAction, bool bAdvancedPasteActions)
+void plEditActions::MapActions(const char* szMapping, const char* szPath, bool bDeleteAction, bool bAdvancedPasteActions)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", szMapping);
 
-  pMap->MapAction(s_hEditCategory, "G.Edit", 3.5f);
+  plStringBuilder sSubPath(szPath, "/EditCategory");
 
-  pMap->MapAction(s_hCopy, "G.Edit", "EditCategory", 1.0f);
-  pMap->MapAction(s_hPaste, "G.Edit", "EditCategory", 2.0f);
+  pMap->MapAction(s_hEditCategory, szPath, 3.5f);
+
+  pMap->MapAction(s_hCopy, sSubPath, 1.0f);
+  pMap->MapAction(s_hPaste, sSubPath, 2.0f);
 
   if (bAdvancedPasteActions)
   {
-    pMap->MapAction(s_hPasteAsChild, "G.Edit", "EditCategory", 2.5f);
-    pMap->MapAction(s_hPasteAtOriginalLocation, "G.Edit", "EditCategory", 2.7f);
+    pMap->MapAction(s_hPasteAsChild, sSubPath, 2.5f);
+    pMap->MapAction(s_hPasteAtOriginalLocation, sSubPath, 2.7f);
   }
 
   if (bDeleteAction)
-    pMap->MapAction(s_hDelete, "G.Edit", "EditCategory", 3.0f);
+    pMap->MapAction(s_hDelete, sSubPath, 3.0f);
 }
 
 
-void plEditActions::MapContextMenuActions(plStringView sMapping)
+void plEditActions::MapContextMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", szMapping);
 
-  pMap->MapAction(s_hEditCategory, "", 10.0f);
+  plStringBuilder sSubPath(szPath, "/EditCategory");
 
-  pMap->MapAction(s_hCopy, "EditCategory", 1.0f);
-  pMap->MapAction(s_hPasteAsChild, "EditCategory", 2.0f);
-  pMap->MapAction(s_hDelete, "EditCategory", 3.0f);
+  pMap->MapAction(s_hEditCategory, szPath, 10.0f);
+
+  pMap->MapAction(s_hCopy, sSubPath, 1.0f);
+  pMap->MapAction(s_hPasteAsChild, sSubPath, 2.0f);
+  pMap->MapAction(s_hDelete, sSubPath, 3.0f);
 }
 
 
-void plEditActions::MapViewContextMenuActions(plStringView sMapping)
+void plEditActions::MapViewContextMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", szMapping);
 
-  pMap->MapAction(s_hEditCategory, "", 10.0f);
+  plStringBuilder sSubPath(szPath, "/EditCategory");
 
-  pMap->MapAction(s_hCopy, "EditCategory", 1.0f);
-  pMap->MapAction(s_hPasteAsChild, "EditCategory", 2.0f);
-  pMap->MapAction(s_hPasteAtOriginalLocation, "EditCategory", 2.5f);
-  pMap->MapAction(s_hDelete, "EditCategory", 3.0f);
+  pMap->MapAction(s_hEditCategory, szPath, 10.0f);
+
+  pMap->MapAction(s_hCopy, sSubPath, 1.0f);
+  pMap->MapAction(s_hPasteAsChild, sSubPath, 2.0f);
+  pMap->MapAction(s_hPasteAtOriginalLocation, sSubPath, 2.5f);
+  pMap->MapAction(s_hDelete, sSubPath, 3.0f);
 }
 
 ////////////////////////////////////////////////////////////////////////

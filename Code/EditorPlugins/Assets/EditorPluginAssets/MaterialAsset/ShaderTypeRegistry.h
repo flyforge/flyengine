@@ -25,12 +25,15 @@ private:
 
   struct ShaderData
   {
-    ShaderData() = default;
+    ShaderData()
+      : m_pType(nullptr)
+    {
+    }
 
     plString m_sShaderPath;
     plString m_sAbsShaderPath;
     plTimestamp m_fileModifiedTime;
-    const plRTTI* m_pType = nullptr;
+    const plRTTI* m_pType;
   };
   void UpdateShaderType(ShaderData& data);
   void PhantomTypeRegistryEventHandler(const plPhantomRttiManagerEvent& e);

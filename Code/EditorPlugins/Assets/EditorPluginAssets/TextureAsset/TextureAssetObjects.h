@@ -9,7 +9,7 @@ struct plPropertyMetaStateEvent;
 
 struct plTexture2DChannelMappingEnum
 {
-  using StorageType = plInt8;
+  typedef plInt8 StorageType;
 
   enum Enum
   {
@@ -34,7 +34,7 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plTexture2DChannelMappingEnum
 
 struct plTexture2DResolution
 {
-  using StorageType = plInt8;
+  typedef plInt8 StorageType;
 
   enum Enum
   {
@@ -55,7 +55,7 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plTexture2DResolution);
 
 struct plRenderTargetFormat
 {
-  using StorageType = plInt8;
+  typedef plInt8 StorageType;
 
   enum Enum
   {

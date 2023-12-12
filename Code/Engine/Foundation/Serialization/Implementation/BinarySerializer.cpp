@@ -85,8 +85,8 @@ void plAbstractGraphBinarySerializer::Read(
   inout_stream >> uiVersion;
   if (uiVersion != plBinarySerializerVersion::CurrentVersion)
   {
-   // PLASMA_REPORT_FAILURE(
-   //   "Binary serializer version {0} does not match expected version {1}, re-export file.", uiVersion, plBinarySerializerVersion::CurrentVersion);
+    PLASMA_REPORT_FAILURE(
+      "Binary serializer version {0} does not match expected version {1}, re-export file.", uiVersion, plBinarySerializerVersion::CurrentVersion);
     return;
   }
   ReadGraph(inout_stream, pGraph);

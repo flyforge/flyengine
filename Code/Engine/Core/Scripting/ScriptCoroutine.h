@@ -64,19 +64,19 @@ public:
       };
     };
 
-    static PLASMA_ALWAYS_INLINE Result Running(plTime maxDelay = plTime::MakeZero()) { return {State::Running, maxDelay}; }
+    static PLASMA_ALWAYS_INLINE Result Running(plTime maxDelay = plTime::Zero()) { return {State::Running, maxDelay}; }
     static PLASMA_ALWAYS_INLINE Result Completed() { return {State::Completed}; }
     static PLASMA_ALWAYS_INLINE Result Failed() { return {State::Failed}; }
 
     plEnum<State> m_State;
-    plTime m_MaxDelay = plTime::MakeZero();
+    plTime m_MaxDelay = plTime::Zero();
   };
 
   virtual void Start(plArrayPtr<plVariant> arguments) = 0;
   virtual void Stop() {}
   virtual Result Update(plTime deltaTimeSinceLastUpdate) = 0;
 
-  void UpdateAndSchedule(plTime deltaTimeSinceLastUpdate = plTime::MakeZero());
+  void UpdateAndSchedule(plTime deltaTimeSinceLastUpdate = plTime::Zero());
 
 private:
   friend class plScriptWorldModule;

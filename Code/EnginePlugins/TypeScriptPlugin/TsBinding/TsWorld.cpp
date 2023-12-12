@@ -207,7 +207,7 @@ static int __CPP_World_FindObjectsInSphere(duk_context* pDuk)
     queryParams.m_uiCategoryBitmask = category.GetBitmask();
 
     pWorld->GetSpatialSystem()->FindObjectsInSphere(
-      plBoundingSphere::MakeFromCenterAndRadius(vSphereCenter, fRadius), queryParams, plMakeDelegate(&FindObjectsCallback::Callback, &cb));
+      plBoundingSphere(vSphereCenter, fRadius), queryParams, plMakeDelegate(&FindObjectsCallback::Callback, &cb));
   }
 
   PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);

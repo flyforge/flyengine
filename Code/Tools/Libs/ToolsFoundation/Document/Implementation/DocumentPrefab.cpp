@@ -19,16 +19,16 @@ void plDocument::UpdatePrefabs()
   SetModified(true);
 }
 
-void plDocument::RevertPrefabs(const plDeque<const plDocumentObject*>& selection)
+void plDocument::RevertPrefabs(const plDeque<const plDocumentObject*>& Selection)
 {
-  if (selection.IsEmpty())
+  if (Selection.IsEmpty())
     return;
 
   auto pHistory = GetCommandHistory();
 
   pHistory->StartTransaction("Revert Prefab");
 
-  for (auto pItem : selection)
+  for (auto pItem : Selection)
   {
     RevertPrefab(pItem);
   }
@@ -36,26 +36,26 @@ void plDocument::RevertPrefabs(const plDeque<const plDocumentObject*>& selection
   pHistory->FinishTransaction();
 }
 
-void plDocument::UnlinkPrefabs(const plDeque<const plDocumentObject*>& selection)
+void plDocument::UnlinkPrefabs(const plDeque<const plDocumentObject*>& Selection)
 {
-  if (selection.IsEmpty())
+  if (Selection.IsEmpty())
     return;
 
   auto pHistory = GetCommandHistory();
   pHistory->StartTransaction("Unlink Prefab");
 
-  for (auto pObject : selection)
+  for (auto pObject : Selection)
   {
     plUnlinkPrefabCommand cmd;
     cmd.m_Object = pObject->GetGuid();
 
-    pHistory->AddCommand(cmd).AssertSuccess();
+    pHistory->AddCommand(cmd).IgnoreResult();
   }
 
   pHistory->FinishTransaction();
 }
 
-plStatus plDocument::CreatePrefabDocumentFromSelection(plStringView sFile, const plRTTI* pRootType, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB, plDelegate<void(plDocumentObject*)> adjustNewNodesCB, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB)
+plStatus plDocument::CreatePrefabDocumentFromSelection(const char* szFile, const plRTTI* pRootType, plDelegate<void(plAbstractObjectNode*)> AdjustGraphNodeCB, plDelegate<void(plDocumentObject*)> AdjustNewNodesCB, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB)
 {
   auto Selection = GetSelectionManager()->GetTopLevelSelection(pRootType);
 
@@ -70,15 +70,15 @@ plStatus plDocument::CreatePrefabDocumentFromSelection(plStringView sFile, const
   }
 
   plUuid PrefabGuid, SeedGuid;
-  SeedGuid = plUuid::MakeUuid();
-  plStatus res = CreatePrefabDocument(sFile, nodes, SeedGuid, PrefabGuid, adjustGraphNodeCB, true, finalizeGraphCB);
+  SeedGuid.CreateNewUuid();
+  plStatus res = CreatePrefabDocument(szFile, nodes, SeedGuid, PrefabGuid, AdjustGraphNodeCB, true, finalizeGraphCB);
 
   if (res.m_Result.Succeeded())
   {
     GetCommandHistory()->StartTransaction("Replace all by Prefab");
 
     // this replaces ONE object by the new prefab (we pick the last one in the selection)
-    plUuid newObj = ReplaceByPrefab(nodes.PeekBack(), sFile, PrefabGuid, SeedGuid, true);
+    plUuid newObj = ReplaceByPrefab(nodes.PeekBack(), szFile, PrefabGuid, SeedGuid, true);
 
     // if we had more than one selected objects, remove the others as well
     if (nodes.GetCount() > 1)
@@ -90,15 +90,15 @@ plStatus plDocument::CreatePrefabDocumentFromSelection(plStringView sFile, const
         plRemoveObjectCommand remCmd;
         remCmd.m_Object = pNode->GetGuid();
 
-        GetCommandHistory()->AddCommand(remCmd).AssertSuccess();
+        GetCommandHistory()->AddCommand(remCmd).IgnoreResult();
       }
     }
 
     auto pObject = GetObjectManager()->GetObject(newObj);
 
-    if (adjustNewNodesCB.IsValid())
+    if (AdjustNewNodesCB.IsValid())
     {
-      adjustNewNodesCB(pObject);
+      AdjustNewNodesCB(pObject);
     }
 
     GetCommandHistory()->FinishTransaction();
@@ -108,14 +108,14 @@ plStatus plDocument::CreatePrefabDocumentFromSelection(plStringView sFile, const
   return res;
 }
 
-plStatus plDocument::CreatePrefabDocument(plStringView sFile, plArrayPtr<const plDocumentObject*> rootObjects, const plUuid& invPrefabSeed,
-  plUuid& out_newDocumentGuid, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB, bool bKeepOpen, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB)
+plStatus plDocument::CreatePrefabDocument(const char* szFile, plArrayPtr<const plDocumentObject*> rootObjects, const plUuid& invPrefabSeed,
+  plUuid& out_NewDocumentGuid, plDelegate<void(plAbstractObjectNode*)> AdjustGraphNodeCB, bool bKeepOpen, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB)
 {
   const plDocumentTypeDescriptor* pTypeDesc = nullptr;
-  if (plDocumentManager::FindDocumentTypeFromPath(sFile, true, pTypeDesc).Failed())
-    return plStatus(plFmt("Document type is unknown: '{0}'", sFile));
+  if (plDocumentManager::FindDocumentTypeFromPath(szFile, true, pTypeDesc).Failed())
+    return plStatus(plFmt("Document type is unknown: '{0}'", szFile));
 
-  pTypeDesc->m_pManager->EnsureDocumentIsClosed(sFile);
+  pTypeDesc->m_pManager->EnsureDocumentIsClosed(szFile);
 
   // prepare the current state as a graph
   plAbstractObjectGraph PrefabGraph;
@@ -129,14 +129,15 @@ plStatus plDocument::CreatePrefabDocument(plStringView sFile, plArrayPtr<const p
     auto pSaveAsPrefab = rootObjects[i];
 
     PLASMA_ASSERT_DEV(pSaveAsPrefab != nullptr, "CreatePrefabDocument: pSaveAsPrefab must be a valid object!");
+    const plRTTI* pRootType = pSaveAsPrefab->GetTypeAccessor().GetType();
 
     auto pPrefabGraphMainNode = writer.AddObjectToGraph(pSaveAsPrefab);
     graphRootNodes.PushBack(pPrefabGraphMainNode);
 
     // allow external adjustments
-    if (adjustGraphNodeCB.IsValid())
+    if (AdjustGraphNodeCB.IsValid())
     {
-      adjustGraphNodeCB(pPrefabGraphMainNode);
+      AdjustGraphNodeCB(pPrefabGraphMainNode);
     }
   }
 
@@ -149,9 +150,9 @@ plStatus plDocument::CreatePrefabDocument(plStringView sFile, plArrayPtr<const p
 
   plDocument* pSceneDocument = nullptr;
 
-  PLASMA_SUCCEED_OR_RETURN(pTypeDesc->m_pManager->CreateDocument("Prefab", sFile, pSceneDocument, plDocumentFlags::RequestWindow | plDocumentFlags::AddToRecentFilesList | plDocumentFlags::EmptyDocument));
+  PLASMA_SUCCEED_OR_RETURN(pTypeDesc->m_pManager->CreateDocument("Prefab", szFile, pSceneDocument, plDocumentFlags::RequestWindow | plDocumentFlags::AddToRecentFilesList | plDocumentFlags::EmptyDocument));
 
-  out_newDocumentGuid = pSceneDocument->GetGuid();
+  out_NewDocumentGuid = pSceneDocument->GetGuid();
   auto pPrefabSceneRoot = pSceneDocument->GetObjectManager()->GetRootObject();
 
   plDocumentObjectConverterReader reader(&PrefabGraph, pSceneDocument->GetObjectManager(), plDocumentObjectConverterReader::Mode::CreateAndAddToDocument);
@@ -181,7 +182,7 @@ plStatus plDocument::CreatePrefabDocument(plStringView sFile, plArrayPtr<const p
 }
 
 
-plUuid plDocument::ReplaceByPrefab(const plDocumentObject* pRootObject, plStringView sPrefabFile, const plUuid& prefabAsset, const plUuid& prefabSeed, bool bEnginePrefab)
+plUuid plDocument::ReplaceByPrefab(const plDocumentObject* pRootObject, const char* szPrefabFile, const plUuid& PrefabAsset, const plUuid& PrefabSeed, bool bEnginePrefab)
 {
   GetCommandHistory()->StartTransaction("Replace by Prefab");
 
@@ -192,13 +193,13 @@ plUuid plDocument::ReplaceByPrefab(const plDocumentObject* pRootObject, plString
     plInstantiatePrefabCommand instCmd;
     instCmd.m_Index = pRootObject->GetPropertyIndex().ConvertTo<plInt32>();
     instCmd.m_bAllowPickedPosition = false;
-    instCmd.m_CreateFromPrefab = prefabAsset;
+    instCmd.m_CreateFromPrefab = PrefabAsset;
     instCmd.m_Parent = pRootObject->GetParent() == GetObjectManager()->GetRootObject() ? plUuid() : pRootObject->GetParent()->GetGuid();
     instCmd.m_sBasePrefabGraph = plPrefabUtils::ReadDocumentAsString(
-      sPrefabFile); // since the prefab might have been created just now, going through the cache (via GUID) will most likely fail
-    instCmd.m_RemapGuid = prefabSeed;
+      szPrefabFile); // since the prefab might have been created just now, going through the cache (via GUID) will most likely fail
+    instCmd.m_RemapGuid = PrefabSeed;
 
-    GetCommandHistory()->AddCommand(instCmd).AssertSuccess();
+    GetCommandHistory()->AddCommand(instCmd).IgnoreResult();
 
     instantiatedRoot = instCmd.m_CreatedRootObject;
   }
@@ -207,8 +208,9 @@ plUuid plDocument::ReplaceByPrefab(const plDocumentObject* pRootObject, plString
     auto pHistory = GetCommandHistory();
 
     plStringBuilder tmp;
-    plUuid CmpGuid = plUuid::MakeUuid();
-    instantiatedRoot = plUuid::MakeUuid();
+    plUuid CmpGuid;
+    instantiatedRoot.CreateNewUuid();
+    CmpGuid.CreateNewUuid();
 
     plAddObjectCommand cmd;
     cmd.m_Parent = (pRootObject->GetParent() == GetObjectManager()->GetRootObject()) ? plUuid() : pRootObject->GetParent()->GetGuid();
@@ -229,7 +231,7 @@ plUuid plDocument::ReplaceByPrefab(const plDocumentObject* pRootObject, plString
     plSetObjectPropertyCommand cmd2;
     cmd2.m_Object = CmpGuid;
     cmd2.m_sProperty = "Prefab";
-    cmd2.m_NewValue = plConversionUtils::ToString(prefabAsset, tmp).GetData();
+    cmd2.m_NewValue = plConversionUtils::ToString(PrefabAsset, tmp).GetData();
     PLASMA_VERIFY(pHistory->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
   }
 
@@ -237,7 +239,7 @@ plUuid plDocument::ReplaceByPrefab(const plDocumentObject* pRootObject, plString
     plRemoveObjectCommand remCmd;
     remCmd.m_Object = pRootObject->GetGuid();
 
-    GetCommandHistory()->AddCommand(remCmd).AssertSuccess();
+    GetCommandHistory()->AddCommand(remCmd).IgnoreResult();
   }
 
   GetCommandHistory()->FinishTransaction();
@@ -271,8 +273,8 @@ plUuid plDocument::RevertPrefab(const plDocumentObject* pObject)
 
   m_DocumentObjectMetaData->EndReadMetaData();
 
-  pHistory->AddCommand(remCmd).AssertSuccess();
-  pHistory->AddCommand(instCmd).AssertSuccess();
+  pHistory->AddCommand(remCmd).IgnoreResult();
+  pHistory->AddCommand(instCmd).IgnoreResult();
 
   return instCmd.m_CreatedRootObject;
 }
@@ -308,12 +310,12 @@ void plDocument::UpdatePrefabsRecursive(plDocumentObject* pObject)
   }
 }
 
-void plDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, plStringView sBasePrefab)
+void plDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, const char* szBasePrefab)
 {
   const plStringBuilder& sNewBasePrefab = plPrefabCache::GetSingleton()->GetCachedPrefabDocument(PrefabAsset);
 
   plStringBuilder sNewMergedGraph;
-  plPrefabUtils::Merge(sBasePrefab, sNewBasePrefab, pObject, true, PrefabSeed, sNewMergedGraph);
+  plPrefabUtils::Merge(szBasePrefab, sNewBasePrefab, pObject, true, PrefabSeed, sNewMergedGraph);
 
   // remove current object
   plRemoveObjectCommand rm;
@@ -329,6 +331,6 @@ void plDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid& Pre
   inst.m_sBasePrefabGraph = sNewBasePrefab;
   inst.m_sObjectGraph = sNewMergedGraph;
 
-  GetCommandHistory()->AddCommand(rm).AssertSuccess();
-  GetCommandHistory()->AddCommand(inst).AssertSuccess();
+  GetCommandHistory()->AddCommand(rm).IgnoreResult();
+  GetCommandHistory()->AddCommand(inst).IgnoreResult();
 }

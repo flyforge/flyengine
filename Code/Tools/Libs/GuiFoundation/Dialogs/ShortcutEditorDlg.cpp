@@ -7,8 +7,8 @@
 #include <QTableWidget>
 #include <QTreeWidget>
 
-plQtShortcutEditorDlg::plQtShortcutEditorDlg(QWidget* pParent)
-  : QDialog(pParent)
+plQtShortcutEditorDlg::plQtShortcutEditorDlg(QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 
@@ -57,7 +57,7 @@ plQtShortcutEditorDlg::plQtShortcutEditorDlg(QWidget* pParent)
       QFont font = pParent->font(0);
       font.setBold(true);
 
-      pParent->setFont(0, font);
+      //pParent->setFont(0, font);
 
       for (auto it2 : it.Value())
       {
@@ -72,7 +72,7 @@ plQtShortcutEditorDlg::plQtShortcutEditorDlg(QWidget* pParent)
         pItem->setData(0, Qt::DisplayRole, item->m_sActionName.GetData());
         pItem->setData(1, Qt::DisplayRole, sTemp.GetData());
         pItem->setData(2, Qt::DisplayRole, item->m_sShortcut.GetData());
-        pItem->setData(3, Qt::DisplayRole, plMakeQString(plTranslateTooltip(item->m_sActionName)));
+        pItem->setData(3, Qt::DisplayRole, plTranslateTooltip(item->m_sActionName));
 
         if (item->m_sShortcut == item->m_sDefaultShortcut)
           pItem->setBackground(2, QBrush());

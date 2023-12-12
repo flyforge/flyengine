@@ -1,0 +1,592 @@
+[PLATFORMS]
+
+ALL
+
+
+[PERMUTATIONS]
+
+SHADING_MODE = SHADING_MODE_LIT // Always use LIT mode
+SHADING_QUALITY = SHADING_QUALITY_NORMAL // Not compatible with SIMPLE shading quality
+
+BLEND_MODE
+
+TWO_SIDED
+
+// SYSTEM permutations
+FLIP_WINDING
+GAMEOBJECT_VELOCITY
+RENDER_PASS
+CAMERA_MODE
+VERTEX_SKINNING
+FORWARD_PASS_WRITE_DEPTH
+// SYSTEM permutations
+
+
+[MATERIALPARAMETER]
+
+Permutation TWO_SIDED;
+Permutation BLEND_MODE;
+
+float MaskThreshold @Default(0.25);
+
+float2 UVOffset @Default(float2(0.0, 0.0));
+float2 UVScale @Default(float2(1.0, 1.0));
+
+bool UseBaseTexture;
+Texture2D BaseTexture;
+bool UseDiffuseStochasticTexturing;
+Color BaseColor @Default(Color(1.0, 1.0, 1.0));
+
+bool UseNormalTexture;
+Texture2D NormalTexture;
+bool UseNormalStochasticTexturing;
+float NormalIntensity @Default(1.0) @Clamp(0.0, 2.0);
+
+bool UseOrmTexture;
+bool UseRMA;
+Texture2D OrmTexture;
+bool UseOrmStochasticTexturing;
+float RoughnessValue @Default(0.7) @Clamp(0.0, 2.0);
+float MetallicValue @Default(0.0) @Clamp(0.0, 2.0);
+
+bool UseSpecularTexture;
+Texture2D SpecularTexture;
+bool UseSpecularStochasticTexturing;
+Color SpecularColor @Default(Color(0.04, 0.04, 0.04));
+
+bool UseSubsurfaceTexture;
+Texture2D SubsurfaceTexture;
+Color SubsurfaceColor @Default(Color(0.04, 0.04, 0.04));
+float SubsurfaceScatterPower @Default(9.0);
+float SubsurfaceStrength @Default(0.0);
+
+
+float Clearcoat @Default(0.0) @Clamp(0.0, 2.0);
+bool UseClearcoatInfluenceTexture;
+bool UseClearcoatRoughnessTexture;
+bool UseClearcoatNormalTexture;
+bool UseClearcoatInfluenceStochasticTexturing;
+bool UseClearcoatRoughnessStochasticTexturing;
+bool UseClearcoatNormalStochasticTexturing;
+Texture2D ClearcoatTexture;
+float ClearcoatRoughness @Default(0.0) @Clamp(0.0, 1.0);
+
+float Anisotropic @Default(0.0) @Clamp(0.0, 2.0);
+float AnisotropicRotation @Default(0.0) @Clamp(0.0, 1.0);
+
+float Sheen @Default(0.0) @Clamp(0.0, 2.0);
+float SheenTintFactor @Default(0.0) @Clamp(0.0, 1.0);
+
+bool UseEmissiveTexture;
+Texture2D EmissiveTexture;
+bool UseEmissiveStochasticTexturing;
+Color EmissiveColor @Default(Color(0.0, 0.0, 0.0));
+
+bool UseDisplacementTexture;
+Texture2D DisplacementTexture;
+bool UseDisplacementStochasticTexturing;
+float HeightScale @Default(0.0) @Clamp(0.0, 10.0);
+float MaxSlices @Default(64.0) @Clamp(0.0, 512.0);
+
+bool UseCavityTexture;
+Texture2D CavityTexture;
+bool UseCavityStochasticTexturing;
+
+[MATERIALCONFIG]
+
+#include <Shaders/Materials/MaterialConfig.h>
+
+[RENDERSTATE]
+
+#include <Shaders/Materials/MaterialState.h>
+
+
+[SHADER]
+
+#define USE_NORMAL
+#define USE_TANGENT
+#define USE_TANGENT_POS
+#define USE_TEXCOORD0
+
+#if VERTEX_SKINNING
+#define USE_SKINNING
+#endif
+
+// This enables special editor render modes:
+#if RENDER_PASS == RENDER_PASS_EDITOR
+#define USE_DEBUG_INTERPOLATOR
+#endif
+
+#include <Shaders/Common/Utils.h>
+
+CONSTANT_BUFFER(plMaterialConstants, 1)
+{
+  FLOAT2(UVOffset);
+  FLOAT2(UVScale);
+
+  COLOR4F(BaseColor);
+
+  COLOR4F(SpecularColor);
+
+  COLOR4F(EmissiveColor);
+
+  COLOR4F(SubsurfaceColor);
+
+  FLOAT1(MaskThreshold);
+  FLOAT1(NormalIntensity);
+  FLOAT1(RoughnessValue);
+  FLOAT1(MetallicValue);
+
+  FLOAT1(HeightScale);
+  FLOAT1(Clearcoat);
+  FLOAT1(ClearcoatRoughness);
+  FLOAT1(Anisotropic);
+
+  FLOAT1(AnisotropicRotation);
+  FLOAT1(Sheen);
+  FLOAT1(SheenTintFactor);
+  BOOL1(UseBaseTexture);
+
+  BOOL1(UseNormalTexture);
+  BOOL1(UseSpecularTexture);
+  BOOL1(UseClearcoatInfluenceTexture);
+  BOOL1(UseClearcoatRoughnessTexture);
+
+  BOOL1(UseClearcoatNormalTexture);
+  BOOL1(UseEmissiveTexture);
+  BOOL1(UseDisplacementTexture);
+
+  BOOL1(UseCavityTexture);
+  BOOL1(UseSubsurfaceTexture);
+  FLOAT1(MaxSlices);
+  BOOL1(UseOrmTexture);
+
+  BOOL1(InvertOcclusion);
+  BOOL1(UseRMA);
+  BOOL1(UseDiffuseStochasticTexturing);
+  BOOL1(UseNormalStochasticTexturing);
+
+
+  BOOL1(UseOrmStochasticTexturing);
+  BOOL1(UseSpecularStochasticTexturing);
+  BOOL1(UseClearcoatInfluenceStochasticTexturing);
+  BOOL1(UseClearcoatRoughnessStochasticTexturing);
+
+  BOOL1(UseClearcoatNormalStochasticTexturing);
+  BOOL1(UseEmissiveStochasticTexturing);
+  BOOL1(UseDisplacementStochasticTexturing);
+  BOOL1(UseOcclusionStochasticTexturing);
+
+  BOOL1(UseCavityStochasticTexturing);
+  FLOAT1(SubsurfaceScatterPower);
+  FLOAT1(SubsurfaceStrength);
+};
+
+
+[VERTEXSHADER]
+
+#if GAMEOBJECT_VELOCITY
+#define USE_VELOCITY
+#endif
+
+#include <Shaders/Materials/MaterialVertexShader.h>
+
+VS_OUT main(VS_IN Input)
+{
+  VS_OUT Output = FillVertexData(Input);
+
+  Output.TexCoord0 = (Output.TexCoord0 + UVOffset) * UVScale;
+
+  return Output;
+}
+
+
+[GEOMETRYSHADER]
+
+#if GAMEOBJECT_VELOCITY
+#define USE_VELOCITY
+#endif
+
+#include <Shaders/Materials/MaterialStereoGeometryShader.h>
+
+[PIXELSHADER]
+
+#define USE_MATERIAL_EMISSIVE
+#define USE_MATERIAL_OCCLUSION
+#define USE_MATERIAL_DISPLACEMENT
+#define USE_MATERIAL_SPECULAR_CLEARCOAT
+#define USE_MATERIAL_SPECULAR_ANISOTROPIC
+#define USE_MATERIAL_SPECULAR_SHEEN
+#define USE_MATERIAL_CAVITY
+#define USE_MATERIAL_SUBSURFACE_COLOR
+#define USE_MATERIAL_SUBSURFACE_PARAMS
+
+#define USE_TWO_SIDED_LIGHTING
+
+#define USE_DECALS
+#define USE_FOG
+
+#if GAMEOBJECT_VELOCITY
+#define USE_VELOCITY
+#endif
+
+#define CUSTOM_GLOBALS
+
+#include <Shaders/Materials/MaterialPixelShader.h>
+
+Texture2D BaseTexture;
+SamplerState BaseTexture_AutoSampler;
+
+Texture2D NormalTexture;
+SamplerState NormalTexture_AutoSampler;
+
+Texture2D EmissiveTexture;
+SamplerState EmissiveTexture_AutoSampler;
+
+Texture2D SpecularTexture;
+SamplerState SpecularTexture_AutoSampler;
+
+Texture2D CavityTexture;
+SamplerState CavityTexture_AutoSampler;
+
+Texture2D DisplacementTexture;
+SamplerState DisplacementTexture_AutoSampler;
+
+Texture2D ClearcoatTexture;
+SamplerState ClearcoatTexture_AutoSampler;
+
+Texture2D OrmTexture;
+SamplerState OrmTexture_AutoSampler;
+
+Texture2D SubsurfaceTexture;
+SamplerState SubsurfaceTexture_AutoSampler;
+
+// Based on the following implementation:
+// https://learnopengl.com/Advanced-Lighting/Parallax-Mapping
+float2 ComputeParallaxMapping(in float2 uv, in float3 viewDirection, in float scale)
+{
+  static const float minLayers = 08.0f;
+
+  float3x3 TBN       = float3x3(G.Input.Tangent, G.Input.BiTangent, G.Input.Normal);
+  float3x3 toTangent = transpose(TBN);
+  viewDirection      = mul(viewDirection, toTangent);
+  scale             /= 10.0f;
+  scale             *= -1.0f;
+
+  // Number of depth layers
+  float numLayers = lerp(MaxSlices, minLayers, abs(dot(float3(0.0f, 0.0f, 1.0f), viewDirection)));
+  // Calculate the size of each layer
+  float layerDepth = 1.0f / numLayers;
+  // Depth of current layer
+  float currentLayerDepth = 0.0f;
+
+  // The amount to shift the texture coordinates per layer (from vector P)
+  float2 P = viewDirection.xy / viewDirection.z * scale;
+  float2 deltaTexCoords = P / numLayers;
+
+  // Get initial values
+  float2 currentTexCoords     = uv;
+  float2 deriv_x              = ddx_coarse(currentTexCoords);
+  float2 deriv_y              = ddy_coarse(currentTexCoords);
+  float  currentDepthMapValue = DisplacementTexture.SampleGrad(DisplacementTexture_AutoSampler, currentTexCoords, deriv_x, deriv_y).r;
+
+  int steps = 0;
+
+  [loop]
+  while (currentLayerDepth < currentDepthMapValue && steps < MaxSlices)
+  {
+    // Shift texture coordinates along direction of P
+    currentTexCoords -= deltaTexCoords;
+
+    // Get depthmap value at current texture coordinates
+    currentDepthMapValue = DisplacementTexture.SampleGrad(DisplacementTexture_AutoSampler, currentTexCoords, deriv_x, deriv_y).r;
+
+    // Get depth of next layer
+    currentLayerDepth += layerDepth;
+
+    steps++;
+  }
+
+  // Get texture coordinates before collision (reverse operations)
+  float2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+  // Get depth after and before collision for linear interpolation
+  float afterDepth  = currentDepthMapValue - currentLayerDepth;
+  float beforeDepth = DisplacementTexture.SampleGrad(DisplacementTexture_AutoSampler, prevTexCoords, deriv_x, deriv_y).r - currentLayerDepth + layerDepth;
+
+  // Interpolation of texture coordinates
+  float weight = afterDepth / (afterDepth - beforeDepth);
+  float2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0f - weight);
+
+  return finalTexCoords;
+}
+
+// Stochastic sampling
+// Based on the following:
+// https://drive.google.com/file/d/1QecekuuyWgw68HU9tg6ENfrCTCVIjm6l/view
+float4 Sample(in Texture2D tex, in SamplerState sam, in float2 uv, in bool useStochastic = false)
+{
+  float4 c;
+
+  if (useStochastic)
+  {
+    // Triangle vertices and blend weights
+    // BW_vx[0...2].xyz = triangle verts
+    // BW_vx[3].xy = blend weights (z is unused)
+    float4x3 BW_vx;
+
+    // UV transformed into triangular grid space with UV scaled by approximation of 2*sqrt(3)
+    float2 skewUV = mul(float2x2 (1.0 , 0.0 , -0.57735027 , 1.15470054), uv * 3.464);
+
+    // Vertex IDs and barycentric coords
+    float2 vxID = float2(floor(skewUV));
+    float3 barry = float3(frac(skewUV), 0);
+    barry.z = 1.0f - barry.x - barry.y;
+
+    BW_vx = ((barry.z>0) ?
+                           float4x3(float3(vxID, 0), float3(vxID + float2(0, 1), 0), float3(vxID + float2(1, 0), 0), barry.zyx) :
+                           float4x3(float3(vxID + float2 (1, 1), 0), float3(vxID + float2 (1, 0), 0), float3(vxID + float2 (0, 1), 0), float3(-barry.z, 1.0 - barry.y, 1.0 - barry.x)));
+
+    // Calculate derivatives to avoid triangular grid artifacts
+    float2 dx = ddx_coarse(uv);
+    float2 dy = ddy_coarse(uv);
+
+    // Blend samples with calculated weights
+    c = mul(tex.SampleGrad(sam, uv + Hash2D(BW_vx[0].xy), dx, dy), BW_vx[3].x) +
+        mul(tex.SampleGrad(sam, uv + Hash2D(BW_vx[1].xy), dx, dy), BW_vx[3].y) +
+        mul(tex.SampleGrad(sam, uv + Hash2D(BW_vx[2].xy), dx, dy), BW_vx[3].z);
+  }
+  else
+  {
+    c = tex.Sample(sam, uv);
+  }
+
+  return c;
+}
+
+void FillCustomGlobals()
+{
+  [branch]
+  if (UseDisplacementTexture)
+  {
+    float3 direction = normalize(GetCameraPosition() - G.Input.WorldPosition.xyz);
+    G.Input.TexCoord0 = ComputeParallaxMapping(G.Input.TexCoord0, direction, HeightScale);
+  }
+}
+
+float3 GetBaseColor()
+{
+  // BaseColor comes from the material itself
+  // GetInstanceData() comes from the specific mesh instance
+  float3 baseColor = BaseColor.rgb * GetInstanceData().Color.rgb;
+
+  [branch]
+  if (UseBaseTexture)
+  {
+    float3 color = Sample(BaseTexture, BaseTexture_AutoSampler, G.Input.TexCoord0.xy, UseDiffuseStochasticTexturing).rgb;
+    // color = degamma(color);
+    baseColor *= color;
+  }
+
+  return baseColor;
+}
+
+#if defined(USE_MATERIAL_SUBSURFACE_COLOR)
+float3 GetSubsurfaceColor()
+{
+  [branch]
+  if (UseSubsurfaceTexture)
+  {
+    return Sample(SubsurfaceTexture, SubsurfaceTexture_AutoSampler, G.Input.TexCoord0.xy).rgb * SubsurfaceColor.rgb;
+  }
+
+  return SubsurfaceColor.rgb;
+}
+#endif
+
+#if defined(USE_MATERIAL_SUBSURFACE_PARAMS)
+void GetSubsurfaceParams(out float scatterPower, out float shadowStrength)
+{
+    scatterPower = SubsurfaceScatterPower;
+    shadowStrength = SubsurfaceStrength;
+}
+#endif
+
+float3 GetNormal()
+{
+  [branch]
+  if (UseNormalTexture)
+  {
+    // per-pixel normal read from the provided texture
+    float3 normalTS = normalize(DecodeNormalTexture(Sample(NormalTexture, NormalTexture_AutoSampler, G.Input.TexCoord0.xy, UseNormalStochasticTexturing), NormalIntensity));
+    return TangentToWorldSpace(normalTS);
+  }
+  else
+  {
+    // interpolated vertex normals
+    return G.Input.Normal;
+  }
+}
+
+float GetReflectance()
+{
+  return 0.5f;
+}
+
+float GetMetallic()
+{
+  [branch]
+  if (UseRMA)
+  {
+    return MetallicValue * Sample(OrmTexture, OrmTexture_AutoSampler, G.Input.TexCoord0.xy * UVScale, UseOrmStochasticTexturing).g;
+  }
+  else if (UseOrmTexture)
+  {
+    return MetallicValue * Sample(OrmTexture, OrmTexture_AutoSampler, G.Input.TexCoord0.xy * UVScale, UseOrmStochasticTexturing).b;
+  }
+  else
+  {
+    return MetallicValue;
+  }
+}
+
+float3 GetDiffuseColor()
+{
+  [branch]
+  if (UseSpecularTexture)
+  {
+    return GetBaseColor();
+  }
+  else
+  {
+    return lerp(GetBaseColor(), 0.0f, GetMetallic());
+  }
+}
+
+float3 GetSpecularColor()
+{
+  [branch]
+  if (UseSpecularTexture)
+  {
+    return Sample(SpecularTexture, SpecularTexture_AutoSampler, G.Input.TexCoord0.xy, UseSpecularStochasticTexturing).rgb;
+  }
+  else
+  {
+    return lerp(SpecularColor.rgb, GetBaseColor(), GetMetallic());
+  }
+}
+
+float GetRoughness()
+{
+  [branch]
+  if (UseRMA)
+  {
+    return RoughnessValue * Sample(OrmTexture, OrmTexture_AutoSampler, G.Input.TexCoord0.xy * UVScale, UseOrmStochasticTexturing).r;
+  }
+  else if (UseOrmTexture)
+  {
+    return RoughnessValue * Sample(OrmTexture, OrmTexture_AutoSampler, G.Input.TexCoord0.xy * UVScale, UseOrmStochasticTexturing).g;
+  }
+  else
+  {
+    return RoughnessValue;
+  }
+}
+
+float GetOpacity()
+{
+  float opacity = BaseColor.a * GetInstanceData().Color.a;
+
+  [branch]
+  if (UseBaseTexture)
+  {
+    opacity *= Sample(BaseTexture, BaseTexture_AutoSampler, G.Input.TexCoord0.xy, UseDiffuseStochasticTexturing).a;
+  }
+
+  #if BLEND_MODE == BLEND_MODE_MASKED
+    return opacity - MaskThreshold;
+  #else
+    return opacity;
+  #endif
+}
+
+float3 GetEmissiveColor()
+{
+  [branch]
+  if (UseEmissiveTexture)
+  {
+    return Sample(EmissiveTexture, EmissiveTexture_AutoSampler, G.Input.TexCoord0.xy, UseEmissiveStochasticTexturing).rgb * EmissiveColor.rgb;
+  }
+  else
+  {
+    return EmissiveColor.rgb;
+  }
+}
+
+float GetOcclusion()
+{
+  [branch]
+  if (UseRMA)
+  {
+    return abs(float(InvertOcclusion) - Sample(OrmTexture, OrmTexture_AutoSampler, G.Input.TexCoord0.xy * UVScale, UseOrmStochasticTexturing).b);
+  }
+  else if (UseOrmTexture)
+  {
+    return abs(float(InvertOcclusion) - Sample(OrmTexture, OrmTexture_AutoSampler, G.Input.TexCoord0.xy * UVScale, UseOrmStochasticTexturing).r);
+  }
+  else
+  {
+    return 1.0f;
+  }
+}
+
+float GetCavity()
+{
+  [branch]
+  if (UseCavityTexture)
+  {
+    return Sample(CavityTexture, CavityTexture_AutoSampler, G.Input.TexCoord0.xy, UseCavityStochasticTexturing).r;
+  }
+  else
+  {
+    return 1.0f;
+  }
+}
+
+void GetSpecularClearCoatParams(out float clearcoat, out float clearcoatRoughness, out float3 normal)
+{
+  clearcoat = Clearcoat;
+  clearcoatRoughness = ClearcoatRoughness;
+  normal = normalize(G.Input.Normal);
+
+  [branch]
+  if (UseClearcoatInfluenceTexture)
+  {
+    clearcoat *= Sample(ClearcoatTexture, ClearcoatTexture_AutoSampler, G.Input.TexCoord0.xy, UseClearcoatInfluenceStochasticTexturing).w;
+  }
+
+  [branch]
+  if (UseClearcoatRoughnessTexture)
+  {
+    clearcoatRoughness *= Sample(ClearcoatTexture, ClearcoatTexture_AutoSampler, G.Input.TexCoord0.xy, UseClearcoatRoughnessStochasticTexturing).z;
+  }
+
+  [branch]
+  if (UseClearcoatNormalTexture)
+  {
+    float3 normalTS = DecodeNormalTexture(Sample(ClearcoatTexture, ClearcoatTexture_AutoSampler, G.Input.TexCoord0.xy, UseClearcoatNormalStochasticTexturing));
+    normal = normalize(TangentToWorldSpace(normalTS));
+  }
+}
+
+void GetSpecularAnisotopicParams(out float anisotropic, out float rotation)
+{
+  anisotropic = Anisotropic;
+  rotation = AnisotropicRotation;
+}
+
+void GetSpecularSheenParams(out float sheen, out float tintFactor)
+{
+  sheen = Sheen;
+  tintFactor = SheenTintFactor;
+}

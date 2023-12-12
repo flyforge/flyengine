@@ -29,7 +29,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plFollowPathComponent, 1, plComponentMode::Dynamic)
     PLASMA_MEMBER_PROPERTY("LookAhead", m_fLookAhead)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 10.0f)),
     PLASMA_MEMBER_PROPERTY("Smoothing", m_fSmoothing)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
     PLASMA_MEMBER_PROPERTY("TiltAmount", m_fTiltAmount)->AddAttributes(new plDefaultValueAttribute(5.0f)),
-    PLASMA_MEMBER_PROPERTY("MaxTilt", m_MaxTilt)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30.0f)), new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(90.0f))),
+    PLASMA_MEMBER_PROPERTY("MaxTilt", m_MaxTilt)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30.0f)), new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(90.0f))),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_FUNCTIONS
@@ -137,36 +137,37 @@ void plFollowPathComponent::Update(bool bForce)
   plVec3 vTarget = transformAhead.m_vPosition - transform.m_vPosition;
   if (m_FollowMode == plFollowPathMode::AlignUpZ)
   {
-    const plPlane plane = plPlane::MakeFromNormalAndPoint(plVec3::MakeAxisZ(), transform.m_vPosition);
+    const plPlane plane = plPlane(plVec3::UnitZAxis(), transform.m_vPosition);
     vTarget = plane.GetCoplanarDirection(vTarget);
   }
-  vTarget.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
+  vTarget.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
 
-  plVec3 vUp = (m_FollowMode == plFollowPathMode::FullRotation) ? transform.m_vUpDirection : plVec3::MakeAxisZ();
+  plVec3 vUp = (m_FollowMode == plFollowPathMode::FullRotation) ? transform.m_vUpDirection : plVec3::UnitZAxis();
   plVec3 vRight = vTarget.CrossRH(vUp);
-  vRight.NormalizeIfNotZero(plVec3::MakeAxisY()).IgnoreResult();
+  vRight.NormalizeIfNotZero(plVec3::UnitYAxis()).IgnoreResult();
 
   vUp = vRight.CrossRH(vTarget);
-  vUp.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
+  vUp.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
 
   // check if we want to tilt the platform when turning
-  plAngle deltaAngle = plAngle::MakeFromDegree(0.0f);
+  plAngle deltaAngle = plAngle::Degree(0.0f);
   if (m_FollowMode == plFollowPathMode::AlignUpZ && !plMath::IsZero(m_fTiltAmount, 0.0001f) && !plMath::IsZero(m_MaxTilt.GetDegree(), 0.0001f))
   {
     if (m_bLastStateValid)
     {
       plVec3 vLastTarget = m_vLastTargetPosition - m_vLastPosition;
       {
-        const plPlane plane = plPlane::MakeFromNormalAndPoint(plVec3::MakeAxisZ(), transform.m_vPosition);
+        const plPlane plane = plPlane(plVec3::UnitZAxis(), transform.m_vPosition);
         vLastTarget = plane.GetCoplanarDirection(vLastTarget);
-        vLastTarget.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
+        vLastTarget.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
       }
 
       const float fTiltStrength = plMath::Sign((vTarget - vLastTarget).Dot(vRight)) * plMath::Sign(m_fTiltAmount);
       plAngle tiltAngle = plMath::Min(vLastTarget.GetAngleBetween(vTarget) * plMath::Abs(m_fTiltAmount), m_MaxTilt);
       deltaAngle = plMath::Lerp(tiltAngle * fTiltStrength, m_LastTiltAngle, 0.85f); // this smooths out the tilting from being jittery
 
-      plQuat rot = plQuat ::MakeFromAxisAndAngle(vTarget, deltaAngle);
+      plQuat rot;
+      rot.SetFromAxisAndAngle(vTarget, deltaAngle);
       vUp = rot * vUp;
       vRight = rot * vRight;
     }
@@ -180,7 +181,7 @@ void plFollowPathComponent::Update(bool bForce)
     m_LastTiltAngle = deltaAngle;
   }
 
-  plMat3 mRot = plMat3::MakeIdentity();
+  plMat3 mRot = plMat3::IdentityMatrix();
   if (m_FollowMode != plFollowPathMode::OnlyPosition)
   {
     mRot.SetColumn(0, vTarget);
@@ -191,7 +192,7 @@ void plFollowPathComponent::Update(bool bForce)
   plTransform tFinal;
   tFinal.m_vPosition = transform.m_vPosition;
   tFinal.m_vScale.Set(1);
-  tFinal.m_qRotation = plQuat::MakeFromMat3(mRot);
+  tFinal.m_qRotation.SetFromMat3(mRot);
 
   GetOwner()->SetGlobalTransform(pPathObject->GetGlobalTransform() * tFinal);
 }

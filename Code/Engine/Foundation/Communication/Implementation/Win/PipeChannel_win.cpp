@@ -24,6 +24,7 @@ plPipeChannel_win::plPipeChannel_win(plStringView sAddress, Mode::Enum mode)
   , m_InputState(this)
   , m_OutputState(this)
 {
+  CreatePipe(sAddress);
   m_pOwner->AddChannel(this);
 }
 
@@ -33,10 +34,11 @@ plPipeChannel_win::~plPipeChannel_win()
   {
     Disconnect();
   }
-  while (IsConnected())
+  while (m_bConnected)
   {
-    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
+    plThreadUtils::Sleep(plTime::Milliseconds(10));
   }
+
   m_pOwner->RemoveChannel(this);
 }
 
@@ -66,42 +68,39 @@ bool plPipeChannel_win::CreatePipe(plStringView sAddress)
     return false;
   }
 
+  return true;
+}
+
+void plPipeChannel_win::AddToMessageLoop(plMessageLoop* pMsgLoop)
+{
   if (m_hPipeHandle != INVALID_HANDLE_VALUE)
   {
-    plMessageLoop_win* pMsgLoopWin = static_cast<plMessageLoop_win*>(m_pOwner);
+    plMessageLoop_win* pMsgLoopWin = static_cast<plMessageLoop_win*>(pMsgLoop);
 
     ULONG_PTR key = reinterpret_cast<ULONG_PTR>(this);
     HANDLE port = CreateIoCompletionPort(m_hPipeHandle, pMsgLoopWin->GetPort(), key, 1);
     PLASMA_ASSERT_DEBUG(pMsgLoopWin->GetPort() == port, "Failed to CreateIoCompletionPort: {0}", plArgErrorCode(GetLastError()));
   }
-  return true;
 }
 
 void plPipeChannel_win::InternalConnect()
 {
-  if (GetConnectionState() != ConnectionState::Disconnected)
+  if (m_hPipeHandle == INVALID_HANDLE_VALUE)
     return;
-
+  if (m_bConnected)
+    return;
 #  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
   if (m_ThreadId == 0)
     m_ThreadId = plThreadUtils::GetCurrentThreadID();
 #  endif
 
-  if (!CreatePipe(m_sAddress))
-    return;
-
-  if (m_hPipeHandle == INVALID_HANDLE_VALUE)
-    return;
-
-  SetConnectionState(ConnectionState::Connecting);
   if (m_Mode == Mode::Server)
   {
     ProcessConnection();
   }
   else
   {
-    // If CreatePipe succeeded, we are already connected.
-    SetConnectionState(ConnectionState::Connected);
+    m_bConnected = true;
   }
 
   if (!m_InputState.IsPending)
@@ -109,9 +108,10 @@ void plPipeChannel_win::InternalConnect()
     OnIOCompleted(&m_InputState.Context, 0, 0);
   }
 
-  if (IsConnected())
+  if (m_bConnected)
   {
     ProcessOutgoingMessages(0);
+    m_Events.Broadcast(plIpcChannelEvent(m_Mode == Mode::Client ? plIpcChannelEvent::ConnectedToServer : plIpcChannelEvent::ConnectedToClient, this));
   }
 
   return;
@@ -119,9 +119,6 @@ void plPipeChannel_win::InternalConnect()
 
 void plPipeChannel_win::InternalDisconnect()
 {
-  if (GetConnectionState() == ConnectionState::Disconnected)
-    return;
-
 #  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
   if (m_ThreadId != 0)
     PLASMA_ASSERT_DEBUG(m_ThreadId == plThreadUtils::GetCurrentThreadID(), "Function must be called from worker thread!");
@@ -142,24 +139,21 @@ void plPipeChannel_win::InternalDisconnect()
     FlushPendingOperations();
   }
 
-  bool bWasConnected = false;
   {
     PLASMA_LOCK(m_OutputQueueMutex);
     m_OutputQueue.Clear();
-    bWasConnected = IsConnected();
+    m_bConnected = false;
   }
 
-  if (bWasConnected)
-  {
-    SetConnectionState(ConnectionState::Disconnected);
-    // Raise in case another thread is waiting for new messages (as we would sleep forever otherwise).
-    m_IncomingMessages.RaiseSignal();
-  }
+  m_Events.Broadcast(
+    plIpcChannelEvent(m_Mode == Mode::Client ? plIpcChannelEvent::DisconnectedFromServer : plIpcChannelEvent::DisconnectedFromClient, this));
+  // Raise in case another thread is waiting for new messages (as we would sleep forever otherwise).
+  m_IncomingMessages.RaiseSignal();
 }
 
 void plPipeChannel_win::InternalSend()
 {
-  if (!m_OutputState.IsPending && IsConnected())
+  if (!m_OutputState.IsPending && m_bConnected)
   {
     ProcessOutgoingMessages(0);
   }
@@ -191,7 +185,8 @@ bool plPipeChannel_win::ProcessConnection()
       m_InputState.IsPending = true;
       break;
     case ERROR_PIPE_CONNECTED:
-      SetConnectionState(ConnectionState::Connected);
+      m_bConnected = true;
+      m_Events.Broadcast(plIpcChannelEvent(m_Mode == Mode::Client ? plIpcChannelEvent::ConnectedToServer : plIpcChannelEvent::ConnectedToClient, this));
       break;
     case ERROR_NO_DATA:
       return false;
@@ -242,7 +237,7 @@ bool plPipeChannel_win::ProcessIncomingMessages(DWORD uiBytesRead)
     }
 
     PLASMA_ASSERT_DEBUG(uiBytesRead != 0, "We really should have data at this point.");
-    ReceiveData(plArrayPtr<plUInt8>(m_InputBuffer, uiBytesRead));
+    ReceiveMessageData(plArrayPtr<plUInt8>(m_InputBuffer, uiBytesRead));
     uiBytesRead = 0;
   }
   return true;
@@ -250,7 +245,7 @@ bool plPipeChannel_win::ProcessIncomingMessages(DWORD uiBytesRead)
 
 bool plPipeChannel_win::ProcessOutgoingMessages(DWORD uiBytesWritten)
 {
-  PLASMA_ASSERT_DEBUG(IsConnected(), "Must be connected to process outgoing messages.");
+  PLASMA_ASSERT_DEBUG(m_bConnected, "Must be connected to process outgoing messages.");
   PLASMA_ASSERT_DEBUG(m_ThreadId == plThreadUtils::GetCurrentThreadID(), "Function must be called from worker thread!");
 
   if (m_OutputState.IsPending)
@@ -320,7 +315,7 @@ void plPipeChannel_win::OnIOCompleted(IOContext* pContext, DWORD uiBytesTransfer
   bool bRes = true;
   if (pContext == &m_InputState.Context)
   {
-    if (!IsConnected())
+    if (!m_bConnected)
     {
       if (!ProcessConnection())
         return;

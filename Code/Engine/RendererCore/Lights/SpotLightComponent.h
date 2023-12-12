@@ -4,7 +4,7 @@
 #include <RendererCore/Pipeline/Declarations.h>
 #include <RendererCore/Textures/Texture2DResource.h>
 
-using plSpotLightComponentManager = plComponentManager<class plSpotLightComponent, plBlockStorageType::Compact>;
+typedef plComponentManager<class plSpotLightComponent, plBlockStorageType::Compact> plSpotLightComponentManager;
 
 /// \brief The render data object for spot lights.
 class PLASMA_RENDERERCORE_DLL plSpotLightRenderData : public plLightRenderData
@@ -13,6 +13,9 @@ class PLASMA_RENDERERCORE_DLL plSpotLightRenderData : public plLightRenderData
 
 public:
   float m_fRange;
+  float m_fFalloff;
+  float m_fSize;
+  float m_fLength;
   plAngle m_InnerSpotAngle;
   plAngle m_OuterSpotAngle;
   plTexture2DResourceHandle m_hProjectedTexture;
@@ -49,9 +52,16 @@ public:
   void SetRange(float fRange); // [ property ]
   float GetRange() const;      // [ property ]
 
-  float GetEffectiveRange() const;
+  void SetFalloff(float fFalloff); // [ property ]
+  float GetFalloff() const;      // [ property ]
 
-  void SetInnerSpotAngle(plAngle spotAngle);  // [ property ]
+  void SetSize(float fSize); // [ property ]
+  float GetSize() const;      // [ property ]
+
+  void SetLength(float fLength); // [ property ]
+  float GetLength() const;      // [ property ]
+
+  void SetInnerSpotAngle(plAngle fSpotAngle); // [ property ]
   plAngle GetInnerSpotAngle() const;          // [ property ]
 
   void SetOuterSpotAngle(plAngle spotAngle);  // [ property ]
@@ -68,10 +78,13 @@ protected:
   plBoundingSphere CalculateBoundingSphere(const plTransform& t, float fRange) const;
 
   float m_fRange = 0.0f;
-  float m_fEffectiveRange = 0.0f;
 
-  plAngle m_InnerSpotAngle = plAngle::MakeFromDegree(15.0f);
-  plAngle m_OuterSpotAngle = plAngle::MakeFromDegree(30.0f);
+  float m_fFalloff = 1.0f;
+  float m_fSize = 0;
+  float m_fLength = 0;
+
+  plAngle m_InnerSpotAngle = plAngle::Degree(15.0f);
+  plAngle m_OuterSpotAngle = plAngle::Degree(30.0f);
 
   plTexture2DResourceHandle m_hProjectedTexture;
 };

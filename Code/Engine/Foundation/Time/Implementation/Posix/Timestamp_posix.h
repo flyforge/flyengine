@@ -1,15 +1,13 @@
 #include <Foundation/FoundationInternal.h>
 PLASMA_FOUNDATION_INTERNAL_HEADER
-
 #include <time.h>
-#include <sys/time.h>
 
 const plTimestamp plTimestamp::CurrentTimestamp()
 {
   timeval currentTime;
   gettimeofday(&currentTime, nullptr);
 
-  return plTimestamp::MakeFromInt(currentTime.tv_sec * 1000000LL + currentTime.tv_usec, plSIUnitOfTime::Microsecond);
+  return plTimestamp(currentTime.tv_sec * 1000000LL + currentTime.tv_usec, plSIUnitOfTime::Microsecond);
 }
 
 bool operator!=(const tm& lhs, const tm& rhs)
@@ -49,21 +47,21 @@ const plTimestamp plDateTime::GetTimestamp() const
   time_t iTimeStamp = mktime(&timeinfo);
   // mktime may have 'patched' our time to be valid, we don't want that to count as a valid date.
   if (iTimeStamp == (time_t)-1 || timeinfoCopy != timeinfo)
-    return plTimestamp::MakeInvalid();
+    return plTimestamp();
 
   iTimeStamp += timeinfo.tm_gmtoff;
   // Subtract one hour if daylight saving time was activated by mktime.
   if (timeinfo.tm_isdst == 1)
     iTimeStamp -= 3600;
-  return plTimestamp::MakeFromInt(iTimeStamp, plSIUnitOfTime::Second);
+  return plTimestamp(iTimeStamp, plSIUnitOfTime::Second);
 }
 
-plResult plDateTime::SetFromTimestamp(plTimestamp timestamp)
+bool plDateTime::SetTimestamp(plTimestamp timestamp)
 {
   tm timeinfo = {0};
   time_t iTime = (time_t)timestamp.GetInt64(plSIUnitOfTime::Second);
   if (gmtime_r(&iTime, &timeinfo) == nullptr)
-    return PLASMA_FAILURE;
+    return false;
 
   m_iYear = timeinfo.tm_year + 1900;
   m_uiMonth = timeinfo.tm_mon + 1;
@@ -74,5 +72,5 @@ plResult plDateTime::SetFromTimestamp(plTimestamp timestamp)
   m_uiSecond = timeinfo.tm_sec;
   m_uiMicroseconds = 0;
 
-  return PLASMA_SUCCESS;
+  return true;
 }

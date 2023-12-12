@@ -13,7 +13,7 @@ class plQtVisualShaderScene : public plQtNodeScene
   Q_OBJECT
 
 public:
-  plQtVisualShaderScene(QObject* pParent = nullptr);
+  plQtVisualShaderScene(QObject* parent = nullptr);
   ~plQtVisualShaderScene();
 };
 
@@ -23,7 +23,7 @@ public:
   plQtVisualShaderPin();
 
   virtual void SetPin(const plPin& pin) override;
-  virtual void paint(QPainter* pPainter, const QStyleOptionGraphicsItem* pOption, QWidget* pWidget) override;
+  virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 };
 
 class plQtVisualShaderNode : public plQtNode

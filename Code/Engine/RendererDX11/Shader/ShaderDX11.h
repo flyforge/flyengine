@@ -29,6 +29,7 @@ public:
 
   PLASMA_ALWAYS_INLINE ID3D11ComputeShader* GetDXComputeShader() const;
 
+
 protected:
   friend class plGALDeviceDX11;
   friend class plMemoryUtils;
@@ -41,12 +42,12 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11VertexShader* m_pVertexShader = nullptr;
-  ID3D11HullShader* m_pHullShader = nullptr;
-  ID3D11DomainShader* m_pDomainShader = nullptr;
-  ID3D11GeometryShader* m_pGeometryShader = nullptr;
-  ID3D11PixelShader* m_pPixelShader = nullptr;
-  ID3D11ComputeShader* m_pComputeShader = nullptr;
+  ID3D11VertexShader* m_pVertexShader;
+  ID3D11HullShader* m_pHullShader;
+  ID3D11DomainShader* m_pDomainShader;
+  ID3D11GeometryShader* m_pGeometryShader;
+  ID3D11PixelShader* m_pPixelShader;
+  ID3D11ComputeShader* m_pComputeShader;
 };
 
 #include <RendererDX11/Shader/Implementation/ShaderDX11_inl.h>

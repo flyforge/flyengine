@@ -132,9 +132,9 @@ private:
 class PLASMA_GAMEENGINE_DLL plStateMachineInstance
 {
   PLASMA_DISALLOW_COPY_AND_ASSIGN(plStateMachineInstance);
-  
+
 public:
-  plStateMachineInstance(plReflectedClass& ref_owner, const plSharedPtr<const plStateMachineDescription>& pDescription = nullptr);
+  plStateMachineInstance(plReflectedClass& owner, const plSharedPtr<const plStateMachineDescription>& pDescription = nullptr);
   ~plStateMachineInstance();
 
   plResult SetState(plStateMachineState* pState);
@@ -148,24 +148,17 @@ public:
   plReflectedClass& GetOwner() { return m_Owner; }
   plWorld* GetOwnerWorld();
 
-  void SetBlackboard(const plSharedPtr<plBlackboard>& pBlackboard);
+  void SetBlackboard(const plSharedPtr<plBlackboard>& blackboard);
   const plSharedPtr<plBlackboard>& GetBlackboard() const { return m_pBlackboard; }
 
   /// \brief Returns how long the state machine is in its current state
   plTime GetTimeInCurrentState() const { return m_TimeInCurrentState; }
 
-  /// \brief Sends a named event that state transitions can react to.
-  void FireTransitionEvent(plStringView sEvent);
-
-  plStringView GetCurrentTransitionEvent() const { return m_sCurrentTransitionEvent; }
-
-private:
-  PLASMA_ALLOW_PRIVATE_PROPERTIES(plStateMachineInstance);
-
-  bool Reflection_SetState(const plHashedString& sStateName);
+  // The following functions are for scripting reflection and shouldn't be called manually
+  bool Reflection_SetState(const plHashedString & sStateName);
   plComponent* Reflection_GetOwnerComponent() const;
   plBlackboard* Reflection_GetBlackboard() const { return m_pBlackboard.Borrow(); }
-
+private:
   void SetStateInternal(plUInt32 uiStateIndex);
   void EnterCurrentState(const plStateMachineState* pFromState);
   void ExitCurrentState(const plStateMachineState* pToState);
@@ -192,7 +185,6 @@ private:
   plStateMachineState* m_pCurrentState = nullptr;
   plUInt32 m_uiCurrentStateIndex = plInvalidIndex;
   plTime m_TimeInCurrentState;
-  plStringView m_sCurrentTransitionEvent;
 
   const plStateMachineDescription::TransitionArray* m_pCurrentTransitions = nullptr;
 

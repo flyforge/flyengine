@@ -1,6 +1,5 @@
 #include <ShaderCompilerDXC/ShaderCompilerDXC.h>
 
-#include <Foundation/Configuration/Startup.h>
 #include <Foundation/IO/MemoryStream.h>
 #include <Foundation/Memory/MemoryUtils.h>
 #include <Foundation/Strings/StringConversion.h>
@@ -13,6 +12,11 @@
 #endif
 
 #include <dxc/dxcapi.h>
+
+// clang-format off
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plShaderCompilerDXC, 1, plRTTIDefaultAllocator<plShaderCompilerDXC>)
+PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+// clang-format on
 
 template <typename T>
 struct plComPtr
@@ -62,31 +66,6 @@ private:
 
 plComPtr<IDxcUtils> s_pDxcUtils;
 plComPtr<IDxcCompiler3> s_pDxcCompiler;
-
-// clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ShaderCompilerDXC, ShaderCompilerDXCPlugin)
-
-  BEGIN_SUBSYSTEM_DEPENDENCIES
-    "Foundation"
-  END_SUBSYSTEM_DEPENDENCIES
-
-  ON_CORESYSTEMS_STARTUP
-  {
-    DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(s_pDxcUtils.put()));
-    DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(s_pDxcCompiler.put()));
-  }
-
-  ON_CORESYSTEMS_SHUTDOWN
-  {
-    s_pDxcUtils = {};
-    s_pDxcCompiler = {};
-  }
-
-PLASMA_END_SUBSYSTEM_DECLARATION;
-
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plShaderCompilerDXC, 1, plRTTIDefaultAllocator<plShaderCompilerDXC>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-// clang-format on
 
 static plResult CompileVulkanShader(const char* szFile, const char* szSource, bool bDebug, const char* szProfile, const char* szEntryPoint, plDynamicArray<plUInt8>& out_ByteCode);
 
@@ -152,7 +131,12 @@ plResult plShaderCompilerDXC::Initialize()
     m_VertexInputMapping["in.var.BONEWEIGHTS1"] = plGALVertexAttributeSemantic::BoneWeights1;
   }
 
-  PLASMA_ASSERT_DEV(s_pDxcUtils != nullptr && s_pDxcCompiler != nullptr, "ShaderCompiler SubSystem init should have initialized library pointers.");
+  if (s_pDxcUtils != nullptr)
+    return PLASMA_SUCCESS;
+
+  DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(s_pDxcUtils.put()));
+  DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(s_pDxcCompiler.put()));
+
   return PLASMA_SUCCESS;
 }
 
@@ -162,9 +146,7 @@ plResult plShaderCompilerDXC::Compile(plShaderProgramData& inout_Data, plLogInte
 
   for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
   {
-    if (inout_Data.m_uiSourceHash[stage] == 0)
-      continue;
-    if (inout_Data.m_bWriteToDisk[stage] == false)
+    if (!inout_Data.m_StageBinary[stage].GetByteCode().IsEmpty())
     {
       plLog::Debug("Shader for stage '{}' is already compiled.", plGALShaderStage::Names[stage]);
       continue;
@@ -176,7 +158,7 @@ plResult plShaderCompilerDXC::Compile(plShaderProgramData& inout_Data, plLogInte
     {
       const plStringBuilder sSourceFile = inout_Data.m_sSourceFile;
 
-      if (CompileVulkanShader(sSourceFile, sShaderSource, inout_Data.m_Flags.IsSet(plShaderCompilerFlags::Debug), GetProfileName(inout_Data.m_sPlatform, (plGALShaderStage::Enum)stage), "main", inout_Data.m_ByteCode[stage]->m_ByteCode).Succeeded())
+      if (CompileVulkanShader(sSourceFile, sShaderSource, inout_Data.m_Flags.IsSet(plShaderCompilerFlags::Debug), GetProfileName(inout_Data.m_sPlatform, (plGALShaderStage::Enum)stage), "main", inout_Data.m_StageBinary[stage].GetByteCode()).Succeeded())
       {
         PLASMA_SUCCEED_OR_RETURN(ReflectShaderStage(inout_Data, (plGALShaderStage::Enum)stage));
       }
@@ -282,112 +264,29 @@ plResult CompileVulkanShader(const char* szFile, const char* szSource, bool bDeb
   return PLASMA_SUCCESS;
 }
 
-plResult plShaderCompilerDXC::DefineShaderResourceBindings(plShaderProgramData& inout_data, plHashTable<plHashedString, plShaderResourceBinding>& ref_resourceBinding, plLogInterface* pLog)
-{
-  plHybridArray<plHybridBitfield<64>, 4> indexInUse;
-  for (auto it : ref_resourceBinding)
-  {
-    plInt16& iSet = it.Value().m_iSet;
-    if (iSet == -1)
-      iSet = 0;
-
-    indexInUse.EnsureCount(iSet + 1);
-
-    if (it.Value().m_iSlot != -1)
-    {
-      indexInUse[iSet].SetCount(plMath::Max(indexInUse[iSet].GetCount(), static_cast<plUInt32>(it.Value().m_iSlot + 1)));
-      indexInUse[iSet].SetBit(it.Value().m_iSlot);
-    }
-  }
-
-  // Create stable order of resources
-  plHybridArray<plHybridArray<plHashedString, 16>, 4> order;
-  order.SetCount(indexInUse.GetCount());
-  for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-  {
-    if (inout_data.m_sShaderSource[stage].IsEmpty())
-      continue;
-
-    for (const auto& res : inout_data.m_Resources[stage])
-    {
-      const plInt16 iSet = res.m_Binding.m_iSet < 0 ? (plInt16)0 : res.m_Binding.m_iSet;
-      if (!order[iSet].Contains(res.m_Binding.m_sName))
-      {
-        order[iSet].PushBack(res.m_Binding.m_sName);
-      }
-    }
-  }
-
-  //
-  for (plInt16 iSet = 0; iSet < (plInt16)indexInUse.GetCount(); ++iSet)
-  {
-    plUInt32 uiCurrentIndex = 0;
-    for (const auto& sName : order[iSet])
-    {
-      plInt16& iSlot = ref_resourceBinding[sName].m_iSlot;
-      if (iSlot != -1)
-        continue;
-      while (uiCurrentIndex < indexInUse[iSet].GetCount() && indexInUse[iSet].IsBitSet(uiCurrentIndex))
-      {
-        uiCurrentIndex++;
-      }
-      iSlot = static_cast<plInt16>(uiCurrentIndex);
-      indexInUse[iSet].SetCount(plMath::Max(indexInUse[iSet].GetCount(), uiCurrentIndex + 1));
-      indexInUse[iSet].SetBit(uiCurrentIndex);
-    }
-  }
-
-  return PLASMA_SUCCESS;
-}
-
-void plShaderCompilerDXC::CreateShaderResourceDeclaration(plStringView sDeclaration, const plShaderResourceBinding& binding, plStringBuilder& out_sDeclaration)
-{
-  const plEnum<plGALShaderResourceType> type = plGALShaderResourceType::MakeFromShaderDescriptorType(binding.m_DescriptorType);
-  plStringView sResourcePrefix;
-  switch (type)
-  {
-    case plGALShaderResourceType::Sampler:
-      sResourcePrefix = "s"_plsv;
-      break;
-    case plGALShaderResourceType::ConstantBuffer:
-      sResourcePrefix = "b"_plsv;
-      break;
-    case plGALShaderResourceType::SRV:
-      sResourcePrefix = "t"_plsv;
-      break;
-    case plGALShaderResourceType::UAV:
-      sResourcePrefix = "u"_plsv;
-      break;
-    default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-      break;
-  }
-  out_sDeclaration.Format("{} : register({}{}, space{})", sDeclaration, sResourcePrefix, binding.m_iSlot, binding.m_iSet);
-}
-
-plResult plShaderCompilerDXC::FillResourceBinding(plGALShaderByteCode& shaderBinary, plShaderResourceBinding& binding, const SpvReflectDescriptorBinding& info)
+plResult plShaderCompilerDXC::FillResourceBinding(plShaderStageBinary& shaderBinary, plShaderResourceBinding& binding, const SpvReflectDescriptorBinding& info)
 {
   if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_SRV)
   {
     return FillSRVResourceBinding(shaderBinary, binding, info);
   }
 
-  else if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_UAV)
+  if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_UAV)
   {
     return FillUAVResourceBinding(shaderBinary, binding, info);
   }
 
-  else if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_CBV)
+  if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_CBV)
   {
-    binding.m_DescriptorType = plGALShaderDescriptorType::ConstantBuffer;
+    binding.m_Type = plShaderResourceType::ConstantBuffer;
     binding.m_pLayout = ReflectConstantBufferLayout(shaderBinary, info);
 
     return PLASMA_SUCCESS;
   }
 
-  else if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_SAMPLER)
+  if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_SAMPLER)
   {
-    binding.m_DescriptorType = plGALShaderDescriptorType::Sampler;
+    binding.m_Type = plShaderResourceType::Sampler;
 
     // TODO: not sure how this will map to Vulkan
     if (binding.m_sName.GetString().EndsWith("_AutoSampler"))
@@ -404,125 +303,137 @@ plResult plShaderCompilerDXC::FillResourceBinding(plGALShaderByteCode& shaderBin
   return PLASMA_FAILURE;
 }
 
-plGALShaderTextureType::Enum plShaderCompilerDXC::GetTextureType(const SpvReflectDescriptorBinding& info)
-{
-  switch (info.image.dim)
-  {
-    case SpvDim::SpvDim1D:
-    {
-      if (info.image.ms == 0)
-      {
-        if (info.image.arrayed > 0)
-        {
-          return plGALShaderTextureType::Texture1DArray;
-        }
-        else
-        {
-          return plGALShaderTextureType::Texture1D;
-        }
-      }
-
-      break;
-    }
-
-    case SpvDim::SpvDim2D:
-    {
-      if (info.image.ms == 0)
-      {
-        if (info.image.arrayed > 0)
-        {
-          return plGALShaderTextureType::Texture2DArray;
-        }
-        else
-        {
-          return plGALShaderTextureType::Texture2D;
-        }
-      }
-      else
-      {
-        if (info.image.arrayed > 0)
-        {
-          return plGALShaderTextureType::Texture2DMSArray;
-        }
-        else
-        {
-          return plGALShaderTextureType::Texture2DMS;
-        }
-      }
-
-      break;
-    }
-
-    case SpvDim::SpvDim3D:
-    {
-      if (info.image.ms == 0 && info.image.arrayed == 0)
-      {
-        return plGALShaderTextureType::Texture3D;
-      }
-
-      break;
-    }
-
-    case SpvDim::SpvDimCube:
-    {
-      if (info.image.ms == 0)
-      {
-        if (info.image.arrayed == 0)
-        {
-          return plGALShaderTextureType::TextureCube;
-        }
-        else
-        {
-          return plGALShaderTextureType::TextureCubeArray;
-        }
-      }
-
-      break;
-    }
-
-    case SpvDim::SpvDimBuffer:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-      //binding.m_TextureType = plGALShaderTextureType::GenericBuffer;
-      return plGALShaderTextureType::Unknown;
-
-    case SpvDim::SpvDimRect:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-      return plGALShaderTextureType::Unknown;
-
-    case SpvDim::SpvDimSubpassData:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-      return plGALShaderTextureType::Unknown;
-
-    case SpvDim::SpvDimMax:
-      PLASMA_ASSERT_DEV(false, "Invalid enum value");
-      break;
-  }
-  return plGALShaderTextureType::Unknown;
-}
-
-plResult plShaderCompilerDXC::FillSRVResourceBinding(plGALShaderByteCode& shaderBinary, plShaderResourceBinding& binding, const SpvReflectDescriptorBinding& info)
+plResult plShaderCompilerDXC::FillSRVResourceBinding(plShaderStageBinary& shaderBinary, plShaderResourceBinding& binding, const SpvReflectDescriptorBinding& info)
 {
   if (info.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER)
   {
     if (info.type_description->op == SpvOp::SpvOpTypeStruct)
     {
-      binding.m_DescriptorType = plGALShaderDescriptorType::StructuredBuffer;
+      binding.m_Type = plShaderResourceType::GenericBuffer;
       return PLASMA_SUCCESS;
     }
   }
 
   if (info.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE)
   {
-    binding.m_DescriptorType = plGALShaderDescriptorType::Texture;
-    binding.m_TextureType = GetTextureType(info);
-    return PLASMA_SUCCESS;
+    switch (info.image.dim)
+    {
+      case SpvDim::SpvDim1D:
+      {
+        if (info.image.ms == 0)
+        {
+          if (info.image.arrayed > 0)
+          {
+            binding.m_Type = plShaderResourceType::Texture1DArray;
+            return PLASMA_SUCCESS;
+          }
+          else
+          {
+            binding.m_Type = plShaderResourceType::Texture1D;
+            return PLASMA_SUCCESS;
+          }
+        }
+
+        break;
+      }
+
+      case SpvDim::SpvDim2D:
+      {
+        if (info.image.ms == 0)
+        {
+          if (info.image.arrayed > 0)
+          {
+            binding.m_Type = plShaderResourceType::Texture2DArray;
+            return PLASMA_SUCCESS;
+          }
+          else
+          {
+            binding.m_Type = plShaderResourceType::Texture2D;
+            return PLASMA_SUCCESS;
+          }
+        }
+        else
+        {
+          if (info.image.arrayed > 0)
+          {
+            binding.m_Type = plShaderResourceType::Texture2DMSArray;
+            return PLASMA_SUCCESS;
+          }
+          else
+          {
+            binding.m_Type = plShaderResourceType::Texture2DMS;
+            return PLASMA_SUCCESS;
+          }
+        }
+
+        break;
+      }
+
+      case SpvDim::SpvDim3D:
+      {
+        if (info.image.ms == 0 && info.image.arrayed == 0)
+        {
+          binding.m_Type = plShaderResourceType::Texture3D;
+          return PLASMA_SUCCESS;
+        }
+
+        break;
+      }
+
+      case SpvDim::SpvDimCube:
+      {
+        if (info.image.ms == 0)
+        {
+          if (info.image.arrayed == 0)
+          {
+            binding.m_Type = plShaderResourceType::TextureCube;
+            return PLASMA_SUCCESS;
+          }
+          else
+          {
+            binding.m_Type = plShaderResourceType::TextureCubeArray;
+            return PLASMA_SUCCESS;
+          }
+        }
+
+        break;
+      }
+
+      case SpvDim::SpvDimBuffer:
+        binding.m_Type = plShaderResourceType::GenericBuffer;
+        return PLASMA_SUCCESS;
+
+      case SpvDim::SpvDimRect:
+        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        return PLASMA_FAILURE;
+
+      case SpvDim::SpvDimSubpassData:
+        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        return PLASMA_FAILURE;
+
+      case SpvDim::SpvDimMax:
+        PLASMA_ASSERT_DEV(false, "Invalid enum value");
+        break;
+    }
+
+    if (info.image.ms > 0)
+    {
+      plLog::Error("Resource '{}': Multi-sampled textures of this type are not supported.", info.name);
+      return PLASMA_FAILURE;
+    }
+
+    if (info.image.arrayed > 0)
+    {
+      plLog::Error("Resource '{}': Array-textures of this type are not supported.", info.name);
+      return PLASMA_FAILURE;
+    }
   }
 
   if (info.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER)
   {
     if (info.image.dim == SpvDim::SpvDimBuffer)
     {
-      binding.m_DescriptorType = plGALShaderDescriptorType::TexelBuffer;
+      binding.m_Type = plShaderResourceType::GenericBuffer;
       return PLASMA_SUCCESS;
     }
 
@@ -534,12 +445,11 @@ plResult plShaderCompilerDXC::FillSRVResourceBinding(plGALShaderByteCode& shader
   return PLASMA_FAILURE;
 }
 
-plResult plShaderCompilerDXC::FillUAVResourceBinding(plGALShaderByteCode& shaderBinary, plShaderResourceBinding& binding, const SpvReflectDescriptorBinding& info)
+plResult plShaderCompilerDXC::FillUAVResourceBinding(plShaderStageBinary& shaderBinary, plShaderResourceBinding& binding, const SpvReflectDescriptorBinding& info)
 {
   if (info.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE)
   {
-    binding.m_DescriptorType = plGALShaderDescriptorType::TextureRW;
-    binding.m_TextureType = GetTextureType(info);
+    binding.m_Type = plShaderResourceType::UAV;
     return PLASMA_SUCCESS;
   }
 
@@ -547,7 +457,7 @@ plResult plShaderCompilerDXC::FillUAVResourceBinding(plGALShaderByteCode& shader
   {
     if (info.image.dim == SpvDim::SpvDimBuffer)
     {
-      binding.m_DescriptorType = plGALShaderDescriptorType::TexelBufferRW;
+      binding.m_Type = plShaderResourceType::UAV;
       return PLASMA_SUCCESS;
     }
 
@@ -555,22 +465,6 @@ plResult plShaderCompilerDXC::FillUAVResourceBinding(plGALShaderByteCode& shader
     return PLASMA_FAILURE;
   }
 
-  if (info.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-  {
-    if (info.image.dim == SpvDim::SpvDimBuffer)
-    {
-      binding.m_DescriptorType = plGALShaderDescriptorType::StructuredBufferRW;
-      return PLASMA_SUCCESS;
-    }
-    else if (info.image.dim == SpvDim::SpvDim1D)
-    {
-      binding.m_DescriptorType = plGALShaderDescriptorType::StructuredBufferRW;
-      return PLASMA_SUCCESS;
-    }
-
-    plLog::Error("Resource '{}': Unsupported storage buffer UAV type.", info.name);
-    return PLASMA_FAILURE;
-  }
   plLog::Error("Resource '{}': Unsupported UAV type.", info.name);
   return PLASMA_FAILURE;
 }
@@ -613,8 +507,7 @@ plResult plShaderCompilerDXC::ReflectShaderStage(plShaderProgramData& inout_Data
 {
   PLASMA_LOG_BLOCK("ReflectShaderStage", inout_Data.m_sSourceFile);
 
-  plGALShaderByteCode* pShader = inout_Data.m_ByteCode[Stage];
-  auto& bytecode = pShader->m_ByteCode;
+  auto& bytecode = inout_Data.m_StageBinary[Stage].GetByteCode();
 
   SpvReflectShaderModule module;
 
@@ -627,7 +520,7 @@ plResult plShaderCompilerDXC::ReflectShaderStage(plShaderProgramData& inout_Data
   PLASMA_SCOPE_EXIT(spvReflectDestroyShaderModule(&module));
 
   //
-  auto& vertexInputAttributes = pShader->m_ShaderVertexInput;
+  plHybridArray<plVulkanVertexInputAttribute, 8> vertexInputAttributes;
   if (Stage == plGALShaderStage::VertexShader)
   {
     plUInt32 uiNumVars = 0;
@@ -652,7 +545,7 @@ plResult plShaderCompilerDXC::ReflectShaderStage(plShaderProgramData& inout_Data
       SpvReflectInterfaceVariable* pVar = vars[i];
       if (pVar->name != nullptr)
       {
-        plShaderVertexInputAttribute& attr = vertexInputAttributes.ExpandAndGetRef();
+        plVulkanVertexInputAttribute& attr = vertexInputAttributes.ExpandAndGetRef();
         attr.m_uiLocation = static_cast<plUInt8>(pVar->location);
 
         plGALVertexAttributeSemantic::Enum* pVAS = m_VertexInputMapping.GetValue(pVar->name);
@@ -663,6 +556,7 @@ plResult plShaderCompilerDXC::ReflectShaderStage(plShaderProgramData& inout_Data
       }
     }
   }
+
 
   // descriptor bindings
   {
@@ -682,6 +576,9 @@ plResult plShaderCompilerDXC::ReflectShaderStage(plShaderProgramData& inout_Data
       return PLASMA_FAILURE;
     }
 
+    plMap<plUInt32, plUInt32> descriptorToEzBinding;
+    plUInt32 uiVirtualResourceView = 0;
+    plUInt32 uiVirtualSampler = 0;
     for (plUInt32 i = 0; i < vars.GetCount(); ++i)
     {
       auto& info = *vars[i];
@@ -689,31 +586,106 @@ plResult plShaderCompilerDXC::ReflectShaderStage(plShaderProgramData& inout_Data
       plLog::Info("Bound Resource: '{}' at slot {} (Count: {})", info.name, info.binding, info.count);
 
       plShaderResourceBinding shaderResourceBinding;
-      shaderResourceBinding.m_iSet = static_cast<plInt16>(info.set);
-      shaderResourceBinding.m_iSlot = static_cast<plInt16>(info.binding);
-      shaderResourceBinding.m_uiArraySize = info.count;
+      shaderResourceBinding.m_Type = plShaderResourceType::Unknown;
+      shaderResourceBinding.m_iSlot = info.binding;
       shaderResourceBinding.m_sName.Assign(info.name);
-      shaderResourceBinding.m_Stages = plGALShaderStageFlags::MakeFromShaderStage(Stage);
 
-      if (FillResourceBinding(*inout_Data.m_ByteCode[Stage], shaderResourceBinding, info).Failed())
+      if (FillResourceBinding(inout_Data.m_StageBinary[Stage], shaderResourceBinding, info).Failed())
         continue;
 
-      PLASMA_ASSERT_DEV(shaderResourceBinding.m_DescriptorType != plGALShaderDescriptorType::Unknown, "FillResourceBinding should have failed.");
+      // We pretend SRVs and Samplers are mapped per stage and nicely packed so we fit into the DX11-based high level render interface.
+      if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_SRV)
+      {
+        shaderResourceBinding.m_iSlot = uiVirtualResourceView;
+        uiVirtualResourceView++;
+      }
+      if (info.resource_type == SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_SAMPLER)
+      {
+        shaderResourceBinding.m_iSlot = uiVirtualSampler;
+        uiVirtualSampler++;
+      }
 
-      inout_Data.m_ByteCode[Stage]->m_ShaderResourceBindings.PushBack(shaderResourceBinding);
+
+      PLASMA_ASSERT_DEV(shaderResourceBinding.m_Type != plShaderResourceType::Unknown, "FillResourceBinding should have failed.");
+
+      descriptorToEzBinding[i] = inout_Data.m_StageBinary[Stage].GetShaderResourceBindings().GetCount();
+      inout_Data.m_StageBinary[Stage].AddShaderResourceBinding(shaderResourceBinding);
+    }
+
+    {
+      plArrayPtr<const plShaderResourceBinding> plBindings = inout_Data.m_StageBinary[Stage].GetShaderResourceBindings();
+      // Modify meta data
+      plDefaultMemoryStreamStorage storage;
+      plMemoryStreamWriter stream(&storage);
+
+      const plUInt32 uiCount = vars.GetCount();
+
+      // #TODO_VULKAN Currently hard coded to a single DescriptorSetLayout.
+      plHybridArray<plVulkanDescriptorSetLayout, 3> sets;
+      plVulkanDescriptorSetLayout& set = sets.ExpandAndGetRef();
+
+      for (plUInt32 i = 0; i < uiCount; ++i)
+      {
+        auto& info = *vars[i];
+        PLASMA_ASSERT_DEV(info.set == 0, "Only a single descriptor set is currently supported.");
+        plVulkanDescriptorSetLayoutBinding& binding = set.bindings.ExpandAndGetRef();
+        binding.m_sName = info.name;
+        binding.m_uiBinding = static_cast<plUInt8>(info.binding);
+        binding.m_uiVirtualBinding = plBindings[descriptorToEzBinding[i]].m_iSlot;
+        binding.m_plType = plBindings[descriptorToEzBinding[i]].m_Type;
+        switch (info.resource_type)
+        {
+          case SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_SAMPLER:
+            binding.m_Type = plVulkanDescriptorSetLayoutBinding::ResourceType::Sampler;
+            break;
+          case SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_CBV:
+            binding.m_Type = plVulkanDescriptorSetLayoutBinding::ResourceType::ConstantBuffer;
+            break;
+          case SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_SRV:
+            binding.m_Type = plVulkanDescriptorSetLayoutBinding::ResourceType::ResourceView;
+            break;
+          default:
+          case SpvReflectResourceType::SPV_REFLECT_RESOURCE_FLAG_UAV:
+            binding.m_Type = plVulkanDescriptorSetLayoutBinding::ResourceType::UAV;
+            break;
+        }
+        binding.m_uiDescriptorType = static_cast<plUInt32>(info.descriptor_type);
+        binding.m_uiDescriptorCount = 1;
+        for (plUInt32 uiDim = 0; uiDim < info.array.dims_count; ++uiDim)
+        {
+          binding.m_uiDescriptorCount *= info.array.dims[uiDim];
+        }
+        binding.m_uiWordOffset = info.word_offset.binding;
+      }
+      set.bindings.Sort([](const plVulkanDescriptorSetLayoutBinding& lhs, const plVulkanDescriptorSetLayoutBinding& rhs) { return lhs.m_uiBinding < rhs.m_uiBinding; });
+
+      plSpirvMetaData::Write(stream, bytecode, sets, vertexInputAttributes);
+
+      // Replaced compiled Spirv code with custom plSpirvMetaData format.
+      plUInt64 uiBytesLeft = storage.GetStorageSize64();
+      plUInt64 uiReadPosition = 0;
+      bytecode.Clear();
+      bytecode.Reserve((plUInt32)uiBytesLeft);
+      while (uiBytesLeft > 0)
+      {
+        plArrayPtr<const plUInt8> data = storage.GetContiguousMemoryRange(uiReadPosition);
+        bytecode.PushBackRange(data);
+        uiReadPosition += data.GetCount();
+        uiBytesLeft -= data.GetCount();
+      }
     }
   }
   return PLASMA_SUCCESS;
 }
 
-plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(plGALShaderByteCode& pStageBinary, const SpvReflectDescriptorBinding& constantBufferReflection)
+plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(plShaderStageBinary& pStageBinary, const SpvReflectDescriptorBinding& constantBufferReflection)
 {
   const auto& block = constantBufferReflection.block;
 
   PLASMA_LOG_BLOCK("Constant Buffer Layout", constantBufferReflection.name);
   plLog::Debug("Constant Buffer has {} variables, Size is {}", block.member_count, block.padded_size);
 
-  plShaderConstantBufferLayout* pLayout = PLASMA_DEFAULT_NEW(plShaderConstantBufferLayout);
+  plShaderConstantBufferLayout* pLayout = pStageBinary.CreateConstantBufferLayout();
 
   pLayout->m_uiTotalSize = block.padded_size;
 
@@ -721,7 +693,7 @@ plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(p
   {
     const auto& svd = block.members[var];
 
-    plShaderConstant constant;
+    plShaderConstantBufferLayout::Constant constant;
     constant.m_sName.Assign(svd.name);
     constant.m_uiOffset = svd.offset; // TODO: or svd.absolute_offset ??
     constant.m_uiArrayElements = 1;
@@ -761,7 +733,7 @@ plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(p
       {
         case 0:
         case 1:
-          constant.m_Type = plShaderConstant::Type::Bool;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Bool;
           break;
 
         default:
@@ -779,16 +751,16 @@ plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(p
       {
         case 0:
         case 1:
-          constant.m_Type = plShaderConstant::Type::Int1;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Int1;
           break;
         case 2:
-          constant.m_Type = plShaderConstant::Type::Int2;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Int2;
           break;
         case 3:
-          constant.m_Type = plShaderConstant::Type::Int3;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Int3;
           break;
         case 4:
-          constant.m_Type = plShaderConstant::Type::Int4;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Int4;
           break;
       }
     }
@@ -800,16 +772,16 @@ plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(p
       {
         case 0:
         case 1:
-          constant.m_Type = plShaderConstant::Type::Float1;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Float1;
           break;
         case 2:
-          constant.m_Type = plShaderConstant::Type::Float2;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Float2;
           break;
         case 3:
-          constant.m_Type = plShaderConstant::Type::Float3;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Float3;
           break;
         case 4:
-          constant.m_Type = plShaderConstant::Type::Float4;
+          constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Float4;
           break;
       }
     }
@@ -818,7 +790,7 @@ plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(p
     {
       uiFlags &= ~SpvReflectTypeFlagBits::SPV_REFLECT_TYPE_FLAG_MATRIX;
 
-      constant.m_Type = plShaderConstant::Type::Default;
+      constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Default;
 
       const plUInt32 rows = svd.type_description->traits.numeric.matrix.row_count;
       const plUInt32 columns = svd.type_description->traits.numeric.matrix.column_count;
@@ -831,11 +803,11 @@ plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(p
 
       if (columns == 3 && rows == 3)
       {
-        constant.m_Type = plShaderConstant::Type::Mat3x3;
+        constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Mat3x3;
       }
       else if (columns == 4 && rows == 4)
       {
-        constant.m_Type = plShaderConstant::Type::Mat4x4;
+        constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Mat4x4;
       }
       else
       {
@@ -849,7 +821,7 @@ plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(p
       uiFlags &= ~SpvReflectTypeFlagBits::SPV_REFLECT_TYPE_FLAG_STRUCT;
       uiFlags &= ~SpvReflectTypeFlagBits::SPV_REFLECT_TYPE_FLAG_EXTERNAL_BLOCK;
 
-      constant.m_Type = plShaderConstant::Type::Struct;
+      constant.m_Type = plShaderConstantBufferLayout::Constant::Type::Struct;
     }
 
     if (uiFlags != 0)
@@ -857,7 +829,7 @@ plShaderConstantBufferLayout* plShaderCompilerDXC::ReflectConstantBufferLayout(p
       plLog::Error("Variable '{}': Unknown additional type flags '{}'", constant.m_sName, uiFlags);
     }
 
-    if (constant.m_Type == plShaderConstant::Type::Default)
+    if (constant.m_Type == plShaderConstantBufferLayout::Constant::Type::Default)
     {
       plLog::Error("Variable '{}': Variable type is unknown / not supported", constant.m_sName);
       continue;

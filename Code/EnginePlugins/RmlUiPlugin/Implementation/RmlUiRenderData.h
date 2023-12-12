@@ -27,7 +27,7 @@ namespace plRmlUiInternal
 
   struct Batch
   {
-    plMat4 m_Transform = plMat4::MakeIdentity();
+    plMat4 m_Transform = plMat4::IdentityMatrix();
     plVec2 m_Translation = plVec2(0);
     CompiledGeometry m_CompiledGeometry;
     plRectFloat m_ScissorRect = plRectFloat(0, 0);

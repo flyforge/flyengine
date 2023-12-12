@@ -176,7 +176,7 @@ void plParticleTypeEffect::Process(plUInt64 uiNumElements)
 
       // TODO: pass through velocity
       pEffect->SetVisibleIf(GetOwnerEffect());
-      pEffect->SetTransformForNextFrame(t, plVec3::MakeZero());
+      pEffect->SetTransformForNextFrame(t, plVec3::ZeroVector());
 
       plBoundingBoxSphere bounds;
       pEffect->GetBoundingVolume(bounds);

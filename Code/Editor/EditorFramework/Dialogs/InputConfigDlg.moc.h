@@ -15,7 +15,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtInputConfigDlg(QWidget* pParent);
+  plQtInputConfigDlg(QWidget* parent);
 
 private Q_SLOTS:
   void on_ButtonNewInputSet_clicked();

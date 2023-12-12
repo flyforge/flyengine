@@ -51,7 +51,7 @@ PLASMA_FORCE_INLINE plHashedString plRenderData::GetCategoryName(Category catego
 
 PLASMA_FORCE_INLINE plUInt64 plRenderData::GetCategorySortingKey(Category category, const plCamera& camera) const
 {
-  return s_CategoryData[category.m_uiValue].m_sortingKeyFunc(this, camera);
+  return s_CategoryData[category.m_uiValue].m_sortingKeyFunc(this, m_uiSortingKey, camera);
 }
 
 //////////////////////////////////////////////////////////////////////////

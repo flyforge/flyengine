@@ -72,7 +72,7 @@ private:
   plArrayMap<plHashedString, plVariant> m_Parameters;
 
   plScriptClassResourceHandle m_hScriptClass;
-  plTime m_UpdateInterval = plTime::MakeZero();
+  plTime m_UpdateInterval = plTime::Zero();
 
   plSharedPtr<plScriptRTTI> m_pScriptType;
   plUniquePtr<plScriptInstance> m_pInstance;

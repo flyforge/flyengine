@@ -5,17 +5,17 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 plMaterialViewContext::plMaterialViewContext(plMaterialContext* pMaterialContext)
-  : plEngineProcessViewContext(pMaterialContext)
+  : PlasmaEngineProcessViewContext(pMaterialContext)
 {
   m_pMaterialContext = pMaterialContext;
 }
 
-plMaterialViewContext::~plMaterialViewContext() = default;
+plMaterialViewContext::~plMaterialViewContext() {}
 
 void plMaterialViewContext::PositionThumbnailCamera()
 {
   m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, 45.0f, 0.1f, 1000.0f);
-  m_Camera.LookAt(plVec3(+0.23f, -0.23f, 0.1f), plVec3::MakeZero(), plVec3(0.0f, 0.0f, 1.0f));
+  m_Camera.LookAt(plVec3(+0.23f, -0.23f, 0.1f), plVec3::ZeroVector(), plVec3(0.0f, 0.0f, 1.0f));
 }
 
 plViewHandle plMaterialViewContext::CreateView()
@@ -27,7 +27,7 @@ plViewHandle plMaterialViewContext::CreateView()
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
   pView->SetShaderPermutationVariable("MATERIAL_PREVIEW", "TRUE");
 
-  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   return pView->GetHandle();

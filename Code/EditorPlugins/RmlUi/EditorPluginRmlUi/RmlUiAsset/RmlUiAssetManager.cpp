@@ -13,7 +13,6 @@ plRmlUiAssetDocumentManager::plRmlUiAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "RmlUi";
   m_DocTypeDesc.m_sFileExtension = "plRmlUiAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/RmlUi.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Input";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plRmlUiAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Rml_UI");
@@ -35,7 +34,7 @@ void plRmlUiAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plRmlUiAssetDocument>())
       {
-        new plQtRmlUiAssetDocumentWindow(static_cast<plRmlUiAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtRmlUiAssetDocumentWindow* pDocWnd = new plQtRmlUiAssetDocumentWindow(static_cast<plRmlUiAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -46,9 +45,9 @@ void plRmlUiAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager
 }
 
 void plRmlUiAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plRmlUiAssetDocument(sPath);
+  out_pDocument = new plRmlUiAssetDocument(szPath);
 }
 
 void plRmlUiAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

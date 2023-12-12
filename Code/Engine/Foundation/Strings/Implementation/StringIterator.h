@@ -8,7 +8,7 @@ struct plStringIterator
 {
   using iterator_category = std::bidirectional_iterator_tag;
   using value_type = plUInt32;
-  using difference_type = std::ptrdiff_t;
+  using difference_type = ptrdiff_t;
   using pointer = const char*;
   using reference = plUInt32;
 
@@ -163,7 +163,7 @@ struct plStringReverseIterator
 {
   using iterator_category = std::bidirectional_iterator_tag;
   using value_type = plUInt32;
-  using difference_type = std::ptrdiff_t;
+  using difference_type = ptrdiff_t;
   using pointer = const char*;
   using reference = plUInt32;
 

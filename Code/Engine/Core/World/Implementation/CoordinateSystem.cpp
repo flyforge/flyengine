@@ -49,7 +49,7 @@ plVec3 plCoordinateSystemConversion::ConvertSourcePosition(const plVec3& vPos) c
 
 plQuat plCoordinateSystemConversion::ConvertSourceRotation(const plQuat& vOrientation) const
 {
-  plVec3 axis = m_mSourceToTarget * vOrientation.GetVectorPart();
+  plVec3 axis = m_mSourceToTarget * vOrientation.v;
   plQuat rr(axis.x, axis.y, axis.z, vOrientation.w * m_fWindingSwap);
   return rr;
 }
@@ -66,7 +66,7 @@ plVec3 plCoordinateSystemConversion::ConvertTargetPosition(const plVec3& vPos) c
 
 plQuat plCoordinateSystemConversion::ConvertTargetRotation(const plQuat& vOrientation) const
 {
-  plVec3 axis = m_mTargetToSource * vOrientation.GetVectorPart();
+  plVec3 axis = m_mTargetToSource * vOrientation.v;
   plQuat rr(axis.x, axis.y, axis.z, vOrientation.w * m_fWindingSwap);
   return rr;
 }

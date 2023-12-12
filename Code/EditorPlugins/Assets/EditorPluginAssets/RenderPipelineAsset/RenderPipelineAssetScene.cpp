@@ -3,10 +3,10 @@
 #include <EditorPluginAssets/RenderPipelineAsset/RenderPipelineAssetScene.moc.h>
 
 
-plQtRenderPipelineAssetScene::plQtRenderPipelineAssetScene(QObject* pParent)
-  : plQtNodeScene(pParent)
+plQtRenderPipelineAssetScene::plQtRenderPipelineAssetScene(QObject* parent)
+  : plQtNodeScene(parent)
 {
 }
 
 
-plQtRenderPipelineAssetScene::~plQtRenderPipelineAssetScene() = default;
+plQtRenderPipelineAssetScene::~plQtRenderPipelineAssetScene() {}

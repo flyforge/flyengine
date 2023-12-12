@@ -2,7 +2,9 @@
 
 #include <Foundation/SimdMath/SimdQuat.h>
 
-plSimdQuat plSimdQuat::MakeShortestRotation(const plSimdVec4f& vDirFrom, const plSimdVec4f& vDirTo)
+///\todo optimize these methods if needed
+
+void plSimdQuat::SetShortestRotation(const plSimdVec4f& vDirFrom, const plSimdVec4f& vDirTo)
 {
   const plSimdVec4f v0 = vDirFrom.GetNormalized<3>();
   const plSimdVec4f v1 = vDirTo.GetNormalized<3>();
@@ -12,24 +14,25 @@ plSimdQuat plSimdQuat::MakeShortestRotation(const plSimdVec4f& vDirFrom, const p
   // if both vectors are identical -> no rotation needed
   if (fDot.IsEqual(1.0f, 0.0001f))
   {
-    return plSimdQuat::MakeIdentity();
+    SetIdentity();
+    return;
   }
   else if (fDot.IsEqual(-1.0f, 0.0001f)) // if both vectors are opposing
   {
-    return plSimdQuat::MakeFromAxisAndAngle(v0.GetOrthogonalVector().GetNormalized<3>(), plAngle::MakeFromRadian(plMath::Pi<float>()));
+    SetFromAxisAndAngle(v0.GetOrthogonalVector().GetNormalized<3>(), plAngle::Radian(plMath::Pi<float>()));
+    return;
   }
 
   const plSimdVec4f c = v0.CrossRH(v1);
   const plSimdFloat s = ((fDot + plSimdFloat(1.0f)) * plSimdFloat(2.0f)).GetSqrt();
 
-  plSimdQuat res;
-  res.m_v = c / s;
-  res.m_v.SetW(s * plSimdFloat(0.5f));
-  res.Normalize();
-  return res;
+  m_v = c / s;
+  m_v.SetW(s * plSimdFloat(0.5f));
+
+  Normalize();
 }
 
-plSimdQuat plSimdQuat::MakeSlerp(const plSimdQuat& qFrom, const plSimdQuat& qTo, const plSimdFloat& t)
+void plSimdQuat::SetSlerp(const plSimdQuat& qFrom, const plSimdQuat& qTo, const plSimdFloat& t)
 {
   PLASMA_ASSERT_DEBUG((t >= 0.0f) && (t <= 1.0f), "Invalid lerp factor.");
 
@@ -73,10 +76,9 @@ plSimdQuat plSimdQuat::MakeSlerp(const plSimdQuat& qFrom, const plSimdQuat& qTo,
   if (bFlipSign)
     t1 = -t1;
 
-  plSimdQuat res;
-  res.m_v = qFrom.m_v * t0 + qTo.m_v * t1;
-  res.Normalize();
-  return res;
+  m_v = qFrom.m_v * t0 + qTo.m_v * t1;
+
+  Normalize();
 }
 
 bool plSimdQuat::IsEqualRotation(const plSimdQuat& qOther, const plSimdFloat& fEpsilon) const
@@ -89,13 +91,13 @@ bool plSimdQuat::IsEqualRotation(const plSimdQuat& qOther, const plSimdFloat& fE
   if (qOther.GetRotationAxisAndAngle(vA2, fA2) == PLASMA_FAILURE)
     return false;
 
-  plAngle A1 = plAngle::MakeFromRadian(fA1);
-  plAngle A2 = plAngle::MakeFromRadian(fA2);
+  plAngle A1 = plAngle::Radian(fA1);
+  plAngle A2 = plAngle::Radian(fA2);
 
-  if ((A1.IsEqualSimple(A2, plAngle::MakeFromDegree(fEpsilon))) && (vA1.IsEqual(vA2, fEpsilon).AllSet<3>()))
+  if ((A1.IsEqualSimple(A2, plAngle::Degree(fEpsilon))) && (vA1.IsEqual(vA2, fEpsilon).AllSet<3>()))
     return true;
 
-  if ((A1.IsEqualSimple(-A2, plAngle::MakeFromDegree(fEpsilon))) && (vA1.IsEqual(-vA2, fEpsilon).AllSet<3>()))
+  if ((A1.IsEqualSimple(-A2, plAngle::Degree(fEpsilon))) && (vA1.IsEqual(-vA2, fEpsilon).AllSet<3>()))
     return true;
 
   return false;

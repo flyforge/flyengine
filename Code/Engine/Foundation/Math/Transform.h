@@ -41,34 +41,21 @@ public:
 public:
   /// \brief Default constructor: Does not do any initialization.
   plTransformTemplate() = default;
+  ; // [tested]
 
-
-  /// \brief Initializes the transform from the given position, rotation and scale.
-  plTransformTemplate(const plVec3Template<Type>& vPosition,
-    const plQuatTemplate<Type>& qRotation = plQuatTemplate<Type>::MakeIdentity(),
+  /// \brief Sets position and rotation.
+  explicit plTransformTemplate(const plVec3Template<Type>& vPosition,
+    const plQuatTemplate<Type>& qRotation = plQuatTemplate<Type>::IdentityQuaternion(),
     const plVec3Template<Type>& vScale = plVec3Template<Type>(1)); // [tested]
 
-  /// \brief Creates a transform from the given position, rotation and scale.
-  [[nodiscard]] static plTransformTemplate<Type> Make(const plVec3Template<Type>& vPosition, const plQuatTemplate<Type>& qRotation = plQuatTemplate<Type>::MakeIdentity(), const plVec3Template<Type>& vScale = plVec3Template<Type>(1));
-
-  /// \brief Creates an identity transform.
-  [[nodiscard]] static plTransformTemplate<Type> MakeIdentity();
-
-  /// \brief Creates a transform from the given matrix.
-  ///
-  /// \note This operation always succeeds, even though the matrix may be complete garbage (e.g. a zero matrix)
-  /// or may not be representable as a transform (containing shearing).
-  /// Also be careful with mirroring. The transform may or may not be able to represent that.
-  [[nodiscard]] static plTransformTemplate<Type> MakeFromMat4(const plMat4Template<Type>& mMat);
-
-  /// \brief Creates a transform that is the local transformation needed to get from the parent's transform to the child's.
-  [[nodiscard]] static plTransformTemplate<Type> MakeLocalTransform(const plTransformTemplate& globalTransformParent, const plTransformTemplate& globalTransformChild); // [tested]
-
-  /// \brief Creates a transform that is the global transform, that is reached by applying the child's local transform to the parent's global one.
-  [[nodiscard]] static plTransformTemplate<Type> MakeGlobalTransform(const plTransformTemplate& globalTransformParent, const plTransformTemplate& localTransformChild); // [tested]
+  /// \brief Attempts to extract position, scale and rotation from the matrix. Negative scaling and shearing will get lost in the process.
+  void SetFromMat4(const plMat4Template<Type>& mMat);
 
   /// \brief Sets the position to be zero and the rotation to identity.
   void SetIdentity(); // [tested]
+
+  /// \brief Returns an Identity Transform.
+  static const plTransformTemplate<Type> IdentityTransform();
 
   /// \brief Returns the scale component with maximum magnitude.
   Type GetMaxScale() const;
@@ -95,14 +82,19 @@ public:
   /// \brief Returns the inverse of this transform.
   const plTransformTemplate GetInverse() const; // [tested]
 
-  [[nodiscard]] plVec3Template<Type> TransformPosition(const plVec3Template<Type>& v) const;  // [tested]
-  [[nodiscard]] plVec3Template<Type> TransformDirection(const plVec3Template<Type>& v) const; // [tested]
+  plVec3Template<Type> TransformPosition(const plVec3Template<Type>& v) const;  // [tested]
+  plVec3Template<Type> TransformDirection(const plVec3Template<Type>& v) const; // [tested]
 
   void operator+=(const plVec3Template<Type>& v); // [tested]
   void operator-=(const plVec3Template<Type>& v); // [tested]
 
   // *** Conversion operations ***
 public:
+  /// \brief Sets this transform to be the local transformation needed to get from the parent's transform to the child's.
+  void SetLocalTransform(const plTransformTemplate& globalTransformParent, const plTransformTemplate& globalTransformChild); // [tested]
+
+  /// \brief Sets this transform to the global transform, that is reached by applying the child's local transform to the parent's global one.
+  void SetGlobalTransform(const plTransformTemplate& globalTransformParent, const plTransformTemplate& localTransformChild); // [tested]
 
   /// \brief Returns the transformation as a matrix.
   const plMat4Template<Type> GetAsMat4() const; // [tested]

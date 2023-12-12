@@ -12,7 +12,7 @@ public:
   plBoxManipulatorAdapter();
   ~plBoxManipulatorAdapter();
 
-  virtual void QueryGridSettings(plGridSettingsMsgToEngine& out_gridSettings) override;
+  virtual void QueryGridSettings(plGridSettingsMsgToEngine& outGridSettings) override;
 
 protected:
   virtual void Finalize() override;

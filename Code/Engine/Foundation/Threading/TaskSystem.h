@@ -298,7 +298,7 @@ public:
   /// \brief Sets the target frame time that is supposed to not be exceeded.
   ///
   /// \see FinishFrameTasks() for more details.
-  static void SetTargetFrameTime(plTime targetFrameTime = plTime::MakeFromSeconds(1.0 / 40.0) /* 40 FPS -> 25 ms */);
+  static void SetTargetFrameTime(plTime targetFrameTime = plTime::Seconds(1.0 / 40.0) /* 40 FPS -> 25 ms */);
 
 private:
   PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, TaskSystem);

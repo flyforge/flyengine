@@ -59,6 +59,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRaycastComponent, 3, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"),
+    new plColorAttribute(plColorScheme::Logic),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColor::YellowGreen),
   }
   PLASMA_END_ATTRIBUTES;
@@ -302,7 +303,7 @@ void plRaycastComponent::PostTriggerMessage(plTriggerState::Enum state, plGameOb
   msg.m_sMessage = m_sTriggerMessage;
   msg.m_hTriggeringObject = hObject;
 
-  m_TriggerEventSender.PostEventMessage(msg, this, GetOwner(), plTime::MakeZero(), plObjectMsgQueueType::PostTransform);
+  m_TriggerEventSender.PostEventMessage(msg, this, GetOwner(), plTime::Zero(), plObjectMsgQueueType::PostTransform);
 }
 
 

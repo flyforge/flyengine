@@ -33,7 +33,8 @@ plAttributeHolder::~plAttributeHolder()
 {
   for (auto pAttr : m_Attributes)
   {
-    pAttr->GetDynamicRTTI()->GetAllocator()->Deallocate(const_cast<plPropertyAttribute*>(pAttr));
+    if(pAttr)
+     pAttr->GetDynamicRTTI()->GetAllocator()->Deallocate(const_cast<plPropertyAttribute*>(pAttr));
   }
 }
 

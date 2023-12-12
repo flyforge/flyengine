@@ -10,8 +10,8 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapToolbarActions(plStringView sMapping);
-  static void MapContextMenuActions(plStringView sMapping);
+  static void MapToolbarActions(const char* szMapping, const char* szPath);
+  static void MapContextMenuActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hCategory;
   static plActionDescriptorHandle s_hPickContextScene;

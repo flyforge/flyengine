@@ -43,7 +43,7 @@ plResult plBakedProbesWorldModule::GetProbeIndexData(const plVec3& vGlobalPositi
     return PLASMA_FAILURE;
 
   plSimdVec4f gridSpacePos = plSimdConversion::ToVec3((vGlobalPosition - pProbeTree->GetGridOrigin()).CompDiv(pProbeTree->GetProbeSpacing()));
-  gridSpacePos = gridSpacePos.CompMax(plSimdVec4f::MakeZero());
+  gridSpacePos = gridSpacePos.CompMax(plSimdVec4f::ZeroVector());
 
   plSimdVec4f gridSpacePosFloor = gridSpacePos.Floor();
   plSimdVec4f weights = gridSpacePos - gridSpacePosFloor;

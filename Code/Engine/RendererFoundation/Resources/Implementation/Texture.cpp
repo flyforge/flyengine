@@ -7,7 +7,7 @@ plGALTexture::plGALTexture(const plGALTextureCreationDescription& Description)
 {
 }
 
-plGALTexture::~plGALTexture() = default;
+plGALTexture::~plGALTexture() {}
 
 
 

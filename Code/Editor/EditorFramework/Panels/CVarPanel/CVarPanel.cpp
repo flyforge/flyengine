@@ -10,22 +10,22 @@ PLASMA_IMPLEMENT_SINGLETON(plQtCVarPanel);
 class plCommandInterpreterFwd : public plCommandInterpreter
 {
 public:
-  virtual void Interpret(plCommandInterpreterState& inout_state) override
+  virtual void Interpret(plCommandInterpreterState& inout_State) override
   {
     plConsoleCmdMsgToEngine msg;
     msg.m_iType = 0;
-    msg.m_sCommand = inout_state.m_sInput;
+    msg.m_sCommand = inout_State.m_sInput;
 
-    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 
-  virtual void AutoComplete(plCommandInterpreterState& inout_state) override
+  virtual void AutoComplete(plCommandInterpreterState& inout_State) override
   {
     plConsoleCmdMsgToEngine msg;
     msg.m_iType = 1;
-    msg.m_sCommand = inout_state.m_sInput;
+    msg.m_sCommand = inout_State.m_sInput;
 
-    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 };
 
@@ -34,13 +34,13 @@ plQtCVarPanel::plQtCVarPanel()
   , m_SingletonRegistrar(this)
 {
   setIcon(plQtUiServices::GetCachedIconResource(":/GuiFoundation/Icons/CVar.svg"));
-  setWindowTitle(plMakeQString(plTranslate("Panel.CVar")));
+  setWindowTitle(QString::fromUtf8(plTranslate("Panel.CVar")));
   m_pCVarWidget = new plQtCVarWidget(this);
   m_pCVarWidget->layout()->setContentsMargins(0, 0, 0, 0);
   // m_pCVarWidget->setContentsMargins(0, 0, 0, 0);
   setWidget(m_pCVarWidget);
 
-  plEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtCVarPanel::EngineProcessMsgHandler, this));
+  PlasmaEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtCVarPanel::EngineProcessMsgHandler, this));
 
   connect(m_pCVarWidget, &plQtCVarWidget::onBoolChanged, this, &plQtCVarPanel::BoolChanged);
   connect(m_pCVarWidget, &plQtCVarWidget::onFloatChanged, this, &plQtCVarPanel::FloatChanged);
@@ -52,7 +52,7 @@ plQtCVarPanel::plQtCVarPanel()
 
 plQtCVarPanel::~plQtCVarPanel()
 {
-  plEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtCVarPanel::EngineProcessMsgHandler, this));
+  PlasmaEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtCVarPanel::EngineProcessMsgHandler, this));
 }
 
 void plQtCVarPanel::ToolsProjectEventHandler(const plToolsProjectEvent& e)
@@ -76,11 +76,11 @@ void plQtCVarPanel::ToolsProjectEventHandler(const plToolsProjectEvent& e)
   plQtApplicationPanel::ToolsProjectEventHandler(e);
 }
 
-void plQtCVarPanel::EngineProcessMsgHandler(const plEditorEngineProcessConnection::Event& e)
+void plQtCVarPanel::EngineProcessMsgHandler(const PlasmaEditorEngineProcessConnection::Event& e)
 {
   switch (e.m_Type)
   {
-    case plEditorEngineProcessConnection::Event::Type::ProcessMessage:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessMessage:
     {
       if (e.m_pMsg->GetDynamicRTTI()->IsDerivedFrom<plCVarMsgToEditor>())
       {
@@ -164,7 +164,7 @@ void plQtCVarPanel::BoolChanged(const char* szCVar, bool newValue)
   plChangeCVarMsgToEngine msg;
   msg.m_sCVarName = szCVar;
   msg.m_NewValue = newValue;
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtCVarPanel::FloatChanged(const char* szCVar, float newValue)
@@ -172,7 +172,7 @@ void plQtCVarPanel::FloatChanged(const char* szCVar, float newValue)
   plChangeCVarMsgToEngine msg;
   msg.m_sCVarName = szCVar;
   msg.m_NewValue = newValue;
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtCVarPanel::IntChanged(const char* szCVar, int newValue)
@@ -180,7 +180,7 @@ void plQtCVarPanel::IntChanged(const char* szCVar, int newValue)
   plChangeCVarMsgToEngine msg;
   msg.m_sCVarName = szCVar;
   msg.m_NewValue = newValue;
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtCVarPanel::StringChanged(const char* szCVar, const char* newValue)
@@ -188,5 +188,5 @@ void plQtCVarPanel::StringChanged(const char* szCVar, const char* newValue)
   plChangeCVarMsgToEngine msg;
   msg.m_sCVarName = szCVar;
   msg.m_NewValue = newValue;
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }

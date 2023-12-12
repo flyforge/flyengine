@@ -20,11 +20,11 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSkeletonContext::plSkeletonContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plSkeletonContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
+void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocMsg)
 {
   if (auto pMsg = plDynamicCast<const plQuerySelectionBBoxMsgToEngine*>(pDocMsg))
   {
@@ -140,7 +140,7 @@ void plSkeletonContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
     }
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pDocMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pDocMsg);
 }
 
 void plSkeletonContext::OnInitialize()
@@ -171,17 +171,17 @@ void plSkeletonContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plSkeletonContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plSkeletonContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plSkeletonViewContext, this);
 }
 
-void plSkeletonContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plSkeletonContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
-bool plSkeletonContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plSkeletonContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
@@ -190,12 +190,13 @@ bool plSkeletonContext::UpdateThumbnailViewContext(plEngineProcessViewContext* p
 }
 
 
-void plSkeletonContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
+void plSkeletonContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (m_pGameObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   {
     PLASMA_LOCK(m_pWorld->GetWriteMarker());

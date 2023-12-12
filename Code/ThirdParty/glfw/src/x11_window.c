@@ -510,7 +510,7 @@ static char** parseUriList(char* text, int* count)
 }
 
 // Decode a Unicode code point from a UTF-8 stream
-// Based on cutef8 by Jeff Bezanson (Public Domain)
+// Based on cutef8 by Jeff Bplanson (Public Domain)
 //
 #if defined(X_HAVE_UTF8_STRING)
 static uint32_t decodeUTF8(const char** s)

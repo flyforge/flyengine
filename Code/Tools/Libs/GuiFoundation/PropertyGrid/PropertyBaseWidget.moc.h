@@ -157,8 +157,8 @@ private:
   void FlushQueuedChanges();
 
 protected:
-  bool m_bTemporaryCommand = false;
-  const plRTTI* m_pResolvedType = nullptr;
+  bool m_bTemporaryCommand;
+  const plRTTI* m_pResolvedType;
   plHybridArray<plPropertySelection, 8> m_ResolvedObjects;
 
   plHybridArray<plString, 1> m_QueuedChanges;
@@ -288,7 +288,7 @@ protected:
   QHBoxLayout* m_pLayout;
   plQtGroupBoxBase* m_pGroup;
   QVBoxLayout* m_pGroupLayout;
-  plQtAddSubElementButton* m_pAddButton = nullptr;
+  plQtAddSubElementButton* m_pAddButton;
   QPalette m_Pal;
 
   mutable plHybridArray<plVariant, 16> m_Keys;
@@ -330,7 +330,7 @@ protected:
   void CommandHistoryEventHandler(const plCommandHistoryEvent& e);
 
 private:
-  bool m_bNeedsUpdate = false;
+  bool m_bNeedsUpdate;
 };
 
 class PLASMA_GUIFOUNDATION_DLL plQtVariantPropertyWidget : public plQtStandardPropertyWidget

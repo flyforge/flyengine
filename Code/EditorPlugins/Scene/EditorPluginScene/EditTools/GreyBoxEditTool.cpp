@@ -23,7 +23,7 @@ plGreyBoxEditTool::~plGreyBoxEditTool()
   m_DrawBoxGizmo.m_GizmoEvents.RemoveEventHandler(plMakeDelegate(&plGreyBoxEditTool::GizmoEventHandler, this));
 }
 
-plEditorInputContext* plGreyBoxEditTool::GetEditorInputContextOverride()
+PlasmaEditorInputContext* plGreyBoxEditTool::GetEditorInputContextOverride()
 {
   if (IsActive())
     return &m_DrawBoxGizmo;
@@ -95,7 +95,7 @@ void plGreyBoxEditTool::UpdateGizmoState()
   plManipulatorManager::GetSingleton()->HideActiveManipulator(GetDocument(), GetDocument()->GetActiveEditTool() != nullptr);
 
   m_DrawBoxGizmo.SetVisible(IsActive());
-  m_DrawBoxGizmo.SetTransformation(plTransform::MakeIdentity());
+  m_DrawBoxGizmo.SetTransformation(plTransform::IdentityTransform());
 }
 
 void plGreyBoxEditTool::GameObjectEventHandler(const plGameObjectEvent& e)
@@ -171,8 +171,8 @@ void plGreyBoxEditTool::GizmoEventHandler(const plGizmoEvent& e)
     pHistory->StartTransaction("Add Grey-Box");
 
     plUuid objGuid, compGuid;
-    objGuid = plUuid::MakeUuid();
-    compGuid = plUuid::MakeUuid();
+    objGuid.CreateNewUuid();
+    compGuid.CreateNewUuid();
 
     {
       plAddObjectCommand cmdAdd;

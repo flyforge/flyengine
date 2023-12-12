@@ -21,7 +21,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plBakedProbesVolumeComponent, 1, plComponentMode::St
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
-    new plCategoryAttribute("Lighting/Baking"),
+    new plCategoryAttribute("Rendering/Baking"),
+    new plColorAttribute(plColorScheme::Lighting),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColor::OrangeRed),
   }
@@ -76,7 +77,7 @@ void plBakedProbesVolumeComponent::DeserializeComponent(plWorldReader& inout_str
 
 void plBakedProbesVolumeComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg) const
 {
-  ref_msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vExtents * 0.5f, m_vExtents * 0.5f)), plInvalidSpatialDataCategory);
+  ref_msg.AddBounds(plBoundingBox(-m_vExtents * 0.5f, m_vExtents * 0.5f), plInvalidSpatialDataCategory);
 }
 
 

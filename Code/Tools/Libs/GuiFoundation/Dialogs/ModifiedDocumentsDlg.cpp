@@ -5,10 +5,10 @@
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 #include <ToolsFoundation/Project/ToolsProject.h>
 
-plQtModifiedDocumentsDlg::plQtModifiedDocumentsDlg(QWidget* pParent, const plHybridArray<plDocument*, 32>& modifiedDocs)
-  : QDialog(pParent)
+plQtModifiedDocumentsDlg::plQtModifiedDocumentsDlg(QWidget* parent, const plHybridArray<plDocument*, 32>& ModifiedDocs)
+  : QDialog(parent)
 {
-  m_ModifiedDocs = modifiedDocs;
+  m_ModifiedDocs = ModifiedDocs;
 
   setupUi(this);
 
@@ -55,7 +55,7 @@ plQtModifiedDocumentsDlg::plQtModifiedDocumentsDlg(QWidget* pParent, const plHyb
     TableDocuments->setCellWidget(iRow, 2, pButtonSave);
 
     QTableWidgetItem* pItem0 = new QTableWidgetItem();
-    pItem0->setData(Qt::DisplayRole, plMakeQString(plTranslate(pDoc->GetDocumentTypeDescriptor()->m_sDocumentTypeName)));
+    pItem0->setData(Qt::DisplayRole, QString::fromUtf8(plTranslate(pDoc->GetDocumentTypeDescriptor()->m_sDocumentTypeName)));
     pItem0->setIcon(plQtUiServices::GetCachedIconResource(pDoc->GetDocumentTypeDescriptor()->m_sIcon));
     TableDocuments->setItem(iRow, 0, pItem0);
 

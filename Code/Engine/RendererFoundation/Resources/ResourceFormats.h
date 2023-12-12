@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <Foundation/Reflection/Reflection.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
 struct PLASMA_RENDERERFOUNDATION_DLL plGALResourceFormat
@@ -119,14 +120,14 @@ struct PLASMA_RENDERERFOUNDATION_DLL plGALResourceFormat
 
   static bool IsSrgb(plGALResourceFormat::Enum format);
 
-  /// \brief Returns whether the given resource format returns integer values when sampled (e.g. RUShort). Note that normalized formats like RGUShortNormalized are not considered integer formats as they return float values in the [0..1] range when sampled.
-  static bool IsIntegerFormat(plGALResourceFormat::Enum format);
-
 private:
   static const plUInt8 s_BitsPerElement[plGALResourceFormat::ENUM_COUNT];
 
   static const plUInt8 s_ChannelCount[plGALResourceFormat::ENUM_COUNT];
 };
+
+PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERFOUNDATION_DLL, plGALResourceFormat);
+
 
 template <typename NativeFormatType, NativeFormatType InvalidFormat>
 class plGALFormatLookupEntry

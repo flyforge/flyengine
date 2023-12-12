@@ -4,9 +4,9 @@
 #include <EditorFramework/Manipulators/CapsuleManipulatorAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plCapsuleManipulatorAdapter::plCapsuleManipulatorAdapter() = default;
+plCapsuleManipulatorAdapter::plCapsuleManipulatorAdapter() {}
 
-plCapsuleManipulatorAdapter::~plCapsuleManipulatorAdapter() = default;
+plCapsuleManipulatorAdapter::~plCapsuleManipulatorAdapter() {}
 
 void plCapsuleManipulatorAdapter::Finalize()
 {

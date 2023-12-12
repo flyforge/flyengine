@@ -71,6 +71,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltRagdollComponent, 2, plComponentMode::Dynamic)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Animation"),
+    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_FUNCTIONS
@@ -114,6 +115,7 @@ void plJoltRagdollComponentManager::Update(const plWorldModule::UpdateContext& c
   PLASMA_PROFILE_SCOPE("UpdateRagdolls");
 
   plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
+  auto* pSystem = pModule->GetJoltSystem();
 
   for (auto it : pModule->GetActiveRagdolls())
   {
@@ -204,13 +206,13 @@ void plJoltRagdollComponent::Update(bool bForce)
   {
     m_ElapsedTimeSinceUpdate += plClock::GetGlobalClock()->GetTimeDiff();
 
-    if (visState == plVisibilityState::Indirect && m_ElapsedTimeSinceUpdate < plTime::MakeFromMilliseconds(200))
+    if (visState == plVisibilityState::Indirect && m_ElapsedTimeSinceUpdate < plTime::Milliseconds(200))
     {
       // when the ragdoll is only visible by shadows or reflections, update it infrequently
       return;
     }
 
-    if (visState == plVisibilityState::Invisible && m_ElapsedTimeSinceUpdate < plTime::MakeFromMilliseconds(500))
+    if (visState == plVisibilityState::Invisible && m_ElapsedTimeSinceUpdate < plTime::Milliseconds(500))
     {
       // when the ragdoll is entirely invisible, update it very rarely
       return;
@@ -220,7 +222,7 @@ void plJoltRagdollComponent::Update(bool bForce)
   RetrieveRagdollPose();
   SendAnimationPoseMsg();
 
-  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
+  m_ElapsedTimeSinceUpdate.SetZero();
 }
 
 plResult plJoltRagdollComponent::EnsureSkeletonIsKnown()
@@ -413,11 +415,9 @@ void plJoltRagdollComponent::AddInitialImpulse(const plVec3& vPosition, const pl
 
 void plJoltRagdollComponent::SetJointTypeOverride(plStringView sJointName, plEnum<plSkeletonJointType> type)
 {
-  const plTempHashedString sJointNameHashed(sJointName);
-
   for (plUInt32 i = 0; i < m_JointOverrides.GetCount(); ++i)
   {
-    if (m_JointOverrides[i].m_sJointName == sJointNameHashed)
+    if (m_JointOverrides[i].m_sJointName == sJointName)
     {
       m_JointOverrides[i].m_JointType = type;
       m_JointOverrides[i].m_bOverrideType = true;
@@ -426,7 +426,7 @@ void plJoltRagdollComponent::SetJointTypeOverride(plStringView sJointName, plEnu
   }
 
   auto& jo = m_JointOverrides.ExpandAndGetRef();
-  jo.m_sJointName = sJointNameHashed;
+  jo.m_sJointName = sJointName;
   jo.m_JointType = type;
   jo.m_bOverrideType = true;
 }
@@ -441,23 +441,23 @@ void plJoltRagdollComponent::OnMsgAnimationPoseProposal(plMsgAnimationPosePropos
   // JPH::SkeletonPose pose;
   // pose.SetSkeleton(m_pRagdoll->GetRagdollSettings()->GetSkeleton());
 
-  // for (plUInt32 uiLimbIdx = 0; uiLimbIdx < m_Limbs.GetCount(); ++uiLimbIdx)
+  // for (ezUInt32 uiLimbIdx = 0; uiLimbIdx < m_Limbs.GetCount(); ++uiLimbIdx)
   //{
-  //   if (m_Limbs[uiLimbIdx].m_uiPartIndex == plInvalidJointIndex)
+  //   if (m_Limbs[uiLimbIdx].m_uiPartIndex == ezInvalidJointIndex)
   //   {
   //     // no need to do anything, just pass the original pose through
   //     continue;
   //   }
 
-  //  const plMat4 srcMat = ref_poseMsg.m_ModelTransforms[uiLimbIdx];
+  //  const ezMat4 srcMat = ref_poseMsg.m_ModelTransforms[uiLimbIdx];
 
   //  // TODO: add global transform to every bone
 
   //  JPH::Mat44& dstMat = pose.GetJointMatrix(m_Limbs[uiLimbIdx].m_uiPartIndex);
 
-  //  memcpy(&dstMat, &srcMat, sizeof(plMat4));
+  //  memcpy(&dstMat, &srcMat, sizeof(ezMat4));
 
-  //  // const plTransform limbGlobalPose = plJoltConversionUtils::ToTransform(bodyRead.GetBody().GetPosition(), bodyRead.GetBody().GetRotation());
+  //  // const ezTransform limbGlobalPose = ezJoltConversionUtils::ToTransform(bodyRead.GetBody().GetPosition(), bodyRead.GetBody().GetRotation());
   //  // m_CurrentLimbTransforms[uiLimbIdx] = (mInv * limbGlobalPose.GetAsMat4()) * scale;
   //}
 
@@ -469,21 +469,16 @@ void plJoltRagdollComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& r
 {
   if (!IsActiveAndSimulating())
     return;
-
   if (HasCreatedLimbs())
   {
     ref_poseMsg.m_bContinueAnimating = false; // TODO: change this
-
     // TODO: if at some point we can layer ragdolls with detail animations, we should
     // take poses for all bones for which there are no shapes (link == null) -> to animate leafs (fingers and such)
     return;
   }
-
   if (m_StartMode != plJoltRagdollStartMode::WithNextAnimPose)
     return;
-
   m_CurrentLimbTransforms = ref_poseMsg.m_ModelTransforms;
-
   CreateLimbsFromPose(ref_poseMsg);
 }
 
@@ -559,7 +554,8 @@ void plJoltRagdollComponent::RetrieveRagdollPose()
   const plVec3 vObjectScale = GetOwner()->GetGlobalScaling();
   const float fObjectScale = plMath::Max(vObjectScale.x, vObjectScale.y, vObjectScale.z);
 
-  plMat4 scale = plMat4::MakeScaling(rootTransform.m_vScale * fObjectScale);
+  plMat4 scale;
+  scale.SetScalingMatrix(rootTransform.m_vScale * fObjectScale);
 
   plHybridArray<plMat4, 64> relativeTransforms;
 
@@ -593,6 +589,7 @@ void plJoltRagdollComponent::RetrieveRagdollPose()
   }
 
   plUInt32 uiNextRelativeIdx = 0;
+
   for (plUInt32 uiLimbIdx = 0; uiLimbIdx < m_Limbs.GetCount(); ++uiLimbIdx)
   {
     if (m_Limbs[uiLimbIdx].m_uiPartIndex == plInvalidJointIndex)
@@ -707,7 +704,7 @@ void plJoltRagdollComponent::ApplyPartInitialVelocity()
       plVec3 vRotationDir = vVelocityDir.CrossRH(coord.m_vUpDir);
       vRotationDir.NormalizeIfNotZero(coord.m_vUpDir).IgnoreResult();
 
-      plVec3 vRotationAxis = plVec3::MakeRandomDeviation(rng, plAngle::MakeFromDegree(30.0f), vRotationDir);
+      plVec3 vRotationAxis = plVec3::CreateRandomDeviation(rng, plAngle::Degree(30.0f), vRotationDir);
       vRotationAxis *= rng.Bool() ? 1.0f : -1.0f;
 
       float fSpeed = rng.FloatVariance(m_fCenterAngularVelocity, 0.5f);
@@ -791,7 +788,7 @@ void plJoltRagdollComponent::ComputeLimbGlobalTransform(plTransform& transform, 
 {
   plTransform local;
   ComputeLimbModelSpaceTransform(local, pose, uiPoseJointIndex);
-  transform = plTransform::MakeGlobalTransform(GetOwner()->GetGlobalTransform(), local);
+  transform.SetGlobalTransform(GetOwner()->GetGlobalTransform(), local);
 }
 
 void plJoltRagdollComponent::CreateAllLimbs(const plSkeletonResource& skeletonResource, const plMsgAnimationPoseUpdated& pose, plJoltWorldModule& worldModule, float fObjectScale)
@@ -821,7 +818,7 @@ void plJoltRagdollComponent::CreateAllLimbs(const plSkeletonResource& skeletonRe
 
   // get the limb with the lowest index (ie. the first one added) as the root joint
   // and use it's transform to compute m_RootBodyLocalTransform
-  m_RootBodyLocalTransform = plTransform::MakeLocalTransform(GetOwner()->GetGlobalTransform(), limbConstructionInfos.GetIterator().Value().m_GlobalTransform);
+  m_RootBodyLocalTransform.SetLocalTransform(GetOwner()->GetGlobalTransform(), limbConstructionInfos.GetIterator().Value().m_GlobalTransform);
 }
 
 void plJoltRagdollComponent::CreateLimb(const plSkeletonResource& skeletonResource, plMap<plUInt16, LimbConstructionInfo>& limbConstructionInfos, plArrayPtr<const plSkeletonResourceGeometry*> geometries, const plMsgAnimationPoseUpdated& pose, plJoltWorldModule& worldModule, float fObjectScale)
@@ -899,7 +896,8 @@ JPH::Shape* plJoltRagdollComponent::CreateLimbGeoShape(const LimbConstructionInf
       shape.mHalfHeightOfCylinder = geo.m_Transform.m_vScale.x * 0.5f * fObjectScale;
       shape.mRadius = geo.m_Transform.m_vScale.z * fObjectScale;
 
-      plQuat qRot = plQuat::MakeFromAxisAndAngle(plVec3::MakeAxisZ(), plAngle::MakeFromDegree(-90));
+      plQuat qRot;
+      qRot.SetFromAxisAndAngle(plVec3::UnitZAxis(), plAngle::Degree(-90));
       out_shapeTransform.m_qRotation = out_shapeTransform.m_qRotation * qRot;
       out_shapeTransform.m_vPosition += qBoneDirAdjustment * plVec3(geo.m_Transform.m_vScale.x * 0.5f * fObjectScale, 0, 0);
 
@@ -997,7 +995,7 @@ void plJoltRagdollComponent::CreateAllLimbGeoShapes(const LimbConstructionInfo& 
     plTransform shapeTransform;
     JPH::Shape* pSubShape = CreateLimbGeoShape(limbConstructionInfo, *geometries[0], pJoltMaterial, qBoneDirAdjustment, skeletonRootTransform, shapeTransform, fObjectScale);
 
-    if (!shapeTransform.IsEqual(plTransform::MakeIdentity(), 0.001f))
+    if (!shapeTransform.IsEqual(plTransform::IdentityTransform(), 0.001f))
     {
       JPH::RotatedTranslatedShapeSettings outerShape;
       outerShape.mInnerShapePtr = pSubShape;
@@ -1025,13 +1023,14 @@ void plJoltRagdollComponent::CreateAllLimbGeoShapes(const LimbConstructionInfo& 
 //////////////////////////////////////////////////////////////////////////
 
 
+
 void plJoltRagdollComponent::SetupLimbJoints(const plSkeletonResource* pSkeleton)
 {
   // TODO: still needed ? (it should be)
   // the main direction of Jolt bones is +X (for bone limits and such)
   // therefore the main direction of the source bones has to be adjusted
   // const auto srcBoneDir = pSkeleton->GetDescriptor().m_Skeleton.m_BoneDirection;
-  // const plQuat qBoneDirAdjustment = -plBasisAxis::GetBasisRotation(srcBoneDir, plBasisAxis::PositiveX);
+  // const ezQuat qBoneDirAdjustment = -ezBasisAxis::GetBasisRotation(srcBoneDir, ezBasisAxis::PositiveX);
 
   const auto& skeleton = pSkeleton->GetDescriptor().m_Skeleton;
 
@@ -1089,6 +1088,8 @@ void plJoltRagdollComponent::CreateLimbJoint(const plSkeletonJoint& thisJoint, v
     JPH::FixedConstraintSettings* pJoint = new JPH::FixedConstraintSettings();
     pLink->mToParent = pJoint;
 
+    const plQuat offsetRot = thisJoint.GetLocalOrientation();
+
     pJoint->mDrawConstraintSize = 0.1f;
     pJoint->mPoint1 = pLink->mPosition;
     pJoint->mPoint2 = pLink->mPosition;
@@ -1101,7 +1102,8 @@ void plJoltRagdollComponent::CreateLimbJoint(const plSkeletonJoint& thisJoint, v
 
     const plQuat offsetRot = thisJoint.GetLocalOrientation();
 
-    plQuat qTwist = plQuat::MakeFromAxisAndAngle(plVec3::MakeAxisY(), thisJoint.GetTwistLimitCenterAngle());
+    plQuat qTwist;
+    qTwist.SetFromAxisAndAngle(plVec3::UnitYAxis(), thisJoint.GetTwistLimitCenterAngle());
 
     pJoint->mDrawConstraintSize = 0.1f;
     pJoint->mPosition1 = pLink->mPosition;
@@ -1111,10 +1113,10 @@ void plJoltRagdollComponent::CreateLimbJoint(const plSkeletonJoint& thisJoint, v
     pJoint->mTwistMinAngle = -thisJoint.GetTwistLimitHalfAngle().GetRadian();
     pJoint->mTwistMaxAngle = thisJoint.GetTwistLimitHalfAngle().GetRadian();
     pJoint->mMaxFrictionTorque = m_fStiffnessFactor * thisJoint.GetStiffness();
-    pJoint->mPlaneAxis1 = plJoltConversionUtils::ToVec3(tParent.m_qRotation * offsetRot * qTwist * plVec3::MakeAxisZ()).Normalized();
-    pJoint->mPlaneAxis2 = plJoltConversionUtils::ToVec3(tThis.m_qRotation * qTwist * plVec3::MakeAxisZ()).Normalized();
-    pJoint->mTwistAxis1 = plJoltConversionUtils::ToVec3(tParent.m_qRotation * offsetRot * plVec3::MakeAxisY()).Normalized();
-    pJoint->mTwistAxis2 = plJoltConversionUtils::ToVec3(tThis.m_qRotation * plVec3::MakeAxisY()).Normalized();
+    pJoint->mPlaneAxis1 = plJoltConversionUtils::ToVec3(tParent.m_qRotation * offsetRot * qTwist * plVec3::UnitZAxis()).Normalized();
+    pJoint->mPlaneAxis2 = plJoltConversionUtils::ToVec3(tThis.m_qRotation * qTwist * plVec3::UnitZAxis()).Normalized();
+    pJoint->mTwistAxis1 = plJoltConversionUtils::ToVec3(tParent.m_qRotation * offsetRot * plVec3::UnitYAxis()).Normalized();
+    pJoint->mTwistAxis2 = plJoltConversionUtils::ToVec3(tThis.m_qRotation * plVec3::UnitYAxis()).Normalized();
   }
 }
 

@@ -21,7 +21,7 @@ plResourceLoadData plResourceLoaderFromFile::OpenDataStream(const plResource* pR
   plResourceLoadData res;
 
   plFileReader File;
-    if (File.Open(pResource->GetResourceID().GetData()).Failed())
+  if (File.Open(pResource->GetResourceID().GetData()).Failed())
     return res;
 
   res.m_sResourceDescription = File.GetFilePathRelative().GetData();

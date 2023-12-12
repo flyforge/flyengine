@@ -52,7 +52,7 @@ private:
   friend class plRmlUiInternal::EventListener;
   void ProcessEvent(const plHashedString& sIdentifier, Rml::Event& event);
 
-  plVec2I32 m_vOffset = plVec2I32::MakeZero();
+  plVec2I32 m_vOffset = plVec2I32::ZeroVector();
 
   plHashTable<plHashedString, EventHandler> m_EventHandler;
 

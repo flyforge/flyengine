@@ -9,51 +9,45 @@ ads--CDockContainerWidget > QSplitter{
 }
 
 ads--CDockContainerWidget ads--CDockSplitter::handle {
-	background: palette(mid);
+	background: palette(window);
 }
-
-ads--CDockContainerWidget ads--CDockSplitter {
-	background: palette(mid);
-}
-
 
 ads--CDockAreaWidget {
 	background: palette(window);
-	border: 1px solid palette(window);
+	border: 1px solid black;
 }
 
 ads--CDockWidgetTab {
-	background: palette(dark);
-	border-color: transparent;
+	background: palette(window);
+	border-color: palette(light);
 	border-style: solid;
 	border-width: 0 1px 0 0;
 	padding: 0 0px;
 }
 
 ads--CDockWidgetTab[activeTab="true"] {
-	background: palette(button);
+	background: qlineargradient(spread : pad, x1 : 0, y1 : 0, x2 : 0, y2 : 0.5, stop : 0
+		palette(window), stop:1 palette(light));
+	/*background: palette(highlight);*/
 }
 
 ads--CDockWidgetTab QLabel {
-	color: palette(Text);
+	color: palette(foreground);
 }
 
 ads--CDockWidgetTab[activeTab="true"] QLabel {
-	color: palette(HighlightedText);
+	color: palette(foreground);
 }
 
 ads--CDockWidget {
 	background: palette(dark);
 	border-color: palette(dark);
-	border-style: none;
+	border-style: solid;
 	border-width: 1px 0 0 0;
 }
 
-ads--CDockAreaWidget ads--CDockAreaTitleBar
-{
-	background: transparent;
-	border-bottom: none;
-	padding-bottom: 0px;
+ads--CTitleBarButton {
+	padding: 0px 0px;
 }
 
 QScrollArea#dockWidgetScrollArea {
@@ -111,6 +105,5 @@ QScrollArea#dockWidgetScrollArea {
 #detachGroupButton {
 	qproperty-icon: url(:/ads/images/detach-button.svg),
 		url(:/ads/images/detach-button-disabled.svg) disabled;
-	qproperty-iconSize: 16px;
+	qproperty-iconSize: 16px;	
 }
-

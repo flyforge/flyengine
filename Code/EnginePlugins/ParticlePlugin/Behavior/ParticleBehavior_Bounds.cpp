@@ -21,7 +21,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Bounds, 1, plRTTID
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plBoxVisualizerAttribute("BoxExtents", 1.0f, plColor::LightGreen, nullptr, plVisualizerAnchor::Center, plVec3(1,1,1), "PositionOffset")
+    new plBoxVisualizerAttribute("BoxExtents", 1.0f, plColor::LightGreen, nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "PositionOffset")
   }
   PLASMA_END_ATTRIBUTES;
 }

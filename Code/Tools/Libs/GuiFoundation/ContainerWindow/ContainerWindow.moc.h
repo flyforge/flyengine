@@ -36,14 +36,13 @@ public:
   static plQtContainerWindow* GetContainerWindow() { return s_pContainerWindow; }
 
   void AddDocumentWindow(plQtDocumentWindow* pDocWindow);
-  void DocumentWindowRenamed(plQtDocumentWindow* pDocWindow);
   void AddApplicationPanel(plQtApplicationPanel* pPanel);
 
   ads::CDockManager* GetDockManager() { return m_pDockManager; }
 
   static plResult EnsureVisibleAnyContainer(plDocument* pDocument);
 
-  void GetDocumentWindows(plHybridArray<plQtDocumentWindow*, 16>& ref_windows);
+  void GetDocumentWindows(plHybridArray<plQtDocumentWindow*, 16>& windows);
 
   void SaveWindowLayout();
   void SaveDocumentLayouts();

@@ -33,13 +33,13 @@ void plGameGrid<CellData>::SetWorldSpaceDimensions(const plVec3& vLowerLeftCorne
   switch (ori)
   {
     case InPlaneXY:
-      mRot = plMat3::MakeIdentity();
+      mRot.SetIdentity();
       break;
     case InPlaneXZ:
-      mRot = plMat3::MakeAxisRotation(plVec3(1, 0, 0), plAngle::MakeFromDegree(90.0f));
+      mRot.SetRotationMatrix(plVec3(1, 0, 0), plAngle::Degree(90.0f));
       break;
     case InPlaneXminusZ:
-      mRot = plMat3::MakeAxisRotation(plVec3(1, 0, 0), plAngle::MakeFromDegree(-90.0f));
+      mRot.SetRotationMatrix(plVec3(1, 0, 0), plAngle::Degree(-90.0f));
       break;
   }
 
@@ -99,7 +99,8 @@ bool plGameGrid<CellData>::IsValidCellCoordinate(const plVec2I32& Coord) const
 template <class CellData>
 bool plGameGrid<CellData>::PickCell(const plVec3& vRayStartPos, const plVec3& vRayDirNorm, plVec2I32* out_CellCoord, plVec3* out_vIntersection) const
 {
-  plPlane p = plPlane::MakeFromNormalAndPoint(m_RotateToWorldspace * plVec3(0, 0, -1), m_vWorldSpaceOrigin);
+  plPlane p;
+  p.SetFromNormalAndPoint(m_RotateToWorldspace * plVec3(0, 0, -1), m_vWorldSpaceOrigin);
 
   plVec3 vPos;
 

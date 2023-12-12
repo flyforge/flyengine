@@ -7,6 +7,11 @@ constexpr PLASMA_ALWAYS_INLINE plTime::plTime(double fTime)
 {
 }
 
+PLASMA_ALWAYS_INLINE void plTime::SetZero()
+{
+  m_fTime = 0.0;
+}
+
 constexpr PLASMA_ALWAYS_INLINE float plTime::AsFloatInSeconds() const
 {
   return static_cast<float>(m_fTime);
@@ -79,30 +84,30 @@ constexpr PLASMA_ALWAYS_INLINE plTime plTime::operator+(const plTime& other) con
 
 constexpr PLASMA_ALWAYS_INLINE plTime operator*(plTime t, double f)
 {
-  return plTime::MakeFromSeconds(t.GetSeconds() * f);
+  return plTime::Seconds(t.GetSeconds() * f);
 }
 
 constexpr PLASMA_ALWAYS_INLINE plTime operator*(double f, plTime t)
 {
-  return plTime::MakeFromSeconds(t.GetSeconds() * f);
+  return plTime::Seconds(t.GetSeconds() * f);
 }
 
 constexpr PLASMA_ALWAYS_INLINE plTime operator*(plTime f, plTime t)
 {
-  return plTime::MakeFromSeconds(t.GetSeconds() * f.GetSeconds());
+  return plTime::Seconds(t.GetSeconds() * f.GetSeconds());
 }
 
 constexpr PLASMA_ALWAYS_INLINE plTime operator/(plTime t, double f)
 {
-  return plTime::MakeFromSeconds(t.GetSeconds() / f);
+  return plTime::Seconds(t.GetSeconds() / f);
 }
 
 constexpr PLASMA_ALWAYS_INLINE plTime operator/(double f, plTime t)
 {
-  return plTime::MakeFromSeconds(f / t.GetSeconds());
+  return plTime::Seconds(f / t.GetSeconds());
 }
 
 constexpr PLASMA_ALWAYS_INLINE plTime operator/(plTime f, plTime t)
 {
-  return plTime::MakeFromSeconds(f.GetSeconds() / t.GetSeconds());
+  return plTime::Seconds(f.GetSeconds() / t.GetSeconds());
 }

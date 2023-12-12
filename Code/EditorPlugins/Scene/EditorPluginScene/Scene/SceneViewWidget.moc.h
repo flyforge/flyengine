@@ -7,7 +7,7 @@ class plQtSceneViewWidget : public plQtGameObjectViewWidget
 {
   Q_OBJECT
 public:
-  plQtSceneViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig);
+  plQtSceneViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig);
   ~plQtSceneViewWidget();
 
   virtual bool IsPickingAgainstSelectionAllowed() const override;

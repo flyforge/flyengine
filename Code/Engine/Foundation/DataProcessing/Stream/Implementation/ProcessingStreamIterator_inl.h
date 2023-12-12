@@ -8,8 +8,8 @@ plProcessingStreamIterator<Type>::plProcessingStreamIterator(const plProcessingS
 
   m_uiElementStride = pStream->GetElementStride();
 
-  m_pCurrentPtr = plMemoryUtils::AddByteOffset(pStream->GetWritableData(), static_cast<std::ptrdiff_t>(uiStartIndex * m_uiElementStride));
-  m_pEndPtr = plMemoryUtils::AddByteOffset(pStream->GetWritableData(), static_cast<std::ptrdiff_t>((uiStartIndex + uiNumElements) * m_uiElementStride));
+  m_pCurrentPtr = plMemoryUtils::AddByteOffset(pStream->GetWritableData(), static_cast<ptrdiff_t>(uiStartIndex * m_uiElementStride));
+  m_pEndPtr = plMemoryUtils::AddByteOffset(pStream->GetWritableData(), static_cast<ptrdiff_t>((uiStartIndex + uiNumElements) * m_uiElementStride));
 }
 
 template <typename Type>
@@ -27,11 +27,11 @@ PLASMA_ALWAYS_INLINE bool plProcessingStreamIterator<Type>::HasReachedEnd() cons
 template <typename Type>
 PLASMA_ALWAYS_INLINE void plProcessingStreamIterator<Type>::Advance()
 {
-  m_pCurrentPtr = plMemoryUtils::AddByteOffset(m_pCurrentPtr, static_cast<std::ptrdiff_t>(m_uiElementStride));
+  m_pCurrentPtr = plMemoryUtils::AddByteOffset(m_pCurrentPtr, static_cast<ptrdiff_t>(m_uiElementStride));
 }
 
 template <typename Type>
 PLASMA_ALWAYS_INLINE void plProcessingStreamIterator<Type>::Advance(plUInt32 uiNumElements)
 {
-  m_pCurrentPtr = plMemoryUtils::AddByteOffset(m_pCurrentPtr, static_cast<std::ptrdiff_t>(m_uiElementStride * uiNumElements));
+  m_pCurrentPtr = plMemoryUtils::AddByteOffset(m_pCurrentPtr, static_cast<ptrdiff_t>(m_uiElementStride * uiNumElements));
 }

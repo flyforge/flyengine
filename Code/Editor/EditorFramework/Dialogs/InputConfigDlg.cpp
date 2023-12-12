@@ -33,8 +33,8 @@ void UpdateInputDynamicEnumValues()
   }
 }
 
-plQtInputConfigDlg::plQtInputConfigDlg(QWidget* pParent)
-  : QDialog(pParent)
+plQtInputConfigDlg::plQtInputConfigDlg(QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 

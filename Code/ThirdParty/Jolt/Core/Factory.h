@@ -10,7 +10,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Factory, to create RTTI objects
-class JPH_EXPORT Factory
+class Factory
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE

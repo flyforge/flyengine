@@ -40,15 +40,15 @@ public:
 
   plObjectMetaData();
 
-  bool HasMetaData(const KEY objectKey) const;
+  bool HasMetaData(const KEY ObjectKey) const;
 
-  void ClearMetaData(const KEY objectKey);
+  void ClearMetaData(const KEY ObjectKey);
 
   /// \brief Will always return a non-null result. May be a default object.
-  const VALUE* BeginReadMetaData(const KEY objectKey) const;
+  const VALUE* BeginReadMetaData(const KEY ObjectKey) const;
   void EndReadMetaData() const;
 
-  VALUE* BeginModifyMetaData(const KEY objectKey);
+  VALUE* BeginModifyMetaData(const KEY ObjectKey);
   void EndModifyMetaData(plUInt32 uiModifiedFlags = 0xFFFFFFFF);
 
 
@@ -58,7 +58,7 @@ public:
 
   /// \brief Uses reflection information from VALUE to store all properties that differ from the default value as additional properties for the graph
   /// objects.
-  void AttachMetaDataToAbstractGraph(plAbstractObjectGraph& inout_graph) const;
+  void AttachMetaDataToAbstractGraph(plAbstractObjectGraph& graph) const;
 
   /// \brief Uses reflection information from VALUE to restore all meta data properties from the graph.
   void RestoreMetaDataFromAbstractGraph(const plAbstractObjectGraph& graph);

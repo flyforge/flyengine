@@ -8,15 +8,6 @@
 #include <QStandardItemModel>
 #include <QTreeWidget>
 
-namespace
-{
-  enum CustomRoles
-  {
-    InternalPathRole = Qt::UserRole + 1,
-    VariantRole = Qt::UserRole + 2
-  };
-}
-
 
 class QNullWidget : public QWidget
 {
@@ -33,8 +24,8 @@ protected:
 };
 
 
-plQtSearchableMenu::plQtSearchableMenu(QObject* pParent)
-  : QWidgetAction(pParent)
+plQtSearchableMenu::plQtSearchableMenu(QObject* parent)
+  : QWidgetAction(parent)
 {
   m_pGroup = new QNullWidget();
   m_pGroup->setLayout(new QVBoxLayout(m_pGroup));
@@ -69,16 +60,16 @@ plQtSearchableMenu::plQtSearchableMenu(QObject* pParent)
   setDefaultWidget(m_pGroup);
 }
 
-QStandardItem* plQtSearchableMenu::CreateCategoryMenu(plStringView sCategory)
+QStandardItem* plQtSearchableMenu::CreateCategoryMenu(const char* szCategory)
 {
-  if (sCategory.IsEmpty())
+  if (plStringUtils::IsNullOrEmpty(szCategory))
     return m_pItemModel->invisibleRootItem();
 
-  auto it = m_Hierarchy.Find(sCategory);
+  auto it = m_Hierarchy.Find(szCategory);
   if (it.IsValid())
     return it.Value();
 
-  plStringBuilder sPath = sCategory;
+  plStringBuilder sPath = szCategory;
   sPath.PathParentDirectory();
   sPath.Trim("/");
 
@@ -89,7 +80,7 @@ QStandardItem* plQtSearchableMenu::CreateCategoryMenu(plStringView sCategory)
     pParentMenu = CreateCategoryMenu(sPath);
   }
 
-  sPath = sCategory;
+  sPath = szCategory;
   sPath = sPath.GetFileName();
 
   QStandardItem* pThisItem = new QStandardItem(sPath.GetData());
@@ -97,7 +88,7 @@ QStandardItem* plQtSearchableMenu::CreateCategoryMenu(plStringView sCategory)
 
   pParentMenu->appendRow(pThisItem);
 
-  m_Hierarchy[sCategory] = pThisItem;
+  m_Hierarchy[szCategory] = pThisItem;
 
   return pThisItem;
 }
@@ -112,7 +103,7 @@ bool plQtSearchableMenu::SelectFirstLeaf(QModelIndex parent)
 
     if (!m_pFilterModel->hasChildren(child))
     {
-      if (m_pFilterModel->data(child, VariantRole).isValid())
+      if (m_pFilterModel->data(child, Qt::UserRole + 1).isValid())
       {
         // set this one item as the new selection
         m_pTreeView->selectionModel()->setCurrentIndex(
@@ -150,22 +141,24 @@ bool plQtSearchableMenu::eventFilter(QObject* pObject, QEvent* event)
   return false;
 }
 
-void plQtSearchableMenu::AddItem(plStringView sDisplayName, const char* szInternalPath, const QVariant& variant, QIcon icon)
+void plQtSearchableMenu::AddItem(const char* szName, const QVariant& variant, QIcon icon)
 {
   QStandardItem* pParent = m_pItemModel->invisibleRootItem();
 
-  const char* szLastCat = plStringUtils::FindLastSubString(szInternalPath, "/");
+  const char* szLastCat = plStringUtils::FindLastSubString(szName, "/");
   if (szLastCat != nullptr)
   {
-    plStringView sCategory(szInternalPath, szLastCat);
+    plStringBuilder sCategory;
+    sCategory.SetSubString_FromTo(szName, szLastCat);
 
     pParent = CreateCategoryMenu(sCategory);
+
+    szName = szLastCat + 1;
   }
 
-  QStandardItem* pThisItem = new QStandardItem(plMakeQString(sDisplayName));
+  QStandardItem* pThisItem = new QStandardItem(szName);
   pThisItem->setFlags(Qt::ItemFlag::ItemIsEnabled | Qt::ItemFlag::ItemIsSelectable);
-  pThisItem->setData(szInternalPath, InternalPathRole);
-  pThisItem->setData(variant, VariantRole);
+  pThisItem->setData(variant, Qt::UserRole + 1);
   pThisItem->setIcon(icon);
 
   pParent->appendRow(pThisItem);
@@ -182,7 +175,6 @@ void plQtSearchableMenu::Finalize(const QString& sSearchText)
 
   m_pSearch->setText(sSearchText);
   m_pSearch->setFocus();
-  m_pSearch->selectAll();
 }
 
 void plQtSearchableMenu::OnItemActivated(const QModelIndex& index)
@@ -193,7 +185,7 @@ void plQtSearchableMenu::OnItemActivated(const QModelIndex& index)
   QModelIndex realIndex = m_pFilterModel->mapToSource(index);
 
   QString sName = m_pItemModel->data(realIndex, Qt::DisplayRole).toString();
-  QVariant variant = m_pItemModel->data(realIndex, VariantRole);
+  QVariant variant = m_pItemModel->data(realIndex, Qt::UserRole + 1);
 
   // potentially only a folder item
   if (!variant.isValid())
@@ -236,5 +228,4 @@ void plQtSearchableMenu::OnSearchChanged(const QString& text)
 void plQtSearchableMenu::OnShow()
 {
   m_pSearch->setFocus();
-  m_pSearch->selectAll();
 }

@@ -26,11 +26,11 @@ void plTypeScriptActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hEditScript);
 }
 
-void plTypeScriptActions::MapActions(plStringView sMapping)
+void plTypeScriptActions::MapActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
-  
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+
   pMap->MapAction(s_hCategory, "", 11.0f);
 
   const char* szSubPath = "TypeScriptCategory";

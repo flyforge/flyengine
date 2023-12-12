@@ -307,18 +307,6 @@ PLASMA_ALWAYS_INLINE plStringView plStringBase<Derived>::GetView() const
   return plStringView(InternalGetData(), InternalGetElementCount());
 }
 
-template <typename DerivedLhs>
-PLASMA_ALWAYS_INLINE plStringBase<DerivedLhs>::operator std::string_view() const
-{
-  return std::string_view(InternalGetData(), static_cast<size_t>(InternalGetElementCount()));
-}
-
-template <typename Derived>
-PLASMA_ALWAYS_INLINE std::string_view plStringBase<Derived>::GetAsStdView() const
-{
-  return std::string_view(InternalGetData(), static_cast<size_t>(InternalGetElementCount()));
-}
-
 template <typename Derived>
 template <typename Container>
 void plStringBase<Derived>::Split(bool bReturnEmptyStrings, Container& ref_output, const char* szSeparator1, const char* szSeparator2 /*= nullptr*/, const char* szSeparator3 /*= nullptr*/, const char* szSeparator4 /*= nullptr*/, const char* szSeparator5 /*= nullptr*/, const char* szSeparator6 /*= nullptr*/) const

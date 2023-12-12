@@ -20,7 +20,7 @@ protected:
   // plSelectPoseAnimNode
 
 private:
-  plTime m_TransitionDuration = plTime::MakeFromMilliseconds(200); // [ property ]
+  plTime m_TransitionDuration = plTime::Milliseconds(200);  // [ property ]
   plUInt8 m_uiPosesCount = 0;                               // [ property ]
   plHybridArray<plAnimGraphLocalPoseInputPin, 4> m_InPoses; // [ property ]
   plAnimGraphNumberInputPin m_InIndex;                      // [ property ]

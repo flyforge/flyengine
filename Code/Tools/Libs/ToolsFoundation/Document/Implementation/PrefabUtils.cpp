@@ -27,15 +27,15 @@ plString ToBinary(const plUuid& guid)
   return sResult;
 }
 
-void plPrefabUtils::LoadGraph(plAbstractObjectGraph& out_graph, plStringView sGraph)
+void plPrefabUtils::LoadGraph(plAbstractObjectGraph& out_graph, const char* szGraph)
 {
-  plPrefabCache::GetSingleton()->LoadGraph(out_graph, plStringView(sGraph));
+  plPrefabCache::GetSingleton()->LoadGraph(out_graph, plStringView(szGraph));
 }
 
 
-plAbstractObjectNode* plPrefabUtils::GetFirstRootNode(plAbstractObjectGraph& ref_graph)
+plAbstractObjectNode* plPrefabUtils::GetFirstRootNode(plAbstractObjectGraph& graph)
 {
-  auto& nodes = ref_graph.GetAllNodes();
+  auto& nodes = graph.GetAllNodes();
   for (auto it = nodes.GetIterator(); it.IsValid(); ++it)
   {
     auto* pNode = it.Value();
@@ -43,7 +43,7 @@ plAbstractObjectNode* plPrefabUtils::GetFirstRootNode(plAbstractObjectGraph& ref
     {
       for (const auto& ObjectTreeProp : pNode->GetProperties())
       {
-        if (ObjectTreeProp.m_sPropertyName == "Children" && ObjectTreeProp.m_Value.IsA<plVariantArray>())
+        if ((ObjectTreeProp.m_sPropertyName == "Children") && ObjectTreeProp.m_Value.IsA<plVariantArray>())
         {
           const plVariantArray& RootChildren = ObjectTreeProp.m_Value.Get<plVariantArray>();
 
@@ -54,7 +54,7 @@ plAbstractObjectNode* plPrefabUtils::GetFirstRootNode(plAbstractObjectGraph& ref
 
             const plUuid& rootObjectGuid = childGuid.Get<plUuid>();
 
-            return ref_graph.GetNode(rootObjectGuid);
+            return graph.GetNode(rootObjectGuid);
           }
         }
       }
@@ -63,9 +63,9 @@ plAbstractObjectNode* plPrefabUtils::GetFirstRootNode(plAbstractObjectGraph& ref
   return nullptr;
 }
 
-void plPrefabUtils::GetRootNodes(plAbstractObjectGraph& ref_graph, plHybridArray<plAbstractObjectNode*, 4>& out_nodes)
+void plPrefabUtils::GetRootNodes(plAbstractObjectGraph& graph, plHybridArray<plAbstractObjectNode*, 4>& out_Nodes)
 {
-  auto& nodes = ref_graph.GetAllNodes();
+  auto& nodes = graph.GetAllNodes();
   for (auto it = nodes.GetIterator(); it.IsValid(); ++it)
   {
     auto* pNode = it.Value();
@@ -73,7 +73,7 @@ void plPrefabUtils::GetRootNodes(plAbstractObjectGraph& ref_graph, plHybridArray
     {
       for (const auto& ObjectTreeProp : pNode->GetProperties())
       {
-        if (ObjectTreeProp.m_sPropertyName == "Children" && ObjectTreeProp.m_Value.IsA<plVariantArray>())
+        if ((ObjectTreeProp.m_sPropertyName == "Children") && ObjectTreeProp.m_Value.IsA<plVariantArray>())
         {
           const plVariantArray& RootChildren = ObjectTreeProp.m_Value.Get<plVariantArray>();
 
@@ -84,7 +84,7 @@ void plPrefabUtils::GetRootNodes(plAbstractObjectGraph& ref_graph, plHybridArray
 
             const plUuid& rootObjectGuid = childGuid.Get<plUuid>();
 
-            out_nodes.PushBack(ref_graph.GetNode(rootObjectGuid));
+            out_Nodes.PushBack(graph.GetNode(rootObjectGuid));
           }
 
           return;
@@ -117,7 +117,7 @@ plUuid plPrefabUtils::GetPrefabRoot(const plDocumentObject* pObject, const plObj
 }
 
 
-plVariant plPrefabUtils::GetDefaultValue(const plAbstractObjectGraph& graph, const plUuid& objectGuid, plStringView sProperty, plVariant index, bool* pValueFound)
+plVariant plPrefabUtils::GetDefaultValue(const plAbstractObjectGraph& graph, const plUuid& objectGuid, const char* szProperty, plVariant index, bool* pValueFound)
 {
   if (pValueFound)
     *pValueFound = false;
@@ -126,7 +126,7 @@ plVariant plPrefabUtils::GetDefaultValue(const plAbstractObjectGraph& graph, con
   if (!pNode)
     return plVariant();
 
-  const plAbstractObjectNode::Property* pProp = pNode->FindProperty(sProperty);
+  const plAbstractObjectNode::Property* pProp = pNode->FindProperty(szProperty);
   if (pProp)
   {
     const plVariant& value = pProp->m_Value;
@@ -244,11 +244,11 @@ void plPrefabUtils::Merge(const plAbstractObjectGraph& baseGraph, const plAbstra
   }
 }
 
-void plPrefabUtils::Merge(plStringView sBase, plStringView sLeft, plDocumentObject* pRight, bool bRightIsNotPartOfPrefab, const plUuid& prefabSeed, plStringBuilder& out_sNewGraph)
+void plPrefabUtils::Merge(const char* szBase, const char* szLeft, plDocumentObject* pRight, bool bRightIsNotPartOfPrefab, const plUuid& PrefabSeed, plStringBuilder& out_sNewGraph)
 {
   // prepare the original prefab as a graph
   plAbstractObjectGraph baseGraph;
-  plPrefabUtils::LoadGraph(baseGraph, sBase);
+  plPrefabUtils::LoadGraph(baseGraph, szBase);
   if (auto pHeader = baseGraph.GetNodeByName("Header"))
   {
     baseGraph.RemoveNode(pHeader->GetGuid());
@@ -257,7 +257,7 @@ void plPrefabUtils::Merge(plStringView sBase, plStringView sLeft, plDocumentObje
   {
     // read the new template as a graph
     plAbstractObjectGraph leftGraph;
-    plPrefabUtils::LoadGraph(leftGraph, sLeft);
+    plPrefabUtils::LoadGraph(leftGraph, szLeft);
     if (auto pHeader = leftGraph.GetNodeByName("Header"))
     {
       leftGraph.RemoveNode(pHeader->GetGuid());
@@ -283,7 +283,7 @@ void plPrefabUtils::Merge(plStringView sBase, plStringView sLeft, plDocumentObje
         children.PushBack(pRight->GetGuid());
       }
 
-      rightGraph.ReMapNodeGuids(prefabSeed, true);
+      rightGraph.ReMapNodeGuids(PrefabSeed, true);
       // just take the entire ObjectTree node as is TODO: this may cause a crash if the root object is replaced
       plAbstractObjectNode* pRightObjectTree = rightGraph.CopyNodeIntoGraph(leftGraph.GetNodeByName("ObjectTree"));
       // The root node should always have a property 'children' where all the root objects are attached to. We need to replace that property's value as the prefab instance graph can have less or more objects than the template.
@@ -318,12 +318,12 @@ void plPrefabUtils::Merge(plStringView sBase, plStringView sLeft, plDocumentObje
   }
 }
 
-plString plPrefabUtils::ReadDocumentAsString(plStringView sFile)
+plString plPrefabUtils::ReadDocumentAsString(const char* szFile)
 {
   plFileReader file;
-  if (file.Open(sFile) == PLASMA_FAILURE)
+  if (file.Open(szFile) == PLASMA_FAILURE)
   {
-    plLog::Error("Failed to open document file '{0}'", sFile);
+    plLog::Error("Failed to open document file '{0}'", szFile);
     return plString();
   }
 

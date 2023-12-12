@@ -1,13 +1,13 @@
 #pragma once
 
-#include <RecastPlugin/Components/NpcComponent.h>
+#include <GameEngine/AI/NpcComponent.h>
 #include <RecastPlugin/RecastPluginDLL.h>
 
 class plRecastWorldModule;
 class plPhysicsWorldModuleInterface;
 struct plAgentSteeringEvent;
 
-using plSoldierComponentManager = plComponentManagerSimple<class plSoldierComponent, plComponentUpdateType::WhenSimulating>;
+typedef plComponentManagerSimple<class plSoldierComponent, plComponentUpdateType::WhenSimulating> plSoldierComponentManager;
 
 class PLASMA_RECASTPLUGIN_DLL plSoldierComponent : public plNpcComponent
 {
@@ -17,8 +17,8 @@ class PLASMA_RECASTPLUGIN_DLL plSoldierComponent : public plNpcComponent
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
-  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
+  virtual void SerializeComponent(plWorldWriter& stream) const override;
+  virtual void DeserializeComponent(plWorldReader& stream) override;
 
 protected:
   virtual void Deinitialize() override;

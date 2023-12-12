@@ -22,7 +22,8 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plMsaaResolvePass::plMsaaResolvePass()
   : plRenderPipelinePass("MsaaResolvePass", true)
-
+  , m_bIsDepth(false)
+  , m_MsaaSampleCount(plGALMSAASampleCount::None)
 {
   {
     // Load shader.
@@ -31,10 +32,12 @@ plMsaaResolvePass::plMsaaResolvePass()
   }
 }
 
-plMsaaResolvePass::~plMsaaResolvePass() = default;
+plMsaaResolvePass::~plMsaaResolvePass() {}
 
 bool plMsaaResolvePass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
+  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
+
   auto pInput = inputs[m_PinInput.m_uiInputIndex];
   if (pInput != nullptr)
   {

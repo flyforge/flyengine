@@ -29,8 +29,8 @@ void plJoltActions::MapMenuActions()
   plActionMap* pMap = plActionMapManager::GetActionMap("EditorPluginScene_Scene2MenuBar");
   PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
-  pMap->MapAction(s_hCategoryJolt, "G.Plugins.Settings", 10.0f);
-  pMap->MapAction(s_hProjectSettings, "G.Plugins.Settings", "Jolt", 1.0f);
+  pMap->MapAction(s_hCategoryJolt, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 10.0f);
+  pMap->MapAction(s_hProjectSettings, "Menu.Editor/ProjectCategory/Menu.ProjectSettings/Jolt", 1.0f);
 }
 
 plJoltAction::plJoltAction(const plActionContext& context, const char* szName, ActionType type)

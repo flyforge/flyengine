@@ -53,13 +53,13 @@ namespace plMath
 
   PLASMA_ALWAYS_INLINE float Tan(plAngle a) { return tanf(a.GetRadian()); }
 
-  PLASMA_ALWAYS_INLINE plAngle ASin(float f) { return plAngle::MakeFromRadian(asinf(f)); }
+  PLASMA_ALWAYS_INLINE plAngle ASin(float f) { return plAngle::Radian(asinf(f)); }
 
-  PLASMA_ALWAYS_INLINE plAngle ACos(float f) { return plAngle::MakeFromRadian(acosf(f)); }
+  PLASMA_ALWAYS_INLINE plAngle ACos(float f) { return plAngle::Radian(acosf(f)); }
 
-  PLASMA_ALWAYS_INLINE plAngle ATan(float f) { return plAngle::MakeFromRadian(atanf(f)); }
+  PLASMA_ALWAYS_INLINE plAngle ATan(float f) { return plAngle::Radian(atanf(f)); }
 
-  PLASMA_ALWAYS_INLINE plAngle ATan2(float y, float x) { return plAngle::MakeFromRadian(atan2f(y, x)); }
+  PLASMA_ALWAYS_INLINE plAngle ATan2(float y, float x) { return plAngle::Radian(atan2f(y, x)); }
 
   PLASMA_ALWAYS_INLINE float Exp(float f) { return expf(f); }
 

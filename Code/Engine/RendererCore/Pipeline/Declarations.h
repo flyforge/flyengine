@@ -58,7 +58,7 @@ struct plRenderViewContext
   const plDebugRendererContext* m_pViewDebugContext;
 };
 
-using plViewId = plGenericId<24, 8>;
+typedef plGenericId<24, 8> plViewId;
 
 class plViewHandle
 {
@@ -79,7 +79,7 @@ struct plHashHelper<plViewHandle>
 /// \brief Usage hint of a camera/view.
 struct PLASMA_RENDERERCORE_DLL plCameraUsageHint
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -99,3 +99,43 @@ struct PLASMA_RENDERERCORE_DLL plCameraUsageHint
 };
 
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plCameraUsageHint);
+
+struct PLASMA_RENDERERCORE_DLL plTonemapMode
+{
+  using StorageType = plUInt8;
+
+  enum Enum
+  {
+    AMD = 0,
+    ACES,
+    Reinhard,
+    Uncharted2,
+    None,
+
+    Default = AMD
+  };
+};
+
+PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plTonemapMode);
+
+struct plMotionBlurMode
+{
+  using StorageType = plUInt8;
+
+  enum Enum
+  {
+    /// @brief Applies motion blur on objects when they are moving and on camera movements.
+    /// This won't affect the skybox since it's always static in the scene.
+    /// @note This mode requires the Velocity texture as input.
+    ObjectBased,
+
+    /// @brief Applies motion blur on the whole screen only on camera movements.
+    /// This will affect the skybox too.
+    /// @note This mode requires the Depth texture as input.
+    ScreenBased,
+
+    Default = ObjectBased,
+  };
+};
+
+PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plMotionBlurMode);

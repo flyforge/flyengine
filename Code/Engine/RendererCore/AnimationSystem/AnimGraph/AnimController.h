@@ -33,7 +33,7 @@ struct plAnimGraphPinDataLocalTransforms
   plAnimPoseGeneratorCommandID m_CommandID;
   const plAnimGraphPinDataBoneWeights* m_pWeights = nullptr;
   float m_fOverallWeight = 1.0f;
-  plVec3 m_vRootMotion = plVec3::MakeZero();
+  plVec3 m_vRootMotion = plVec3::ZeroVector();
   bool m_bUseRootMotion = false;
 };
 
@@ -41,7 +41,7 @@ struct plAnimGraphPinDataModelTransforms
 {
   plUInt16 m_uiOwnIndex = 0xFFFF;
   plAnimPoseGeneratorCommandID m_CommandID;
-  plVec3 m_vRootMotion = plVec3::MakeZero();
+  plVec3 m_vRootMotion = plVec3::ZeroVector();
   plAngle m_RootRotationX;
   plAngle m_RootRotationY;
   plAngle m_RootRotationZ;
@@ -93,7 +93,7 @@ private:
   plSkeletonResourceHandle m_hSkeleton;
   plAnimGraphPinDataModelTransforms* m_pCurrentModelTransforms = nullptr;
 
-  plVec3 m_vRootMotion = plVec3::MakeZero();
+  plVec3 m_vRootMotion = plVec3::ZeroVector();
   plAngle m_RootRotationX;
   plAngle m_RootRotationY;
   plAngle m_RootRotationZ;

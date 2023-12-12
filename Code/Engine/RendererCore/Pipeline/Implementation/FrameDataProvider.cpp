@@ -8,8 +8,11 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plFrameDataProviderBase, 1, plRTTINoAllocato
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plFrameDataProviderBase::plFrameDataProviderBase()
-
-  = default;
+  : m_pOwnerPipeline(nullptr)
+  , m_pData(nullptr)
+  , m_uiLastUpdateFrame(0)
+{
+}
 
 void* plFrameDataProviderBase::GetData(const plRenderViewContext& renderViewContext)
 {

@@ -32,7 +32,7 @@ plStereoTestPass::plStereoTestPass()
   }
 }
 
-plStereoTestPass::~plStereoTestPass() = default;
+plStereoTestPass::~plStereoTestPass() {}
 
 bool plStereoTestPass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {

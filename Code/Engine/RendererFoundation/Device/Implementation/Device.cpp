@@ -3,7 +3,6 @@
 #include <Foundation/Logging/Log.h>
 #include <Foundation/Profiling/Profiling.h>
 #include <RendererFoundation/Device/Device.h>
-#include <RendererFoundation/Device/SharedTextureSwapChain.h>
 #include <RendererFoundation/Device/SwapChain.h>
 #include <RendererFoundation/Resources/Buffer.h>
 #include <RendererFoundation/Resources/ProxyTexture.h>
@@ -114,8 +113,6 @@ plResult plGALDevice::Init()
   {
     return PLASMA_FAILURE;
   }
-
-  plGALSharedTextureSwapChain::SetFactoryMethod([this](const plGALSharedTextureSwapChainCreationDescription& desc) -> plGALSwapChainHandle { return CreateSwapChain([this, &desc](plAllocatorBase* pAllocator) -> plGALSwapChain* { return PLASMA_NEW(pAllocator, plGALSharedTextureSwapChain, desc); }); });
 
   // Fill the capabilities
   FillCapabilitiesPlatform();
@@ -751,86 +748,6 @@ void plGALDevice::DestroyProxyTexture(plGALTextureHandle hProxyTexture)
   }
 }
 
-plGALTextureHandle plGALDevice::CreateSharedTexture(const plGALTextureCreationDescription& desc, plArrayPtr<plGALSystemMemoryDescription> initialData)
-{
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
-
-  /// \todo Platform independent validation (desc width & height < platform maximum, format, etc.)
-
-  if (desc.m_ResourceAccess.IsImmutable() && (initialData.IsEmpty() || initialData.GetCount() < desc.m_uiMipLevelCount) &&
-      !desc.m_bCreateRenderTarget)
-  {
-    plLog::Error("Trying to create an immutable texture but not supplying initial data (or not enough data pointers) is not possible!");
-    return plGALTextureHandle();
-  }
-
-  if (desc.m_uiWidth == 0 || desc.m_uiHeight == 0)
-  {
-    plLog::Error("Trying to create a texture with width or height == 0 is not possible!");
-    return plGALTextureHandle();
-  }
-
-  if (desc.m_pExisitingNativeObject != nullptr)
-  {
-    plLog::Error("Shared textures cannot be created on exiting native objects!");
-    return plGALTextureHandle();
-  }
-
-  if (desc.m_Type != plGALTextureType::Texture2DShared)
-  {
-    plLog::Error("Only plGALTextureType::Texture2DShared is supported for shared textures!");
-    return plGALTextureHandle();
-  }
-
-  plGALTexture* pTexture = CreateSharedTexturePlatform(desc, initialData, plGALSharedTextureType::Exported, {});
-
-  return FinalizeTextureInternal(desc, pTexture);
-}
-
-plGALTextureHandle plGALDevice::OpenSharedTexture(const plGALTextureCreationDescription& desc, plGALPlatformSharedHandle hSharedHandle)
-{
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
-
-  if (desc.m_pExisitingNativeObject != nullptr)
-  {
-    plLog::Error("Shared textures cannot be created on exiting native objects!");
-    return plGALTextureHandle();
-  }
-
-  if (desc.m_Type != plGALTextureType::Texture2DShared)
-  {
-    plLog::Error("Only plGALTextureType::Texture2DShared is supported for shared textures!");
-    return plGALTextureHandle();
-  }
-
-  if (desc.m_uiWidth == 0 || desc.m_uiHeight == 0)
-  {
-    plLog::Error("Trying to create a texture with width or height == 0 is not possible!");
-    return plGALTextureHandle();
-  }
-
-  plGALTexture* pTexture = CreateSharedTexturePlatform(desc, {}, plGALSharedTextureType::Imported, hSharedHandle);
-
-  return FinalizeTextureInternal(desc, pTexture);
-}
-
-void plGALDevice::DestroySharedTexture(plGALTextureHandle hSharedTexture)
-{
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
-
-  plGALTexture* pTexture = nullptr;
-  if (m_Textures.TryGetValue(hSharedTexture, pTexture))
-  {
-    PLASMA_ASSERT_DEV(pTexture->GetDescription().m_Type == plGALTextureType::Texture2DShared, "Given texture is not a shared texture texture");
-
-    AddDeadObject(GALObjectType::Texture, hSharedTexture);
-  }
-  else
-  {
-    plLog::Warning("DestroySharedTexture called on invalid handle (double free?)");
-  }
-}
-
 plGALResourceViewHandle plGALDevice::GetDefaultResourceView(plGALTextureHandle hTexture)
 {
   if (const plGALTexture* pTexture = GetTexture(hTexture))
@@ -865,7 +782,7 @@ plGALResourceViewHandle plGALDevice::CreateResourceView(const plGALResourceViewC
 
   if (pResource == nullptr)
   {
-    plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
+    //plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
     return plGALResourceViewHandle();
   }
 
@@ -930,7 +847,7 @@ plGALRenderTargetViewHandle plGALDevice::CreateRenderTargetView(const plGALRende
 
   if (pTexture == nullptr)
   {
-    plLog::Error("No valid texture handle given for render target view creation!");
+    //plLog::Error("No valid texture handle given for render target view creation!");
     return plGALRenderTargetViewHandle();
   }
 
@@ -982,7 +899,7 @@ plGALUnorderedAccessViewHandle plGALDevice::CreateUnorderedAccessView(const plGA
 
   if (!desc.m_hTexture.IsInvalidated() && !desc.m_hBuffer.IsInvalidated())
   {
-    plLog::Error("Can't pass both a texture and buffer to a plGALUnorderedAccessViewCreationDescription.");
+   // plLog::Error("Can't pass both a texture and buffer to a plGALUnorderedAccessViewCreationDescription.");
     return plGALUnorderedAccessViewHandle();
   }
 
@@ -1001,7 +918,7 @@ plGALUnorderedAccessViewHandle plGALDevice::CreateUnorderedAccessView(const plGA
 
   if (pResource == nullptr)
   {
-    plLog::Error("No valid texture handle or buffer handle given for unordered access view creation!");
+    //plLog::Error("No valid texture handle or buffer handle given for unordered access view creation!");
     return plGALUnorderedAccessViewHandle();
   }
 
@@ -1326,12 +1243,6 @@ plUInt64 plGALDevice::GetMemoryConsumptionForBuffer(const plGALBufferCreationDes
   return desc.m_uiTotalSize;
 }
 
-void plGALDevice::Flush()
-{
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
-
-  FlushPlatform();
-}
 
 void plGALDevice::WaitIdle()
 {
@@ -1340,8 +1251,6 @@ void plGALDevice::WaitIdle()
 
 void plGALDevice::DestroyViews(plGALResourceBase* pResource)
 {
-  PLASMA_ASSERT_DEBUG(pResource != nullptr, "Must provide valid resource");
-
   PLASMA_GALDEVICE_LOCK_AND_CHECK();
 
   for (auto it = pResource->m_ResourceViews.GetIterator(); it.IsValid(); ++it)
@@ -1467,19 +1376,11 @@ void plGALDevice::DestroyDeadObjects()
         plGALTextureHandle hTexture(plGAL::pl18_14Id(deadObject.m_uiHandle));
         plGALTexture* pTexture = nullptr;
 
-        PLASMA_VERIFY(m_Textures.Remove(hTexture, &pTexture), "Unexpected invalild texture handle");
+        m_Textures.Remove(hTexture, &pTexture);
 
         DestroyViews(pTexture);
+        DestroyTexturePlatform(pTexture);
 
-        switch (pTexture->GetDescription().m_Type)
-        {
-          case plGALTextureType::Texture2DShared:
-            DestroySharedTexturePlatform(pTexture);
-            break;
-          default:
-            DestroyTexturePlatform(pTexture);
-            break;
-        }
         break;
       }
       case GALObjectType::ResourceView:
@@ -1563,7 +1464,7 @@ void plGALDevice::DestroyDeadObjects()
         plGALVertexDeclarationHandle hVertexDeclaration(plGAL::pl18_14Id(deadObject.m_uiHandle));
         plGALVertexDeclaration* pVertexDeclaration = nullptr;
 
-        PLASMA_VERIFY(m_VertexDeclarations.Remove(hVertexDeclaration, &pVertexDeclaration), "Unexpected invalid handle");
+        m_VertexDeclarations.Remove(hVertexDeclaration, &pVertexDeclaration);
         m_VertexDeclarationTable.Remove(pVertexDeclaration->GetDescription().CalculateHash());
 
         DestroyVertexDeclarationPlatform(pVertexDeclaration);

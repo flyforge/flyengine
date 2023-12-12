@@ -196,14 +196,14 @@ void plJoltContactEvents::SpawnPhysicsImpactReactions()
 
         if (cvar_PhysicsReactionsVisImpacts)
         {
-          plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::LightGreen, plTransform(ic.m_vPosition), plTime::MakeFromSeconds(3));
+          plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::LightGreen, plTransform(ic.m_vPosition), plTime::Seconds(3));
         }
       }
       else
       {
         if (cvar_PhysicsReactionsVisDiscardedImpacts)
         {
-          plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DarkGray, plTransform(ic.m_vPosition), plTime::MakeFromSeconds(1));
+          plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DarkGray, plTransform(ic.m_vPosition), plTime::Seconds(1));
         }
       }
     }
@@ -256,7 +256,7 @@ void plJoltContactEvents::UpdatePhysicsSlideReactions()
 
       if (cvar_PhysicsReactionsVisSlides)
       {
-        plDebugRenderer::DrawLineBox(m_pWorld, plBoundingBox::MakeFromMinMax(plVec3(-0.5f), plVec3(0.5f)), plColor::BlueViolet, plTransform(slideInfo.m_vContactPosition));
+        plDebugRenderer::DrawLineBox(m_pWorld, plBoundingBox(plVec3(-0.5f), plVec3(0.5f)), plColor::BlueViolet, plTransform(slideInfo.m_vContactPosition));
       }
 
       slideInfo.m_bStillSliding = false;
@@ -373,7 +373,7 @@ void plJoltContactEvents::OnContact_ImpactReaction(const plVec3& vAvgPos, const 
     {
       if (cvar_PhysicsReactionsVisDiscardedImpacts)
       {
-        plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DimGrey, plTransform(vAvgPos), plTime::MakeFromSeconds(3));
+        plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DimGrey, plTransform(vAvgPos), plTime::Seconds(3));
       }
 
       return;
@@ -382,7 +382,7 @@ void plJoltContactEvents::OnContact_ImpactReaction(const plVec3& vAvgPos, const 
     {
       if (cvar_PhysicsReactionsVisDiscardedImpacts)
       {
-        plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DimGrey, plTransform(m_InteractionContacts[uiBestScore].m_vPosition), plTime::MakeFromSeconds(3));
+        plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DimGrey, plTransform(m_InteractionContacts[uiBestScore].m_vPosition), plTime::Seconds(3));
       }
     }
 
@@ -421,7 +421,7 @@ void plJoltContactEvents::OnContact_ImpactReaction(const plVec3& vAvgPos, const 
 
   if (cvar_PhysicsReactionsVisDiscardedImpacts)
   {
-    plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DarkOrange, plTransform(vAvgPos), plTime::MakeFromSeconds(10));
+    plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DarkOrange, plTransform(vAvgPos), plTime::Seconds(10));
   }
 }
 
@@ -484,7 +484,7 @@ plJoltContactEvents::SlideAndRollInfo* plJoltContactEvents::FindSlideOrRollInfo(
 void plJoltContactEvents::OnContact_RollReaction(const JPH::Body& body0, const JPH::Body& body1, const JPH::ContactManifold& manifold, plBitflags<plOnJoltContact> onContact0, plBitflags<plOnJoltContact> onContact1, const plVec3& vAvgPos, const plVec3& vAvgNormal0)
 {
   // only consider something 'rolling' when it turns faster than this (per second)
-  constexpr plAngle rollThreshold = plAngle::MakeFromDegree(45);
+  constexpr plAngle rollThreshold = plAngle::Degree(45);
 
   plBitflags<plOnJoltContact> contactFlags[2] = {onContact0, onContact1};
   const JPH::Body* bodies[2] = {&body0, &body1};
@@ -523,7 +523,7 @@ void plJoltContactEvents::OnContact_RollReaction(const JPH::Body& body0, const J
 
 void plJoltContactEvents::OnContact_SlideReaction(const JPH::Body& body0, const JPH::Body& body1, const JPH::ContactManifold& manifold, plBitflags<plOnJoltContact> onContact0, plBitflags<plOnJoltContact> onContact1, const plVec3& vAvgPos, const plVec3& vAvgNormal0)
 {
-  plVec3 vVelocity[2] = {plVec3::MakeZero(), plVec3::MakeZero()};
+  plVec3 vVelocity[2] = {plVec3::ZeroVector(), plVec3::ZeroVector()};
 
   {
     vVelocity[0] = plJoltConversionUtils::ToVec3(body0.GetLinearVelocity());
@@ -546,10 +546,10 @@ void plJoltContactEvents::OnContact_SlideReaction(const JPH::Body& body0, const 
     const plVec3 vRelativeVelocityDir = vRelativeVelocity.GetNormalized();
 
     plVec3 vAvgNormal = vAvgNormal0;
-    vAvgNormal.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
+    vAvgNormal.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
 
     // an object is only 'sliding' if it moves at roughly 90 degree along another object
-    constexpr float slideAngle = 0.17f; // plMath ::Cos(plAngle::MakeFromDegree(80));
+    constexpr float slideAngle = 0.17f; // plMath ::Cos(plAngle::Degree(80));
 
     if (plMath::Abs(vAvgNormal.Dot(vRelativeVelocityDir)) < slideAngle)
     {

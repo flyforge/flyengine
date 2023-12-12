@@ -98,8 +98,8 @@ private:
 
 struct plProcGenBoxExtents
 {
-  plVec3 m_vOffset = plVec3::MakeZero();
-  plQuat m_Rotation = plQuat::MakeIdentity();
+  plVec3 m_vOffset = plVec3::ZeroVector();
+  plQuat m_Rotation = plQuat::IdentityQuaternion();
   plVec3 m_vExtents = plVec3(10);
 
   plResult Serialize(plStreamWriter& stream) const;

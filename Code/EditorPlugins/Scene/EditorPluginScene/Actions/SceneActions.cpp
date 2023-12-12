@@ -39,18 +39,24 @@ void plSceneActions::RegisterActions()
   s_hSceneCategory = PLASMA_REGISTER_CATEGORY("SceneCategory");
   s_hSceneUtilsMenu = PLASMA_REGISTER_MENU_WITH_ICON("Scene.Utils.Menu", "");
 
-  s_hExportScene = PLASMA_REGISTER_ACTION_1("Scene.ExportAndRun", plActionScope::Document, "Scene", "Ctrl+R", plSceneAction, plSceneAction::ActionType::ExportAndRunScene);
-  s_hGameModeSimulate = PLASMA_REGISTER_ACTION_1("Scene.GameMode.Simulate", plActionScope::Document, "Scene", "F5", plSceneAction, plSceneAction::ActionType::StartGameModeSimulate);
-  s_hGameModePlay = PLASMA_REGISTER_ACTION_1("Scene.GameMode.Play", plActionScope::Document, "Scene", "Ctrl+F5", plSceneAction, plSceneAction::ActionType::StartGameModePlay);
+  s_hExportScene = PLASMA_REGISTER_ACTION_1(
+    "Scene.ExportAndRun", plActionScope::Document, "Scene", "Ctrl+E", plSceneAction, plSceneAction::ActionType::ExportAndRunScene);
+  s_hGameModeSimulate = PLASMA_REGISTER_ACTION_1(
+    "Scene.GameMode.Simulate", plActionScope::Document, "Scene", "F5", plSceneAction, plSceneAction::ActionType::StartGameModeSimulate);
+  s_hGameModePlay = PLASMA_REGISTER_ACTION_1(
+    "Scene.GameMode.Play", plActionScope::Document, "Scene", "Ctrl+F5", plSceneAction, plSceneAction::ActionType::StartGameModePlay);
 
   s_hGameModePlayFromHere = PLASMA_REGISTER_ACTION_1("Scene.GameMode.PlayFromHere", plActionScope::Document, "Scene", "Ctrl+Shift+F5", plSceneAction,
     plSceneAction::ActionType::StartGameModePlayFromHere);
 
-  s_hGameModeStop = PLASMA_REGISTER_ACTION_1("Scene.GameMode.Stop", plActionScope::Document, "Scene", "Shift+F5", plSceneAction, plSceneAction::ActionType::StopGameMode);
+  s_hGameModeStop =
+    PLASMA_REGISTER_ACTION_1("Scene.GameMode.Stop", plActionScope::Document, "Scene", "Shift+F5", plSceneAction, plSceneAction::ActionType::StopGameMode);
 
-  s_hUtilExportSceneToOBJ = PLASMA_REGISTER_ACTION_1("Scene.ExportSceneToOBJ", plActionScope::Document, "Scene", "", plSceneAction, plSceneAction::ActionType::ExportSceneToOBJ);
+  s_hUtilExportSceneToOBJ =
+    PLASMA_REGISTER_ACTION_1("Scene.ExportSceneToOBJ", plActionScope::Document, "Scene", "", plSceneAction, plSceneAction::ActionType::ExportSceneToOBJ);
 
-  s_hKeepSimulationChanges = PLASMA_REGISTER_ACTION_1("Scene.KeepSimulationChanges", plActionScope::Document, "Scene", "K", plSceneAction, plSceneAction::ActionType::KeepSimulationChanges);
+  s_hKeepSimulationChanges = PLASMA_REGISTER_ACTION_1(
+    "Scene.KeepSimulationChanges", plActionScope::Document, "Scene", "K", plSceneAction, plSceneAction::ActionType::KeepSimulationChanges);
 
   s_hCreateThumbnail = PLASMA_REGISTER_ACTION_1("Scene.CreateThumbnail", plActionScope::Document, "Scene", "", plSceneAction, plSceneAction::ActionType::CreateThumbnail);
   // unfortunately the macros use lambdas thus using a loop to generate the strings does not work
@@ -126,22 +132,22 @@ void plSceneActions::UnregisterActions()
   }
 }
 
-void plSceneActions::MapMenuActions(plStringView sMapping)
+void plSceneActions::MapMenuActions(const char* szMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
   PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
-    const char* szSubPath = "G.Scene/SceneCategory";
-    const char* szUtilsSubPath = "G.Scene/Scene.Utils.Menu";
+    const char* szSubPath = "Menu.Scene/SceneCategory";
+    const char* szUtilsSubPath = "Menu.Scene/Scene.Utils.Menu";
 
-    pMap->MapAction(s_hSceneUtilsMenu, "G.Scene", 2.0f);
+    pMap->MapAction(s_hSceneUtilsMenu, "Menu.Scene", 2.0f);
     // pMap->MapAction(s_hCreateThumbnail, szUtilsSubPath, 0.0f); // now available through the export scene dialog
     pMap->MapAction(s_hKeepSimulationChanges, szUtilsSubPath, 1.0f);
     pMap->MapAction(s_hUtilExportSceneToOBJ, szUtilsSubPath, 2.0f);
 
-    pMap->MapAction(s_hFavoriteCamsMenu, "G.Scene", 3.0f);
-    const char* szFavCamsSubPath = "G.Scene/Scene.FavoriteCams.Menu";
+    pMap->MapAction(s_hFavoriteCamsMenu, "Menu.Scene", 3.0f);
+    const char* szFavCamsSubPath = "Menu.Scene/Scene.FavoriteCams.Menu";
 
     for (plUInt32 i = 0; i < 10; ++i)
     {
@@ -151,7 +157,7 @@ void plSceneActions::MapMenuActions(plStringView sMapping)
       pMap->MapAction(s_hCreateLevelCamera[i], szFavCamsSubPath, 40.0f + i);
     }
 
-    pMap->MapAction(s_hSceneCategory, "G.Scene", 4.0f);
+    pMap->MapAction(s_hSceneCategory, "Menu.Scene", 4.0f);
     pMap->MapAction(s_hExportScene, szSubPath, 1.0f);
     pMap->MapAction(s_hGameModeStop, szSubPath, 4.0f);
     pMap->MapAction(s_hGameModeSimulate, szSubPath, 5.0f);
@@ -160,9 +166,9 @@ void plSceneActions::MapMenuActions(plStringView sMapping)
   }
 }
 
-void plSceneActions::MapToolbarActions(plStringView sMapping)
+void plSceneActions::MapToolbarActions(const char* szMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
   PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
@@ -178,12 +184,14 @@ void plSceneActions::MapToolbarActions(plStringView sMapping)
   }
 }
 
-void plSceneActions::MapViewContextMenuActions(plStringView sMapping)
+void plSceneActions::MapViewContextMenuActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  pMap->MapAction(s_hGameModePlayFromHere, "", 1.0f);
+  plStringBuilder sSubPath(szPath, "/SceneCategory");
+
+  pMap->MapAction(s_hGameModePlayFromHere, szPath, 1.0f);
 }
 
 plSceneAction::plSceneAction(const plActionContext& context, const char* szName, plSceneAction::ActionType type)
@@ -212,7 +220,7 @@ plSceneAction::plSceneAction(const plActionContext& context, const char* szName,
       break;
 
     case ActionType::StartGameModePlayFromHere:
-      SetIconPath(":/EditorPluginScene/Icons/ScenePlayTheGame.svg"); // TODO: icon
+      SetIconPath(":/EditorPluginScene/Icons/ScenePlayTheGame.svg");
       break;
 
     case ActionType::StopGameMode:
@@ -283,8 +291,6 @@ void plSceneAction::Execute(const plVariant& value)
           return;
       }
 
-      bool bDidTransformAll = false;
-
       range.BeginNextStep("Transform Assets");
       if (dlg.s_bTransformAll)
       {
@@ -292,7 +298,6 @@ void plSceneAction::Execute(const plVariant& value)
         {
           // once all assets have been transformed, disable it for the next export
           dlg.s_bTransformAll = false;
-          bDidTransformAll = true;
         }
       }
 
@@ -302,7 +307,6 @@ void plSceneAction::Execute(const plVariant& value)
       if (!m_pSceneDocument->IsPrefab() && !bCreateThumbnail)
       {
         // if the thumbnail doesn't exist, or is very old, update it anyway
-
         plStringBuilder sThumbnailPath = m_pSceneDocument->GetAssetDocumentManager()->GenerateResourceThumbnailPath(m_pSceneDocument->GetDocumentPath());
 
         plFileStats stat;
@@ -313,21 +317,13 @@ void plSceneAction::Execute(const plVariant& value)
         else
         {
           auto tNow = plTimestamp::CurrentTimestamp();
-          auto tComp = stat.m_LastModificationTime + plTime::MakeFromHours(24) * 7;
+          auto tComp = stat.m_LastModificationTime + plTime::Hours(24) * 7;
 
           if (tComp.GetInt64(plSIUnitOfTime::Second) < tNow.GetInt64(plSIUnitOfTime::Second))
           {
             bCreateThumbnail = true;
           }
         }
-      }
-
-
-      // Convert collections
-      if (!bDidTransformAll)
-      {
-        plAssetCurator* pCurator = plAssetCurator::GetSingleton();
-        pCurator->TransformAssetsForSceneExport(pCurator->GetActiveAssetProfile());
       }
 
       dlg.s_bUpdateThumbnail = false;

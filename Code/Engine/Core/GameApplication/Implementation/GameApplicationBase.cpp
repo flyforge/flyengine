@@ -34,11 +34,11 @@ plGameApplicationBase::~plGameApplicationBase()
   s_pGameApplicationBaseInstance = nullptr;
 }
 
-void AppendCurrentTimestamp(plStringBuilder& out_sString)
+void AppendCurrentTimestamp(plStringBuilder& out_String)
 {
-  const plDateTime dt = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
+  const plDateTime dt = plTimestamp::CurrentTimestamp();
 
-  out_sString.AppendFormat("_{0}-{1}-{2}_{3}-{4}-{5}-{6}", dt.GetYear(), plArgU(dt.GetMonth(), 2, true), plArgU(dt.GetDay(), 2, true), plArgU(dt.GetHour(), 2, true), plArgU(dt.GetMinute(), 2, true), plArgU(dt.GetSecond(), 2, true), plArgU(dt.GetMicroseconds() / 1000, 3, true));
+  out_String.AppendFormat("_{0}-{1}-{2}_{3}-{4}-{5}-{6}", dt.GetYear(), plArgU(dt.GetMonth(), 2, true), plArgU(dt.GetDay(), 2, true), plArgU(dt.GetHour(), 2, true), plArgU(dt.GetMinute(), 2, true), plArgU(dt.GetSecond(), 2, true), plArgU(dt.GetMicroseconds() / 1000, 3, true));
 }
 
 void plGameApplicationBase::TakeProfilingCapture()
@@ -85,7 +85,7 @@ void plGameApplicationBase::TakeScreenshot()
   m_bTakeScreenshot = true;
 }
 
-void plGameApplicationBase::StoreScreenshot(plImage&& image, plStringView sContext /*= {} */)
+void plGameApplicationBase::StoreScreenshot(plImage&& image, plStringView sContext /*= nullptr*/)
 {
   class WriteFileTask final : public plTask
   {
@@ -124,7 +124,7 @@ void plGameApplicationBase::StoreScreenshot(plImage&& image, plStringView sConte
   plTaskSystem::StartSingleTask(pWriteTask, plTaskPriority::LongRunning);
 }
 
-void plGameApplicationBase::ExecuteTakeScreenshot(plWindowOutputTargetBase* pOutputTarget, plStringView sContext /* = {} */)
+void plGameApplicationBase::ExecuteTakeScreenshot(plWindowOutputTargetBase* pOutputTarget, plStringView sContext /* = nullptr*/)
 {
   if (m_bTakeScreenshot)
   {
@@ -144,9 +144,9 @@ void plGameApplicationBase::CaptureFrame()
   m_bCaptureFrame = true;
 }
 
-void plGameApplicationBase::SetContinuousFrameCapture(bool bEnable)
+void plGameApplicationBase::SetContinuousFrameCapture(bool enable)
 {
-  m_bContinuousFrameCapture = bEnable;
+  m_bContinuousFrameCapture = enable;
 }
 
 bool plGameApplicationBase::GetContinousFrameCapture() const
@@ -155,14 +155,14 @@ bool plGameApplicationBase::GetContinousFrameCapture() const
 }
 
 
-plResult plGameApplicationBase::GetAbsFrameCaptureOutputPath(plStringBuilder& ref_sOutputPath)
+plResult plGameApplicationBase::GetAbsFrameCaptureOutputPath(plStringBuilder& sOutputPath)
 {
   plStringBuilder sPath = ":appdata/FrameCaptures/Capture_";
   AppendCurrentTimestamp(sPath);
-  return plFileSystem::ResolvePath(sPath, &ref_sOutputPath, nullptr);
+  return plFileSystem::ResolvePath(sPath, &sOutputPath, nullptr);
 }
 
-void plGameApplicationBase::ExecuteFrameCapture(plWindowHandle targetWindowHandle, plStringView sContext /*= {} */)
+void plGameApplicationBase::ExecuteFrameCapture(plWindowHandle targetWindowHandle, plStringView sContext /*= nullptr*/)
 {
   plFrameCaptureInterface* pCaptureInterface = plSingletonRegistry::GetSingletonInstance<plFrameCaptureInterface>();
   if (!pCaptureInterface)
@@ -376,22 +376,16 @@ PLASMA_ON_GLOBAL_EVENT(GameApp_UpdatePlugins)
 
 plApplication::Execution plGameApplicationBase::Run()
 {
+  PLASMA_PROFILE_SCOPE("Run");
   if (m_bWasQuitRequested)
     return plApplication::Execution::Quit;
 
-  RunOneFrame();
-  return plApplication::Execution::Continue;
-}
-
-void plGameApplicationBase::RunOneFrame()
-{
-  PLASMA_PROFILE_SCOPE("Run");
   s_bUpdatePluginsExecuted = false;
 
   plActorManager::GetSingleton()->Update();
 
   if (!IsGameUpdateEnabled())
-    return;
+    return plApplication::Execution::Continue;
 
   {
     // for plugins that need to hook into this without a link dependency on this lib
@@ -449,6 +443,7 @@ void plGameApplicationBase::RunOneFrame()
     PLASMA_PROFILE_SCOPE("Run_FinishFrame");
     Run_FinishFrame();
   }
+  return plApplication::Execution::Continue;
 }
 
 void plGameApplicationBase::Run_InputUpdate()
@@ -532,7 +527,7 @@ void plGameApplicationBase::Run_FinishFrame()
   plProfilingSystem::StartNewFrame();
 
   // if many messages have been logged, make sure they get written to disk
-  plLog::Flush(100, plTime::MakeFromSeconds(10));
+  plLog::Flush(100, plTime::Seconds(10));
 
   // reset this state
   m_bTakeScreenshot = false;

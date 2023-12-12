@@ -6,8 +6,8 @@
 #include <RendererCore/ShaderCompiler/ShaderParser.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
-plQtShaderTemplateDlg::plQtShaderTemplateDlg(QWidget* pParent, const plDocument* pSceneDoc)
-  : QDialog(pParent)
+plQtShaderTemplateDlg::plQtShaderTemplateDlg(QWidget* parent, const plDocument* pSceneDoc)
+  : QDialog(parent)
 {
   setupUi(this);
 

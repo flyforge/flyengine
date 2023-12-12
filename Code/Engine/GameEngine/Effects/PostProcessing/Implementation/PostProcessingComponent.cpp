@@ -86,6 +86,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plPostProcessingComponent, 1, plComponentMode::Stati
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
+    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
 }

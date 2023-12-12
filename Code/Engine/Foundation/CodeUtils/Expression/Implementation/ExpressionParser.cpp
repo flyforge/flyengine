@@ -380,6 +380,8 @@ plExpressionAST::Node* plExpressionParser::ParseFactor()
     auto pIdentifierToken = m_TokenStream[uiIdentifierToken];
     const plStringView sIdentifier = pIdentifierToken->m_DataView;
 
+    plExpressionAST::Node* pNode = nullptr;
+
     if (Accept(m_TokenStream, m_uiCurrentToken, "("))
     {
       return ParseSwizzle(ParseFunctionCall(sIdentifier));

@@ -5,16 +5,6 @@ PLASMA_ALWAYS_INLINE plSimdVec4f::plSimdVec4f(plInternal::QuadFloat v)
   m_v = v;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MakeZero()
-{
-  return plSimdVec4f(plSimdFloat::MakeZero());
-}
-
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MakeNaN()
-{
-  return plSimdVec4f(plSimdFloat::MakeNaN());
-}
-
 template <int N, plMathAcc::Enum acc>
 PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::GetLength() const
 {

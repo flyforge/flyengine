@@ -17,6 +17,7 @@ public:
   virtual ~plWindowXR();
 
   virtual plSizeU32 GetClientAreaSize() const override;
+  virtual plSizeU32 GetRenderAreaSize() const override;
 
   virtual plWindowHandle GetNativeWindowHandle() const override;
 

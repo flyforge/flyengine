@@ -3,8 +3,8 @@
 #include <EditorFramework/Dialogs/SnapSettingsDlg.moc.h>
 #include <EditorFramework/Gizmos/SnapProvider.h>
 
-plQtSnapSettingsDlg::plQtSnapSettingsDlg(QWidget* pParent)
-  : QDialog(pParent)
+plQtSnapSettingsDlg::plQtSnapSettingsDlg(QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 
@@ -49,7 +49,7 @@ plQtSnapSettingsDlg::plQtSnapSettingsDlg(QWidget* pParent)
 
   for (plUInt32 i = 0; i < m_Translation.GetCount(); ++i)
   {
-    TranslationSnap->addItem(plMakeQString(plTranslate(m_Translation[i].m_szKey)));
+    TranslationSnap->addItem(plTranslate(m_Translation[i].m_szKey));
 
     if (plSnapProvider::GetTranslationSnapValue() == m_Translation[i].m_fValue)
       uiSelectedT = i;
@@ -57,15 +57,15 @@ plQtSnapSettingsDlg::plQtSnapSettingsDlg(QWidget* pParent)
 
   for (plUInt32 i = 0; i < m_Rotation.GetCount(); ++i)
   {
-    RotationSnap->addItem(plMakeQString(plTranslate(m_Rotation[i].m_szKey)));
+    RotationSnap->addItem(plTranslate(m_Rotation[i].m_szKey));
 
-    if (plSnapProvider::GetRotationSnapValue() == plAngle::MakeFromDegree(m_Rotation[i].m_fValue))
+    if (plSnapProvider::GetRotationSnapValue() == plAngle::Degree(m_Rotation[i].m_fValue))
       uiSelectedR = i;
   }
 
   for (plUInt32 i = 0; i < m_Scale.GetCount(); ++i)
   {
-    ScaleSnap->addItem(plMakeQString(plTranslate(m_Scale[i].m_szKey)));
+    ScaleSnap->addItem(plTranslate(m_Scale[i].m_szKey));
 
     if (plSnapProvider::GetScaleSnapValue() == m_Scale[i].m_fValue)
       uiSelectedS = i;
@@ -79,7 +79,7 @@ plQtSnapSettingsDlg::plQtSnapSettingsDlg(QWidget* pParent)
 void plQtSnapSettingsDlg::QueryUI()
 {
   plSnapProvider::SetTranslationSnapValue(m_Translation[TranslationSnap->currentIndex()].m_fValue);
-  plSnapProvider::SetRotationSnapValue(plAngle::MakeFromDegree(m_Rotation[RotationSnap->currentIndex()].m_fValue));
+  plSnapProvider::SetRotationSnapValue(plAngle::Degree(m_Rotation[RotationSnap->currentIndex()].m_fValue));
   plSnapProvider::SetScaleSnapValue(m_Scale[ScaleSnap->currentIndex()].m_fValue);
 }
 

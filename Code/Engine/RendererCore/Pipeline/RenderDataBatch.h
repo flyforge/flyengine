@@ -14,10 +14,10 @@ private:
   };
 
 public:
-  // PLASMA_DECLARE_POD_TYPE(); // plDelegate has a destructor and therefore plRenderDataBatch can't be POD
+  PLASMA_DECLARE_POD_TYPE();
 
   /// \brief This function should return true if the given render data should be filtered and not rendered.
-  using Filter = plDelegate<bool(const plRenderData*)>;
+  typedef plDelegate<bool(const plRenderData*)> Filter;
 
   template <typename T>
   class Iterator

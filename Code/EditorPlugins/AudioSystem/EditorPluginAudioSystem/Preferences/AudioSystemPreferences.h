@@ -34,7 +34,7 @@ public:
   void SyncCVars();
 
 private:
-  void ProcessEventHandler(const plEditorEngineProcessConnection::Event& e);
+  void ProcessEventHandler(const PlasmaEditorEngineProcessConnection::Event& e);
 
   bool m_bMute{false};
   float m_fGain{1.0f};

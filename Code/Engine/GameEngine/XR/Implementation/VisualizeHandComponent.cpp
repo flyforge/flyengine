@@ -13,6 +13,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plVisualizeHandComponent, 1, plComponentMode::Static
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("XR"),
+    new plColorAttribute(plColorScheme::XR),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
   }
   PLASMA_END_ATTRIBUTES;
@@ -42,7 +43,7 @@ void plVisualizeHandComponent::Update()
         for (plUInt32 uiBone = 0; uiBone < bones.GetCount(); uiBone++)
         {
           const plXRHandBone& bone = bones[uiBone];
-          plBoundingSphere sphere = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), bone.m_fRadius);
+          plBoundingSphere sphere(plVec3::ZeroVector(), bone.m_fRadius);
           plDebugRenderer::DrawLineSphere(GetWorld(), sphere, plColor::Aquamarine, bone.m_Transform);
 
           if (uiBone + 1 < bones.GetCount())

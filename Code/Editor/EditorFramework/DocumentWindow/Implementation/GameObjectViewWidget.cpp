@@ -7,7 +7,7 @@
 #include <EditorFramework/InputContexts/OrthoGizmoContext.h>
 #include <EditorFramework/InputContexts/SelectionContext.h>
 
-plQtGameObjectViewWidget::plQtGameObjectViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig)
+plQtGameObjectViewWidget::plQtGameObjectViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig)
   : plQtEngineViewWidget(pParent, pOwnerWindow, pViewConfig)
 {
   m_pSelectionContext = PLASMA_DEFAULT_NEW(plSelectionContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
@@ -65,6 +65,8 @@ void plQtGameObjectViewWidget::HandleMarqueePickingResult(const plViewMarqueePic
     auto pObject = pObjMan->GetObject(guid);
     newSelection.PushBack(pObject);
   }
+
+  const plDocumentObject* pRoot = pObjMan->GetRootObject();
 
   for (plUuid guid : pMsg->m_ObjectGuids)
   {

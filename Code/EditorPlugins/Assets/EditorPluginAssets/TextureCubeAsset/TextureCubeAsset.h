@@ -6,7 +6,7 @@
 
 struct plTextureCubeChannelMode
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -26,18 +26,20 @@ class plTextureCubeAssetDocument : public plSimpleAssetDocument<plTextureCubeAss
   PLASMA_ADD_DYNAMIC_REFLECTION(plTextureCubeAssetDocument, plSimpleAssetDocument<plTextureCubeAssetProperties>);
 
 public:
-  plTextureCubeAssetDocument(plStringView sDocumentPath);
+  plTextureCubeAssetDocument(const char* szDocumentPath);
 
   // for previewing purposes
   plEnum<plTextureCubeChannelMode> m_ChannelMode;
   plInt32 m_iTextureLod; // -1 == regular sampling, >= 0 == sample that level
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+    const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override
   {
     return plStatus(PLASMA_SUCCESS);
   }
-  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+    const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   plStatus RunTexConv(const char* szTargetFile, const plAssetFileHeader& AssetHeader, bool bUpdateThumbnail);
 
@@ -54,8 +56,10 @@ public:
   plTextureCubeAssetDocumentGenerator();
   ~plTextureCubeAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
+  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const override;
+  virtual plStatus Generate(
+    plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
   virtual plStringView GetDocumentExtension() const override { return "plTextureCubeAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "Images"; }
-  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
+  virtual plStringView GetNameSuffix() const override { return "texture_cube"; }
 };

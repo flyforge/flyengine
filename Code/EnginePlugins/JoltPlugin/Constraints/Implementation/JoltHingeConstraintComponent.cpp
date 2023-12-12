@@ -18,8 +18,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltHingeConstraintComponent, 1, plComponentMode::
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_ENUM_ACCESSOR_PROPERTY("LimitMode", plJoltConstraintLimitMode, GetLimitMode, SetLimitMode),
-    PLASMA_ACCESSOR_PROPERTY("LowerLimit", GetLowerLimitAngle, SetLowerLimitAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(180))),
-    PLASMA_ACCESSOR_PROPERTY("UpperLimit", GetUpperLimitAngle, SetUpperLimitAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(180))),
+    PLASMA_ACCESSOR_PROPERTY("LowerLimit", GetLowerLimitAngle, SetLowerLimitAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0), plAngle::Degree(180))),
+    PLASMA_ACCESSOR_PROPERTY("UpperLimit", GetUpperLimitAngle, SetUpperLimitAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0), plAngle::Degree(180))),
     PLASMA_ACCESSOR_PROPERTY("Friction", GetFriction, SetFriction)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_ENUM_ACCESSOR_PROPERTY("DriveMode", plJoltConstraintDriveMode, GetDriveMode, SetDriveMode),
     PLASMA_ACCESSOR_PROPERTY("DriveTargetValue", GetDriveTargetValue, SetDriveTargetValue),
@@ -58,7 +58,7 @@ void plJoltHingeConstraintComponent::SerializeComponent(plWorldWriter& inout_str
 void plJoltHingeConstraintComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 
@@ -81,13 +81,13 @@ void plJoltHingeConstraintComponent::SetLimitMode(plJoltConstraintLimitMode::Enu
 
 void plJoltHingeConstraintComponent::SetLowerLimitAngle(plAngle f)
 {
-  m_LowerLimit = plMath::Clamp(f, plAngle(), plAngle::MakeFromDegree(180));
+  m_LowerLimit = plMath::Clamp(f, plAngle(), plAngle::Degree(180));
   QueueApplySettings();
 }
 
 void plJoltHingeConstraintComponent::SetUpperLimitAngle(plAngle f)
 {
-  m_UpperLimit = plMath::Clamp(f, plAngle(), plAngle::MakeFromDegree(180));
+  m_UpperLimit = plMath::Clamp(f, plAngle(), plAngle::Degree(180));
   QueueApplySettings();
 }
 
@@ -146,7 +146,7 @@ void plJoltHingeConstraintComponent::ApplySettings()
     float low = m_LowerLimit.GetRadian();
     float high = m_UpperLimit.GetRadian();
 
-    const float fLowest = plAngle::MakeFromDegree(1.0f).GetRadian();
+    const float fLowest = plAngle::Degree(1.0f).GetRadian();
 
     // there should be at least some slack
     if (low <= fLowest && high <= fLowest)
@@ -183,8 +183,7 @@ void plJoltHingeConstraintComponent::ApplySettings()
 
       const float strength = (m_fDriveStrength == 0) ? FLT_MAX : m_fDriveStrength;
 
-      pConstraint->GetMotorSettings().mSpringSettings.mMode = JPH::ESpringMode::FrequencyAndDamping;
-      pConstraint->GetMotorSettings().mSpringSettings.mFrequency = 20.0f;
+      pConstraint->GetMotorSettings().mFrequency = 20.0f;
       pConstraint->GetMotorSettings().SetForceLimit(strength);
       pConstraint->GetMotorSettings().SetTorqueLimit(strength);
     }

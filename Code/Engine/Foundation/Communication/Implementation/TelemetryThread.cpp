@@ -28,7 +28,7 @@ private:
       {
         plTime tNow = plTime::Now();
 
-        if (tNow - LastPing > plTime::MakeFromMilliseconds(500))
+        if (tNow - LastPing > plTime::Milliseconds(500))
         {
           LastPing = tNow;
 
@@ -36,7 +36,7 @@ private:
         }
       }
 
-      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
+      plThreadUtils::Sleep(plTime::Milliseconds(10));
     }
 
     return 0;

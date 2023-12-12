@@ -364,28 +364,28 @@ bool plDocumentObjectMirror::IsRootObject(const plDocumentObject* pParent)
   return (pParent == nullptr || pParent == m_pManager->GetRootObject());
 }
 
-bool plDocumentObjectMirror::IsHeapAllocated(const plDocumentObject* pParent, plStringView sParentProperty)
+bool plDocumentObjectMirror::IsHeapAllocated(const plDocumentObject* pParent, const char* szParentProperty)
 {
   if (pParent == nullptr || pParent == m_pManager->GetRootObject())
     return true;
 
   const plRTTI* pRtti = pParent->GetTypeAccessor().GetType();
 
-  auto* pProp = pRtti->FindPropertyByName(sParentProperty);
+  auto* pProp = pRtti->FindPropertyByName(szParentProperty);
   return pProp->GetFlags().IsSet(plPropertyFlags::PointerOwner);
 }
 
 
-bool plDocumentObjectMirror::IsDiscardedByFilter(const plDocumentObject* pObject, plStringView sProperty) const
+bool plDocumentObjectMirror::IsDiscardedByFilter(const plDocumentObject* pObject, const char* szProperty) const
 {
   if (m_Filter.IsValid())
   {
-    return !m_Filter(pObject, sProperty);
+    return !m_Filter(pObject, szProperty);
   }
   return false;
 }
 
-void plDocumentObjectMirror::CreatePath(plObjectChange& out_change, const plDocumentObject* pRoot, plStringView sProperty)
+void plDocumentObjectMirror::CreatePath(plObjectChange& out_change, const plDocumentObject* pRoot, const char* szProperty)
 {
   if (pRoot && pRoot->GetDocumentObjectManager()->GetRootObject() != pRoot)
   {
@@ -394,7 +394,7 @@ void plDocumentObjectMirror::CreatePath(plObjectChange& out_change, const plDocu
     FlattenSteps(path, out_change.m_Steps);
   }
 
-  out_change.m_Change.m_sProperty = sProperty;
+  out_change.m_Change.m_sProperty = szProperty;
 }
 
 plUuid plDocumentObjectMirror::FindRootOpObject(const plDocumentObject* pParent, plHybridArray<const plDocumentObject*, 8>& path)

@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{9942389368597704355,5056955079846159374}}
-		u4 %Hash{15285320274292164611}
+		u4 %Hash{10982342019232288542}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -345,7 +345,7 @@ o
 		b %CastShadows{1}
 		f %ConstantBias{0xCDCCCC3D}
 		f %FadeOutStart{0xCDCC4C3F}
-		f %Intensity{0x0050C347}
+		f %Intensity{0x0000803F}
 		ColorGamma %LightColor{u1{255,255,255,255}}
 		s %LightUnit{"plLightUnit::Lumen"}
 		f %MinShadowRange{0x00004842}
@@ -367,7 +367,7 @@ o
 	p
 	{
 		b %Active{1}
-		f %Aperture{0x00008041}
+		f %Aperture{0x0000803F}
 		s %CameraRenderPipeline{""}
 		f %Dimensions{0x00002041}
 		f %EV100{0}
@@ -490,37 +490,6 @@ o
 			s{"CastShadow"}
 			s{"AutoColMesh"}
 		}
-	}
-}
-o
-{
-	Uuid %id{u4{3306204807635805078,4656029013925541611}}
-	s %t{"plCameraComponent"}
-	u3 %v{11}
-	p
-	{
-		b %Active{1}
-		f %Aperture{0x0000803F}
-		s %CameraRenderPipeline{""}
-		f %Dimensions{0x00002041}
-		f %EV100{0}
-		i1 %EditorShortcut{-1}
-		VarArray %ExcludeTags{}
-		f %ExposureCompensation{0}
-		f %FOV{0x00007042}
-		f %FarPlane{0x00007A44}
-		f %FinalExposure{0}
-		f %FocusDistance{0xCDCC4C3E}
-		f %ISO{0x0000C842}
-		VarArray %IncludeTags{}
-		s %Mode{"plCameraMode::PerspectiveFixedFovY"}
-		f %NearPlane{0x0000803E}
-		s %RenderTarget{""}
-		Vec2 %RenderTargetOffset{f{0,0}}
-		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
-		b %ShowStats{0}
-		Time %ShutterTime{d{0xF168E388B5F8E43E}}
-		s %UsageHint{"plCameraUsageHint::EditorView"}
 	}
 }
 o
@@ -773,7 +742,7 @@ o
 	{
 		b %Active{1}
 		ColorGamma %BottomColor{u1{89,89,108,255}}
-		f %Intensity{0x0050C347}
+		f %Intensity{0x0000803F}
 		ColorGamma %TopColor{u1{124,124,149,255}}
 	}
 }
@@ -1265,7 +1234,7 @@ o
 	{
 		b %Active{1}
 		s %CubeMap{"{ 0b202e08-a64f-465d-b38e-15b81d161822 }"}
-		f %ExposureBias{0x00401C46}
+		f %ExposureBias{0x9A99193F}
 		b %InverseTonemap{0}
 		b %UseFog{1}
 		f %VirtualDistance{0x00007A44}
@@ -1323,32 +1292,6 @@ o
 		f %Value1{0}
 		f %Value2{0}
 		f %Value3{0}
-	}
-}
-o
-{
-	Uuid %id{u4{12525481912322619785,5399438216372817928}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children
-		{
-			Uuid{u4{6227873501636811408,5502992849157818176}}
-		}
-		VarArray %Components{}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0xD1559640,0x3909F5C0,0xB2C6033F}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{"Editor"}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-		}
 	}
 }
 o
@@ -1482,32 +1425,6 @@ o
 		{
 			s{"CastShadow"}
 			s{"AutoColMesh"}
-		}
-	}
-}
-o
-{
-	Uuid %id{u4{6227873501636811408,5502992849157818176}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{3306204807635805078,4656029013925541611}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0xC05B12BE,0}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
 		}
 	}
 }
@@ -1784,7 +1701,6 @@ o
 			Uuid{u4{13102665823260780598,10395193144561511314}}
 			Uuid{u4{2370582970120980703,15181957159360090340}}
 			Uuid{u4{579611923524634592,16318104803921398191}}
-			Uuid{u4{12525481912322619785,5399438216372817928}}
 		}
 		Uuid %Settings{u4{12518859769286275017,4712398715231436096}}
 	}
@@ -5199,7 +5115,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plComponent"}
-		s %PluginName{"plasmaEnginePluginScene"}
+		s %PluginName{"PlasmaEnginePluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plShapeIconComponent"}
 		u3 %TypeVersion{1}

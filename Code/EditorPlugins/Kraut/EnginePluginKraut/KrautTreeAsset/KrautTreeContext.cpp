@@ -20,12 +20,12 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plKrautTreeContext::plKrautTreeContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_pMainObject = nullptr;
 }
 
-void plKrautTreeContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg0)
+void plKrautTreeContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg0)
 {
   if (auto pMsg = plDynamicCast<const plQuerySelectionBBoxMsgToEngine*>(pMsg0))
   {
@@ -54,7 +54,7 @@ void plKrautTreeContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg0)
     return;
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pMsg0);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg0);
 }
 
 void plKrautTreeContext::OnInitialize()
@@ -100,7 +100,7 @@ void plKrautTreeContext::OnInitialize()
     plSimpleWindComponent* pWind = nullptr;
     plSimpleWindComponent::CreateComponent(pObj, pWind);
 
-    pWind->m_Deviation = plAngle::MakeFromDegree(180);
+    pWind->m_Deviation = plAngle::Degree(180);
     pWind->m_MinWindStrength = plWindStrength::Calm;
     pWind->m_MaxWindStrength = plWindStrength::ModerateBreple;
   }
@@ -120,7 +120,7 @@ void plKrautTreeContext::OnInitialize()
       {
         // Build geometry
         plGeometry::GeoOptions opt;
-        opt.m_Transform = plMat4::MakeTranslation(plVec3(0, 0, -0.05f));
+        opt.m_Transform.SetTranslationMatrix(plVec3(0, 0, -0.05f));
 
         plGeometry geom;
         geom.AddCylinder(8.0f, 7.9f, 0.05f, 0.05f, true, true, 32, opt);
@@ -161,17 +161,17 @@ void plKrautTreeContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plKrautTreeContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plKrautTreeContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plKrautTreeViewContext, this);
 }
 
-void plKrautTreeContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plKrautTreeContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }
 
-bool plKrautTreeContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
+bool plKrautTreeContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
 {
   {
     PLASMA_LOCK(m_pWorld->GetWriteMarker());
@@ -192,12 +192,13 @@ bool plKrautTreeContext::UpdateThumbnailViewContext(plEngineProcessViewContext* 
 }
 
 
-void plKrautTreeContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
+void plKrautTreeContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (m_pMainObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   {
     PLASMA_LOCK(m_pWorld->GetWriteMarker());

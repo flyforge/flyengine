@@ -17,9 +17,9 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureContext, 1, plRTTIDefaultAllocator<
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-static void CreatePreviewRect(plGeometry& ref_geom)
+static void CreatePreviewRect(plGeometry& geom)
 {
-  const plMat4 mTransform = plMat4::MakeIdentity();
+  const plMat4 mTransform = plMat4::IdentityMatrix();
   const plVec2 size(1.0f);
   const plColor color = plColor::White;
 
@@ -27,20 +27,20 @@ static void CreatePreviewRect(plGeometry& ref_geom)
 
   plUInt32 idx[4];
 
-  idx[0] = ref_geom.AddVertex(plVec3(-halfSize.x, 0, -halfSize.y), plVec3(-1, 0, 0), plVec2(-1, 2), color, 0, mTransform);
-  idx[1] = ref_geom.AddVertex(plVec3(halfSize.x, 0, -halfSize.y), plVec3(-1, 0, 0), plVec2(2, 2), color, 0, mTransform);
-  idx[2] = ref_geom.AddVertex(plVec3(halfSize.x, 0, halfSize.y), plVec3(-1, 0, 0), plVec2(2, -1), color, 0, mTransform);
-  idx[3] = ref_geom.AddVertex(plVec3(-halfSize.x, 0, halfSize.y), plVec3(-1, 0, 0), plVec2(-1, -1), color, 0, mTransform);
+  idx[0] = geom.AddVertex(plVec3(-halfSize.x, 0, -halfSize.y), plVec3(-1, 0, 0), plVec2(-1, 2), color, 0, mTransform);
+  idx[1] = geom.AddVertex(plVec3(halfSize.x, 0, -halfSize.y), plVec3(-1, 0, 0), plVec2(2, 2), color, 0, mTransform);
+  idx[2] = geom.AddVertex(plVec3(halfSize.x, 0, halfSize.y), plVec3(-1, 0, 0), plVec2(2, -1), color, 0, mTransform);
+  idx[3] = geom.AddVertex(plVec3(-halfSize.x, 0, halfSize.y), plVec3(-1, 0, 0), plVec2(-1, -1), color, 0, mTransform);
 
-  ref_geom.AddPolygon(idx, false);
+  geom.AddPolygon(idx, false);
 }
 
 plTextureContext::plTextureContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plTextureContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
+void plTextureContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plDocumentConfigMsgToEngine>())
   {
@@ -54,7 +54,7 @@ void plTextureContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
     }
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
 }
 
 void plTextureContext::OnInitialize()
@@ -135,7 +135,7 @@ void plTextureContext::OnInitialize()
     plGameObject* pObj;
 
     obj.m_sName.Assign("TexturePreview");
-    obj.m_LocalRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
+    obj.m_LocalRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
     m_hPreviewObject = m_pWorld->CreateObject(obj, pObj);
 
     plMeshComponent* pMesh;
@@ -145,12 +145,12 @@ void plTextureContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plTextureContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plTextureContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plTextureViewContext, this);
 }
 
-void plTextureContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plTextureContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }

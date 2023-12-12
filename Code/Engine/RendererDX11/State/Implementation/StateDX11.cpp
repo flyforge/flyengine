@@ -15,11 +15,11 @@
 
 plGALBlendStateDX11::plGALBlendStateDX11(const plGALBlendStateCreationDescription& Description)
   : plGALBlendState(Description)
-
+  , m_pDXBlendState(nullptr)
 {
 }
 
-plGALBlendStateDX11::~plGALBlendStateDX11() = default;
+plGALBlendStateDX11::~plGALBlendStateDX11() {}
 
 static D3D11_BLEND_OP ToD3DBlendOp(plGALBlendOp::Enum e)
 {
@@ -121,11 +121,11 @@ plResult plGALBlendStateDX11::DeInitPlatform(plGALDevice* pDevice)
 
 plGALDepthStencilStateDX11::plGALDepthStencilStateDX11(const plGALDepthStencilStateCreationDescription& Description)
   : plGALDepthStencilState(Description)
-
+  , m_pDXDepthStencilState(nullptr)
 {
 }
 
-plGALDepthStencilStateDX11::~plGALDepthStencilStateDX11() = default;
+plGALDepthStencilStateDX11::~plGALDepthStencilStateDX11() {}
 
 plResult plGALDepthStencilStateDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -171,11 +171,11 @@ plResult plGALDepthStencilStateDX11::DeInitPlatform(plGALDevice* pDevice)
 
 plGALRasterizerStateDX11::plGALRasterizerStateDX11(const plGALRasterizerStateCreationDescription& Description)
   : plGALRasterizerState(Description)
-
+  , m_pDXRasterizerState(nullptr)
 {
 }
 
-plGALRasterizerStateDX11::~plGALRasterizerStateDX11() = default;
+plGALRasterizerStateDX11::~plGALRasterizerStateDX11() {}
 
 
 
@@ -255,11 +255,11 @@ plResult plGALRasterizerStateDX11::DeInitPlatform(plGALDevice* pDevice)
 
 plGALSamplerStateDX11::plGALSamplerStateDX11(const plGALSamplerStateCreationDescription& Description)
   : plGALSamplerState(Description)
-
+  , m_pDXSamplerState(nullptr)
 {
 }
 
-plGALSamplerStateDX11::~plGALSamplerStateDX11() = default;
+plGALSamplerStateDX11::~plGALSamplerStateDX11() {}
 
 /*
  */

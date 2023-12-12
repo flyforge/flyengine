@@ -13,16 +13,16 @@ plBoxGizmo::plBoxGizmo()
 
   m_ManipulateMode = ManipulateMode::None;
 
-  m_hCorners.ConfigureHandle(this, plEngineGizmoHandleType::BoxCorners, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+  m_hCorners.ConfigureHandle(this, PlasmaEngineGizmoHandleType::BoxCorners, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
 
   for (int i = 0; i < 3; ++i)
   {
-    m_Edges[i].ConfigureHandle(this, plEngineGizmoHandleType::BoxEdges, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
-    m_Faces[i].ConfigureHandle(this, plEngineGizmoHandleType::BoxFaces, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+    m_Edges[i].ConfigureHandle(this, PlasmaEngineGizmoHandleType::BoxEdges, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+    m_Faces[i].ConfigureHandle(this, PlasmaEngineGizmoHandleType::BoxFaces, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
   }
 
   SetVisible(false);
-  SetTransformation(plTransform::MakeIdentity());
+  SetTransformation(plTransform::IdentityTransform());
 }
 
 void plBoxGizmo::OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
@@ -50,24 +50,24 @@ void plBoxGizmo::OnVisibleChanged(bool bVisible)
 void plBoxGizmo::OnTransformationChanged(const plTransform& transform)
 {
   plMat4 scale, rot;
-  scale = plMat4::MakeScaling(m_vSize);
+  scale.SetScalingMatrix(m_vSize);
   scale = transform.GetAsMat4() * scale;
 
   m_hCorners.SetTransformation(scale);
 
-  rot = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
+  rot.SetRotationMatrixX(plAngle::Degree(90));
   m_Edges[0].SetTransformation(scale * rot);
 
-  rot = plMat4::MakeRotationY(plAngle::MakeFromDegree(90));
+  rot.SetRotationMatrixY(plAngle::Degree(90));
   m_Faces[0].SetTransformation(scale * rot);
 
   rot.SetIdentity();
   m_Edges[1].SetTransformation(scale * rot);
 
-  rot = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
+  rot.SetRotationMatrixX(plAngle::Degree(90));
   m_Faces[1].SetTransformation(scale * rot);
 
-  rot = plMat4::MakeRotationZ(plAngle::MakeFromDegree(90));
+  rot.SetRotationMatrixZ(plAngle::Degree(90));
   m_Edges[2].SetTransformation(scale * rot);
 
   rot.SetIdentity();
@@ -87,15 +87,15 @@ void plBoxGizmo::DoFocusLost(bool bCancel)
   m_ManipulateMode = ManipulateMode::None;
 }
 
-plEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
+PlasmaEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
   if (e->modifiers() != 0)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (m_pInteractionGizmoHandle == &m_hCorners)
   {
@@ -126,7 +126,7 @@ plEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
     m_ManipulateMode = ManipulateMode::PlaneYZ;
   }
   else
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -134,7 +134,7 @@ plEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
 
   m_LastInteraction = plTime::Now();
 
-  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
 
   SetActiveInputContext(this);
 
@@ -143,38 +143,36 @@ plEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plBoxGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+PlasmaEditorInput plBoxGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
+PlasmaEditorInput plBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
-    return plEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
 
-  const QPoint mousePosition = e->globalPosition().toPoint();
-
-  const plVec2I32 vNewMousePos = plVec2I32(mousePosition.x(), mousePosition.y());
+  const plVec2I32 vNewMousePos = plVec2I32(e->globalPos().x(), e->globalPos().y());
   const plVec2I32 vDiff = vNewMousePos - m_vLastMousePos;
 
   m_vLastMousePos = UpdateMouseMode(e);
@@ -217,12 +215,12 @@ plEditorInput plBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-void plBoxGizmo::SetSize(const plVec3& vSize)
+void plBoxGizmo::SetSize(const plVec3& size)
 {
-  m_vSize = vSize;
+  m_vSize = size;
 
   // update the scale
   OnTransformationChanged(GetTransformation());

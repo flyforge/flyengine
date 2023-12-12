@@ -27,8 +27,8 @@ int main(int argc, const char** argv)
   char** argv = nullptr;
   QApplication* pQtApplication = new QApplication(argc, const_cast<char**>(argv));
   pQtApplication->setApplicationName("plFileserve");
-  pQtApplication->setOrganizationDomain("https://plasmagameengine.com/");
-  pQtApplication->setOrganizationName("Plasma Engine Project");
+  pQtApplication->setOrganizationDomain("www.PlasmaEngine.net");
+  pQtApplication->setOrganizationName("PlasmaEngine Project");
   pQtApplication->setApplicationVersion("1.0.0");
 
   plRun_Startup(pApp).IgnoreResult();
@@ -70,7 +70,7 @@ void plFileserverApp::FileserverEventHandler(const plFileserverEvent& e)
     case plFileserverEvent::Type::ClientConnected:
     case plFileserverEvent::Type::ClientReconnected:
       ++m_uiConnections;
-      m_TimeTillClosing = plTime::MakeZero();
+      m_TimeTillClosing.SetZero();
       break;
     case plFileserverEvent::Type::ClientDisconnected:
       --m_uiConnections;

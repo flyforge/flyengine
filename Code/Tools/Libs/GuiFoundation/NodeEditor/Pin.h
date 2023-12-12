@@ -38,10 +38,10 @@ public:
   virtual void UpdateConnections();
   void SetHighlightState(plQtPinHighlightState state);
 
-  void SetActive(bool bActive);
+  void SetActive(bool active);
 
-  virtual void ExtendContextMenu(QMenu& ref_menu) {}
-  virtual void keyPressEvent(QKeyEvent* pEvent) override {}
+  virtual void ExtendContextMenu(QMenu& menu) {}
+  virtual void keyPressEvent(QKeyEvent* event) override {}
 
 protected:
   virtual bool UpdatePinColors(const plColorGammaUB* pOverwriteColor = nullptr);
@@ -52,7 +52,6 @@ protected:
   QPointF m_PinCenter;
 
   bool m_bTranslatePinName = true;
-
 private:
   bool m_bIsActive = true;
 

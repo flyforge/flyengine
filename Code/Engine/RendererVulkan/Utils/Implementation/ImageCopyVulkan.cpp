@@ -323,8 +323,7 @@ void plImageCopyVulkan::Init(const plGALTextureVulkan* pSource, const plGALTextu
     }
 
     const plGALShaderVulkan::DescriptorSetLayoutDesc& descriptorLayoutDesc = m_PipelineDesc.m_pCurrentShader->GetDescriptorSetLayout();
-    m_LayoutDesc.m_layout.SetCount(1);
-    m_LayoutDesc.m_layout[0] = plResourceCacheVulkan::RequestDescriptorSetLayout(descriptorLayoutDesc);
+    m_LayoutDesc.m_layout = plResourceCacheVulkan::RequestDescriptorSetLayout(descriptorLayoutDesc);
     m_PipelineDesc.m_layout = plResourceCacheVulkan::RequestPipelineLayout(m_LayoutDesc);
     m_pipeline = plResourceCacheVulkan::RequestGraphicsPipeline(m_PipelineDesc);
   }
@@ -458,7 +457,7 @@ void plImageCopyVulkan::RenderInternal(const plVec3U32& sourceOffset, const vk::
   }
 
   // Descriptor Set
-  vk::DescriptorSet descriptorSet = plDescriptorSetPoolVulkan::CreateDescriptorSet(m_LayoutDesc.m_layout[0]);
+  vk::DescriptorSet descriptorSet = plDescriptorSetPoolVulkan::CreateDescriptorSet(m_LayoutDesc.m_layout);
   {
     plHybridArray<vk::WriteDescriptorSet, 16> descriptorWrites;
 
@@ -466,27 +465,27 @@ void plImageCopyVulkan::RenderInternal(const plVec3U32& sourceOffset, const vk::
     sourceInfo.imageLayout = bSourceIsDepth ? vk::ImageLayout::eDepthStencilReadOnlyOptimal : vk::ImageLayout::eShaderReadOnlyOptimal;
     sourceInfo.imageView = sourceView;
 
-    plArrayPtr<const plShaderResourceBinding> bindingMapping = m_PipelineDesc.m_pCurrentShader->GetBindings();
+    plArrayPtr<const plGALShaderVulkan::BindingMapping> bindingMapping = m_PipelineDesc.m_pCurrentShader->GetBindingMapping();
     const plUInt32 uiCount = bindingMapping.GetCount();
     for (plUInt32 i = 0; i < uiCount; i++)
     {
-      const plShaderResourceBinding& mapping = bindingMapping[i];
+      const plGALShaderVulkan::BindingMapping& mapping = bindingMapping[i];
       vk::WriteDescriptorSet& write = descriptorWrites.ExpandAndGetRef();
       write.dstArrayElement = 0;
-      write.descriptorType = plConversionUtilsVulkan::GetDescriptorType(mapping.m_DescriptorType);
-      write.dstBinding = mapping.m_iSlot;
+      write.descriptorType = mapping.m_descriptorType;
+      write.dstBinding = mapping.m_uiTarget;
       write.dstSet = descriptorSet;
       write.descriptorCount = 1;
-      switch (mapping.m_DescriptorType)
+      switch (mapping.m_type)
       {
-        case plGALShaderDescriptorType::ConstantBuffer:
+        case plGALShaderVulkan::BindingMapping::ConstantBuffer:
         {
           //#TODO_VULKAN constant buffer for offset in the shader to allow region copy
           //const plGALBufferVulkan* pBuffer = m_pBoundConstantBuffers[mapping.m_uiSource];
           //write.pBufferInfo = &pBuffer->GetBufferInfo();
         }
         break;
-        case plGALShaderDescriptorType::Texture:
+        case plGALShaderVulkan::BindingMapping::ResourceView:
         {
           write.pImageInfo = &sourceInfo;
         }

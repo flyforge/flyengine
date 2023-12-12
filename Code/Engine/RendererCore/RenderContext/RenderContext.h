@@ -304,7 +304,7 @@ private:
   {
     PLASMA_DECLARE_POD_TYPE();
 
-    BoundConstantBuffer() = default;
+    BoundConstantBuffer() {}
     BoundConstantBuffer(plGALBufferHandle hConstantBuffer)
       : m_hConstantBuffer(hConstantBuffer)
     {
@@ -369,9 +369,9 @@ private: // Per Renderer States
   void BindShaderInternal(const plShaderResourceHandle& hShader, plBitflags<plShaderBindFlags> flags);
   plShaderPermutationResource* ApplyShaderState();
   plMaterialResource* ApplyMaterialState();
-  void ApplyConstantBufferBindings(const plGALShader* pShader);
-  void ApplyTextureBindings(const plGALShader* pShader);
-  void ApplyUAVBindings(const plGALShader* pShader);
-  void ApplySamplerBindings(const plGALShader* pShader);
-  void ApplyBufferBindings(const plGALShader* pShader);
+  void ApplyConstantBufferBindings(const plShaderStageBinary* pBinary);
+  void ApplyTextureBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary);
+  void ApplyUAVBindings(const plShaderStageBinary* pBinary);
+  void ApplySamplerBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary);
+  void ApplyBufferBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary);
 };

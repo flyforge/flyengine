@@ -1,8 +1,16 @@
-AI;AI
-plRcAgentComponent;Recast Agent
-plRcNavMeshComponent;Recast Navmesh
-NavMeshConfig;Navmesh Config
-plRcMarkPoiVisibleComponent;Recast Mark POI Visible
-plSoldierComponent;Soldier
+# Asset Types
+
+# UI
+
 Menu.Recast;Recast
 NavMesh.Generate;Generate NavMesh
+
+# Component Types
+
+plRcAgentComponent;Recast Agent
+plRcNavMeshComponent;Recast Navmesh;;https://plasmaengine.github.io/PlasmaDocs/#ai/recast-navmesh-component/
+plRcMarkPoiVisibleComponent;Recast Mark POI Visible
+
+# Properties
+
+NavMeshConfig;Navmesh Config

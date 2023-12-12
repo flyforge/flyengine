@@ -25,20 +25,20 @@ PLASMA_END_COMPONENT_TYPE
 plRcMarkPoiVisibleComponent::plRcMarkPoiVisibleComponent() = default;
 plRcMarkPoiVisibleComponent::~plRcMarkPoiVisibleComponent() = default;
 
-void plRcMarkPoiVisibleComponent::SerializeComponent(plWorldWriter& inout_stream) const
+void plRcMarkPoiVisibleComponent::SerializeComponent(plWorldWriter& stream) const
 {
-  SUPER::SerializeComponent(inout_stream);
-  plStreamWriter& s = inout_stream.GetStream();
+  SUPER::SerializeComponent(stream);
+  plStreamWriter& s = stream.GetStream();
 
   s << m_fRadius;
   s << m_uiCollisionLayer;
 }
 
-void plRcMarkPoiVisibleComponent::DeserializeComponent(plWorldReader& inout_stream)
+void plRcMarkPoiVisibleComponent::DeserializeComponent(plWorldReader& stream)
 {
-  SUPER::DeserializeComponent(inout_stream);
+  SUPER::DeserializeComponent(stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = inout_stream.GetStream();
+  plStreamReader& s = stream.GetStream();
 
   s >> m_fRadius;
   s >> m_uiCollisionLayer;

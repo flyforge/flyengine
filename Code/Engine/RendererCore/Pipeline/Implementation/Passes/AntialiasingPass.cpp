@@ -4,7 +4,6 @@
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderContext/RenderContext.h>
 
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererFoundation/Resources/RenderTargetView.h>
 #include <RendererFoundation/Resources/Texture.h>
 
@@ -31,7 +30,7 @@ plAntialiasingPass::plAntialiasingPass()
   }
 }
 
-plAntialiasingPass::~plAntialiasingPass() = default;
+plAntialiasingPass::~plAntialiasingPass() {}
 
 bool plAntialiasingPass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
@@ -98,18 +97,6 @@ void plAntialiasingPass::Execute(const plRenderViewContext& renderViewContext, c
   renderViewContext.m_pRenderContext->DrawMeshBuffer().IgnoreResult();
 }
 
-plResult plAntialiasingPass::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  return PLASMA_SUCCESS;
-}
 
-plResult plAntialiasingPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  return PLASMA_SUCCESS;
-}
 
 PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_AntialiasingPass);

@@ -2,8 +2,6 @@
 
 #include <Foundation/Containers/Map.h>
 #include <GuiFoundation/GuiFoundationDLL.h>
-#include <ToolsFoundation/Utilities/SearchPatternFilter.h>
-
 #include <QSortFilterProxyModel>
 
 class QWidget;
@@ -13,9 +11,9 @@ class PLASMA_GUIFOUNDATION_DLL plQtTreeSearchFilterModel : public QSortFilterPro
   Q_OBJECT
 
 public:
-  plQtTreeSearchFilterModel(QWidget* pParent);
+  plQtTreeSearchFilterModel(QWidget* parent);
 
-  void SetFilterText(const QString& sText);
+  void SetFilterText(const QString& text);
 
   /// \brief By default only nodes (and their parents) are shown that fit the search criterion.
   /// If this is enabled, all child nodes of nodes that fit the criterion are included as well.
@@ -28,6 +26,7 @@ protected:
 
   bool m_bIncludeChildren;
   QAbstractItemModel* m_pSourceModel;
-  plSearchPatternFilter m_Filter;
+  QString m_sFilterText;
   plMap<QModelIndex, bool> m_Visible;
 };
+

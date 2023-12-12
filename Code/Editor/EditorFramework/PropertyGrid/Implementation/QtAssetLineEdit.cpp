@@ -3,8 +3,8 @@
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <EditorFramework/PropertyGrid/AssetBrowserPropertyWidget.moc.h>
 
-plQtAssetLineEdit::plQtAssetLineEdit(QWidget* pParent /*= nullptr*/)
-  : QLineEdit(pParent)
+plQtAssetLineEdit::plQtAssetLineEdit(QWidget* parent /*= nullptr*/)
+  : QLineEdit(parent)
 {
 }
 
@@ -75,35 +75,5 @@ void plQtAssetLineEdit::dropEvent(QDropEvent* e)
       setText(QString());
 
     return;
-  }
-}
-
-void plQtAssetLineEdit::paintEvent(QPaintEvent* e)
-{
-  if (hasFocus())
-  {
-    QLineEdit::paintEvent(e);
-  }
-  else
-  {
-    QPainter p(this);
-
-    // Paint background
-    QStyleOptionFrame panel;
-    initStyleOption(&panel);
-    style()->drawPrimitive(QStyle::PE_PanelLineEdit, &panel, &p, this);
-
-    // Clip to line edit contents
-    QRect r = style()->subElementRect(QStyle::SE_LineEditContents, &panel, this);
-    auto margins = textMargins();
-    r = r.marginsRemoved(margins);
-    p.setClipRect(r);
-
-    // Render asset name
-    r.adjust(2, 0, 2, 0);
-    QTextOption opt(Qt::AlignLeft | Qt::AlignVCenter);
-    opt.setWrapMode(QTextOption::NoWrap);
-    plStringBuilder sAsset = qtToPlasmaString(text());
-    p.drawText(r, plMakeQString(sAsset.GetFileName()), opt);
   }
 }

@@ -4,9 +4,11 @@
 #include <GuiFoundation/NodeEditor/NodeView.moc.h>
 #include <QMouseEvent>
 
-plQtNodeView::plQtNodeView(QWidget* pParent)
-  : QGraphicsView(pParent)
-
+plQtNodeView::plQtNodeView(QWidget* parent)
+  : QGraphicsView(parent)
+  , m_pScene(nullptr)
+  , m_bPanning(false)
+  , m_iPanCounter(0)
 {
   setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
   setDragMode(QGraphicsView::DragMode::RubberBandDrag);
@@ -17,7 +19,7 @@ plQtNodeView::plQtNodeView(QWidget* pParent)
   m_ViewScale = QPointF(1, 1);
 }
 
-plQtNodeView::~plQtNodeView() = default;
+plQtNodeView::~plQtNodeView() {}
 
 void plQtNodeView::SetScene(plQtNodeScene* pScene)
 {
@@ -42,7 +44,11 @@ void plQtNodeView::mousePressEvent(QMouseEvent* event)
   if (event->button() == Qt::RightButton)
   {
     setContextMenuPolicy(Qt::NoContextMenu);
-    m_StartDragView = event->position();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    m_StartDragView = event->localPos();
+#else
+    m_vStartDragView = event->pos();
+#endif
 
     m_StartDragScene = m_ViewPos;
     viewport()->setCursor(Qt::ClosedHandCursor);
@@ -60,7 +66,7 @@ void plQtNodeView::mouseMoveEvent(QMouseEvent* event)
   {
     m_iPanCounter++;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    QPointF vViewDelta = m_StartDragView - event->position();
+    QPointF vViewDelta = m_StartDragView - event->localPos();
 #else
     QPointF vViewDelta = m_vStartDragView - event->pos();
 #endif

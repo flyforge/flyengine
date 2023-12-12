@@ -11,7 +11,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtModifiedDocumentsDlg(QWidget* pParent, const plHybridArray<plDocument*, 32>& modifiedDocs);
+  plQtModifiedDocumentsDlg(QWidget* parent, const plHybridArray<plDocument*, 32>& ModifiedDocs);
 
 
 private Q_SLOTS:

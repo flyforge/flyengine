@@ -174,7 +174,7 @@ public:
 ///
 /// \sa plProfilingScope
 /// \sa PLASMA_PROFILE_LIST_SCOPE
-#  define PLASMA_PROFILE_SCOPE(szScopeName) plProfilingScope PLASMA_CONCAT(_plProfilingScope, PLASMA_SOURCE_LINE)(szScopeName, PLASMA_SOURCE_FUNCTION, plTime::MakeZero())
+#  define PLASMA_PROFILE_SCOPE(szScopeName) plProfilingScope PLASMA_CONCAT(_plProfilingScope, PLASMA_SOURCE_LINE)(szScopeName, PLASMA_SOURCE_FUNCTION, plTime::Zero())
 
 
 /// \brief Same as PLASMA_PROFILE_SCOPE but if the scope takes longer than 'Timeout', the plProfilingSystem's timeout callback is executed.

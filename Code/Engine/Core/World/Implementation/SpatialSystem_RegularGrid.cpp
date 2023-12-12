@@ -254,7 +254,7 @@ struct plSpatialSystem_RegularGrid::Grid
     , m_bCanBeCached(CanBeCached(category))
   {
     plSimdBBox overflowBox;
-    overflowBox.SetCenterAndHalfExtents(plSimdVec4f::MakeZero(), plSimdVec4f((float)(ref_system.m_vCellSize.x() * MAX_CELL_INDEX)));
+    overflowBox.SetCenterAndHalfExtents(plSimdVec4f::ZeroVector(), plSimdVec4f((float)(ref_system.m_vCellSize.x() * MAX_CELL_INDEX)));
 
     auto pOverflowCell = PLASMA_NEW(&m_System.m_AlignedAllocator, Cell, &m_System.m_AlignedAllocator, &m_System.m_Allocator);
     pOverflowCell->m_Bounds = overflowBox;
@@ -737,7 +737,7 @@ plSpatialDataHandle plSpatialSystem_RegularGrid::CreateSpatialDataAlwaysVisible(
     return plSpatialDataHandle();
 
   plSimdBBox hugeBox;
-  hugeBox.SetCenterAndHalfExtents(plSimdVec4f::MakeZero(), plSimdVec4f((float)(m_vCellSize.x() * MAX_CELL_INDEX)));
+  hugeBox.SetCenterAndHalfExtents(plSimdVec4f::ZeroVector(), plSimdVec4f((float)(m_vCellSize.x() * MAX_CELL_INDEX)));
 
   return AddSpatialDataToGrids(hugeBox, pObject, uiCategoryBitmask, tags, true);
 }

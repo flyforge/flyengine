@@ -69,7 +69,7 @@ plQtRmlUiAssetDocumentWindow::plQtRmlUiAssetDocumentWindow(plAssetDocument* pDoc
 
 void plQtRmlUiAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -77,7 +77,7 @@ void plQtRmlUiAssetDocumentWindow::InternalRedraw()
 void plQtRmlUiAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   for (auto pView : m_ViewWidgets)

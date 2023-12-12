@@ -14,7 +14,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtEditDynamicEnumsDlg(plDynamicStringEnum* pEnum, QWidget* pParent);
+  plQtEditDynamicEnumsDlg(plDynamicStringEnum* pEnum, QWidget* parent);
 
   plInt32 GetSelectedItem() const { return m_iSelectedItem; }
 

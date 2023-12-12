@@ -183,7 +183,7 @@ void plLargeBlockAllocator<BlockSize>::Deallocate(void* ptr)
   // find super block
   bool bFound = false;
   plUInt32 uiSuperBlockIndex = m_SuperBlocks.GetCount();
-  std::ptrdiff_t diff = 0;
+  ptrdiff_t diff = 0;
 
   for (; uiSuperBlockIndex-- > 0;)
   {

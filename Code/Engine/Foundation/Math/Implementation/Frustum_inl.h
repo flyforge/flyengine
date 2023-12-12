@@ -10,7 +10,7 @@ PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBBox& object) const
   // We're working with center and extents scaled by two - but the plane equation still works out
   // correctly since we set W = 2 here.
   center2.SetW(plSimdFloat(2.0f));
-  extents.SetW(plSimdFloat::MakeZero());
+  extents.SetW(plSimdFloat::Zero());
 
 #if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
   plSimdVec4f minusZero;
@@ -29,13 +29,13 @@ PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBBox& object) const
     // Specialized for SSE - this is faster than FlipSign for multiple calls since we can preload the constant -0.0f
     maxExtent.m_v = _mm_xor_ps(extents.m_v, _mm_andnot_ps(equation.m_v, minusZero.m_v));
 #else
-    maxExtent = extents.FlipSign(equation >= plSimdVec4f::MakeZero());
+    maxExtent = extents.FlipSign(equation >= plSimdVec4f::ZeroVector());
 #endif
 
     // Compute AABB corner which is the furthest along the plane normal
     const plSimdVec4f offset = center2 + maxExtent;
 
-    if (equation.Dot<4>(offset) > plSimdFloat::MakeZero())
+    if (equation.Dot<4>(offset) > plSimdFloat::Zero())
     {
       // outside
       return false;
@@ -109,5 +109,5 @@ PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBSphere& object) const
   minDist += radius;
 
   // If the distance is still less than zero, the sphere is completely "outside" of at least one plane.
-  return (minDist < plSimdVec4f::MakeZero()).NoneSet();
+  return (minDist < plSimdVec4f::ZeroVector()).NoneSet();
 }

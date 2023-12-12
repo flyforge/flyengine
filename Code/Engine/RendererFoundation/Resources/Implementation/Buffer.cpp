@@ -7,7 +7,7 @@ plGALBuffer::plGALBuffer(const plGALBufferCreationDescription& Description)
 {
 }
 
-plGALBuffer::~plGALBuffer() = default;
+plGALBuffer::~plGALBuffer() {}
 
 
 

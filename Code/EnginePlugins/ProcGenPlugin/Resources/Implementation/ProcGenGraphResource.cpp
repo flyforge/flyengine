@@ -12,7 +12,7 @@
 
 namespace plProcGenInternal
 {
-  extern Pattern* GetPattern(plProcPlacementPattern::Enum pattern);
+  extern Pattern* GetPattern(plTempHashedString sName);
 }
 
 using namespace plProcGenInternal;
@@ -140,6 +140,8 @@ plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
             pOutput->m_ObjectsToPlace.ExpandAndGetRef() = plResourceManager::LoadResource<plPrefabResource>(sTemp);
           }
 
+          pOutput->m_pPattern = plProcGenInternal::GetPattern("Bayer");
+
           chunk >> pOutput->m_fFootprint;
 
           chunk >> pOutput->m_vMinOffset;
@@ -174,14 +176,6 @@ plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
           {
             chunk >> pOutput->m_Mode;
           }
-
-          plEnum<plProcPlacementPattern> pattern = plProcPlacementPattern::RegularGrid;
-          if (chunk.GetCurrentChunk().m_uiChunkVersion >= 7)
-          {
-            chunk >> pattern;
-          }
-
-          pOutput->m_pPattern = plProcGenInternal::GetPattern(pattern);
 
           m_PlacementOutputs.PushBack(pOutput);
         }
@@ -257,7 +251,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plProcGenGraphResource, plProcGenGraphResou
   auto pOutput = PLASMA_DEFAULT_NEW(PlacementOutput);
   pOutput->m_sName.Assign("MissingPlacementOutput");
   pOutput->m_ObjectsToPlace.PushBack(plResourceManager::GetResourceTypeMissingFallback<plPrefabResource>());
-  pOutput->m_pPattern = plProcGenInternal::GetPattern(plProcPlacementPattern::RegularGrid);
+  pOutput->m_pPattern = plProcGenInternal::GetPattern("Bayer");
   pOutput->m_fFootprint = 3.0f;
   pOutput->m_vMinOffset.Set(-1.0f, -1.0f, -0.5f);
   pOutput->m_vMaxOffset.Set(1.0f, 1.0f, 0.0f);

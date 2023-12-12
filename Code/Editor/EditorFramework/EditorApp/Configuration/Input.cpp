@@ -5,10 +5,10 @@
 #include <Foundation/IO/OSFile.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
-void plQtEditorApp::GetKnownInputSlots(plDynamicArray<plString>& ref_slotList) const
+void plQtEditorApp::GetKnownInputSlots(plDynamicArray<plString>& slotList) const
 {
-  if (ref_slotList.IndexOf("") == plInvalidIndex)
-    ref_slotList.PushBack("");
+  if (slotList.IndexOf("") == plInvalidIndex)
+    slotList.PushBack("");
 
   plStringBuilder sFile;
   plDynamicArray<plStringView> Lines;
@@ -35,8 +35,8 @@ void plQtEditorApp::GetKnownInputSlots(plDynamicArray<plString>& ref_slotList) c
       {
         sSlot = Lines[s];
 
-        if (ref_slotList.IndexOf(sSlot) == plInvalidIndex)
-          ref_slotList.PushBack(sSlot);
+        if (slotList.IndexOf(sSlot) == plInvalidIndex)
+          slotList.PushBack(sSlot);
       }
     }
   }

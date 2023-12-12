@@ -11,13 +11,11 @@ public:
   plCollectionAssetDocumentManager();
   ~plCollectionAssetDocumentManager();
 
-  virtual void GetAssetTypesRequiringTransformForSceneExport(plSet<plTempHashedString>& inout_assetTypes) override;
-
 private:
   void OnDocumentManagerEvent(const plDocumentManager::Event& e);
 
   virtual void InternalCreateDocument(
-    plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) override;
+    const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) override;
   virtual void InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const override;
 
   virtual bool GeneratesProfileSpecificAssets() const override { return false; }

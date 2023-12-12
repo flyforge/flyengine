@@ -24,6 +24,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plOccluderComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
+    new plColorAttribute(plColorScheme::Rendering),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColorScheme::LightUI(plColorScheme::Blue)),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
   }
@@ -56,9 +57,9 @@ void plOccluderComponent::SetExtents(const plVec3& vExtents)
 void plOccluderComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
 {
   if (GetOwner()->IsStatic())
-    msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vExtents * 0.5f, m_vExtents * 0.5f)), plDefaultSpatialDataCategories::OcclusionStatic);
+    msg.AddBounds(plBoundingBox(-m_vExtents * 0.5f, m_vExtents * 0.5f), plDefaultSpatialDataCategories::OcclusionStatic);
   else
-    msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vExtents * 0.5f, m_vExtents * 0.5f)), plDefaultSpatialDataCategories::OcclusionDynamic);
+    msg.AddBounds(plBoundingBox(-m_vExtents * 0.5f, m_vExtents * 0.5f), plDefaultSpatialDataCategories::OcclusionDynamic);
 }
 
 void plOccluderComponent::OnMsgExtractOccluderData(plMsgExtractOccluderData& msg) const
@@ -86,7 +87,7 @@ void plOccluderComponent::SerializeComponent(plWorldWriter& inout_stream) const
 void plOccluderComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
   plStreamReader& s = inout_stream.GetStream();
 
   s >> m_vExtents;

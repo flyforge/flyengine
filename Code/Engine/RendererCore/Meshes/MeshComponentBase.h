@@ -19,6 +19,7 @@ public:
   plMeshResourceHandle m_hMesh;
   plMaterialResourceHandle m_hMaterial;
   plColor m_Color = plColor::White;
+  plVec3 m_Wind = plVec3::ZeroVector();
 
   plUInt32 m_uiSubMeshIndex : 30;
   plUInt32 m_uiFlipWinding : 1;
@@ -94,9 +95,6 @@ public:
   void SetColor(const plColor& color); // [ property ]
   const plColor& GetColor() const;     // [ property ]
 
-  void SetSortingDepthOffset(float fOffset); // [ property ]
-  float GetSortingDepthOffset() const;       // [ property ]
-
   void OnMsgSetMeshMaterial(plMsgSetMeshMaterial& ref_msg); // [ msg handler ]
   void OnMsgSetColor(plMsgSetColor& ref_msg);               // [ msg handler ]
 
@@ -114,5 +112,11 @@ protected:
   plMeshResourceHandle m_hMesh;
   plDynamicArray<plMaterialResourceHandle> m_Materials;
   plColor m_Color = plColor::White;
-  float m_fSortingDepthOffset = 0.0f;
+
+private:
+  void ComputeWind() const;
+
+  mutable plUInt64 m_uiLastWindUpdate = (plUInt64)-1;
+  mutable plVec3 m_vWindSpringPos;
+  mutable plVec3 m_vWindSpringVel;
 };

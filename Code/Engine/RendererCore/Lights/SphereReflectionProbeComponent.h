@@ -56,6 +56,6 @@ protected:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
   void OnTransformChanged(plMsgTransformChanged& msg);
   float m_fRadius = 5.0f;
-  float m_fFalloff = 0.1f;
+  float m_fFalloff = 0.2f;
   bool m_bSphereProjection = true;
 };

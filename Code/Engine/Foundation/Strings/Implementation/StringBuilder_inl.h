@@ -54,24 +54,6 @@ inline plStringBuilder::plStringBuilder(plStringView rhs, plAllocatorBase* pAllo
   *this = rhs;
 }
 
-inline plStringBuilder::plStringBuilder(const std::string_view& rhs, plAllocatorBase* pAllocator)
-  : m_Data(pAllocator)
-{
-  m_uiCharacterCount = 0;
-  AppendTerminator();
-
-  *this = rhs;
-}
-
-inline plStringBuilder::plStringBuilder(const std::string& rhs, plAllocatorBase* pAllocator)
-  : m_Data(pAllocator)
-{
-  m_uiCharacterCount = 0;
-  AppendTerminator();
-
-  *this = rhs;
-}
-
 PLASMA_ALWAYS_INLINE plAllocatorBase* plStringBuilder::GetAllocator() const
 {
   return m_Data.GetAllocator();

@@ -8,11 +8,11 @@
 class plPreferencesObjectManager : public plDocumentObjectManager
 {
 public:
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const override
+  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const override
   {
     for (auto pRtti : m_KnownTypes)
     {
-      ref_types.PushBack(pRtti);
+      Types.PushBack(pRtti);
     }
   }
 
@@ -24,10 +24,9 @@ class plPreferencesDocument : public plDocument
 {
   PLASMA_ADD_DYNAMIC_REFLECTION(plPreferencesDocument, plDocument);
 
-
 public:
-  plPreferencesDocument(plStringView sDocumentPath)
-    : plDocument(sDocumentPath, PLASMA_DEFAULT_NEW(plPreferencesObjectManager))
+  plPreferencesDocument(const char* szDocumentPath)
+    : plDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plPreferencesObjectManager))
   {
   }
 
@@ -38,8 +37,8 @@ public:
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPreferencesDocument, 1, plRTTINoAllocator)
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-plQtPreferencesDlg::plQtPreferencesDlg(QWidget* pParent)
-  : QDialog(pParent)
+plQtPreferencesDlg::plQtPreferencesDlg(QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 
@@ -86,7 +85,8 @@ plUuid plQtPreferencesDlg::NativeToObject(plPreferences* pPreferences)
   plRttiConverterContext context;
   plRttiConverterWriter conv(&graph, &context, true, true);
 
-  const plUuid guid = plUuid::MakeUuid();
+  plUuid guid;
+  guid.CreateNewUuid();
   context.RegisterObject(guid, pType, pPreferences);
   plAbstractObjectNode* pNode = conv.AddObjectToGraph(pType, pPreferences, "root");
 
@@ -109,8 +109,7 @@ void plQtPreferencesDlg::ObjectToNative(plUuid objectGuid, const plDocument* pPr
 
   // Write object to graph.
   plAbstractObjectGraph graph;
-  auto filter = [](const plDocumentObject*, const plAbstractProperty* pProp) -> bool
-  {
+  auto filter = [](const plDocumentObject*, const plAbstractProperty* pProp) -> bool {
     if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
       return false;
     return true;

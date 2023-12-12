@@ -18,11 +18,11 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTextureCubeContext::plTextureCubeContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plTextureCubeContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
+void plTextureCubeContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plDocumentConfigMsgToEngine>())
   {
@@ -36,7 +36,7 @@ void plTextureCubeContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
     }
   }
 
-  plEngineProcessDocumentContext::HandleMessage(pMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
 }
 
 void plTextureCubeContext::OnInitialize()
@@ -116,7 +116,7 @@ void plTextureCubeContext::OnInitialize()
     plGameObject* pObj;
 
     obj.m_sName.Assign("TextureCubePreview");
-    obj.m_LocalRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
+    obj.m_LocalRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
     m_hPreviewObject = m_pWorld->CreateObject(obj, pObj);
 
     plMeshComponent* pMesh;
@@ -126,12 +126,12 @@ void plTextureCubeContext::OnInitialize()
   }
 }
 
-plEngineProcessViewContext* plTextureCubeContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plTextureCubeContext::CreateViewContext()
 {
   return PLASMA_DEFAULT_NEW(plTextureCubeViewContext, this);
 }
 
-void plTextureCubeContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plTextureCubeContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_DEFAULT_DELETE(pContext);
 }

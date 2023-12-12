@@ -25,7 +25,7 @@ void plTypeScriptTranspiler::StartLoadTranspiler()
   if (m_LoadTaskGroup.IsValid())
     return;
 
-  plSharedPtr<plTask> pTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "Load TypeScript Transpiler", plTaskNesting::Never,
+  plSharedPtr<plTask> pTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "",
     [this]() //
     {
       PLASMA_PROFILE_SCOPE("Load TypeScript Transpiler");

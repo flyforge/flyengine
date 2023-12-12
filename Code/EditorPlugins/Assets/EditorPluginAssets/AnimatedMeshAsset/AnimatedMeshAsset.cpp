@@ -11,12 +11,12 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimatedMeshAssetDocument, 8, plRTTINoAllo
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plAnimatedMeshAssetDocument::plAnimatedMeshAssetDocument(plStringView sDocumentPath)
-  : plSimpleAssetDocument<plAnimatedMeshAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
+plAnimatedMeshAssetDocument::plAnimatedMeshAssetDocument(const char* szDocumentPath)
+  : plSimpleAssetDocument<plAnimatedMeshAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
 }
 
-plTransformStatus plAnimatedMeshAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plAnimatedMeshAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plProgressRange range("Transforming Asset", 2, false);
 
@@ -75,7 +75,7 @@ plStatus plAnimatedMeshAssetDocument::CreateMeshFromFile(plAnimatedMeshAssetProp
   opt.m_MeshNormalsPrecision = pProp->m_NormalPrecision;
   opt.m_MeshTexCoordsPrecision = pProp->m_TexCoordPrecision;
   opt.m_MeshBoneWeightPrecision = pProp->m_BoneWeightPrecision;
-  opt.m_bNormalizeWeights = pProp->m_bNormalizeWeights;
+  opt.m_bOptimize = false;
   // opt.m_RootTransform = CalculateTransformationMatrix(pProp);
 
   if (pImporter->Import(opt).Failed())
@@ -126,51 +126,51 @@ plAnimatedMeshAssetDocumentGenerator::plAnimatedMeshAssetDocumentGenerator()
   AddSupportedFileType("glb");
 }
 
-plAnimatedMeshAssetDocumentGenerator::~plAnimatedMeshAssetDocumentGenerator() = default;
+plAnimatedMeshAssetDocumentGenerator::~plAnimatedMeshAssetDocumentGenerator() {}
 
-void plAnimatedMeshAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
+void plAnimatedMeshAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const
 {
+  plStringBuilder baseOutputFile = sParentDirRelativePath;
+  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
+
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::LowPriority;
     info.m_sName = "AnimatedMeshImport.WithMaterials";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Animated_Mesh.svg";
   }
 
   {
-    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::LowPriority;
     info.m_sName = "AnimatedMeshImport.NoMaterials";
+    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Animated_Mesh.svg";
   }
 }
 
-plStatus plAnimatedMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plAnimatedMeshAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
 {
-  plStringBuilder sOutFile = sInputFileAbs;
-  sOutFile.ChangeFileExtension(GetDocumentExtension());
-  plOSFile::FindFreeFilename(sOutFile);
-
   auto pApp = plQtEditorApp::GetSingleton();
 
-  plStringBuilder sInputFileRel = sInputFileAbs;
-  pApp->MakePathDataDirectoryRelative(sInputFileRel);
-
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
   plAnimatedMeshAssetDocument* pAssetDoc = plDynamicCast<plAnimatedMeshAssetDocument*>(out_pGeneratedDocument);
+  if (pAssetDoc == nullptr)
+    return plStatus("Target document is not a valid plAnimatedMeshAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("MeshFile", sInputFileRel.GetView());
+  accessor.SetValue("MeshFile", sDataDirRelativePath);
 
-  if (sMode == "AnimatedMeshImport.WithMaterials")
+  if (info.m_sName == "AnimatedMeshImport.WithMaterials")
   {
     accessor.SetValue("ImportMaterials", true);
   }
 
-  if (sMode == "AnimatedMeshImport.NoMaterials")
+  if (info.m_sName == "AnimatedMeshImport.NoMaterials")
   {
     accessor.SetValue("ImportMaterials", false);
   }

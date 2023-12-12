@@ -89,11 +89,11 @@ plResult plGALSwapChainDX11::UpdateSwapChain(plGALDevice* pDevice, plEnum<plGALP
 
 plGALSwapChainDX11::plGALSwapChainDX11(const plGALWindowSwapChainCreationDescription& Description)
   : plGALWindowSwapChain(Description)
-
+  , m_pDXSwapChain(nullptr)
 {
 }
 
-plGALSwapChainDX11::~plGALSwapChainDX11() = default;
+plGALSwapChainDX11::~plGALSwapChainDX11() {}
 
 
 plResult plGALSwapChainDX11::InitPlatform(plGALDevice* pDevice)

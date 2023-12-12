@@ -14,7 +14,6 @@ plColorGradientAssetDocumentManager::plColorGradientAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "ColorGradient";
   m_DocTypeDesc.m_sFileExtension = "plColorGradientAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/ColorGradient.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Animation";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plColorGradientAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Data_Gradient");
@@ -36,7 +35,7 @@ void plColorGradientAssetDocumentManager::OnDocumentManagerEvent(const plDocumen
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plColorGradientAssetDocument>())
       {
-        new plQtColorGradientAssetDocumentWindow(e.m_pDocument); // NOLINT: not a memory leak
+        plQtColorGradientAssetDocumentWindow* pDocWnd = new plQtColorGradientAssetDocumentWindow(e.m_pDocument);
       }
     }
     break;
@@ -47,9 +46,9 @@ void plColorGradientAssetDocumentManager::OnDocumentManagerEvent(const plDocumen
 }
 
 void plColorGradientAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plColorGradientAssetDocument(sPath);
+  out_pDocument = new plColorGradientAssetDocument(szPath);
 }
 
 void plColorGradientAssetDocumentManager::InternalGetSupportedDocumentTypes(

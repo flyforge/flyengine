@@ -166,13 +166,13 @@ public:
       };
     };
 
-    static PLASMA_ALWAYS_INLINE ExecResult Completed() { return ExecResult::Completed(); }
+    static PLASMA_ALWAYS_INLINE ExecResult Completed() { return {0}; }
     static PLASMA_ALWAYS_INLINE ExecResult RunNext(int iExecSlot) { return {iExecSlot}; }
     static PLASMA_ALWAYS_INLINE ExecResult ContinueLater(plTime maxDelay) { return {State::ContinueLater, maxDelay}; }
     static PLASMA_ALWAYS_INLINE ExecResult Error() { return {State::Error}; }
 
     int m_NextExecAndState = 0;
-    plTime m_MaxDelay = plTime::MakeZero();
+    plTime m_MaxDelay = plTime::Zero();
   };
 
   struct Node;

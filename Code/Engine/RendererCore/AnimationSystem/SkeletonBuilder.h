@@ -38,7 +38,7 @@ protected:
     plUInt16 m_uiParentIndex = plInvalidJointIndex;
     plHashedString m_sName;
     plEnum<plSkeletonJointType> m_JointType;
-    plQuat m_qLocalJointOrientation = plQuat::MakeIdentity();
+    plQuat m_qLocalJointOrientation = plQuat::IdentityQuaternion();
     plAngle m_HalfSwingLimitZ;
     plAngle m_HalfSwingLimitY;
     plAngle m_TwistLimitHalfAngle;

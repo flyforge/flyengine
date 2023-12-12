@@ -20,7 +20,7 @@ struct PLASMA_RECASTPLUGIN_DLL plRecastConfig
   float m_fAgentHeight = 1.5f;
   float m_fAgentRadius = 0.3f;
   float m_fAgentClimbHeight = 0.4f;
-  plAngle m_WalkableSlope = plAngle::MakeFromDegree(45);
+  plAngle m_WalkableSlope = plAngle::Degree(45);
   float m_fCellSize = 0.2f;
   float m_fCellHeight = 0.2f;
   float m_fMaxEdgeLength = 4.0f;
@@ -30,8 +30,8 @@ struct PLASMA_RECASTPLUGIN_DLL plRecastConfig
   float m_fDetailMeshSampleDistanceFactor = 1.0f;
   float m_fDetailMeshSampleErrorFactor = 1.0f;
 
-  plResult Serialize(plStreamWriter& inout_stream) const;
-  plResult Deserialize(plStreamReader& inout_stream);
+  plResult Serialize(plStreamWriter& stream) const;
+  plResult Deserialize(plStreamReader& stream);
 };
 
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RECASTPLUGIN_DLL, plRecastConfig);
@@ -46,8 +46,8 @@ public:
 
   static plResult ExtractWorldGeometry(const plWorld& world, plWorldGeoExtractionUtil::MeshObjectList& out_worldGeo);
 
-  plResult Build(const plRecastConfig& config, const plWorldGeoExtractionUtil::MeshObjectList& worldGeo, plRecastNavMeshResourceDescriptor& out_navMeshDesc,
-    plProgress& ref_progress);
+  plResult Build(const plRecastConfig& config, const plWorldGeoExtractionUtil::MeshObjectList& worldGeo, plRecastNavMeshResourceDescriptor& out_NavMeshDesc,
+    plProgress& progress);
 
 private:
   static void FillOutConfig(struct rcConfig& cfg, const plRecastConfig& config, const plBoundingBox& bbox);
@@ -60,9 +60,7 @@ private:
 
   struct Triangle
   {
-    PLASMA_DECLARE_POD_TYPE();
-
-    Triangle() = default;
+    Triangle() {}
     Triangle(plInt32 a, plInt32 b, plInt32 c)
     {
       m_VertexIdx[0] = a;

@@ -33,8 +33,8 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 plEvent<const plGameObjectDocumentEvent&> plGameObjectDocument::s_GameObjectDocumentEvents;
 
 plGameObjectDocument::plGameObjectDocument(
-  plStringView sDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType)
-  : plAssetDocument(sDocumentPath, pObjectManager, engineConnectionType)
+  const char* szDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType)
+  : plAssetDocument(szDocumentPath, pObjectManager, engineConnectionType)
 {
   using Meta = plObjectMetaData<plUuid, plGameObjectMetaData>;
   m_GameObjectMetaData = PLASMA_DEFAULT_NEW(Meta);
@@ -81,13 +81,13 @@ void plGameObjectDocument::GameObjectDocumentEventHandler(const plGameObjectDocu
     case plGameObjectDocumentEvent::Type::GameMode_StartingPlay:
     case plGameObjectDocumentEvent::Type::GameMode_StartingSimulate:
     {
-      auto pEditorPrefsUser = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+      auto pEditorPrefsUser = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
       if (pEditorPrefsUser && pEditorPrefsUser->m_bClearEditorLogsOnPlay)
       {
         // on play, the engine log has a lot of activity, so makes sense to clear that first
         plQtLogPanel::GetSingleton()->EngineLog->GetLog()->Clear();
         // but I think we usually want to keep the editor log around
-        // plQtLogPanel::GetSingleton()->EditorLog->GetLog()->Clear();
+        //plQtLogPanel::GetSingleton()->EditorLog->GetLog()->Clear();
       }
     }
     break;
@@ -96,7 +96,7 @@ void plGameObjectDocument::GameObjectDocumentEventHandler(const plGameObjectDocu
   }
 }
 
-plEditorInputContext* plGameObjectDocument::GetEditorInputContextOverride()
+PlasmaEditorInputContext* plGameObjectDocument::GetEditorInputContextOverride()
 {
   if (GetActiveEditTool() && GetActiveEditTool()->GetEditorInputContextOverride() != nullptr)
   {
@@ -236,7 +236,7 @@ void plGameObjectDocument::SetGizmoMoveParentOnly(bool bMoveParent)
   ShowDocumentStatus(plFmt("Move Parent Only: {}", m_bGizmoMoveParentOnly ? "ON" : "OFF"));
 }
 
-void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, const plUuid& prefabGuid, plStringBuilder& out_sResult, QIcon* out_pIcon /*= nullptr*/) const
+void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, const plUuid& prefabGuid, plStringBuilder& out_Result, QIcon* out_pIcon /*= nullptr*/) const
 {
   // tries to find a good name for a node by looking at the attached components and their properties
 
@@ -248,13 +248,13 @@ void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, co
 
     if (pInfo)
     {
-      plStringBuilder sPath = pInfo->m_pAssetInfo->m_Path.GetDataDirParentRelativePath();
+      plStringBuilder sPath = pInfo->m_pAssetInfo->m_sDataDirParentRelativePath;
       sPath = sPath.GetFileName();
 
-      out_sResult.Set("Prefab: ", sPath);
+      out_Result.Set("Prefab: ", sPath);
     }
     else
-      out_sResult = "Prefab: Invalid Asset";
+      out_Result = "Prefab: Invalid Asset";
   }
 
   const bool bHasChildren = pObject->GetTypeAccessor().GetCount("Children") > 0;
@@ -272,11 +272,14 @@ void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, co
     {
       bHasIcon = true;
 
-      plColor color = plColor::MakeZero();
+      plColor color = plColor::ZeroColor();
 
-      if (auto pCatAttr = pChild->GetTypeAccessor().GetType()->GetAttributeByType<plCategoryAttribute>())
+      if (auto pInDev = pChild->GetTypeAccessor().GetType()->GetAttributeByType<plColorAttribute>())
       {
-        color = plColorScheme::GetCategoryColor(pCatAttr->GetCategory(), plColorScheme::CategoryColorUsage::SceneTreeIcon);
+        if (pInDev->m_iColorGroup != -1)
+          color = plColorScheme::GetGroupColor((plColorScheme::ColorGroup)pInDev->m_iColorGroup, 2);
+        else
+          color = pInDev->GetColor();
       }
 
       plStringBuilder sIconName;
@@ -284,20 +287,20 @@ void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, co
       *out_pIcon = plQtUiServices::GetCachedIconResource(sIconName.GetData(), color);
     }
 
-    if (out_sResult.IsEmpty())
+    if (out_Result.IsEmpty())
     {
       // try to translate the component name, that will typically make it a nice clean name already
-      out_sResult = plTranslate(pChild->GetTypeAccessor().GetType()->GetTypeName().GetData(tmp));
+      out_Result = plTranslate(pChild->GetTypeAccessor().GetType()->GetTypeName().GetData(tmp));
 
       // if no translation is available, clean up the component name in a simple way
-      if (out_sResult.EndsWith_NoCase("Component"))
-        out_sResult.Shrink(0, 9);
-      if (out_sResult.StartsWith("pl"))
-        out_sResult.Shrink(2, 0);
+      if (out_Result.EndsWith_NoCase("Component"))
+        out_Result.Shrink(0, 9);
+      if (out_Result.StartsWith("pl"))
+        out_Result.Shrink(2, 0);
 
       if (auto pInDev = pChild->GetTypeAccessor().GetType()->GetAttributeByType<plInDevelopmentAttribute>())
       {
-        out_sResult.AppendFormat(" [ {} ]", pInDev->GetString());
+        out_Result.AppendFormat(" [ {} ]", pInDev->GetString());
       }
     }
 
@@ -310,22 +313,11 @@ void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, co
     {
       // search for string properties that also have an asset browser property -> they reference an asset, so this is most likely the most
       // relevant property
-      if (
-        (pProperty->GetSpecificType() == plGetStaticRTTI<const char*>() || pProperty->GetSpecificType() == plGetStaticRTTI<plString>()) && pProperty->GetAttributeByType<plAssetBrowserAttribute>() != nullptr)
+      if (pProperty->GetCategory() == plPropertyCategory::Member &&
+          (pProperty->GetSpecificType() == plGetStaticRTTI<const char*>() || pProperty->GetSpecificType() == plGetStaticRTTI<plString>()) &&
+          pProperty->GetAttributeByType<plAssetBrowserAttribute>() != nullptr)
       {
-        plStringBuilder sValue;
-        if (pProperty->GetCategory() == plPropertyCategory::Member)
-        {
-          sValue = pChild->GetTypeAccessor().GetValue(pProperty->GetPropertyName()).ConvertTo<plString>();
-        }
-        else if (pProperty->GetCategory() == plPropertyCategory::Array)
-        {
-          const plInt32 iCount = pChild->GetTypeAccessor().GetCount(pProperty->GetPropertyName());
-          if (iCount > 0)
-          {
-            sValue = pChild->GetTypeAccessor().GetValue(pProperty->GetPropertyName(), 0).ConvertTo<plString>();
-          }
-        }
+        plStringBuilder sValue = pChild->GetTypeAccessor().GetValue(pProperty->GetPropertyName()).ConvertTo<plString>();
 
         // if the property is a full asset guid reference, convert it to a file name
         if (plConversionUtils::IsStringUuid(sValue))
@@ -335,7 +327,7 @@ void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, co
           auto pAsset = plAssetCurator::GetSingleton()->GetSubAsset(AssetGuid);
 
           if (pAsset)
-            sValue = pAsset->m_pAssetInfo->m_Path.GetDataDirParentRelativePath();
+            sValue = pAsset->m_pAssetInfo->m_sDataDirParentRelativePath;
           else
             sValue = "<unknown>";
         }
@@ -344,25 +336,25 @@ void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, co
         sValue = sValue.GetFileName();
 
         if (!sValue.IsEmpty())
-          out_sResult.Append(": ", sValue);
+          out_Result.Append(": ", sValue);
 
         return;
       }
     }
   }
 
-  if (!out_sResult.IsEmpty())
+  if (!out_Result.IsEmpty())
     return;
 
   if (bHasChildren)
-    out_sResult = "Group";
+    out_Result = "Group";
   else
-    out_sResult = "Object";
+    out_Result = "Object";
 }
 
 
 void plGameObjectDocument::QueryCachedNodeName(
-  const plDocumentObject* pObject, plStringBuilder& out_sResult, plUuid* out_pPrefabGuid, QIcon* out_pIcon /*= nullptr*/) const
+  const plDocumentObject* pObject, plStringBuilder& out_Result, plUuid* out_pPrefabGuid, QIcon* out_pIcon /*= nullptr*/) const
 {
   auto pMetaScene = m_GameObjectMetaData->BeginReadMetaData(pObject->GetGuid());
   auto pMetaDoc = m_DocumentObjectMetaData->BeginReadMetaData(pObject->GetGuid());
@@ -371,27 +363,27 @@ void plGameObjectDocument::QueryCachedNodeName(
   if (out_pPrefabGuid != nullptr)
     *out_pPrefabGuid = prefabGuid;
 
-  out_sResult = pMetaScene->m_CachedNodeName;
+  out_Result = pMetaScene->m_CachedNodeName;
   if (out_pIcon)
     *out_pIcon = pMetaScene->m_Icon;
   m_GameObjectMetaData->EndReadMetaData();
   m_DocumentObjectMetaData->EndReadMetaData();
 
-  if (out_sResult.IsEmpty())
+  if (out_Result.IsEmpty())
   {
     // the cached node name is only determined once
     // after that only a node rename (EditRole) will currently trigger a cache cleaning and thus a reevaluation
     // this is to prevent excessive re-computation of the name, which is quite involved
 
     QIcon icon;
-    DetermineNodeName(pObject, prefabGuid, out_sResult, &icon);
+    DetermineNodeName(pObject, prefabGuid, out_Result, &icon);
     plString sNodeName = pObject->GetTypeAccessor().GetValue("Name").ConvertTo<plString>();
     if (!sNodeName.IsEmpty())
     {
-      out_sResult = sNodeName;
+      out_Result = sNodeName;
     }
     auto pMetaWrite = m_GameObjectMetaData->BeginModifyMetaData(pObject->GetGuid());
-    pMetaWrite->m_CachedNodeName = out_sResult;
+    pMetaWrite->m_CachedNodeName = out_Result;
     pMetaWrite->m_Icon = icon;
     m_GameObjectMetaData->EndModifyMetaData(0); // no need to broadcast this change
 
@@ -427,7 +419,7 @@ plTransform plGameObjectDocument::GetGlobalTransform(const plDocumentObject* pOb
   return plSimdConversion::ToTransform(m_GlobalTransforms[pObject]);
 }
 
-void plGameObjectDocument::SetGlobalTransform(const plDocumentObject* pObject, const plTransform& t, plUInt8 uiTransformationChanges) const
+void plGameObjectDocument::SetGlobalTransform(const plDocumentObject* pObject, const plTransform& t, plUInt8 transformationChanges) const
 {
   plObjectAccessorBase* pAccessor = GetObjectAccessor();
   auto pHistory = GetCommandHistory();
@@ -451,7 +443,7 @@ void plGameObjectDocument::SetGlobalTransform(const plDocumentObject* pObject, c
 
     plSimdTransform tParent = m_GlobalTransforms[pParent];
 
-    tLocal = plSimdTransform::MakeLocalTransform(tParent, simdT);
+    tLocal.SetLocalTransform(tParent, simdT);
   }
   else
   {
@@ -475,25 +467,25 @@ void plGameObjectDocument::SetGlobalTransform(const plDocumentObject* pObject, c
   // position it does NOT mean that there is no change, in fact there is a change, just back to the original value
 
   // if (pObject->GetTypeAccessor().GetValue("LocalPosition").ConvertTo<plVec3>() != vLocalPos)
-  if ((uiTransformationChanges & TransformationChanges::Translation) != 0)
+  if ((transformationChanges & TransformationChanges::Translation) != 0)
   {
     pAccessor->SetValue(pObject, "LocalPosition", vLocalPos).LogFailure();
   }
 
   // if (pObject->GetTypeAccessor().GetValue("LocalRotation").ConvertTo<plQuat>() != qLocalRot)
-  if ((uiTransformationChanges & TransformationChanges::Rotation) != 0)
+  if ((transformationChanges & TransformationChanges::Rotation) != 0)
   {
     pAccessor->SetValue(pObject, "LocalRotation", qLocalRot).LogFailure();
   }
 
   // if (pObject->GetTypeAccessor().GetValue("LocalScaling").ConvertTo<plVec3>() != vLocalScale)
-  if ((uiTransformationChanges & TransformationChanges::Scale) != 0)
+  if ((transformationChanges & TransformationChanges::Scale) != 0)
   {
     pAccessor->SetValue(pObject, "LocalScaling", vLocalScale).LogFailure();
   }
 
   // if (pObject->GetTypeAccessor().GetValue("LocalUniformScaling").ConvertTo<float>() != fUniformScale)
-  if ((uiTransformationChanges & TransformationChanges::UniformScale) != 0)
+  if ((transformationChanges & TransformationChanges::UniformScale) != 0)
   {
     pAccessor->SetValue(pObject, "LocalUniformScaling", fUniformScale).LogFailure();
   }
@@ -502,7 +494,7 @@ void plGameObjectDocument::SetGlobalTransform(const plDocumentObject* pObject, c
   InvalidateGlobalTransformValue(pObject);
 }
 
-void plGameObjectDocument::SetGlobalTransformParentOnly(const plDocumentObject* pObject, const plTransform& t, plUInt8 uiTransformationChanges) const
+void plGameObjectDocument::SetGlobalTransformParentOnly(const plDocumentObject* pObject, const plTransform& t, plUInt8 transformationChanges) const
 {
   plHybridArray<plTransform, 16> childTransforms;
   const auto& children = pObject->GetChildren();
@@ -515,7 +507,7 @@ void plGameObjectDocument::SetGlobalTransformParentOnly(const plDocumentObject* 
     childTransforms[i] = GetGlobalTransform(pChild);
   }
 
-  SetGlobalTransform(pObject, t, uiTransformationChanges);
+  SetGlobalTransform(pObject, t, transformationChanges);
 
   for (plUInt32 i = 0; i < children.GetCount(); ++i)
   {
@@ -537,7 +529,7 @@ void plGameObjectDocument::InvalidateGlobalTransformValue(const plDocumentObject
   }
 }
 
-plResult plGameObjectDocument::ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_result) const
+plResult plGameObjectDocument::ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_Result) const
 {
   const plDocumentObject* pObj = pObject;
 
@@ -548,12 +540,12 @@ plResult plGameObjectDocument::ComputeObjectTransformation(const plDocumentObjec
 
   if (pObj)
   {
-    out_result = ComputeGlobalTransform(pObj);
+    out_Result = ComputeGlobalTransform(pObj);
     return PLASMA_SUCCESS;
   }
   else
   {
-    out_result.SetIdentity();
+    out_Result.SetIdentity();
     return PLASMA_FAILURE;
   }
 }
@@ -747,7 +739,7 @@ plStatus plGameObjectDocument::CreateGameObjectHere()
 
   if (true)
   {
-    cmdAdd.m_NewObjectGuid = plUuid::MakeUuid();
+    cmdAdd.m_NewObjectGuid.CreateNewUuid();
     NewNode = cmdAdd.m_NewObjectGuid;
 
     auto res = history->AddCommand(cmdAdd);
@@ -798,7 +790,7 @@ void plGameObjectDocument::ScheduleSendObjectSelection()
 
 void plGameObjectDocument::SendGameWorldToEngine()
 {
-  SendDocumentOpenMessage(true);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendDocumentOpenMessage(this, true);
 }
 
 void plGameObjectDocument::SetSimulationSpeed(float f)
@@ -967,7 +959,7 @@ void plGameObjectDocument::SelectionManagerEventHandler(const plSelectionManager
 {
   ScheduleSendObjectSelection();
 
-  plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
 
   if (pPreferences->m_bExpandSceneTreeOnSelection)
   {
@@ -1026,26 +1018,27 @@ plTransform plGameObjectDocument::ComputeGlobalTransform(const plDocumentObject*
 {
   if (pObject == nullptr || pObject->GetTypeAccessor().GetType() != plGetStaticRTTI<plGameObject>())
   {
-    m_GlobalTransforms[pObject] = plSimdTransform::MakeIdentity();
-    return plTransform::MakeIdentity();
+    m_GlobalTransforms[pObject] = plSimdTransform::IdentityTransform();
+    return plTransform::IdentityTransform();
   }
 
   const plSimdTransform tParent = plSimdConversion::ToTransform(ComputeGlobalTransform(pObject->GetParent()));
   const plSimdTransform tLocal = QueryLocalTransformSimd(pObject);
 
-  plSimdTransform tGlobal = plSimdTransform::MakeGlobalTransform(tParent, tLocal);
+  plSimdTransform tGlobal;
+  tGlobal.SetGlobalTransform(tParent, tLocal);
 
   m_GlobalTransforms[pObject] = tGlobal;
 
   return plSimdConversion::ToTransform(tGlobal);
 }
 
-void plGameObjectDocument::ComputeTopLevelSelectedGameObjects(plDeque<plSelectedGameObject>& out_selection)
+void plGameObjectDocument::ComputeTopLevelSelectedGameObjects(plDeque<plSelectedGameObject>& out_Selection)
 {
   // Get the list of all objects that are manipulated
   // and store their original transformation
 
-  out_selection.Clear();
+  out_Selection.Clear();
 
   auto hType = plGetStaticRTTI<plGameObject>();
 
@@ -1061,7 +1054,7 @@ void plGameObjectDocument::ComputeTopLevelSelectedGameObjects(plDeque<plSelected
     if (pSelMan->IsParentSelected(Selection[sel]))
       continue;
 
-    plSelectedGameObject& sgo = out_selection.ExpandAndGetRef();
+    plSelectedGameObject& sgo = out_Selection.ExpandAndGetRef();
     sgo.m_pObject = Selection[sel];
     sgo.m_GlobalTransform = GetGlobalTransform(sgo.m_pObject);
     sgo.m_vLocalScaling = Selection[sel]->GetTypeAccessor().GetValue("LocalScaling").ConvertTo<plVec3>();
@@ -1069,7 +1062,7 @@ void plGameObjectDocument::ComputeTopLevelSelectedGameObjects(plDeque<plSelected
   }
 }
 
-void plGameObjectDocument::HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg)
+void plGameObjectDocument::HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   SUPER::HandleEngineMessage(pMsg);
 

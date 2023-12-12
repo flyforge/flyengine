@@ -21,26 +21,26 @@ plQtColorGradientEditorWidget::plQtColorGradientEditorWidget(QWidget* pParent)
 
   connect(
     GradientWidget, &plQtColorGradientWidget::addColorCp, this, [this](double x, const plColorGammaUB& color) { Q_EMIT ColorCpAdded(x, color); });
-  connect(GradientWidget, &plQtColorGradientWidget::moveColorCpToPos, this, [this](plInt32 iIdx, double x) { Q_EMIT ColorCpMoved(iIdx, x); });
-  connect(GradientWidget, &plQtColorGradientWidget::deleteColorCp, this, [this](plInt32 iIdx) { Q_EMIT ColorCpDeleted(iIdx); });
+  connect(GradientWidget, &plQtColorGradientWidget::moveColorCpToPos, this, [this](plInt32 idx, double x) { Q_EMIT ColorCpMoved(idx, x); });
+  connect(GradientWidget, &plQtColorGradientWidget::deleteColorCp, this, [this](plInt32 idx) { Q_EMIT ColorCpDeleted(idx); });
 
-  connect(GradientWidget, &plQtColorGradientWidget::addAlphaCp, this, [this](double x, plUInt8 uiAlpha) { Q_EMIT AlphaCpAdded(x, uiAlpha); });
-  connect(GradientWidget, &plQtColorGradientWidget::moveAlphaCpToPos, this, [this](plInt32 iIdx, double x) { Q_EMIT AlphaCpMoved(iIdx, x); });
-  connect(GradientWidget, &plQtColorGradientWidget::deleteAlphaCp, this, [this](plInt32 iIdx) { Q_EMIT AlphaCpDeleted(iIdx); });
+  connect(GradientWidget, &plQtColorGradientWidget::addAlphaCp, this, [this](double x, plUInt8 alpha) { Q_EMIT AlphaCpAdded(x, alpha); });
+  connect(GradientWidget, &plQtColorGradientWidget::moveAlphaCpToPos, this, [this](plInt32 idx, double x) { Q_EMIT AlphaCpMoved(idx, x); });
+  connect(GradientWidget, &plQtColorGradientWidget::deleteAlphaCp, this, [this](plInt32 idx) { Q_EMIT AlphaCpDeleted(idx); });
 
   connect(
-    GradientWidget, &plQtColorGradientWidget::addIntensityCp, this, [this](double x, float fIntensity) { Q_EMIT IntensityCpAdded(x, fIntensity); });
-  connect(GradientWidget, &plQtColorGradientWidget::moveIntensityCpToPos, this, [this](plInt32 iIdx, double x) { Q_EMIT IntensityCpMoved(iIdx, x); });
-  connect(GradientWidget, &plQtColorGradientWidget::deleteIntensityCp, this, [this](plInt32 iIdx) { Q_EMIT IntensityCpDeleted(iIdx); });
+    GradientWidget, &plQtColorGradientWidget::addIntensityCp, this, [this](double x, float intensity) { Q_EMIT IntensityCpAdded(x, intensity); });
+  connect(GradientWidget, &plQtColorGradientWidget::moveIntensityCpToPos, this, [this](plInt32 idx, double x) { Q_EMIT IntensityCpMoved(idx, x); });
+  connect(GradientWidget, &plQtColorGradientWidget::deleteIntensityCp, this, [this](plInt32 idx) { Q_EMIT IntensityCpDeleted(idx); });
 
   connect(GradientWidget, &plQtColorGradientWidget::beginOperation, this, [this]() { Q_EMIT BeginOperation(); });
-  connect(GradientWidget, &plQtColorGradientWidget::endOperation, this, [this](bool bCommit) { Q_EMIT EndOperation(bCommit); });
+  connect(GradientWidget, &plQtColorGradientWidget::endOperation, this, [this](bool commit) { Q_EMIT EndOperation(commit); });
 
   connect(GradientWidget, &plQtColorGradientWidget::triggerPickColor, this, [this]() { on_ButtonColor_clicked(); });
 }
 
 
-plQtColorGradientEditorWidget::~plQtColorGradientEditorWidget() = default;
+plQtColorGradientEditorWidget::~plQtColorGradientEditorWidget() {}
 
 
 void plQtColorGradientEditorWidget::SetColorGradient(const plColorGradient& gradient)

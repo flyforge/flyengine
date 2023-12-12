@@ -50,7 +50,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltQueryShapeActorComponent, 1, plComponentMode::
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+    PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface")),
   }
   PLASMA_END_PROPERTIES;
 }
@@ -71,7 +71,7 @@ void plJoltQueryShapeActorComponent::SerializeComponent(plWorldWriter& inout_str
 void plJoltQueryShapeActorComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 

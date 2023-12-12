@@ -637,8 +637,5 @@ struct plHashHelper<plVariant>
     return (plUInt32)uiHash;
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plVariant& a, const plVariant& b)
-  {
-    return a.GetType() == b.GetType() && a == b;
-  }
+  PLASMA_ALWAYS_INLINE static bool Equal(const plVariant& a, const plVariant& b) { return a == b; }
 };

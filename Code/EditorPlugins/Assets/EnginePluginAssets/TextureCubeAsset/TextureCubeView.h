@@ -4,7 +4,7 @@
 
 class plTextureCubeContext;
 
-class plTextureCubeViewContext : public plEngineProcessViewContext
+class plTextureCubeViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plTextureCubeViewContext(plTextureCubeContext* pMaterialContext);

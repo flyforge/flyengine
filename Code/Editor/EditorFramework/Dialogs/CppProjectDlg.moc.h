@@ -13,7 +13,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtCppProjectDlg(QWidget* pParent);
+  plQtCppProjectDlg(QWidget* parent);
 
 private Q_SLOTS:
   void on_Result_rejected();

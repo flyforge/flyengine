@@ -60,8 +60,8 @@ plUInt32 plDecalAtlasResource::s_uiDecalAtlasResources = 0;
 
 plDecalAtlasResource::plDecalAtlasResource()
   : plResource(DoUpdate::OnAnyThread, 1)
-  , m_vBaseColorSize(plVec2U32::MakeZero())
-  , m_vNormalSize(plVec2U32::MakeZero())
+  , m_vBaseColorSize(plVec2U32::ZeroVector())
+  , m_vNormalSize(plVec2U32::ZeroVector())
 {
 }
 

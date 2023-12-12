@@ -9,7 +9,7 @@
 JPH_NAMESPACE_BEGIN
 
 /// Implementation of ObjectStream binary input stream.
-class JPH_EXPORT ObjectStreamBinaryIn : public ObjectStreamIn
+class ObjectStreamBinaryIn : public ObjectStreamIn
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE

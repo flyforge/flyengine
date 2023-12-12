@@ -1,17 +1,5 @@
 PluginState
 {
-	string %ID{"AI"}
-	bool %Selected{true}
-	bool %LoadCopy{false}
-}
-PluginState
-{
-	string %ID{"AmplitudeAudioPlugin"}
-	bool %Selected{true}
-	bool %LoadCopy{false}
-}
-PluginState
-{
 	string %ID{"Jolt"}
 	bool %Selected{true}
 	bool %LoadCopy{false}
@@ -43,6 +31,12 @@ PluginState
 PluginState
 {
 	string %ID{"RmlUi"}
+	bool %Selected{true}
+	bool %LoadCopy{false}
+}
+PluginState
+{
+	string %ID{"Substance"}
 	bool %Selected{true}
 	bool %LoadCopy{false}
 }

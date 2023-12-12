@@ -25,7 +25,7 @@ void plVisualScriptFunctionProperty::Execute(void* pInstance, plArrayPtr<plVaria
   plVisualScriptExecutionContext context(m_pDesc);
   context.Initialize(*pVisualScriptInstance, m_LocalDataStorage, arguments);
 
-  auto result = context.Execute(plTime::MakeZero());
+  auto result = context.Execute(plTime::Zero());
   PLASMA_ASSERT_DEBUG(result.m_NextExecAndState != plVisualScriptExecutionContext::ExecResult::State::ContinueLater, "A non-coroutine function must not return 'ContinueLater'");
 
   // TODO: return value
@@ -59,6 +59,6 @@ void plVisualScriptMessageHandler::Dispatch(plAbstractMessageHandler* pSelf, voi
   plVisualScriptExecutionContext context(pHandler->m_pDesc);
   context.Initialize(*pVisualScriptInstance, pHandler->m_LocalDataStorage, arguments);
 
-  auto result = context.Execute(plTime::MakeZero());
+  auto result = context.Execute(plTime::Zero());
   PLASMA_ASSERT_DEBUG(result.m_NextExecAndState != plVisualScriptExecutionContext::ExecResult::State::ContinueLater, "A non-coroutine function must not return 'ContinueLater'");
 }

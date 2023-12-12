@@ -5,7 +5,7 @@
 
 struct plForwardRenderShadingQuality
 {
-  using StorageType = plInt8;
+  typedef plInt8 StorageType;
 
   enum Enum
   {
@@ -29,8 +29,6 @@ public:
 
   virtual bool GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs) override;
   virtual void Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
-  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
-  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
 protected:
   virtual void SetupResources(plGALPass* pGALPass, const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs);
@@ -40,6 +38,7 @@ protected:
   virtual void RenderObjects(const plRenderViewContext& renderViewContext) = 0;
 
   plRenderPipelineNodePassThrougPin m_PinColor;
+  plRenderPipelineNodePassThrougPin m_PinVelocity;
   plRenderPipelineNodePassThrougPin m_PinDepthStencil;
 
   plEnum<plForwardRenderShadingQuality> m_ShadingQuality;

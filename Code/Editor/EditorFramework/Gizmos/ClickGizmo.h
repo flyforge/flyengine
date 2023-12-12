@@ -17,8 +17,8 @@ public:
   void SetColor(const plColor& color);
 
 protected:
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
 
   virtual void DoFocusLost(bool bCancel) override;
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
@@ -26,5 +26,5 @@ protected:
   virtual void OnTransformationChanged(const plTransform& transform) override;
 
 private:
-  plEngineGizmoHandle m_hShape;
+  PlasmaEngineGizmoHandle m_hShape;
 };

@@ -62,7 +62,7 @@ private:
   plUInt8 m_uiCollisionLayer = 0;
 
   plEnum<plSkeletonJointType> m_JointType;
-  plQuat m_qLocalJointOrientation = plQuat::MakeIdentity();
+  plQuat m_qLocalJointOrientation = plQuat::IdentityQuaternion();
   plAngle m_HalfSwingLimitY;
   plAngle m_HalfSwingLimitZ;
   plAngle m_TwistLimitHalfAngle;

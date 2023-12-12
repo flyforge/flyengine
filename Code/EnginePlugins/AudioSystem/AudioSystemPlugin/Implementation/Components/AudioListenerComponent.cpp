@@ -181,8 +181,8 @@ void plAudioListenerComponent::Update()
   const auto& rotation = GetListenerRotation();
   const auto& velocity = GetListenerVelocity();
 
-  const auto& fw = (rotation * plVec3::MakeAxisX()).GetNormalized();
-  const auto& up = (rotation * plVec3::MakeAxisZ()).GetNormalized();
+  const auto& fw = (rotation * plVec3::UnitXAxis()).GetNormalized();
+  const auto& up = (rotation * plVec3::UnitZAxis()).GetNormalized();
 
   {
     plAudioSystemTransform transform;

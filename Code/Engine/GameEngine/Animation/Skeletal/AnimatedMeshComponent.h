@@ -64,7 +64,7 @@ protected:
 
   void MapModelSpacePoseToSkinningSpace(const plHashTable<plHashedString, plMeshResourceDescriptor::BoneData>& bones, const plSkeleton& skeleton, plArrayPtr<const plMat4> modelSpaceTransforms, plBoundingBox* bounds);
 
-  plTransform m_RootTransform = plTransform::MakeIdentity();
+  plTransform m_RootTransform = plTransform::IdentityTransform();
   plBoundingBox m_MaxBounds;
   plSkinningState m_SkinningState;
   plSkeletonResourceHandle m_hDefaultSkeleton;

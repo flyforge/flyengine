@@ -43,10 +43,11 @@ plQtDecalAssetDocumentWindow::plQtDecalAssetDocumentWindow(plDecalAssetDocument*
     SetTargetFramerate(25);
 
     m_ViewConfig.m_Camera.LookAt(plVec3(2, 0, 0), plVec3(0, 0, 0), plVec3(0, 0, 1));
+    m_ViewConfig.m_Camera.SetShutterSpeed(0.1);
     m_ViewConfig.ApplyPerspectiveSetting(90);
 
     m_pViewWidget = new plQtOrbitCamViewWidget(this, &m_ViewConfig);
-    m_pViewWidget->ConfigureFixed(plVec3(0), plVec3(0.0f), plVec3(2, 0, 0));
+     m_pViewWidget->ConfigureFixed(plVec3(0), plVec3(0.0f), plVec3(2, 0, 0));
     AddViewWidget(m_pViewWidget);
 
     plQtViewWidgetContainer* pContainer = new plQtViewWidgetContainer(nullptr, m_pViewWidget, "DecalAssetViewToolBar");
@@ -58,7 +59,7 @@ plQtDecalAssetDocumentWindow::plQtDecalAssetDocumentWindow(plDecalAssetDocument*
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("DecalAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Decal Properties");
+    pPropertyPanel->setWindowTitle("DECAL PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -74,7 +75,7 @@ plQtDecalAssetDocumentWindow::plQtDecalAssetDocumentWindow(plDecalAssetDocument*
 
 void plQtDecalAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -82,7 +83,7 @@ void plQtDecalAssetDocumentWindow::InternalRedraw()
 void plQtDecalAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   for (auto pView : m_ViewWidgets)

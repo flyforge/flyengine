@@ -8,7 +8,7 @@
 
 struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSceneViewPerspective
 {
-  using StorageType = plUInt8;
+  typedef plUInt8 StorageType;
 
   enum Enum
   {
@@ -22,9 +22,9 @@ struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSceneViewPerspective
 };
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL, plSceneViewPerspective);
 
-struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineViewConfig
+struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineViewConfig
 {
-  plEngineViewConfig()
+  PlasmaEngineViewConfig()
   {
     m_RenderMode = plViewRenderMode::Default;
     m_Perspective = plSceneViewPerspective::Default;
@@ -38,11 +38,11 @@ struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineViewConfig
   bool m_bUseCameraTransformOnDevice = true;
 
   plCamera m_Camera;
-  plEngineViewConfig* m_pLinkedViewConfig; // used to store which other view config this is linked to, for resetting values when switching views
+  PlasmaEngineViewConfig* m_pLinkedViewConfig; // used to store which other view config this is linked to, for resetting values when switching views
 
-  void ApplyPerspectiveSetting(float fFov = 0.0f, float fNearPlane = 0.1f, float fFarPlane = 1000.0f);
+  void ApplyPerspectiveSetting(float fov = 0.0f, float nearPlane = 0.1f, float farPlane = 1000.0f);
 };
-struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineViewLightSettingsEvent
+struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineViewLightSettingsEvent
 {
   enum class Type
   {
@@ -61,48 +61,48 @@ struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineViewLightSettingsEvent
   Type m_Type;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineViewLightSettings : public plEditorEngineSyncObject
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineViewLightSettings : public PlasmaEditorEngineSyncObject
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEngineViewLightSettings, plEditorEngineSyncObject);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEngineViewLightSettings, PlasmaEditorEngineSyncObject);
 
 public:
-  plEngineViewLightSettings(bool bEnable = true);
-  ~plEngineViewLightSettings();
+  PlasmaEngineViewLightSettings(bool bEnable = true);
+  ~PlasmaEngineViewLightSettings();
 
   bool GetSkyBox() const;
-  void SetSkyBox(bool bVal);
+  void SetSkyBox(bool val);
 
   bool GetSkyLight() const;
-  void SetSkyLight(bool bVal);
+  void SetSkyLight(bool val);
 
   const char* GetSkyLightCubeMap() const;
-  void SetSkyLightCubeMap(const char* szVal);
+  void SetSkyLightCubeMap(const char* val);
 
   float GetSkyLightIntensity() const;
-  void SetSkyLightIntensity(float fVal);
+  void SetSkyLightIntensity(float val);
 
   bool GetDirectionalLight() const;
-  void SetDirectionalLight(bool bVal);
+  void SetDirectionalLight(bool val);
 
   plAngle GetDirectionalLightAngle() const;
   void SetDirectionalLightAngle(plAngle val);
 
   bool GetDirectionalLightShadows() const;
-  void SetDirectionalLightShadows(bool bVal);
+  void SetDirectionalLightShadows(bool val);
 
   float GetDirectionalLightIntensity() const;
-  void SetDirectionalLightIntensity(float fVal);
+  void SetDirectionalLightIntensity(float val);
 
   bool GetFog() const;
-  void SetFog(bool bVal);
+  void SetFog(bool val);
 
-  mutable plEvent<const plEngineViewLightSettingsEvent&> m_EngineViewLightSettingsEvents;
+  mutable plEvent<const PlasmaEngineViewLightSettingsEvent&> m_EngineViewLightSettingsEvents;
 
   virtual bool SetupForEngine(plWorld* pWorld, plUInt32 uiNextComponentPickingID) override;
   virtual void UpdateForEngine(plWorld* pWorld) override;
 
 private:
-  void SetModifiedInternal(plEngineViewLightSettingsEvent::Type type);
+  void SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type type);
 
   bool m_bSkyBox = true;
   bool m_bSkyLight = true;
@@ -110,7 +110,7 @@ private:
   float m_fSkyLightIntensity = 1.0f;
 
   bool m_bDirectionalLight = true;
-  plAngle m_DirectionalLightAngle = plAngle::MakeFromDegree(30.0f);
+  plAngle m_DirectionalLightAngle = plAngle::Degree(30.0f);
   bool m_bDirectionalLightShadows = false;
   float m_fDirectionalLightIntensity = 10.0f;
 

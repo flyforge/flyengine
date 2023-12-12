@@ -14,7 +14,7 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plResult plLongOpWorker_BuildNavMesh::InitializeExecution(plStreamReader& config, const plUuid& DocumentGuid)
 {
-  plEngineProcessDocumentContext* pDocContext = plEngineProcessDocumentContext::GetDocumentContext(DocumentGuid);
+  PlasmaEngineProcessDocumentContext* pDocContext = PlasmaEngineProcessDocumentContext::GetDocumentContext(DocumentGuid);
 
   if (pDocContext == nullptr)
     return PLASMA_FAILURE;

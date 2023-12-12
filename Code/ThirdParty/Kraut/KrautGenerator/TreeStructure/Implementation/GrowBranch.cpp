@@ -242,25 +242,25 @@ namespace Kraut
       case Kraut::BranchTargetDir::Upwards:
         fAngle = 0.0f;
         break;
-      case Kraut::BranchTargetDir::MakeFromDegree22:
+      case Kraut::BranchTargetDir::Degree22:
         fAngle = 22.5f;
         break;
-      case Kraut::BranchTargetDir::MakeFromDegree45:
+      case Kraut::BranchTargetDir::Degree45:
         fAngle = 45.0f;
         break;
-      case Kraut::BranchTargetDir::MakeFromDegree67:
+      case Kraut::BranchTargetDir::Degree67:
         fAngle = 67.5f;
         break;
-      case Kraut::BranchTargetDir::MakeFromDegree90:
+      case Kraut::BranchTargetDir::Degree90:
         fAngle = 90.0f;
         break;
-      case Kraut::BranchTargetDir::MakeFromDegree112:
+      case Kraut::BranchTargetDir::Degree112:
         fAngle = 112.5f;
         break;
-      case Kraut::BranchTargetDir::MakeFromDegree135:
+      case Kraut::BranchTargetDir::Degree135:
         fAngle = 135.0f;
         break;
-      case Kraut::BranchTargetDir::MakeFromDegree157:
+      case Kraut::BranchTargetDir::Degree157:
         fAngle = 157.5f;
         break;
       case Kraut::BranchTargetDir::Downwards:

@@ -14,8 +14,6 @@
 #  include <android/log.h>
 #endif
 
-#include <stdarg.h>
-
 plLogMsgType::Enum plLog::s_DefaultLogLevel = plLogMsgType::All;
 plLog::PrintFunction plLog::s_CustomPrintFunction = nullptr;
 plAtomicInteger32 plGlobalLog::s_uiMessageCount[plLogMsgType::ENUM_COUNT];
@@ -281,13 +279,13 @@ void plLog::OsMessageBox(const plFormatString& text)
   plStringBuilder display = text.GetText(tmp);
   display.Trim(" \n\r\t");
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
   const char* title = "";
   if (plApplication::GetApplicationInstance())
   {
     title = plApplication::GetApplicationInstance()->GetApplicationName();
   }
 
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
   MessageBoxW(nullptr, plStringWChar(display).GetData(), plStringWChar(title), MB_OK);
 #else
   plLog::Print(display);
@@ -303,7 +301,7 @@ void plLog::GenerateFormattedTimestamp(TimestampMode mode, plStringBuilder& ref_
     return;
   }
 
-  const plDateTime dateTime = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
+  const plDateTime dateTime(plTimestamp::CurrentTimestamp());
 
   switch (mode)
   {

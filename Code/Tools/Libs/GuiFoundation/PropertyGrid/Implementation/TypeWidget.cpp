@@ -126,18 +126,20 @@ void plQtTypeWidget::BuildUI(const plRTTI* pType, const plMap<plString, const pl
 
       if (!group->m_sIconName.IsEmpty())
       {
-        plStringBuilder sIcon(":/GroupIcons/", group->m_sIconName, ".png");
+        plStringBuilder sIcon(":/GroupIcons/", group->m_sIconName, ".svg");
         pGroupBox->SetIcon(plQtUiServices::GetCachedIconResource(sIcon));
       }
     }
     QGridLayout* pLayout = new QGridLayout();
     pLayout->setColumnStretch(0, 1);
-    pLayout->setColumnStretch(1, 0);
-    pLayout->setColumnMinimumWidth(1, 5);
-    pLayout->setColumnStretch(2, 2);
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    pLayout->setSpacing(0);
+    pLayout->setColumnStretch(1, 1);
+    pLayout->setColumnStretch(3, 1);
+    pLayout->setColumnStretch(4, 1);
+    pLayout->setColumnMinimumWidth(2, 5);
+    pLayout->setSpacing(4);
     pGroupBox->GetContent()->setLayout(pLayout);
+
+    bool bAlignNext = false;
 
     for (plUInt32 i = 0; i < group->m_Properties.GetCount(); ++i)
     {
@@ -163,8 +165,23 @@ void plQtTypeWidget::BuildUI(const plRTTI* pType, const plMap<plString, const pl
 
         connect(pLabel, &QWidget::customContextMenuRequested, pNewWidget, &plQtPropertyWidget::OnCustomContextMenu);
 
-        pLayout->addWidget(pLabel, i, 0, 1, 1);
-        pLayout->addWidget(pNewWidget, i, 2, 1, 1);
+        if (bAlignNext)
+        {
+          pLayout->addWidget(pLabel, i - 1, 3, 1, 1);
+          pLayout->addWidget(pNewWidget, i - 1, 4, 1, 1);
+          bAlignNext = false;
+        }
+        else if (pProp->GetAttributeByType<plGroupNextAttribute>())
+        {
+          pLayout->addWidget(pLabel, i, 0, 1, 1);
+          pLayout->addWidget(pNewWidget, i, 1, 1, 1);
+          bAlignNext = true;
+        }
+        else
+        {
+          pLayout->addWidget(pLabel, i, 0, 1, 2);
+          pLayout->addWidget(pNewWidget, i, 3, 1, 2);
+        }
 
         auto itManip = manipulatorMap.Find(pProp->GetPropertyName());
         if (itManip.IsValid())
@@ -177,15 +194,15 @@ void plQtTypeWidget::BuildUI(const plRTTI* pType, const plMap<plString, const pl
       }
       else
       {
-        pLayout->addWidget(pNewWidget, i, 0, 1, 3);
+        pLayout->addWidget(pNewWidget, i, 0, 1, 5);
       }
     }
     if (p != groups.GetCount() - 1)
     {
-      pLayout->addItem(new QSpacerItem(0, 5, QSizePolicy::Fixed, QSizePolicy::Fixed), group->m_Properties.GetCount(), 0, 1, 3);
+      pLayout->addItem(new QSpacerItem(0, 5, QSizePolicy::Fixed, QSizePolicy::Fixed), group->m_Properties.GetCount(), 0, 1, 5);
     }
     plUInt32 iRows = m_pLayout->rowCount();
-    m_pLayout->addWidget(pGroupBox, iRows, 0, 1, 3);
+    m_pLayout->addWidget(pGroupBox, iRows, 0, 1, 5);
   }
 }
 
@@ -196,14 +213,12 @@ void plQtTypeWidget::BuildUI(const plRTTI* pType, const char* szIncludePropertie
   PropertyGroup* pCurrentGroup = nullptr;
   float fOrder = -1.0f;
 
-  auto AddProperty = [&](const plAbstractProperty* pProp)
-  {
+  auto AddProperty = [&](const plAbstractProperty* pProp) {
     const plGroupAttribute* pGroup = pProp->GetAttributeByType<plGroupAttribute>();
     if (pGroup != nullptr)
     {
       plUniquePtr<PropertyGroup>* pFound =
-        std::find_if(begin(groups), end(groups), [&](const plUniquePtr<PropertyGroup>& g)
-          { return g->m_sGroup == pGroup->GetGroup(); });
+        std::find_if(begin(groups), end(groups), [&](const plUniquePtr<PropertyGroup>& g) { return g->m_sGroup == pGroup->GetGroup(); });
       if (pFound != end(groups))
       {
         pCurrentGroup = pFound->Borrow();
@@ -219,8 +234,7 @@ void plQtTypeWidget::BuildUI(const plRTTI* pType, const char* szIncludePropertie
     if (pCurrentGroup == nullptr)
     {
       plUniquePtr<PropertyGroup>* pFound =
-        std::find_if(begin(groups), end(groups), [&](const plUniquePtr<PropertyGroup>& g)
-          { return g->m_sGroup.IsEmpty(); });
+        std::find_if(begin(groups), end(groups), [&](const plUniquePtr<PropertyGroup>& g) { return g->m_sGroup.IsEmpty(); });
       if (pFound != end(groups))
       {
         pCurrentGroup = pFound->Borrow();
@@ -305,8 +319,7 @@ void plQtTypeWidget::BuildUI(const plRTTI* pType, const char* szIncludePropertie
     pCurrentGroup = nullptr;
   }
 
-  groups.Sort([](const plUniquePtr<PropertyGroup>& lhs, const plUniquePtr<PropertyGroup>& rhs) -> bool
-    { return lhs->m_fOrder < rhs->m_fOrder; });
+  groups.Sort([](const plUniquePtr<PropertyGroup>& lhs, const plUniquePtr<PropertyGroup>& rhs) -> bool { return lhs->m_fOrder < rhs->m_fOrder; });
 
   BuildUI(pType, manipulatorMap, groups, szIncludeProperties, szExcludeProperties);
 }
@@ -369,8 +382,7 @@ void plQtTypeWidget::ManipulatorManagerEventHandler(const plManipulatorManagerEv
 
 void plQtTypeWidget::UpdateProperty(const plDocumentObject* pObject, const plString& sProperty)
 {
-  if (std::none_of(cbegin(m_Items), cend(m_Items), [=](const plPropertySelection& sel)
-        { return pObject == sel.m_pObject; }))
+  if (std::none_of(cbegin(m_Items), cend(m_Items), [=](const plPropertySelection& sel) { return pObject == sel.m_pObject; }))
     return;
 
 
@@ -438,8 +450,8 @@ void plQtTypeWidget::UpdatePropertyMetaState()
       if (itData.IsValid() && !itData.Value().m_sNewLabelText.IsEmpty())
       {
         const char* szLabelText = itData.Value().m_sNewLabelText;
-        it.Value().m_pLabel->setText(plMakeQString(plTranslate(szLabelText)));
-        it.Value().m_pLabel->setToolTip(plMakeQString(plTranslateTooltip(szLabelText)));
+        it.Value().m_pLabel->setText(QString::fromUtf8(plTranslate(szLabelText)));
+        it.Value().m_pLabel->setToolTip(QString::fromUtf8(plTranslateTooltip(szLabelText)));
       }
       else
       {
@@ -448,11 +460,11 @@ void plQtTypeWidget::UpdatePropertyMetaState()
 
         // unless there is a specific override, we want to show the exact property name
         // also we don't want to force people to add translations for each and every property name
-        it.Value().m_pLabel->setText(plMakeQString(plTranslate(it.Value().m_sOriginalLabelText)));
+        it.Value().m_pLabel->setText(QString::fromUtf8(plTranslate(it.Value().m_sOriginalLabelText)));
 
         // though do try to get a tooltip for the property
         // this will not log an error message, if the string is not translated
-        it.Value().m_pLabel->setToolTip(plMakeQString(plTranslateTooltip(it.Value().m_sOriginalLabelText)));
+        it.Value().m_pLabel->setToolTip(QString::fromUtf8(plTranslateTooltip(it.Value().m_sOriginalLabelText)));
 
         plTranslatorLogMissing::s_bActive = temp;
       }

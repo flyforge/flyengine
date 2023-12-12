@@ -20,7 +20,7 @@ public:
 
   virtual plEditToolSupportedSpaces GetSupportedSpaces() const override { return plEditToolSupportedSpaces::LocalAndWorldSpace; }
   virtual bool GetSupportsMoveParentOnly() const override { return true; }
-  virtual void GetGridSettings(plGridSettingsMsgToEngine& out_gridSettings) override;
+  virtual void GetGridSettings(plGridSettingsMsgToEngine& outGridSettings) override;
 
 protected:
   virtual void OnConfigured() override;

@@ -23,3 +23,23 @@ plDragDropConfig::plDragDropConfig()
 {
   m_bPickSelectedObjects = false;
 }
+
+void operator>>(QDataStream& stream, plDynamicArray<plDocumentObject*>& rhs)
+{
+  int iIndices = 0;
+  stream >> iIndices;
+  rhs.Clear();
+  rhs.Reserve(static_cast<plUInt32>(iIndices));
+
+  for (int i = 0; i < iIndices; ++i)
+  {
+    void* p = nullptr;
+
+    uint len = sizeof(void*);
+    stream.readRawData((char*)&p, len);
+
+    plDocumentObject* pDocObject = (plDocumentObject*)p;
+
+    rhs.PushBack(pDocObject);
+  }
+}

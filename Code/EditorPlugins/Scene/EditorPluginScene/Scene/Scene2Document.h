@@ -67,7 +67,7 @@ class PLASMA_EDITORPLUGINSCENE_DLL plScene2Document : public plSceneDocument
   PLASMA_ADD_DYNAMIC_REFLECTION(plScene2Document, plSceneDocument);
 
 public:
-  plScene2Document(plStringView sDocumentPath);
+  plScene2Document(const char* szDocumentPath);
   ~plScene2Document();
 
   /// \name Scene Data Accessors
@@ -115,7 +115,7 @@ public:
   virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;
   virtual void InitializeAfterLoadingAndSaving() override;
   virtual const plDocumentObject* GetSettingsObject() const override;
-  virtual void HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
   virtual plTaskGroupID InternalSaveDocument(AfterSaveCallback callback) override;
   virtual void SendGameWorldToEngine() override;
 

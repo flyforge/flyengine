@@ -62,7 +62,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4u::ToFloat() const
 // static
 PLASMA_ALWAYS_INLINE plSimdVec4u plSimdVec4u::Truncate(const plSimdVec4f& f)
 {
-  plSimdVec4f clampedF = f.CompMax(plSimdVec4f::MakeZero());
+  plSimdVec4f clampedF = f.CompMax(plSimdVec4f::ZeroVector());
 
   plSimdVec4u result;
   result.m_v.x = (plUInt32)clampedF.m_v.x;
@@ -310,7 +310,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4u::operator>(const plSimdVec4u& v) co
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4u plSimdVec4u::MakeZero()
+PLASMA_ALWAYS_INLINE plSimdVec4u plSimdVec4u::ZeroVector()
 {
-  return plVec4U32::MakeZero();
+  return plVec4U32::ZeroVector();
 }

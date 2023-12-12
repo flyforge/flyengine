@@ -16,7 +16,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSliderComponent, 3, plComponentMode::Dynamic)
     PLASMA_MEMBER_PROPERTY("Distance", m_fDistanceToTravel)->AddAttributes(new plDefaultValueAttribute(1.0f)),
     PLASMA_MEMBER_PROPERTY("Acceleration", m_fAcceleration)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_MEMBER_PROPERTY("Deceleration", m_fDeceleration)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("RandomStart", m_RandomStart)->AddAttributes(new plClampValueAttribute(plTime::MakeZero(), plVariant())),
+    PLASMA_MEMBER_PROPERTY("RandomStart", m_RandomStart)->AddAttributes(new plClampValueAttribute(plTime::Zero(), plVariant())),
   }
   PLASMA_END_PROPERTIES;
 

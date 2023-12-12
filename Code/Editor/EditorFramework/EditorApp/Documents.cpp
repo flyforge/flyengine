@@ -5,12 +5,12 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <ToolsFoundation/Document/DocumentUtils.h>
 
-void plQtEditorApp::OpenDocumentQueued(plStringView sDocument, const plDocumentObject* pOpenContext /*= nullptr*/)
+void plQtEditorApp::OpenDocumentQueued(const char* szDocument, const plDocumentObject* pOpenContext /*= nullptr*/)
 {
-  QMetaObject::invokeMethod(this, "SlotQueuedOpenDocument", Qt::ConnectionType::QueuedConnection, Q_ARG(QString, plMakeQString(sDocument)), Q_ARG(void*, (void*)pOpenContext));
+  QMetaObject::invokeMethod(this, "SlotQueuedOpenDocument", Qt::ConnectionType::QueuedConnection, Q_ARG(QString, szDocument), Q_ARG(void*, (void*)pOpenContext));
 }
 
-plDocument* plQtEditorApp::OpenDocument(plStringView sDocument, plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext)
+plDocument* plQtEditorApp::OpenDocument(const char* szDocument, plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext)
 {
   PLASMA_PROFILE_SCOPE("OpenDocument");
 
@@ -19,28 +19,28 @@ plDocument* plQtEditorApp::OpenDocument(plStringView sDocument, plBitflags<plDoc
 
   const plDocumentTypeDescriptor* pTypeDesc = nullptr;
 
-  if (plDocumentManager::FindDocumentTypeFromPath(sDocument, false, pTypeDesc).Failed())
+  if (plDocumentManager::FindDocumentTypeFromPath(szDocument, false, pTypeDesc).Failed())
   {
     plStringBuilder sTemp;
-    sTemp.Format("The selected file extension '{0}' is not registered with any known type.\nCannot open file '{1}'", plPathUtils::GetFileExtension(sDocument), sDocument);
+    sTemp.Format("The selected file extension '{0}' is not registered with any known type.\nCannot open file '{1}'", plPathUtils::GetFileExtension(szDocument), szDocument);
     plQtUiServices::MessageBoxWarning(sTemp);
     return nullptr;
   }
 
   // does the same document already exist and is open ?
-  plDocument* pDocument = pTypeDesc->m_pManager->GetDocumentByPath(sDocument);
+  plDocument* pDocument = pTypeDesc->m_pManager->GetDocumentByPath(szDocument);
   if (!pDocument)
   {
-    plStatus res = pTypeDesc->m_pManager->CanOpenDocument(sDocument);
+    plStatus res = pTypeDesc->m_pManager->CanOpenDocument(szDocument);
     if (res.m_Result.Succeeded())
     {
-      res = pTypeDesc->m_pManager->OpenDocument(pTypeDesc->m_sDocumentTypeName, sDocument, pDocument, flags, pOpenContext);
+      res = pTypeDesc->m_pManager->OpenDocument(pTypeDesc->m_sDocumentTypeName, szDocument, pDocument, flags, pOpenContext);
     }
 
     if (res.m_Result.Failed())
     {
       plStringBuilder s;
-      s.Format("Failed to open document: \n'{0}'", sDocument);
+      s.Format("Failed to open document: \n'{0}'", szDocument);
       plQtUiServices::MessageBoxStatus(res, s);
       return nullptr;
     }
@@ -71,7 +71,7 @@ The following types are missing:\n",
   return pDocument;
 }
 
-plDocument* plQtEditorApp::CreateDocument(plStringView sDocument, plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext)
+plDocument* plQtEditorApp::CreateDocument(const char* szDocument, plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext)
 {
   PLASMA_PROFILE_SCOPE("CreateDocument");
 
@@ -81,11 +81,11 @@ plDocument* plQtEditorApp::CreateDocument(plStringView sDocument, plBitflags<plD
   const plDocumentTypeDescriptor* pTypeDesc = nullptr;
 
   {
-    plStatus res = plDocumentUtils::IsValidSaveLocationForDocument(sDocument, &pTypeDesc);
+    plStatus res = plDocumentUtils::IsValidSaveLocationForDocument(szDocument, &pTypeDesc);
     if (res.Failed())
     {
       plStringBuilder s;
-      s.Format("Failed to create document: \n'{0}'", sDocument);
+      s.Format("Failed to create document: \n'{0}'", szDocument);
       plQtUiServices::MessageBoxStatus(res, s);
       return nullptr;
     }
@@ -93,11 +93,11 @@ plDocument* plQtEditorApp::CreateDocument(plStringView sDocument, plBitflags<plD
 
   plDocument* pDocument = nullptr;
   {
-    plStatus result = pTypeDesc->m_pManager->CreateDocument(pTypeDesc->m_sDocumentTypeName, sDocument, pDocument, flags, pOpenContext);
+    plStatus result = pTypeDesc->m_pManager->CreateDocument(pTypeDesc->m_sDocumentTypeName, szDocument, pDocument, flags, pOpenContext);
     if (result.m_Result.Failed())
     {
       plStringBuilder s;
-      s.Format("Failed to create document: \n'{0}'", sDocument);
+      s.Format("Failed to create document: \n'{0}'", szDocument);
       plQtUiServices::MessageBoxStatus(result, s);
       return nullptr;
     }
@@ -144,6 +144,7 @@ void plQtEditorApp::DocumentManagerEventHandler(const plDocumentManager::Event& 
     {
       if (r.m_pDocument->GetAddToRecentFilesList())
       {
+        plQtDocumentWindow* pWindow = plQtDocumentWindow::FindWindowByDocument(r.m_pDocument);
         m_RecentDocuments.Insert(r.m_pDocument->GetDocumentPath(), 0);
         if (!m_bLoadingProjectInProgress)
         {
@@ -165,6 +166,7 @@ void plQtEditorApp::DocumentManagerEventHandler(const plDocumentManager::Event& 
       if (r.m_pDocument->GetAddToRecentFilesList())
       {
         // again, insert it into the recent documents list, such that the LAST CLOSED document is the LAST USED
+        plQtDocumentWindow* pWindow = plQtDocumentWindow::FindWindowByDocument(r.m_pDocument);
         m_RecentDocuments.Insert(r.m_pDocument->GetDocumentPath(), 0);
       }
     }

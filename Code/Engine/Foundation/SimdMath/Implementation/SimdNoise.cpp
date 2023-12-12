@@ -22,7 +22,7 @@ plSimdPerlinNoise::plSimdPerlinNoise(plUInt32 uiSeed)
 
 plSimdVec4f plSimdPerlinNoise::NoiseZeroToOne(const plSimdVec4f& vX, const plSimdVec4f& vY, const plSimdVec4f& vZ, plUInt32 uiNumOctaves /*= 1*/)
 {
-  plSimdVec4f result = plSimdVec4f::MakeZero();
+  plSimdVec4f result = plSimdVec4f::ZeroVector();
   plSimdFloat amplitude = 1.0f;
   plUInt32 uiOffset = 0;
 
@@ -57,8 +57,8 @@ namespace
     const plSimdVec4i h = vHash & plSimdVec4i(15);
     const plSimdVec4f u = plSimdVec4f::Select(h < plSimdVec4i(8), x, y);
     const plSimdVec4f v = plSimdVec4f::Select(h < plSimdVec4i(4), y, plSimdVec4f::Select(h == plSimdVec4i(12) || h == plSimdVec4i(14), x, z));
-    return plSimdVec4f::Select((h & plSimdVec4i(1)) == plSimdVec4i::MakeZero(), u, -u) +
-           plSimdVec4f::Select((h & plSimdVec4i(2)) == plSimdVec4i::MakeZero(), v, -v);
+    return plSimdVec4f::Select((h & plSimdVec4i(1)) == plSimdVec4i::ZeroVector(), u, -u) +
+           plSimdVec4f::Select((h & plSimdVec4i(2)) == plSimdVec4i::ZeroVector(), v, -v);
   }
 
   PLASMA_ALWAYS_INLINE plSimdVec4f Lerp(const plSimdVec4f& t, const plSimdVec4f& a, const plSimdVec4f& b) { return plSimdVec4f::Lerp(a, b, t); }

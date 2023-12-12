@@ -35,7 +35,7 @@ void plScriptCoroutine_MoveTo::Start(plGameObjectHandle hObject, const plVec3& v
   m_Easing = easing;
 
   m_Duration = duration;
-  m_TimePassed = plTime::MakeZero();
+  m_TimePassed = plTime::Zero();
 }
 
 plScriptCoroutine::Result plScriptCoroutine_MoveTo::Update(plTime deltaTimeSinceLastUpdate)

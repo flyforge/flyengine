@@ -263,14 +263,13 @@ PLASMA_BEGIN_COMPONENT_TYPE(plStateMachineComponent, 2, plComponentMode::Static)
   PLASMA_BEGIN_FUNCTIONS
   {
     PLASMA_SCRIPT_FUNCTION_PROPERTY(SetState, In, "Name"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetCurrentState),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(FireTransitionEvent, In, "Name"),
   }
   PLASMA_END_FUNCTIONS;
 
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"),
+    new plColorAttribute(plColorScheme::Logic),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -402,27 +401,10 @@ bool plStateMachineComponent::SetState(plStringView sName)
   return false;
 }
 
-plStringView plStateMachineComponent::GetCurrentState() const
-{
-  if (m_pStateMachineInstance != nullptr && m_pStateMachineInstance->GetCurrentState())
-  {
-    return m_pStateMachineInstance->GetCurrentState()->GetName();
-  }
-
-  return {};
-}
-
-void plStateMachineComponent::FireTransitionEvent(plStringView sEvent)
-{
-  if (m_pStateMachineInstance != nullptr)
-  {
-    m_pStateMachineInstance->FireTransitionEvent(sEvent);
-  }
-}
 
 void plStateMachineComponent::SendStateChangedMsg(plMsgStateMachineStateChanged& msg, plTime delay)
 {
-  if (delay > plTime::MakeZero())
+  if (delay > plTime::Zero())
   {
     m_StateChangedSender.PostEventMessage(msg, this, GetOwner(), delay, plObjectMsgQueueType::NextFrame);
   }

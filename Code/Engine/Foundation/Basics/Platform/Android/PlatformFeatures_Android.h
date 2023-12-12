@@ -4,10 +4,6 @@
 #undef PLASMA_USE_POSIX_FILE_API
 #define PLASMA_USE_POSIX_FILE_API PLASMA_ON
 
-/// If set to one linux posix extensions such as pipe2, dup3, etc are used.
-#undef PLASMA_USE_LINUX_POSIX_EXTENSIONS
-#define PLASMA_USE_LINUX_POSIX_EXTENSIONS PLASMA_ON
-
 /// Iterating through the file system is not supported
 #undef PLASMA_SUPPORTS_FILE_ITERATORS
 #define PLASMA_SUPPORTS_FILE_ITERATORS PLASMA_OFF

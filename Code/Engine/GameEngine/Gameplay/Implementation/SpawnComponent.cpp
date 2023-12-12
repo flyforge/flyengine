@@ -20,12 +20,13 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSpawnComponent, 3, plComponentMode::Static)
     PLASMA_ACCESSOR_PROPERTY("SpawnContinuously", GetSpawnContinuously, SetSpawnContinuously),
     PLASMA_MEMBER_PROPERTY("MinDelay", m_MinDelay)->AddAttributes(new plClampValueAttribute(plTime(), plVariant()), new plDefaultValueAttribute(plTime::Seconds(1.0))),
     PLASMA_MEMBER_PROPERTY("DelayRange", m_DelayRange)->AddAttributes(new plClampValueAttribute(plTime(), plVariant())),
-    PLASMA_MEMBER_PROPERTY("Deviation", m_MaxDeviation)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(179.0))),
+    PLASMA_MEMBER_PROPERTY("Deviation", m_MaxDeviation)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(179.0))),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
+    new plColorAttribute(plColorScheme::Gameplay),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColorScheme::LightUI(plColorScheme::Lime)),
     new plConeVisualizerAttribute(plBasisAxis::PositiveX, "Deviation", 0.5f, nullptr, plColorScheme::LightUI(plColorScheme::Lime)),
     new plConeAngleManipulatorAttribute("Deviation", 0.5f),
@@ -81,12 +82,12 @@ bool plSpawnComponent::SpawnOnce(const plVec3& vLocalOffset)
       const plVec3 vTiltAxis = plVec3(0, 1, 0);
       const plVec3 vTurnAxis = plVec3(1, 0, 0);
 
-      const plAngle tiltAngle = plAngle::MakeFromRadian((float)GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, (double)m_MaxDeviation.GetRadian()));
-      const plAngle turnAngle = plAngle::MakeFromRadian((float)GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, plMath::Pi<double>() * 2.0));
+      const plAngle tiltAngle = plAngle::Radian((float)GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, (double)m_MaxDeviation.GetRadian()));
+      const plAngle turnAngle = plAngle::Radian((float)GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, plMath::Pi<double>() * 2.0));
 
       plQuat qTilt, qTurn, qDeviate;
-      qTilt = plQuat::MakeFromAxisAndAngle(vTiltAxis, tiltAngle);
-      qTurn = plQuat::MakeFromAxisAndAngle(vTurnAxis, turnAngle);
+      qTilt.SetFromAxisAndAngle(vTiltAxis, tiltAngle);
+      qTurn.SetFromAxisAndAngle(vTurnAxis, turnAngle);
       qDeviate = qTurn * qTilt;
 
       tLocalSpawn.m_qRotation = qDeviate;
@@ -117,7 +118,7 @@ void plSpawnComponent::DoSpawn(const plTransform& tLocalSpawn)
   else
   {
     plTransform tGlobalSpawn;
-    tGlobalSpawn = plTransform::MakeGlobalTransform(GetOwner()->GetGlobalTransform(), tLocalSpawn);
+    tGlobalSpawn.SetGlobalTransform(GetOwner()->GetGlobalTransform(), tLocalSpawn);
 
     pResource->InstantiatePrefab(*GetWorld(), tGlobalSpawn, options, &m_Parameters);
   }
@@ -259,7 +260,7 @@ void plSpawnComponent::OnTriggered(plMsgComponentInternalTrigger& msg)
   {
     m_SpawnFlags.Remove(plSpawnComponentFlags::SpawnInFlight);
 
-    SpawnOnce(plVec3::MakeZero());
+    SpawnOnce(plVec3::ZeroVector());
 
     // do it all again
     if (m_SpawnFlags.IsAnySet(plSpawnComponentFlags::SpawnContinuously))

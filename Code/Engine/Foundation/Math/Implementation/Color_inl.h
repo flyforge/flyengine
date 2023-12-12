@@ -45,6 +45,11 @@ inline void plColor::SetRGBA(float fLinearRed, float fLinearGreen, float fLinear
   a = fLinearAlpha;
 }
 
+inline void plColor::SetZero()
+{
+  *this = ZeroColor();
+}
+
 // http://en.wikipedia.org/wiki/Luminance_%28relative%29
 PLASMA_FORCE_INLINE float plColor::GetLuminance() const
 {

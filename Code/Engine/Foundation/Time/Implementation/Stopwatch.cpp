@@ -12,7 +12,7 @@ plStopwatch::plStopwatch()
 
 void plStopwatch::StopAndReset()
 {
-  m_TotalDuration = plTime::MakeZero();
+  m_TotalDuration.SetZero();
   m_bRunning = false;
 }
 

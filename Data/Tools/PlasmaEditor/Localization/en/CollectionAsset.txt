@@ -1,0 +1,11 @@
+# Asset Types
+
+Collection;Collection
+
+# Component Types
+
+plCollectionComponent;Collection;;https://plasmaengine.github.io/PlasmaDocs/#performance/collection-component/
+
+# Properties
+
+plCollectionAssetEntry::Name;Lookup Name

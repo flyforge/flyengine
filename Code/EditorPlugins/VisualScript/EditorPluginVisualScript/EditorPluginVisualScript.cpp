@@ -17,16 +17,16 @@ void OnLoadPlugin()
       plActionMapManager::RegisterActionMap("VisualScriptAssetMenuBar").IgnoreResult();
       plStandardMenus::MapActions("VisualScriptAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
       plProjectActions::MapActions("VisualScriptAssetMenuBar");
-      plDocumentActions::MapMenuActions("VisualScriptAssetMenuBar");
-      plAssetActions::MapMenuActions("VisualScriptAssetMenuBar");
-      plCommandHistoryActions::MapActions("VisualScriptAssetMenuBar");
-      plEditActions::MapActions("VisualScriptAssetMenuBar", false, false);
+      plDocumentActions::MapActions("VisualScriptAssetMenuBar", "Menu.File", false);
+      plAssetActions::MapMenuActions("VisualScriptAssetMenuBar", "Menu.File");
+      plCommandHistoryActions::MapActions("VisualScriptAssetMenuBar", "Menu.Edit");
+      plEditActions::MapActions("VisualScriptAssetMenuBar", "Menu.Edit", false, false);
     }
-    
+
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("VisualScriptAssetToolBar").IgnoreResult();
-      plDocumentActions::MapToolbarActions("VisualScriptAssetToolBar");
+      plDocumentActions::MapActions("VisualScriptAssetToolBar", "", true);
       plCommandHistoryActions::MapActions("VisualScriptAssetToolBar", "");
       plAssetActions::MapToolBarActions("VisualScriptAssetToolBar", true);
     }

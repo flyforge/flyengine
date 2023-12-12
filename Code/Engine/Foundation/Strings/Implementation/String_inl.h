@@ -43,18 +43,6 @@ plHybridStringBase<Size>::plHybridStringBase(const plStringView& rhs, plAllocato
 }
 
 template <plUInt16 Size>
-plHybridStringBase<Size>::plHybridStringBase(const std::string_view& rhs, plAllocatorBase* pAllocator)
-{
-  *this = rhs;
-}
-
-template <plUInt16 Size>
-plHybridStringBase<Size>::plHybridStringBase(const std::string& rhs, plAllocatorBase* pAllocator)
-{
-  *this = rhs;
-}
-
-template <plUInt16 Size>
 plHybridStringBase<Size>::~plHybridStringBase() = default;
 
 template <plUInt16 Size>
@@ -145,29 +133,6 @@ void plHybridStringBase<Size>::operator=(const plStringView& rhs)
 }
 
 template <plUInt16 Size>
-void plHybridStringBase<Size>::operator=(const std::string_view& rhs)
-{
-  // PLASMA_ASSERT_DEBUG(rhs.GetStartPointer() < m_Data.GetData() || rhs.GetStartPointer() >= m_Data.GetData() + m_Data.GetCount(), "Can't assign string a value that points to ourself!");
-
-  if (rhs.empty())
-  {
-    Clear();
-  }
-  else
-  {
-    m_Data.SetCountUninitialized(rhs.size() + 1);
-    plStringUtils::Copy(&m_Data[0], m_Data.GetCount(), rhs.data(), rhs.data() + rhs.size());
-    m_uiCharacterCount = plStringUtils::GetCharacterCount(GetData());
-  }
-}
-
-template <plUInt16 Size>
-void plHybridStringBase<Size>::operator=(const std::string& rhs)
-{
-  *this = std::string_view(rhs);
-}
-
-template <plUInt16 Size>
 plStringView plHybridStringBase<Size>::GetSubString(plUInt32 uiFirstCharacter, plUInt32 uiNumCharacters) const
 {
   PLASMA_ASSERT_DEV(uiFirstCharacter + uiNumCharacters <= m_uiCharacterCount,
@@ -252,18 +217,6 @@ PLASMA_ALWAYS_INLINE plHybridString<Size, A>::plHybridString(const plStringView&
 }
 
 template <plUInt16 Size, typename A>
-PLASMA_ALWAYS_INLINE plHybridString<Size, A>::plHybridString(const std::string_view& rhs)
-  : plHybridStringBase<Size>(rhs, A::GetAllocator())
-{
-}
-
-template <plUInt16 Size, typename A>
-PLASMA_ALWAYS_INLINE plHybridString<Size, A>::plHybridString(const std::string& rhs)
-  : plHybridStringBase<Size>(rhs, A::GetAllocator())
-{
-}
-
-template <plUInt16 Size, typename A>
 PLASMA_ALWAYS_INLINE void plHybridString<Size, A>::operator=(const plHybridString<Size, A>& rhs)
 {
   plHybridStringBase<Size>::operator=(rhs);
@@ -301,18 +254,6 @@ PLASMA_ALWAYS_INLINE void plHybridString<Size, A>::operator=(const wchar_t* rhs)
 
 template <plUInt16 Size, typename A>
 PLASMA_ALWAYS_INLINE void plHybridString<Size, A>::operator=(const plStringView& rhs)
-{
-  plHybridStringBase<Size>::operator=(rhs);
-}
-
-template <plUInt16 Size, typename A>
-PLASMA_ALWAYS_INLINE void plHybridString<Size, A>::operator=(const std::string_view& rhs)
-{
-  plHybridStringBase<Size>::operator=(rhs);
-}
-
-template <plUInt16 Size, typename A>
-PLASMA_ALWAYS_INLINE void plHybridString<Size, A>::operator=(const std::string& rhs)
 {
   plHybridStringBase<Size>::operator=(rhs);
 }

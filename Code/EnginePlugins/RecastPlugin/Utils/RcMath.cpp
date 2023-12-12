@@ -17,9 +17,9 @@ plRcPos::plRcPos(const plVec3& v)
   *this = v;
 }
 
-plRcPos::plRcPos(const float* pPos)
+plRcPos::plRcPos(const float* pos)
 {
-  *this = pPos;
+  *this = pos;
 }
 
 plRcPos::operator const float *() const
@@ -37,11 +37,11 @@ plRcPos::operator plVec3() const
   return plVec3(m_Pos[0], m_Pos[2], m_Pos[1]);
 }
 
-void plRcPos::operator=(const float* pPos)
+void plRcPos::operator=(const float* pos)
 {
-  m_Pos[0] = pPos[0];
-  m_Pos[1] = pPos[1];
-  m_Pos[2] = pPos[2];
+  m_Pos[0] = pos[0];
+  m_Pos[1] = pos[1];
+  m_Pos[2] = pos[2];
 }
 
 void plRcPos::operator=(const plVec3& v)

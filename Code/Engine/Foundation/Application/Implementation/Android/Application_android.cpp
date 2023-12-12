@@ -19,9 +19,9 @@ static int32_t plAndroidHandleInput(struct android_app* pApp, AInputEvent* pEven
   return pAndroidApp->HandleInput(pEvent);
 }
 
-plAndroidApplication::plAndroidApplication(struct android_app* pApp, plApplication* pPlasmaApp)
+plAndroidApplication::plAndroidApplication(struct android_app* pApp, plApplication* pEzApp)
   : m_pApp(pApp)
-  , m_pPlasmaApp(pPlasmaApp)
+  , m_pEzApp(pEzApp)
 {
   pApp->userData = this;
   pApp->onAppCmd = plAndroidHandleCmd;
@@ -46,7 +46,7 @@ void plAndroidApplication::AndroidRun()
 
       HandleIdent(iIdent);
     }
-    if (bRun && m_pPlasmaApp->Run() != plApplication::Execution::Continue)
+    if (bRun && m_pEzApp->Run() != plApplication::Execution::Continue)
     {
       bRun = false;
       ANativeActivity_finish(m_pApp->activity);
@@ -74,20 +74,20 @@ void plAndroidApplication::HandleIdent(plInt32 iIdent)
   //#TODO:
 }
 
-PLASMA_FOUNDATION_DLL void plAndroidRun(struct android_app* pApp, plApplication* pPlasmaApp)
+PLASMA_FOUNDATION_DLL void plAndroidRun(struct android_app* pApp, plApplication* pEzApp)
 {
-  plAndroidApplication androidApp(pApp, pPlasmaApp);
+  plAndroidApplication androidApp(pApp, pEzApp);
 
-  if (plRun_Startup(pPlasmaApp).Succeeded())
+  if (plRun_Startup(pEzApp).Succeeded())
   {
     androidApp.AndroidRun();
   }
-  plRun_Shutdown(pPlasmaApp);
+  plRun_Shutdown(pEzApp);
 
-  const int iReturnCode = pPlasmaApp->GetReturnCode();
+  const int iReturnCode = pEzApp->GetReturnCode();
   if (iReturnCode != 0)
   {
-    const char* szReturnCode = pPlasmaApp->TranslateReturnCode();
+    const char* szReturnCode = pEzApp->TranslateReturnCode();
     if (szReturnCode != nullptr && szReturnCode[0] != '\0')
       __android_log_print(ANDROID_LOG_ERROR, "plEngine", "Return Code: '%s'", szReturnCode);
   }

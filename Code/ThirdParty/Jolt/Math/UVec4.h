@@ -25,7 +25,6 @@ public:
 	/// Constructor
 								UVec4() = default; ///< Intentionally not initialized for performance reasons
 								UVec4(const UVec4 &inRHS) = default;
-	UVec4 &						operator = (const UVec4 &inRHS) = default;
 	JPH_INLINE					UVec4(Type inRHS) : mValue(inRHS)					{ }
 
 	/// Create a vector from 4 integer components
@@ -89,7 +88,7 @@ public:
 
 	/// Get individual components
 #if defined(JPH_USE_SSE)
-	JPH_INLINE uint32			GetX() const										{ return uint32(_mm_cvtsi128_si32(mValue)); }
+	JPH_INLINE uint32			GetX() const										{ return (uint32)_mm_cvtsi128_si32(mValue); }
 	JPH_INLINE uint32			GetY() const										{ return mU32[1]; }
 	JPH_INLINE uint32			GetZ() const										{ return mU32[2]; }
 	JPH_INLINE uint32			GetW() const										{ return mU32[3]; }
@@ -179,11 +178,11 @@ public:
 	JPH_INLINE UVec4			ArithmeticShiftRight() const;
 
 	/// Takes the lower 4 16 bits and expands them to X, Y, Z and W
-	JPH_INLINE UVec4			Expand4Uint16Lo() const;
+	JPH_INLINE UVec4			Expand4Uint16Lo() const;	
 
 	/// Takes the upper 4 16 bits and expands them to X, Y, Z and W
 	JPH_INLINE UVec4			Expand4Uint16Hi() const;
-
+	
 	/// Takes byte 0 .. 3 and expands them to X, Y, Z and W
 	JPH_INLINE UVec4			Expand4Byte0() const;
 
@@ -192,7 +191,7 @@ public:
 
 	/// Takes byte 8 .. 11 and expands them to X, Y, Z and W
 	JPH_INLINE UVec4			Expand4Byte8() const;
-
+	
 	/// Takes byte 12 .. 15 and expands them to X, Y, Z and W
 	JPH_INLINE UVec4			Expand4Byte12() const;
 
@@ -211,6 +210,9 @@ public:
 		Type					mValue;
 		uint32					mU32[4];
 	};
+
+private:
+	static const UVec4			sFourMinusXShuffle[];
 };
 
 static_assert(is_trivial<UVec4>(), "Is supposed to be a trivial type!");

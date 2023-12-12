@@ -71,10 +71,6 @@ public:
   {
     return &m_Data[0];
   }
-  PLASMA_ALWAYS_INLINE operator const char8_t*() const
-  {
-    return reinterpret_cast<const char8_t*>(&m_Data[0]);
-  }
   PLASMA_ALWAYS_INLINE const char* GetData() const
   {
     return &m_Data[0];

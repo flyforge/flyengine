@@ -8,9 +8,9 @@ class plSurfaceAssetDocument : public plSimpleAssetDocument<plSurfaceResourceDes
   PLASMA_ADD_DYNAMIC_REFLECTION(plSurfaceAssetDocument, plSimpleAssetDocument<plSurfaceResourceDescriptor>);
 
 public:
-  plSurfaceAssetDocument(plStringView sDocumentPath);
+  plSurfaceAssetDocument(const char* szDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 };

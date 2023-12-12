@@ -11,7 +11,7 @@ public:
   Q_OBJECT
 
 public:
-  plQtLaunchFileserveDlg(QWidget* pParent);
+  plQtLaunchFileserveDlg(QWidget* parent);
   ~plQtLaunchFileserveDlg();
 
   plString m_sFileserveCmdLine;

@@ -13,17 +13,17 @@ public:
   plString m_sPropertyPath;
 };
 
-class PLASMA_SHAREDPLUGINSCENE_DLL plExposedDocumentObjectPropertiesMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_SHAREDPLUGINSCENE_DLL plExposedDocumentObjectPropertiesMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExposedDocumentObjectPropertiesMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plExposedDocumentObjectPropertiesMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plDynamicArray<plExposedSceneProperty> m_Properties;
 };
 
-class PLASMA_SHAREDPLUGINSCENE_DLL plExportSceneGeometryMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_SHAREDPLUGINSCENE_DLL plExportSceneGeometryMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExportSceneGeometryMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plExportSceneGeometryMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   bool m_bSelectionOnly = false;
@@ -32,9 +32,9 @@ public:
   plMat3 m_Transform;
 };
 
-class PLASMA_SHAREDPLUGINSCENE_DLL plPullObjectStateMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_SHAREDPLUGINSCENE_DLL plPullObjectStateMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPullObjectStateMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plPullObjectStateMsgToEngine, PlasmaEditorEngineDocumentMsg);
 };
 
 struct plPushObjectStateData
@@ -49,25 +49,25 @@ struct plPushObjectStateData
 
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_SHAREDPLUGINSCENE_DLL, plPushObjectStateData);
 
-class PLASMA_SHAREDPLUGINSCENE_DLL plPushObjectStateMsgToEditor : public plEditorEngineDocumentMsg
+class PLASMA_SHAREDPLUGINSCENE_DLL plPushObjectStateMsgToEditor : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPushObjectStateMsgToEditor, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plPushObjectStateMsgToEditor, PlasmaEditorEngineDocumentMsg);
 
 public:
   plDynamicArray<plPushObjectStateData> m_ObjectStates;
 };
 
-class PLASMA_SHAREDPLUGINSCENE_DLL plActiveLayerChangedMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_SHAREDPLUGINSCENE_DLL plActiveLayerChangedMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plActiveLayerChangedMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plActiveLayerChangedMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plUuid m_ActiveLayer;
 };
 
-class PLASMA_SHAREDPLUGINSCENE_DLL plLayerVisibilityChangedMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_SHAREDPLUGINSCENE_DLL plLayerVisibilityChangedMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLayerVisibilityChangedMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plLayerVisibilityChangedMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plHybridArray<plUuid, 1> m_HiddenLayers;

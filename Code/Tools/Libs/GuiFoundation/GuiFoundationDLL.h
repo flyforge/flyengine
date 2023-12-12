@@ -6,8 +6,6 @@
 #include <QColor>
 #include <QMetaType>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
-#include <Foundation/Strings/String.h>
-#include <QDataStream>
 
 // Configure the DLL Import/Export Define
 #if PLASMA_ENABLED(PLASMA_COMPILE_ENGINE_AS_DLL)
@@ -56,62 +54,7 @@ PLASMA_ALWAYS_INLINE QColor plToQtColor(const plColorGammaUB& c)
   return QColor(c.r, c.g, c.b, c.a);
 }
 
-PLASMA_ALWAYS_INLINE plColorGammaUB qtToPlasmaColor(const QColor& c)
+PLASMA_ALWAYS_INLINE plColorGammaUB qtToPlColor(const QColor& c)
 {
   return plColorGammaUB(c.red(), c.green(), c.blue(), c.alpha());
-}
-
-PLASMA_ALWAYS_INLINE plString qtToPlasmaString(const QString& sString)
-{
-  QByteArray data = sString.toUtf8();
-  return plString(plStringView(data.data(), data.size()));
-}
-
-PLASMA_ALWAYS_INLINE QString plMakeQString(plStringView sString)
-{
-  return QString::fromUtf8(sString.GetStartPointer(), sString.GetElementCount());
-}
-
-template <typename T>
-void operator>>(QDataStream& inout_stream, T*& rhs)
-{
-  void* p = nullptr;
-  uint len = sizeof(void*);
-  inout_stream.readRawData((char*)&p, len);
-  rhs = (T*)p;
-}
-
-
-template <typename T>
-void operator<<(QDataStream& inout_stream, T* rhs)
-{
-  inout_stream.writeRawData((const char*)&rhs, sizeof(void*));
-}
-
-template<typename T>
-void operator>>(QDataStream& inout_stream, plDynamicArray<T>& rhs)
-{
-  plUInt32 uiIndices = 0;
-  inout_stream >> uiIndices;
-  rhs.Clear();
-  rhs.Reserve(uiIndices);
-
-  for (int i = 0; i < uiIndices; ++i)
-  {
-    T obj = {};
-    inout_stream >> obj;
-    rhs.PushBack(obj);
-  }
-}
-
-template <typename T>
-void operator<<(QDataStream& inout_stream, plDynamicArray<T>& rhs)
-{
-  plUInt32 iIndices = rhs.GetCount();
-  inout_stream << iIndices;
-
-  for (plUInt32 i = 0; i < iIndices; ++i)
-  {
-    inout_stream << rhs[i];
-  }
 }

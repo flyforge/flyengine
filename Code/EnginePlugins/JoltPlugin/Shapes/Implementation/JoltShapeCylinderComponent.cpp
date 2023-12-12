@@ -46,7 +46,7 @@ void plJoltShapeCylinderComponent::SerializeComponent(plWorldWriter& inout_strea
 void plJoltShapeCylinderComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
 
   auto& s = inout_stream.GetStream();
@@ -56,8 +56,7 @@ void plJoltShapeCylinderComponent::DeserializeComponent(plWorldReader& inout_str
 
 void plJoltShapeCylinderComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  plBoundingBox box = plBoundingBox::MakeFromMinMax(plVec3(-m_fRadius, -m_fRadius, -m_fHeight * 0.5f), plVec3(m_fRadius, m_fRadius, m_fHeight * 0.5f));
-  msg.AddBounds(plBoundingBoxSphere::MakeFromBox(box), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingBox(plVec3(-m_fRadius, -m_fRadius, -m_fHeight * 0.5f), plVec3(m_fRadius, m_fRadius, m_fHeight * 0.5f)), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeCylinderComponent::SetRadius(float f)
@@ -96,7 +95,7 @@ void plJoltShapeCylinderComponent::CreateShapes(plDynamicArray<plJoltSubShape>& 
 
   plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
   sub.m_pShape = pNewShape;
-  sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, tOwn);
+  sub.m_Transform.SetLocalTransform(rootTransform, tOwn);
 }
 
 

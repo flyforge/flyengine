@@ -12,18 +12,31 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plScaleGizmo::plScaleGizmo()
 {
-  const plColor colr = plColorScheme::LightUI(plColorScheme::Red);
-  const plColor colg = plColorScheme::LightUI(plColorScheme::Green);
-  const plColor colb = plColorScheme::LightUI(plColorScheme::Blue);
-  const plColor coly = plColorScheme::LightUI(plColorScheme::Gray);
+  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
+  m_bUseExperimentalGizmo = !pPreferences->m_bOldGizmos;
 
-  m_hAxisX.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colr, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/ScaleArrowX.obj");
-  m_hAxisY.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colg, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/ScaleArrowY.obj");
-  m_hAxisZ.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colb, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/ScaleArrowZ.obj");
-  m_hAxisXYZ.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, coly, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/ScaleXYZ.obj");
+  if (m_bUseExperimentalGizmo)
+  {
+    const plColor colr = plColorScheme::LightUI(plColorScheme::Red);
+    const plColor colg = plColorScheme::LightUI(plColorScheme::Green);
+    const plColor colb = plColorScheme::LightUI(plColorScheme::Blue);
+    const plColor coly = plColorScheme::LightUI(plColorScheme::Gray);
+
+    m_hAxisX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colr, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/ScaleArrowX.obj");
+    m_hAxisY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colg, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/ScaleArrowY.obj");
+    m_hAxisZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colb, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/ScaleArrowZ.obj");
+    m_hAxisXYZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, coly, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/ScaleXYZ.obj");
+  }
+  else
+  {
+    m_hAxisX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Piston, plColorLinearUB(128, 0, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+    m_hAxisY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Piston, plColorLinearUB(0, 128, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+    m_hAxisZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Piston, plColorLinearUB(0, 0, 128), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+    m_hAxisXYZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Box, plColorLinearUB(128, 128, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+  }
 
   SetVisible(false);
-  SetTransformation(plTransform::MakeIdentity());
+  SetTransformation(plTransform::IdentityTransform());
 }
 
 void plScaleGizmo::UpdateStatusBarText(plQtEngineDocumentWindow* pWindow)
@@ -50,10 +63,31 @@ void plScaleGizmo::OnVisibleChanged(bool bVisible)
 
 void plScaleGizmo::OnTransformationChanged(const plTransform& transform)
 {
-  m_hAxisX.SetTransformation(transform);
-  m_hAxisY.SetTransformation(transform);
-  m_hAxisZ.SetTransformation(transform);
-  m_hAxisXYZ.SetTransformation(transform);
+  if (m_bUseExperimentalGizmo)
+  {
+    m_hAxisX.SetTransformation(transform);
+    m_hAxisY.SetTransformation(transform);
+    m_hAxisZ.SetTransformation(transform);
+    m_hAxisXYZ.SetTransformation(transform);
+  }
+  else
+  {
+    plTransform t;
+    t.SetIdentity();
+
+    t.m_vScale.Set(2.0f);
+    m_hAxisX.SetTransformation(transform * t);
+
+    t.m_qRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
+    m_hAxisY.SetTransformation(transform * t);
+
+    t.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
+    m_hAxisZ.SetTransformation(transform * t);
+
+    t.SetIdentity();
+    t.m_vScale = plVec3(0.2f);
+    m_hAxisXYZ.SetTransformation(transform * t);
+  }
 }
 
 void plScaleGizmo::DoFocusLost(bool bCancel)
@@ -72,13 +106,13 @@ void plScaleGizmo::DoFocusLost(bool bCancel)
   m_hAxisXYZ.SetVisible(true);
 }
 
-plEditorInput plScaleGizmo::DoMousePressEvent(QMouseEvent* e)
+PlasmaEditorInput plScaleGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (m_pInteractionGizmoHandle == &m_hAxisX)
   {
@@ -97,13 +131,13 @@ plEditorInput plScaleGizmo::DoMousePressEvent(QMouseEvent* e)
     m_vMoveAxis.Set(1, 1, 1);
   }
   else
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
   GetOwnerWindow()->GetEditorEngineConnection()->SendHighlightObjectMessage(&msg);
 
-  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
 
   m_vScalingResult.Set(1.0f);
   m_vScaleMouseMove.SetZero();
@@ -123,38 +157,36 @@ plEditorInput plScaleGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plScaleGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+PlasmaEditorInput plScaleGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return plEditorInput::WasExclusivelyHandled;
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
-plEditorInput plScaleGizmo::DoMouseMoveEvent(QMouseEvent* e)
+PlasmaEditorInput plScaleGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return plEditorInput::MayBeHandledByOthers;
+    return PlasmaEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
-    return plEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
+    return PlasmaEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
 
-  const QPoint mousePosition = e->globalPosition().toPoint();
-
-  const plVec2I32 vNewMousePos = plVec2I32(mousePosition.x(), mousePosition.y());
+  const plVec2I32 vNewMousePos = plVec2I32(e->globalPos().x(), e->globalPos().y());
   plVec2I32 vDiff = (vNewMousePos - m_vLastMousePos);
 
   m_vLastMousePos = UpdateMouseMode(e);
@@ -193,7 +225,7 @@ plEditorInput plScaleGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return plEditorInput::WasExclusivelyHandled;
+  return PlasmaEditorInput::WasExclusivelyHandled;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -204,9 +236,9 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 plManipulatorScaleGizmo::plManipulatorScaleGizmo()
 {
   // Overwrite axis to be boxes.
-  m_hAxisX.ConfigureHandle(this, plEngineGizmoHandleType::Box, plColorLinearUB(128, 0, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-  m_hAxisY.ConfigureHandle(this, plEngineGizmoHandleType::Box, plColorLinearUB(0, 128, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-  m_hAxisZ.ConfigureHandle(this, plEngineGizmoHandleType::Box, plColorLinearUB(0, 0, 128), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+  m_hAxisX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Box, plColorLinearUB(128, 0, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+  m_hAxisY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Box, plColorLinearUB(0, 128, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
+  m_hAxisZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Box, plColorLinearUB(0, 0, 128), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
 }
 
 void plManipulatorScaleGizmo::OnTransformationChanged(const plTransform& transform)
@@ -219,11 +251,11 @@ void plManipulatorScaleGizmo::OnTransformationChanged(const plTransform& transfo
 
   m_hAxisX.SetTransformation(transform * t);
 
-  t.m_qRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
+  t.m_qRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
   t.m_vPosition = plVec3(0, fOffset, 0);
   m_hAxisY.SetTransformation(transform * t);
 
-  t.m_qRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(-90));
+  t.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
   t.m_vPosition = plVec3(0, 0, fOffset);
   m_hAxisZ.SetTransformation(transform * t);
 

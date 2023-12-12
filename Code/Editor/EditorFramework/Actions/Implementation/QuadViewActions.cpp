@@ -7,10 +7,13 @@
 plActionDescriptorHandle plQuadViewActions::s_hToggleViews;
 plActionDescriptorHandle plQuadViewActions::s_hSpawnView;
 
+
 void plQuadViewActions::RegisterActions()
 {
-  s_hToggleViews = PLASMA_REGISTER_ACTION_1("Scene.View.Toggle", plActionScope::Window, "Scene", "", plQuadViewAction, plQuadViewAction::ButtonType::ToggleViews);
-  s_hSpawnView = PLASMA_REGISTER_ACTION_1("Scene.View.Span", plActionScope::Window, "Scene", "", plQuadViewAction, plQuadViewAction::ButtonType::SpawnView);
+  s_hToggleViews =
+    PLASMA_REGISTER_ACTION_1("Scene.View.Toggle", plActionScope::Window, "Scene", "", plQuadViewAction, plQuadViewAction::ButtonType::ToggleViews);
+  s_hSpawnView =
+    PLASMA_REGISTER_ACTION_1("Scene.View.Span", plActionScope::Window, "Scene", "", plQuadViewAction, plQuadViewAction::ButtonType::SpawnView);
 }
 
 void plQuadViewActions::UnregisterActions()
@@ -19,12 +22,13 @@ void plQuadViewActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hSpawnView);
 }
 
-void plQuadViewActions::MapToolbarActions(plStringView sMapping)
+void plQuadViewActions::MapActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  pMap->MapAction(s_hToggleViews, "", 3.0f);
+  pMap->MapAction(s_hToggleViews, szPath, 3.0f);
+  // pMap->MapAction(s_hSpawnView, szPath, 4.0f);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -51,7 +55,7 @@ plQuadViewAction::plQuadViewAction(const plActionContext& context, const char* s
   }
 }
 
-plQuadViewAction::~plQuadViewAction() = default;
+plQuadViewAction::~plQuadViewAction() {}
 
 void plQuadViewAction::Execute(const plVariant& value)
 {

@@ -65,7 +65,7 @@ public:
   float m_fAngularDamping = 0.05f;                        // [ property ]
   plSurfaceResourceHandle m_hSurface;                     // [ property ]
   plBitflags<plOnJoltContact> m_OnContact;                // [ property ]
-  plVec3 m_vCenterOfMass = plVec3::MakeZero();            // [ property ]
+  plVec3 m_vCenterOfMass = plVec3::ZeroVector();          // [ property ]
   bool GetUseCustomCoM() const { return GetUserFlag(0); } // [ property ]
   void SetUseCustomCoM(bool b) { SetUserFlag(0, b); }     // [ property ]
 

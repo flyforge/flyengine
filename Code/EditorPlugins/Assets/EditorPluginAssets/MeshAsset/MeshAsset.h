@@ -13,10 +13,10 @@ class plMeshAssetDocument : public plSimpleAssetDocument<plMeshAssetProperties>
   PLASMA_ADD_DYNAMIC_REFLECTION(plMeshAssetDocument, plSimpleAssetDocument<plMeshAssetProperties>);
 
 public:
-  plMeshAssetDocument(plStringView sDocumentPath);
+  plMeshAssetDocument(const char* szDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   void CreateMeshFromGeom(plMeshAssetProperties* pProp, plMeshResourceDescriptor& desc);
   plTransformStatus CreateMeshFromFile(plMeshAssetProperties* pProp, plMeshResourceDescriptor& desc, bool bAllowMaterialImport);
@@ -36,8 +36,10 @@ public:
   plMeshAssetDocumentGenerator();
   ~plMeshAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
+  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const override;
+  virtual plStatus Generate(
+    plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
   virtual plStringView GetDocumentExtension() const override { return "plMeshAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "Meshes"; }
-  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
+  virtual plStringView GetNameSuffix() const override { return "mesh"; }
 };

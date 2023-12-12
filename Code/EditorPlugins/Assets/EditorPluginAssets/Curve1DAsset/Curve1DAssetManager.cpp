@@ -14,7 +14,6 @@ plCurve1DAssetDocumentManager::plCurve1DAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Curve1D";
   m_DocTypeDesc.m_sFileExtension = "plCurve1DAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Curve1D.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Utilities";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plCurve1DAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Data_Curve");
@@ -36,7 +35,7 @@ void plCurve1DAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plCurve1DAssetDocument>())
       {
-        new plQtCurve1DAssetDocumentWindow(e.m_pDocument); // NOLINT: Not a memory leak
+        plQtCurve1DAssetDocumentWindow* pDocWnd = new plQtCurve1DAssetDocumentWindow(e.m_pDocument);
       }
     }
     break;
@@ -47,9 +46,9 @@ void plCurve1DAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
 }
 
 void plCurve1DAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plCurve1DAssetDocument(sPath);
+  out_pDocument = new plCurve1DAssetDocument(szPath);
 }
 
 void plCurve1DAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

@@ -169,7 +169,7 @@
 //  plInputManager::GetInputActionState("mm", "turnleft", &tl);
 //  plInputManager::GetInputActionState("mm", "turnright", &tr);
 //
-//  const plAngle turn = plAngle::MakeFromDegree((tr - tl) * 90.0f);
+//  const plAngle turn = plAngle::Degree((tr - tl) * 90.0f);
 //
 //  plQuat q;
 //  q.SetFromAxisAndAngle(plVec3(0, 0, 1), turn);

@@ -4,6 +4,12 @@
 #include <EditorFramework/Preferences/EditorPreferences.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
+plString plQtEditorApp::GetExternalToolsFolder(bool bForceUseCustomTools)
+{
+  PlasmaEditorPreferencesUser* pPref = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
+  return plApplicationServices::GetSingleton()->GetPrecompiledToolsFolder(bForceUseCustomTools ? false : pPref->m_bUsePrecompiledTools);
+}
+
 plString plQtEditorApp::FindToolApplication(const char* szToolName)
 {
   plStringBuilder toolExe = szToolName;
@@ -16,22 +22,13 @@ plString plQtEditorApp::FindToolApplication(const char* szToolName)
 
   szToolName = toolExe;
 
-  plEditorPreferencesUser* pPref = plPreferences::QueryPreferences<plEditorPreferencesUser>();
-
-  bool bFolders[2] = {false, true};
-
-  if (pPref->m_bUsePrecompiledTools)
-  {
-    plMath::Swap(bFolders[0], bFolders[1]);
-  }
-
-  plStringBuilder sTool = plApplicationServices::GetSingleton()->GetPrecompiledToolsFolder(bFolders[0]);
+  plStringBuilder sTool = plQtEditorApp::GetSingleton()->GetExternalToolsFolder();
   sTool.AppendPath(szToolName);
 
   if (plFileSystem::ExistsFile(sTool))
     return sTool;
 
-  sTool = plApplicationServices::GetSingleton()->GetPrecompiledToolsFolder(bFolders[1]);
+  sTool = plQtEditorApp::GetSingleton()->GetExternalToolsFolder(true);
   sTool.AppendPath(szToolName);
 
   if (plFileSystem::ExistsFile(sTool))
@@ -41,7 +38,7 @@ plString plQtEditorApp::FindToolApplication(const char* szToolName)
   return szToolName;
 }
 
-plStatus plQtEditorApp::ExecuteTool(const char* szTool, const QStringList& arguments, plUInt32 uiSecondsTillTimeout, plLogInterface* pLogOutput /*= nullptr*/, plLogMsgType::Enum logLevel /*= plLogMsgType::InfoMsg*/, const char* szCWD /*= nullptr*/)
+plStatus plQtEditorApp::ExecuteTool(const char* szTool, const QStringList& arguments, plUInt32 uiSecondsTillTimeout, plLogInterface* pLogOutput /*= nullptr*/, plLogMsgType::Enum LogLevel /*= plLogMsgType::InfoMsg*/, const char* szCWD /*= nullptr*/)
 {
   // this block is supposed to be in the global log, not the given log interface
   PLASMA_LOG_BLOCK("Executing Tool", szTool);
@@ -156,7 +153,7 @@ plStatus plQtEditorApp::ExecuteTool(const char* szTool, const QStringList& argum
         // TODO: output all logged data in one big message, if the tool failed
       }
 
-      if (msgType > logLevel || szMsg == nullptr)
+      if (msgType > LogLevel || szMsg == nullptr)
         continue;
 
       plLog::BroadcastLoggingEvent(pLogOutput, msgType, szMsg);

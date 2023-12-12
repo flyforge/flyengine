@@ -1,6 +1,5 @@
 #include <GuiFoundation/GuiFoundationPCH.h>
 
-#include <Foundation/Strings/TranslationLookup.h>
 #include <GuiFoundation/NodeEditor/Connection.h>
 #include <GuiFoundation/NodeEditor/Pin.h>
 #include <QApplication>
@@ -12,7 +11,7 @@ plQtPin::plQtPin()
 
   QPen pen(palette.light().color(), 3, Qt::SolidLine);
   setPen(pen);
-  setBrush(palette.base());
+  setBrush(palette.light());
 
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
@@ -52,7 +51,7 @@ void plQtPin::SetPin(const plPin& pin)
 
   if (m_bTranslatePinName)
   {
-    m_pLabel->setPlainText(plMakeQString(plTranslate(pin.GetName())));
+    m_pLabel->setPlainText(plTranslate(pin.GetName()));
   }
   else
   {
@@ -178,9 +177,9 @@ void plQtPin::SetHighlightState(plQtPinHighlightState state)
   }
 }
 
-void plQtPin::SetActive(bool bActive)
+void plQtPin::SetActive(bool active)
 {
-  m_bIsActive = bActive;
+  m_bIsActive = active;
 
   if (UpdatePinColors())
   {
@@ -191,10 +190,10 @@ void plQtPin::SetActive(bool bActive)
 bool plQtPin::UpdatePinColors(const plColorGammaUB* pOverwriteColor)
 {
   plColorGammaUB pinColor = pOverwriteColor != nullptr ? *pOverwriteColor : GetPin()->GetColor();
-  QColor base = QApplication::palette().window().color();
+  QColor light = QApplication::palette().light().color();
 
   if (!m_bIsActive)
-    pinColor = plMath::Lerp<plColor>(plColorGammaUB(base.red(), base.green(), base.blue()), pinColor, 0.2f);
+    pinColor = plMath::Lerp<plColor>(plColorGammaUB(light.red(), light.green(), light.blue()), pinColor, 0.2f);
 
   switch (m_HighlightState)
   {
@@ -204,7 +203,7 @@ bool plQtPin::UpdatePinColors(const plColorGammaUB* pOverwriteColor)
       p.setColor(plToQtColor(pinColor));
       setPen(p);
 
-      setBrush(HasAnyConnections() ? pen().color().darker(125) : base);
+      setBrush(HasAnyConnections() ? pen().color().darker(125) : light);
     }
     break;
 
@@ -212,10 +211,10 @@ bool plQtPin::UpdatePinColors(const plColorGammaUB* pOverwriteColor)
     case plQtPinHighlightState::CannotConnectSameDirection:
     {
       QPen p = pen();
-      p.setColor(base.lighter());
+      p.setColor(light.lighter());
       setPen(p);
 
-      setBrush(base);
+      setBrush(light);
     }
     break;
 
@@ -226,7 +225,7 @@ bool plQtPin::UpdatePinColors(const plColorGammaUB* pOverwriteColor)
       p.setColor(plToQtColor(pinColor));
       setPen(p);
 
-      setBrush(base);
+      setBrush(light);
     }
     break;
   }

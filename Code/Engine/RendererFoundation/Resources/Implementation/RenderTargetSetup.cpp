@@ -21,7 +21,9 @@ bool plGALRenderTargets::operator!=(const plGALRenderTargets& other) const
   return !(*this == other);
 }
 
-plGALRenderTargetSetup::plGALRenderTargetSetup() = default;
+plGALRenderTargetSetup::plGALRenderTargetSetup()
+{
+}
 
 plGALRenderTargetSetup& plGALRenderTargetSetup::SetRenderTarget(plUInt8 uiIndex, plGALRenderTargetViewHandle hRenderTarget)
 {

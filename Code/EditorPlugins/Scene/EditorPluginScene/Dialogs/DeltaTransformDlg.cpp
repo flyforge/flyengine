@@ -305,7 +305,7 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       case Mode::RotateX:
       case Mode::RotateXRandom:
       case Mode::RotateXDeviation:
-        qRot = plQuat::MakeFromAxisAndAngle(plVec3(1, 0, 0), plAngle::MakeFromDegree(vRotate.x));
+        qRot.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Degree(vRotate.x));
         localTrans.m_qRotation = qRot * localTrans.m_qRotation;
         localTrans.m_vPosition = qRot * localTrans.m_vPosition;
         trans = tReference * localTrans;
@@ -316,7 +316,7 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       case Mode::RotateY:
       case Mode::RotateYRandom:
       case Mode::RotateYDeviation:
-        qRot = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(vRotate.y));
+        qRot.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(vRotate.y));
         localTrans.m_qRotation = qRot * localTrans.m_qRotation;
         localTrans.m_vPosition = qRot * localTrans.m_vPosition;
         trans = tReference * localTrans;
@@ -327,7 +327,7 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       case Mode::RotateZ:
       case Mode::RotateZRandom:
       case Mode::RotateZDeviation:
-        qRot = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(vRotate.z));
+        qRot.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(vRotate.z));
         localTrans.m_qRotation = qRot * localTrans.m_qRotation;
         localTrans.m_vPosition = qRot * localTrans.m_vPosition;
         trans = tReference * localTrans;
@@ -354,18 +354,18 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
 
       case Mode::NaturalDeviationZ:
       {
-        const plAngle randomRotationZ = plAngle::MakeFromDegree(rng.DoubleInRange(0, 360));
+        const plAngle randomRotationZ = plAngle::Degree(rng.DoubleInRange(0, 360));
 
         plQuat qDeviation;
         qDeviation.SetIdentity();
 
         if (s_fNaturalDeviationZ > 0.0f)
         {
-          const plVec3 vDeviationAxis = plVec3::MakeRandomDeviationZ(rng, plAngle::MakeFromDegree(s_fNaturalDeviationZ));
-          qDeviation = plQuat::MakeShortestRotation(plVec3(0, 0, 1), vDeviationAxis);
+          const plVec3 vDeviationAxis = plVec3::CreateRandomDeviationZ(rng, plAngle::Degree(s_fNaturalDeviationZ));
+          qDeviation.SetShortestRotation(plVec3(0, 0, 1), vDeviationAxis);
         }
 
-        qRot = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), randomRotationZ);
+        qRot.SetFromAxisAndAngle(plVec3(0, 0, 1), randomRotationZ);
         localTrans.m_qRotation = qDeviation * qRot * localTrans.m_qRotation;
         localTrans.m_vPosition = qDeviation * qRot * localTrans.m_vPosition;
         trans = tReference * localTrans;

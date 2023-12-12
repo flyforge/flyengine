@@ -14,14 +14,14 @@ plUInt32 plDocumentObject::GetChildIndex(const plDocumentObject* pChild) const
   return m_Children.IndexOf(const_cast<plDocumentObject*>(pChild));
 }
 
-void plDocumentObject::InsertSubObject(plDocumentObject* pObject, plStringView sProperty, const plVariant& index)
+void plDocumentObject::InsertSubObject(plDocumentObject* pObject, const char* szProperty, const plVariant& index)
 {
   PLASMA_ASSERT_DEV(pObject != nullptr, "");
-  PLASMA_ASSERT_DEV(!sProperty.IsEmpty(), "Child objects must have a parent property to insert into");
+  PLASMA_ASSERT_DEV(!plStringUtils::IsNullOrEmpty(szProperty), "Child objects must have a parent property to insert into");
   plIReflectedTypeAccessor& accessor = GetTypeAccessor();
 
   const plRTTI* pType = accessor.GetType();
-  auto* pProp = pType->FindPropertyByName(sProperty);
+  auto* pProp = pType->FindPropertyByName(szProperty);
   PLASMA_ASSERT_DEV(pProp && pProp->GetFlags().IsSet(plPropertyFlags::Class) &&
                   (!pProp->GetFlags().IsSet(plPropertyFlags::Pointer) || pProp->GetFlags().IsSet(plPropertyFlags::PointerOwner)),
     "Only class type or pointer to class type that own the object can be inserted, everything else is handled by value.");
@@ -30,30 +30,30 @@ void plDocumentObject::InsertSubObject(plDocumentObject* pObject, plStringView s
   {
     if (!index.IsValid() || (index.CanConvertTo<plInt32>() && index.ConvertTo<plInt32>() == -1))
     {
-      plVariant newIndex = accessor.GetCount(sProperty);
-      bool bRes = accessor.InsertValue(sProperty, newIndex, pObject->GetGuid());
+      plVariant newIndex = accessor.GetCount(szProperty);
+      bool bRes = accessor.InsertValue(szProperty, newIndex, pObject->GetGuid());
       PLASMA_ASSERT_DEV(bRes, "");
     }
     else
     {
-      bool bRes = accessor.InsertValue(sProperty, index, pObject->GetGuid());
+      bool bRes = accessor.InsertValue(szProperty, index, pObject->GetGuid());
       PLASMA_ASSERT_DEV(bRes, "");
     }
   }
   else if (pProp->GetCategory() == plPropertyCategory::Map)
   {
     PLASMA_ASSERT_DEV(index.IsA<plString>(), "Map key must be a string.");
-    bool bRes = accessor.InsertValue(sProperty, index, pObject->GetGuid());
+    bool bRes = accessor.InsertValue(szProperty, index, pObject->GetGuid());
     PLASMA_ASSERT_DEV(bRes, "");
   }
   else if (pProp->GetCategory() == plPropertyCategory::Member)
   {
-    bool bRes = accessor.SetValue(sProperty, pObject->GetGuid());
+    bool bRes = accessor.SetValue(szProperty, pObject->GetGuid());
     PLASMA_ASSERT_DEV(bRes, "");
   }
 
   // Object patching
-  pObject->m_sParentProperty = sProperty;
+  pObject->m_sParentProperty = szProperty;
   pObject->m_pParent = this;
   m_Children.PushBack(pObject);
 }
@@ -85,13 +85,13 @@ void plDocumentObject::RemoveSubObject(plDocumentObject* pObject)
   pObject->m_pParent = nullptr;
 }
 
-void plDocumentObject::ComputeObjectHash(plUInt64& ref_uiHash) const
+void plDocumentObject::ComputeObjectHash(plUInt64& uiHash) const
 {
   const plIReflectedTypeAccessor& acc = GetTypeAccessor();
   auto pType = acc.GetType();
 
-  ref_uiHash = plHashingUtils::xxHash64(&m_Guid, sizeof(plUuid), ref_uiHash);
-  HashPropertiesRecursive(acc, ref_uiHash, pType);
+  uiHash = plHashingUtils::xxHash64(&m_Guid, sizeof(plUuid), uiHash);
+  HashPropertiesRecursive(acc, uiHash, pType);
 }
 
 

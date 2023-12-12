@@ -132,7 +132,7 @@ o
 	{
 		f %Damage{0x00002041}
 		f %Impulse{0x0000F041}
-		s %Interaction{"plasma_Impact"}
+		s %Interaction{"Plasma_Impact"}
 		s %Reaction{"plProjectileReaction::Absorb"}
 		s %Surface{"{ 8f19ce05-bf1e-4626-9659-e6acc058dee5 }"}
 	}
@@ -222,7 +222,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plFmodComponent"}
-		s %PluginName{"plasmaEditorPluginFmod"}
+		s %PluginName{"PlasmaEditorPluginFmod"}
 		VarArray %Properties{}
 		s %TypeName{"plFmodEventComponent"}
 		u3 %TypeVersion{4}
@@ -249,7 +249,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginScene"}
+		s %PluginName{"PlasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plExposedSceneProperty"}
 		u3 %TypeVersion{1}
@@ -280,7 +280,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plSceneDocumentSettingsBase"}
-		s %PluginName{"plasmaEditorPluginScene"}
+		s %PluginName{"PlasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plPrefabDocumentSettings"}
 		u3 %TypeVersion{1}
@@ -534,7 +534,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plDocumentRoot"}
-		s %PluginName{"plasmaEditorPluginScene"}
+		s %PluginName{"PlasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plSceneDocumentRoot"}
 		u3 %TypeVersion{2}
@@ -592,7 +592,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plComponent"}
-		s %PluginName{"plasmaEditorPluginFmod"}
+		s %PluginName{"PlasmaEditorPluginFmod"}
 		VarArray %Properties{}
 		s %TypeName{"plFmodComponent"}
 		u3 %TypeVersion{1}
@@ -648,7 +648,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginScene"}
+		s %PluginName{"PlasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plSceneDocumentSettingsBase"}
 		u3 %TypeVersion{1}

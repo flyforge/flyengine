@@ -20,5 +20,5 @@ protected:
 
   float m_fFinalScale;
   float m_fAngleScale;
-  plEngineGizmoHandle m_hGizmo;
+  PlasmaEngineGizmoHandle m_hGizmo;
 };

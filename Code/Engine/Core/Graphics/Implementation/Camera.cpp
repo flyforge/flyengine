@@ -157,14 +157,14 @@ plVec3 plCamera::MapInternalToExternal(const plVec3& v) const
 plAngle plCamera::GetFovX(float fAspectRatioWidthDivHeight) const
 {
   if (m_Mode == plCameraMode::PerspectiveFixedFovX)
-    return plAngle::MakeFromDegree(m_fFovOrDim);
+    return plAngle::Degree(m_fFovOrDim);
 
   if (m_Mode == plCameraMode::PerspectiveFixedFovY)
-    return plMath::ATan(plMath::Tan(plAngle::MakeFromDegree(m_fFovOrDim) * 0.5f) * fAspectRatioWidthDivHeight) * 2.0f;
+    return plMath::ATan(plMath::Tan(plAngle::Degree(m_fFovOrDim) * 0.5f) * fAspectRatioWidthDivHeight) * 2.0f;
 
   // TODO: HACK
   if (m_Mode == plCameraMode::Stereo)
-    return plAngle::MakeFromDegree(90);
+    return plAngle::Degree(90);
 
   PLASMA_REPORT_FAILURE("You cannot get the camera FOV when it is not a perspective camera.");
   return plAngle();
@@ -173,14 +173,14 @@ plAngle plCamera::GetFovX(float fAspectRatioWidthDivHeight) const
 plAngle plCamera::GetFovY(float fAspectRatioWidthDivHeight) const
 {
   if (m_Mode == plCameraMode::PerspectiveFixedFovX)
-    return plMath::ATan(plMath::Tan(plAngle::MakeFromDegree(m_fFovOrDim) * 0.5f) / fAspectRatioWidthDivHeight) * 2.0f;
+    return plMath::ATan(plMath::Tan(plAngle::Degree(m_fFovOrDim) * 0.5f) / fAspectRatioWidthDivHeight) * 2.0f;
 
   if (m_Mode == plCameraMode::PerspectiveFixedFovY)
-    return plAngle::MakeFromDegree(m_fFovOrDim);
+    return plAngle::Degree(m_fFovOrDim);
 
   // TODO: HACK
   if (m_Mode == plCameraMode::Stereo)
-    return plAngle::MakeFromDegree(90);
+    return plAngle::Degree(90);
 
   PLASMA_REPORT_FAILURE("You cannot get the camera FOV when it is not a perspective camera.");
   return plAngle();
@@ -282,12 +282,12 @@ void plCamera::GetProjectionMatrix(float fAspectRatioWidthDivHeight, plMat4& out
   switch (m_Mode)
   {
     case plCameraMode::PerspectiveFixedFovX:
-      out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovX(plAngle::MakeFromDegree(m_fFovOrDim), fAspectRatioWidthDivHeight,
+      out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovX(plAngle::Degree(m_fFovOrDim), fAspectRatioWidthDivHeight,
         m_fNearPlane, m_fFarPlane, depthRange, plClipSpaceYMode::Regular, plHandedness::LeftHanded);
       break;
 
     case plCameraMode::PerspectiveFixedFovY:
-      out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovY(plAngle::MakeFromDegree(m_fFovOrDim), fAspectRatioWidthDivHeight,
+      out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovY(plAngle::Degree(m_fFovOrDim), fAspectRatioWidthDivHeight,
         m_fNearPlane, m_fFarPlane, depthRange, plClipSpaceYMode::Regular, plHandedness::LeftHanded);
       break;
 
@@ -307,7 +307,7 @@ void plCamera::GetProjectionMatrix(float fAspectRatioWidthDivHeight, plMat4& out
       else
       {
         // Evade to FixedFovY
-        out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovY(plAngle::MakeFromDegree(m_fFovOrDim), fAspectRatioWidthDivHeight,
+        out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovY(plAngle::Degree(m_fFovOrDim), fAspectRatioWidthDivHeight,
           m_fNearPlane, m_fFarPlane, depthRange, plClipSpaceYMode::Regular, plHandedness::LeftHanded);
       }
       break;
@@ -365,10 +365,10 @@ void plCamera::ClampRotationAngles(bool bLocalSpace, plAngle& forwardAxis, plAng
       // Limit how much the camera can look up and down, to prevent it from overturning
 
       const float fDot = InternalGetDirForwards().Dot(plVec3(0, 0, -1));
-      const plAngle fCurAngle = plMath::ACos(fDot) - plAngle::MakeFromDegree(90.0f);
+      const plAngle fCurAngle = plMath::ACos(fDot) - plAngle::Degree(90.0f);
       const plAngle fNewAngle = fCurAngle + rightAxis;
 
-      const plAngle fAllowedAngle = plMath::Clamp(fNewAngle, plAngle::MakeFromDegree(-85.0f), plAngle::MakeFromDegree(85.0f));
+      const plAngle fAllowedAngle = plMath::Clamp(fNewAngle, plAngle::Degree(-85.0f), plAngle::Degree(85.0f));
 
       rightAxis = fAllowedAngle - fCurAngle;
     }
@@ -385,7 +385,8 @@ void plCamera::RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle upA
 
   if (forwardAxis.GetRadian() != 0.0f)
   {
-    plMat3 m = plMat3::MakeAxisRotation(vDirForwards, forwardAxis);
+    plMat3 m;
+    m.SetRotationMatrix(vDirForwards, forwardAxis);
 
     vDirUp = m * vDirUp;
     vDirRight = m * vDirRight;
@@ -393,7 +394,8 @@ void plCamera::RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle upA
 
   if (rightAxis.GetRadian() != 0.0f)
   {
-    plMat3 m = plMat3::MakeAxisRotation(vDirRight, rightAxis);
+    plMat3 m;
+    m.SetRotationMatrix(vDirRight, rightAxis);
 
     vDirUp = m * vDirUp;
     vDirForwards = m * vDirForwards;
@@ -401,7 +403,8 @@ void plCamera::RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle upA
 
   if (upAxis.GetRadian() != 0.0f)
   {
-    plMat3 m = plMat3::MakeAxisRotation(vDirUp, upAxis);
+    plMat3 m;
+    m.SetRotationMatrix(vDirUp, upAxis);
 
     vDirRight = m * vDirRight;
     vDirForwards = m * vDirForwards;
@@ -425,7 +428,8 @@ void plCamera::RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle up
 
   if (forwardAxis.GetRadian() != 0.0f)
   {
-    plMat3 m = plMat3 ::MakeRotationX(forwardAxis);
+    plMat3 m;
+    m.SetRotationMatrixX(forwardAxis);
 
     vDirUp = m * vDirUp;
     vDirForwards = m * vDirForwards;
@@ -433,7 +437,8 @@ void plCamera::RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle up
 
   if (rightAxis.GetRadian() != 0.0f)
   {
-    plMat3 m = plMat3 ::MakeRotationY(rightAxis);
+    plMat3 m;
+    m.SetRotationMatrixY(rightAxis);
 
     vDirUp = m * vDirUp;
     vDirForwards = m * vDirForwards;
@@ -441,7 +446,8 @@ void plCamera::RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle up
 
   if (upAxis.GetRadian() != 0.0f)
   {
-    plMat3 m = plMat3 ::MakeRotationZ(upAxis);
+    plMat3 m;
+    m.SetRotationMatrixZ(upAxis);
 
     vDirUp = m * vDirUp;
     vDirForwards = m * vDirForwards;

@@ -65,12 +65,12 @@ namespace
     "Yellow",
     "Orange",
     "Gray",
-    "PlasmaBranding",
-    "Black"
+    "Plasma",
+    "Black",
   };
   static_assert(PLASMA_ARRAY_SIZE(s_szColorNames) == plColorScheme::Count);
 
-  static void GetColorFromDdl(const plOpenDdlReaderElement* pElement, plColorGammaUB& out_color)
+  static void GetColorFromDdl(const plOpenDdlReaderElement* pElement, plColorGammaUB& out_Color)
   {
     if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::String)
     {
@@ -85,11 +85,11 @@ namespace
         }
       }
 
-      out_color = plColorScheme::DarkUI(color);
+      out_Color = plColorScheme::DarkUI(color);
     }
     else
     {
-      plOpenDdlUtils::ConvertToColorGamma(pElement, out_color).IgnoreResult();
+      plOpenDdlUtils::ConvertToColorGamma(pElement, out_Color).IgnoreResult();
     }
   }
 } // namespace
@@ -221,7 +221,7 @@ void plVisualShaderTypeRegistry::LoadConfigFile(const char* szFile)
 
     while (pNode != nullptr)
     {
-      if (!pNode->IsCustomType() || pNode->GetCustomType() != "Node")
+      if (!pNode->IsCustomType() || (pNode->GetCustomType() != "Node"))
       {
         plLog::Error("Top-Level object is not a 'Node' type");
         continue;
@@ -558,6 +558,13 @@ void plVisualShaderTypeRegistry::ExtractNodeConfig(const plOpenDdlReaderElement*
         if (!temp.IsEmpty() && !temp.EndsWith("\n"))
           temp.Append("\n");
         nd.m_sShaderCodePermutations = temp;
+      }
+      else if (pElement->GetName() == "CodeRenderConfig")
+      {
+        temp = pElement->GetPrimitivesString()[0];
+        if (!temp.IsEmpty() && !temp.EndsWith("\n"))
+          temp.Append("\n");
+        nd.m_sShaderCodeRenderState = temp;
       }
       else if (pElement->GetName() == "CodeRenderStates")
       {

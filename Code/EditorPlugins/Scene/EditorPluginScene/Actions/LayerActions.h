@@ -14,7 +14,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapContextMenuActions(plStringView sMapping);
+  static void MapContextMenuActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hLayerCategory;
   static plActionDescriptorHandle s_hCreateLayer;

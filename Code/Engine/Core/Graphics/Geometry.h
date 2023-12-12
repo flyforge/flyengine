@@ -60,7 +60,7 @@ public:
 
     GeoOptions() {}
     plColor m_Color = plColor(1, 1, 1, 1);         ///< The color of the entire geometric object
-    plMat4 m_Transform = plMat4::MakeIdentity(); ///< An additional transform to apply to the geometry while adding it
+    plMat4 m_Transform = plMat4::IdentityMatrix(); ///< An additional transform to apply to the geometry while adding it
     plUInt16 m_uiBoneIndex = 0;                    ///< Which bone should influence this geometry, for single-bone skinning.
 
     bool IsFlipWindingNecessary() const;
@@ -88,7 +88,7 @@ public:
   void Clear();
 
   /// \brief Adds a vertex, returns the index to the added vertex.
-  plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& boneIndices = plVec4U16::MakeZero(), const plColorLinearUB& boneWeights = plColorLinearUB(255, 0, 0, 0));
+  plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& boneIndices = plVec4U16::ZeroVector(), const plColorLinearUB& boneWeights = plColorLinearUB(255, 0, 0, 0));
 
   /// \brief Adds a vertex, returns the index to the added vertex. Position and normal are transformed with the given matrix.
   plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& boneIndices, const plColorLinearUB& boneWeights, const plMat4& mTransform)
@@ -205,7 +205,7 @@ public:
   /// uiSegments is the detail around the up axis, must be at least 3.
   /// The top or bottom caps can be removed using \a bCapTop and \a bCapBottom.
   /// When \a fraction is set to any value below 360 degree, a pie / pacman shaped cylinder is created.
-  void AddCylinder(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, bool bCapTop, bool bCapBottom, plUInt16 uiSegments, const GeoOptions& options = GeoOptions(), plAngle fraction = plAngle::MakeFromDegree(360.0f));
+  void AddCylinder(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, bool bCapTop, bool bCapBottom, plUInt16 uiSegments, const GeoOptions& options = GeoOptions(), plAngle fraction = plAngle::Degree(360.0f));
 
   /// \brief Same as AddCylinder(), but always adds caps and does not generate separate vertices for the caps.
   ///

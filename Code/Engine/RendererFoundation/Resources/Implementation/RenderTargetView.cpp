@@ -10,7 +10,7 @@ plGALRenderTargetView::plGALRenderTargetView(plGALTexture* pTexture, const plGAL
   PLASMA_ASSERT_DEV(m_pTexture != nullptr, "Texture must not be null");
 }
 
-plGALRenderTargetView::~plGALRenderTargetView() = default;
+plGALRenderTargetView::~plGALRenderTargetView() {}
 
 
 

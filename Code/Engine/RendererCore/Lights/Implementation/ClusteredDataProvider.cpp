@@ -147,9 +147,9 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plClusteredDataProvider, 1, plRTTIDefaultAll
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plClusteredDataProvider::plClusteredDataProvider() = default;
+plClusteredDataProvider::plClusteredDataProvider() {}
 
-plClusteredDataProvider::~plClusteredDataProvider() = default;
+plClusteredDataProvider::~plClusteredDataProvider() {}
 
 void* plClusteredDataProvider::UpdateData(const plRenderViewContext& renderViewContext, const plExtractedRenderData& extractedData)
 {

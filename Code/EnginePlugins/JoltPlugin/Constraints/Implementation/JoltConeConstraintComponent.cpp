@@ -10,7 +10,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltConeConstraintComponent, 1, plComponentMode::S
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("ConeAngle", GetConeAngle, SetConeAngle)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(175))),
+    PLASMA_ACCESSOR_PROPERTY("ConeAngle", GetConeAngle, SetConeAngle)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(175))),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
@@ -37,7 +37,7 @@ void plJoltConeConstraintComponent::SerializeComponent(plWorldWriter& inout_stre
 void plJoltConeConstraintComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 
@@ -55,8 +55,8 @@ void plJoltConeConstraintComponent::CreateContstraintType(JPH::Body* pBody0, JPH
   opt.mPoint1 = inv1 * plJoltConversionUtils::ToVec3(m_LocalFrameA.m_vPosition);
   opt.mPoint2 = inv2 * plJoltConversionUtils::ToVec3(m_LocalFrameB.m_vPosition);
   opt.mHalfConeAngle = m_ConeAngle.GetRadian() * 0.5f;
-  opt.mTwistAxis1 = inv1.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameA.m_qRotation * plVec3::MakeAxisX()));
-  opt.mTwistAxis2 = inv2.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameB.m_qRotation * plVec3::MakeAxisX()));
+  opt.mTwistAxis1 = inv1.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameA.m_qRotation * plVec3::UnitXAxis()));
+  opt.mTwistAxis2 = inv2.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameB.m_qRotation * plVec3::UnitXAxis()));
 
   m_pConstraint = opt.Create(*pBody0, *pBody1);
 }

@@ -13,7 +13,6 @@ plSkeletonAssetDocumentManager::plSkeletonAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Skeleton";
   m_DocTypeDesc.m_sFileExtension = "plSkeletonAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Skeleton.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Animation";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plSkeletonAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Mesh_Skeleton");
@@ -35,7 +34,7 @@ void plSkeletonAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMana
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plSkeletonAssetDocument>())
       {
-        new plQtSkeletonAssetDocumentWindow(static_cast<plSkeletonAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtSkeletonAssetDocumentWindow* pDocWnd = new plQtSkeletonAssetDocumentWindow(static_cast<plSkeletonAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -46,9 +45,9 @@ void plSkeletonAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMana
 }
 
 void plSkeletonAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plSkeletonAssetDocument(sPath);
+  out_pDocument = new plSkeletonAssetDocument(szPath);
 }
 
 void plSkeletonAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

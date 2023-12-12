@@ -22,7 +22,3 @@ add_dependencies(${PROJECT_NAME}
   EditorPluginAssets
   TexConv
 )
-
-if (PLASMA_BUILD_PHYSX)
-	add_dependencies(${PROJECT_NAME} EditorPluginPhysX PhysXPlugin)
-endif()

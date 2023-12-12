@@ -472,8 +472,8 @@ void plAnimPoseGenerator::SampleEventTrack(const plAnimationClipResource* pResou
 
   const plTime tPrev = fPrevPos * duration;
   const plTime tNow = fCurPos * duration;
-  const plTime tStart = plTime::MakeZero();
-  const plTime tEnd = duration + plTime::MakeFromSeconds(1.0); // sampling position is EXCLUSIVE
+  const plTime tStart = plTime::Zero();
+  const plTime tEnd = duration + plTime::Seconds(1.0); // sampling position is EXCLUSIVE
 
   plHybridArray<plHashedString, 16> events;
 

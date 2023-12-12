@@ -14,7 +14,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_VelocityCone, 2
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Angle", m_Angle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30)), new plClampValueAttribute(plAngle::MakeFromDegree(1), plAngle::MakeFromDegree(89))),
+    PLASMA_MEMBER_PROPERTY("Angle", m_Angle)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30)), new plClampValueAttribute(plAngle::Degree(1), plAngle::Degree(89))),
     PLASMA_MEMBER_PROPERTY("Speed", m_Speed),
   }
   PLASMA_END_PROPERTIES;
@@ -32,7 +32,7 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleInitializerFactory_VelocityCone::plParticleInitializerFactory_VelocityCone()
 {
-  m_Angle = plAngle::MakeFromDegree(45);
+  m_Angle = plAngle::Degree(45);
 }
 
 const plRTTI* plParticleInitializerFactory_VelocityCone::GetInitializerType() const
@@ -44,7 +44,7 @@ void plParticleInitializerFactory_VelocityCone::CopyInitializerProperties(plPart
 {
   plParticleInitializer_VelocityCone* pInitializer = static_cast<plParticleInitializer_VelocityCone*>(pInitializer0);
 
-  pInitializer->m_Angle = plMath::Clamp(m_Angle, plAngle::MakeFromDegree(1), plAngle::MakeFromDegree(89));
+  pInitializer->m_Angle = plMath::Clamp(m_Angle, plAngle::Degree(1), plAngle::Degree(89));
   pInitializer->m_Speed = m_Speed;
 }
 
@@ -94,7 +94,7 @@ void plParticleInitializer_VelocityCone::InitializeElements(plUInt64 uiStartInde
 
   for (plUInt64 i = uiStartIndex; i < uiStartIndex + uiNumElements; ++i)
   {
-    const plVec3 dir = plVec3::MakeRandomDeviationZ(rng, m_Angle);
+    const plVec3 dir = plVec3::CreateRandomDeviationZ(rng, m_Angle);
     // dir.z = 0;
     // float len = 0.0f;
 

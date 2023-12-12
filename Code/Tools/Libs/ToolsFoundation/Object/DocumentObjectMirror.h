@@ -14,13 +14,13 @@
 class PLASMA_TOOLSFOUNDATION_DLL plObjectChange
 {
 public:
-  plObjectChange() = default;
+  plObjectChange() {}
   plObjectChange(const plObjectChange&);
   plObjectChange(plObjectChange&& rhs);
   void operator=(plObjectChange&& rhs);
   void operator=(plObjectChange& rhs);
-  void GetGraph(plAbstractObjectGraph& ref_graph) const;
-  void SetGraph(plAbstractObjectGraph& ref_graph);
+  void GetGraph(plAbstractObjectGraph& graph) const;
+  void SetGraph(plAbstractObjectGraph& graph);
 
   plUuid m_Root;                                //< The object that is the parent of the op, namely the parent heap object we can store a pointer to.
   plHybridArray<plPropertyPathStep, 2> m_Steps; //< Path from root to target of change.
@@ -40,7 +40,7 @@ public:
   void InitReceiver(plRttiConverterContext* pContext);
   void DeInit();
 
-  using FilterFunction = plDelegate<bool(const plDocumentObject*, plStringView)>;
+  typedef plDelegate<bool(const plDocumentObject* pObject, const char* szProperty)> FilterFunction;
   /// \brief
   ///
   /// \param filter
@@ -58,9 +58,9 @@ public:
 
 protected:
   bool IsRootObject(const plDocumentObject* pParent);
-  bool IsHeapAllocated(const plDocumentObject* pParent, plStringView sParentProperty);
-  bool IsDiscardedByFilter(const plDocumentObject* pObject, plStringView sProperty) const;
-  static void CreatePath(plObjectChange& out_change, const plDocumentObject* pRoot, plStringView sProperty);
+  bool IsHeapAllocated(const plDocumentObject* pParent, const char* szParentProperty);
+  bool IsDiscardedByFilter(const plDocumentObject* pObject, const char* szProperty) const;
+  static void CreatePath(plObjectChange& out_change, const plDocumentObject* pRoot, const char* szProperty);
   static plUuid FindRootOpObject(const plDocumentObject* pObject, plHybridArray<const plDocumentObject*, 8>& path);
   static void FlattenSteps(const plArrayPtr<const plDocumentObject* const> path, plHybridArray<plPropertyPathStep, 2>& out_steps);
 

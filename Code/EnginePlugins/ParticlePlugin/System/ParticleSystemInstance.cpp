@@ -337,7 +337,7 @@ void plParticleSystemInstance::ReinitializeStreamProcessors(const plParticleSyst
 
 plParticleSystemInstance::plParticleSystemInstance()
 {
-  m_BoundingVolume = plBoundingBoxSphere::MakeInvalid();
+  m_BoundingVolume.SetInvalid();
 }
 
 void plParticleSystemInstance::Construct(plUInt32 uiMaxParticles, plWorld* pWorld, plParticleEffectInstance* pOwnerEffect, float fSpawnCountMultiplier)

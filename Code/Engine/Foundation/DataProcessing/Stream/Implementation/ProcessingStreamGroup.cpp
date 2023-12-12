@@ -226,8 +226,8 @@ void plProcessingStreamGroup::RunPendingDeletions()
     {
       const plUInt64 uiStreamElementStride = pStream->GetElementStride();
       const plUInt64 uiStreamElementSize = pStream->GetElementSize();
-      const void* pSourceData = plMemoryUtils::AddByteOffset(pStream->GetData(), static_cast<std::ptrdiff_t>(uiLastActiveElementIndex * uiStreamElementStride));
-      void* pTargetData = plMemoryUtils::AddByteOffset(pStream->GetWritableData(), static_cast<std::ptrdiff_t>(uiElementToRemove * uiStreamElementStride));
+      const void* pSourceData = plMemoryUtils::AddByteOffset(pStream->GetData(), static_cast<ptrdiff_t>(uiLastActiveElementIndex * uiStreamElementStride));
+      void* pTargetData = plMemoryUtils::AddByteOffset(pStream->GetWritableData(), static_cast<ptrdiff_t>(uiElementToRemove * uiStreamElementStride));
 
       plMemoryUtils::Copy<plUInt8>(static_cast<plUInt8*>(pTargetData), static_cast<const plUInt8*>(pSourceData), static_cast<size_t>(uiStreamElementSize));
     }

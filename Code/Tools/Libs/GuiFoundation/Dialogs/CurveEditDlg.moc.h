@@ -13,7 +13,7 @@ class PLASMA_GUIFOUNDATION_DLL plQtCurveEditDlg : public QDialog, Ui_CurveEditDl
 {
   Q_OBJECT
 public:
-  plQtCurveEditDlg(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pCurveObject, QWidget* pParent);
+  plQtCurveEditDlg(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pCurveObject, QWidget* parent);
   ~plQtCurveEditDlg();
 
   static QByteArray GetLastDialogGeometry() { return s_LastDialogGeometry; }

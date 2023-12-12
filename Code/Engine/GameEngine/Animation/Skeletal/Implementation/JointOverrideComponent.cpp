@@ -21,6 +21,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJointOverrideComponent, 1, plComponentMode::Dynami
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
+    new plColorAttribute(plColorScheme::Animation),
   }
   PLASMA_END_ATTRIBUTES;
 
@@ -106,9 +107,9 @@ void plJointOverrideComponent::OnAnimationPosePreparing(plMsgAnimationPosePrepar
 
   if (m_bOverrideRotation)
   {
-    SimdFloat4 vx = ozz::math::simd_float4::Load1(t.m_qRotation.x);
-    SimdFloat4 vy = ozz::math::simd_float4::Load1(t.m_qRotation.y);
-    SimdFloat4 vz = ozz::math::simd_float4::Load1(t.m_qRotation.z);
+    SimdFloat4 vx = ozz::math::simd_float4::Load1(t.m_qRotation.v.x);
+    SimdFloat4 vy = ozz::math::simd_float4::Load1(t.m_qRotation.v.y);
+    SimdFloat4 vz = ozz::math::simd_float4::Load1(t.m_qRotation.v.z);
     SimdFloat4 vw = ozz::math::simd_float4::Load1(t.m_qRotation.w);
 
     SoaQuaternion val = msg.m_LocalTransforms[soaIdx].rotation;

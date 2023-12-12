@@ -14,29 +14,29 @@
 
 
 
-///////////////////////////////////// plEditorEngineMsg /////////////////////////////////////
+///////////////////////////////////// PlasmaEditorEngineMsg /////////////////////////////////////
 
 /// \brief Base class for all messages between editor and engine that are not bound to any document
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEditorEngineMsg : public plProcessMessage
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEditorEngineMsg : public plProcessMessage
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditorEngineMsg, plProcessMessage);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorEngineMsg, plProcessMessage);
 
 public:
-  plEditorEngineMsg() = default;
+  PlasmaEditorEngineMsg() {}
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plUpdateReflectionTypeMsgToEditor : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plUpdateReflectionTypeMsgToEditor : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plUpdateReflectionTypeMsgToEditor, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plUpdateReflectionTypeMsgToEditor, PlasmaEditorEngineMsg);
 
 public:
   // Mutable because it is eaten up by plPhantomRttiManager.
   mutable plReflectedTypeDescriptor m_desc;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSetupProjectMsgToEngine : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSetupProjectMsgToEngine : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSetupProjectMsgToEngine, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plSetupProjectMsgToEngine, PlasmaEditorEngineMsg);
 
 public:
   plString m_sProjectDir;
@@ -48,23 +48,23 @@ public:
 
 /// \brief Sent to remote processes to shut them down.
 /// Local processes are simply killed through QProcess::close, but remote processes have to close themselves.
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plShutdownProcessMsgToEngine : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plShutdownProcessMsgToEngine : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plShutdownProcessMsgToEngine, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plShutdownProcessMsgToEngine, PlasmaEditorEngineMsg);
 
 public:
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plProjectReadyMsgToEditor : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plProjectReadyMsgToEditor : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProjectReadyMsgToEditor, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plProjectReadyMsgToEditor, PlasmaEditorEngineMsg);
 
 public:
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSimpleConfigMsgToEngine : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSimpleConfigMsgToEngine : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSimpleConfigMsgToEngine, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plSimpleConfigMsgToEngine, PlasmaEditorEngineMsg);
 
 public:
   plString m_sWhatToDo;
@@ -72,26 +72,17 @@ public:
   double m_fPayload;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSaveProfilingResponseToEditor : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSaveProfilingResponseToEditor : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSaveProfilingResponseToEditor, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plSaveProfilingResponseToEditor, PlasmaEditorEngineMsg);
 
 public:
   plString m_sProfilingFile;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plReloadResourceMsgToEngine : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plResourceUpdateMsgToEngine : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plReloadResourceMsgToEngine, plEditorEngineMsg);
-
-public:
-  plString m_sResourceType;
-  plString m_sResourceID;
-};
-
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plResourceUpdateMsgToEngine : public plEditorEngineMsg
-{
-  PLASMA_ADD_DYNAMIC_REFLECTION(plResourceUpdateMsgToEngine, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plResourceUpdateMsgToEngine, PlasmaEditorEngineMsg);
 
 public:
   plString m_sResourceType;
@@ -99,64 +90,64 @@ public:
   plDataBuffer m_Data;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plRestoreResourceMsgToEngine : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plRestoreResourceMsgToEngine : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRestoreResourceMsgToEngine, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plRestoreResourceMsgToEngine, PlasmaEditorEngineMsg);
 
 public:
   plString m_sResourceType;
   plString m_sResourceID;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plChangeCVarMsgToEngine : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plChangeCVarMsgToEngine : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plChangeCVarMsgToEngine, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plChangeCVarMsgToEngine, PlasmaEditorEngineMsg);
 
 public:
   plString m_sCVarName;
   plVariant m_NewValue;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plConsoleCmdMsgToEngine : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plConsoleCmdMsgToEngine : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plConsoleCmdMsgToEngine, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plConsoleCmdMsgToEngine, PlasmaEditorEngineMsg);
 
 public:
   plInt8 m_iType; // 0 = execute, 1 = auto complete
   plString m_sCommand;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plConsoleCmdResultMsgToEditor : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plConsoleCmdResultMsgToEditor : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plConsoleCmdResultMsgToEditor, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plConsoleCmdResultMsgToEditor, PlasmaEditorEngineMsg);
 
 public:
   plString m_sResult;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDynamicStringEnumMsgToEditor : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDynamicStringEnumMsgToEditor : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicStringEnumMsgToEditor, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicStringEnumMsgToEditor, PlasmaEditorEngineMsg);
 
 public:
   plString m_sEnumName;
   plHybridArray<plString, 8> m_EnumValues;
 };
 
-///////////////////////////////////// plEditorEngineDocumentMsg /////////////////////////////////////
+///////////////////////////////////// PlasmaEditorEngineDocumentMsg /////////////////////////////////////
 
 /// \brief Base class for all messages that are tied to some document.
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEditorEngineDocumentMsg : public plProcessMessage
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEditorEngineDocumentMsg : public plProcessMessage
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditorEngineDocumentMsg, plProcessMessage);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorEngineDocumentMsg, plProcessMessage);
 
 public:
   plUuid m_DocumentGuid;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSimpleDocumentConfigMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSimpleDocumentConfigMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSimpleDocumentConfigMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plSimpleDocumentConfigMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plString m_sWhatToDo;
@@ -164,9 +155,9 @@ public:
   double m_fPayload;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSimpleDocumentConfigMsgToEditor : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSimpleDocumentConfigMsgToEditor : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSimpleDocumentConfigMsgToEditor, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plSimpleDocumentConfigMsgToEditor, PlasmaEditorEngineDocumentMsg);
 
 public:
   plString m_sName;
@@ -191,20 +182,20 @@ public:
 };
 
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEditorEngineViewMsg : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEditorEngineViewMsg : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditorEngineViewMsg, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorEngineViewMsg, PlasmaEditorEngineDocumentMsg);
 
 public:
-  plEditorEngineViewMsg() { m_uiViewID = 0xFFFFFFFF; }
+  PlasmaEditorEngineViewMsg() { m_uiViewID = 0xFFFFFFFF; }
 
   plUInt32 m_uiViewID;
 };
 
 /// \brief For very simple uses cases where a custom message would be too much
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDocumentConfigMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDocumentConfigMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentConfigMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentConfigMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plString m_sWhatToDo;
@@ -213,9 +204,9 @@ public:
   plString m_sValue;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDocumentOpenMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDocumentOpenMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentOpenMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentOpenMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plDocumentOpenMsgToEngine() { m_bDocumentOpen = false; }
@@ -226,35 +217,35 @@ public:
 };
 
 /// \brief Used to reset the engine side to an empty document before sending the full document state over
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDocumentClearMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDocumentClearMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentClearMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentClearMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
-  plDocumentClearMsgToEngine() = default;
+  plDocumentClearMsgToEngine() {}
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDocumentOpenResponseMsgToEditor : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plDocumentOpenResponseMsgToEditor : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentOpenResponseMsgToEditor, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentOpenResponseMsgToEditor, PlasmaEditorEngineDocumentMsg);
 
 public:
-  plDocumentOpenResponseMsgToEditor() = default;
+  plDocumentOpenResponseMsgToEditor() {}
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewDestroyedMsgToEngine : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewDestroyedMsgToEngine : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewDestroyedMsgToEngine, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewDestroyedMsgToEngine, PlasmaEditorEngineViewMsg);
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewDestroyedResponseMsgToEditor : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewDestroyedResponseMsgToEditor : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewDestroyedResponseMsgToEditor, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewDestroyedResponseMsgToEditor, PlasmaEditorEngineViewMsg);
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewRedrawMsgToEngine : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewRedrawMsgToEngine : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewRedrawMsgToEngine, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewRedrawMsgToEngine, PlasmaEditorEngineViewMsg);
 
 public:
   plUInt64 m_uiHWND;
@@ -279,55 +270,57 @@ public:
   plMat4 m_ProjMatrix;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewScreenshotMsgToEngine : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewScreenshotMsgToEngine : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewScreenshotMsgToEngine, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewScreenshotMsgToEngine, PlasmaEditorEngineViewMsg);
 
 public:
   plString m_sOutputFile;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plActivateRemoteViewMsgToEngine : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plActivateRemoteViewMsgToEngine : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plActivateRemoteViewMsgToEngine, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plActivateRemoteViewMsgToEngine, PlasmaEditorEngineViewMsg);
 
 public:
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEntityMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEntityMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEntityMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plEntityMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plObjectChange m_change;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plExportDocumentMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plExportDocumentMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExportDocumentMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plExportDocumentMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plExportDocumentMsgToEngine()
-
-    = default;
+    : m_uiAssetHash(0)
+    , m_uiVersion(0)
+  {
+  }
 
   plString m_sOutputFile;
-  plUInt64 m_uiAssetHash = 0;
-  plUInt16 m_uiVersion = 0;
+  plUInt64 m_uiAssetHash;
+  plUInt16 m_uiVersion;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plExportDocumentMsgToEditor : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plExportDocumentMsgToEditor : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExportDocumentMsgToEditor, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plExportDocumentMsgToEditor, PlasmaEditorEngineDocumentMsg);
 
 public:
   bool m_bOutputSuccess = false;
   plString m_sFailureMsg;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plCreateThumbnailMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plCreateThumbnailMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCreateThumbnailMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plCreateThumbnailMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plUInt16 m_uiWidth = 0;
@@ -335,27 +328,27 @@ public:
   plHybridArray<plString, 1> m_ViewExcludeTags;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plCreateThumbnailMsgToEditor : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plCreateThumbnailMsgToEditor : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCreateThumbnailMsgToEditor, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plCreateThumbnailMsgToEditor, PlasmaEditorEngineDocumentMsg);
 
 public:
-  plCreateThumbnailMsgToEditor() = default;
+  plCreateThumbnailMsgToEditor() {}
   plDataBuffer m_ThumbnailData; ///< Raw 8-bit RGBA data (256x256x4 bytes)
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewPickingMsgToEngine : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewPickingMsgToEngine : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewPickingMsgToEngine, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewPickingMsgToEngine, PlasmaEditorEngineViewMsg);
 
 public:
   plUInt16 m_uiPickPosX;
   plUInt16 m_uiPickPosY;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewPickingResultMsgToEditor : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewPickingResultMsgToEditor : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewPickingResultMsgToEditor, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewPickingResultMsgToEditor, PlasmaEditorEngineViewMsg);
 
 public:
   plUuid m_ObjectGuid;
@@ -368,9 +361,9 @@ public:
   plVec3 m_vPickingRayStartPosition;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewMarqueePickingMsgToEngine : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewMarqueePickingMsgToEngine : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewMarqueePickingMsgToEngine, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewMarqueePickingMsgToEngine, PlasmaEditorEngineViewMsg);
 
 public:
   plUInt16 m_uiPickPosX0;
@@ -383,9 +376,9 @@ public:
   plUInt32 m_uiActionIdentifier;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewMarqueePickingResultMsgToEditor : public plEditorEngineViewMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewMarqueePickingResultMsgToEditor : public PlasmaEditorEngineViewMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewMarqueePickingResultMsgToEditor, plEditorEngineViewMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewMarqueePickingResultMsgToEditor, PlasmaEditorEngineViewMsg);
 
 public:
   plDynamicArray<plUuid> m_ObjectGuids;
@@ -394,11 +387,11 @@ public:
 };
 
 
-class plEditorEngineConnection;
+class PlasmaEditorEngineConnection;
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewHighlightMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plViewHighlightMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewHighlightMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plViewHighlightMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plUuid m_HighlightObject;
@@ -406,17 +399,17 @@ public:
   // extend this message if other types of highlighting become necessary
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLogMsgToEditor : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLogMsgToEditor : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLogMsgToEditor, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plLogMsgToEditor, PlasmaEditorEngineMsg);
 
 public:
   plLogEntry m_Entry;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plCVarMsgToEditor : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plCVarMsgToEditor : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCVarMsgToEditor, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plCVarMsgToEditor, PlasmaEditorEngineMsg);
 
 public:
   plString m_sName;
@@ -426,9 +419,9 @@ public:
 };
 
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpReplicationMsg : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpReplicationMsg : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpReplicationMsg, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpReplicationMsg, PlasmaEditorEngineMsg);
 
 public:
   plUuid m_OperationGuid;
@@ -437,18 +430,18 @@ public:
   plDataBuffer m_ReplicationData;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpProgressMsg : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpProgressMsg : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpProgressMsg, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpProgressMsg, PlasmaEditorEngineMsg);
 
 public:
   plUuid m_OperationGuid;
   float m_fCompletion;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpResultMsg : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpResultMsg : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpResultMsg, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpResultMsg, PlasmaEditorEngineMsg);
 
 public:
   plUuid m_OperationGuid;
@@ -456,9 +449,9 @@ public:
   plDataBuffer m_ResultData;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plEditorEngineSyncObjectMsg : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEditorEngineSyncObjectMsg : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditorEngineSyncObjectMsg, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorEngineSyncObjectMsg, PlasmaEditorEngineDocumentMsg);
 
 public:
   plUuid m_ObjectGuid;
@@ -469,9 +462,9 @@ public:
   void SetObjectData(const plDataBuffer& s) { m_ObjectData = s; }
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plObjectTagMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plObjectTagMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plObjectTagMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plObjectTagMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plObjectTagMsgToEngine()
@@ -486,26 +479,26 @@ public:
   bool m_bApplyOnAllChildren;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plObjectSelectionMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plObjectSelectionMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plObjectSelectionMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plObjectSelectionMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plString m_sSelection;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSimulationSettingsMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSimulationSettingsMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSimulationSettingsMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plSimulationSettingsMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   bool m_bSimulateWorld = false;
   float m_fSimulationSpeed = 1.0f;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGridSettingsMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGridSettingsMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGridSettingsMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plGridSettingsMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   float m_fGridDensity = 0.0f;
@@ -514,17 +507,17 @@ public:
   plVec3 m_vGridTangent2;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGlobalSettingsMsgToEngine : public plEditorEngineMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGlobalSettingsMsgToEngine : public PlasmaEditorEngineMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGlobalSettingsMsgToEngine, plEditorEngineMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plGlobalSettingsMsgToEngine, PlasmaEditorEngineMsg);
 
 public:
   float m_fGizmoScale = 0.0f;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plWorldSettingsMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plWorldSettingsMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plWorldSettingsMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plWorldSettingsMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   bool m_bRenderOverlay = false;
@@ -533,9 +526,9 @@ public:
   bool m_bAddAmbientLight = false;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGameModeMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGameModeMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameModeMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plGameModeMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   bool m_bEnablePTG = false;
@@ -544,26 +537,26 @@ public:
   plVec3 m_vStartDirection;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGameModeMsgToEditor : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGameModeMsgToEditor : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameModeMsgToEditor, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plGameModeMsgToEditor, PlasmaEditorEngineDocumentMsg);
 
 public:
   bool m_bRunningPTG;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plQuerySelectionBBoxMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plQuerySelectionBBoxMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plQuerySelectionBBoxMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plQuerySelectionBBoxMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plUInt32 m_uiViewID; /// passed through to plQuerySelectionBBoxResultMsgToEditor
   plInt32 m_iPurpose;  /// passed through to plQuerySelectionBBoxResultMsgToEditor
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plQuerySelectionBBoxResultMsgToEditor : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plQuerySelectionBBoxResultMsgToEditor : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plQuerySelectionBBoxResultMsgToEditor, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plQuerySelectionBBoxResultMsgToEditor, PlasmaEditorEngineDocumentMsg);
 
 public:
   plVec3 m_vCenter;
@@ -602,9 +595,9 @@ public:
 };
 
 /// Send by the editor scene document to the runtime scene document, to tell it about the poll results (see plGatherObjectsForDebugVisMsgInterDoc).
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plObjectsForDebugVisMsgToEngine : public plEditorEngineDocumentMsg
+class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plObjectsForDebugVisMsgToEngine : public PlasmaEditorEngineDocumentMsg
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plObjectsForDebugVisMsgToEngine, plEditorEngineDocumentMsg);
+  PLASMA_ADD_DYNAMIC_REFLECTION(plObjectsForDebugVisMsgToEngine, PlasmaEditorEngineDocumentMsg);
 
 public:
   plDataBuffer m_Objects;

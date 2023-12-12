@@ -17,20 +17,17 @@ public:
   explicit plQtSearchWidget(QWidget* pParent);
 
   /// \brief Passed through to the QLineEdit
-  void setText(const QString& sText);
+  void setText(const QString& text);
 
   /// \brief Passed through from the QLineEdit
   QString text() const;
 
   /// \brief Passed through to the QLineEdit
-  void setPlaceholderText(const QString& sText);
-
-  /// \brief Passed through to the QLineEdit
-  void selectAll();
+  void setPlaceholderText(const QString& text);
 
 Q_SIGNALS:
   /// \brief Passed through from the QLineEdit
-  void textChanged(const QString& sText);
+  void textChanged(const QString& text);
 
   /// \brief The user pressed the enter key
   void enterPressed();

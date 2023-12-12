@@ -5,6 +5,19 @@ plUuid::plUuid()
 {
 }
 
+void plUuid::SetInvalid()
+{
+  m_uiHigh = 0;
+  m_uiLow = 0;
+}
+
+plUuid plUuid::CreateUuid()
+{
+  plUuid guid;
+  guid.CreateNewUuid();
+  return guid;
+}
+
 bool plUuid::operator==(const plUuid& other) const
 {
   return m_uiHigh == other.m_uiHigh && m_uiLow == other.m_uiLow;

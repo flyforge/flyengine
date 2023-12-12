@@ -282,7 +282,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4u::operator>(const plSimdVec4u& v) co
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4u plSimdVec4u::MakeZero()
+PLASMA_ALWAYS_INLINE plSimdVec4u plSimdVec4u::ZeroVector()
 {
   return _mm_setzero_si128();
 }

@@ -11,22 +11,17 @@ public:
   plSimdTransform(); // [tested]
 
   /// \brief Sets position, rotation and scale.
-  explicit plSimdTransform(const plSimdVec4f& vPosition, const plSimdQuat& qRotation = plSimdQuat::MakeIdentity(), const plSimdVec4f& vScale = plSimdVec4f(1.0f)); // [tested]
+  explicit plSimdTransform(const plSimdVec4f& vPosition, const plSimdQuat& qRotation = plSimdQuat::IdentityQuaternion(),
+    const plSimdVec4f& vScale = plSimdVec4f(1.0f)); // [tested]
 
   /// \brief Sets rotation.
   explicit plSimdTransform(const plSimdQuat& qRotation); // [tested]
 
-  /// \brief Creates a transform from the given position, rotation and scale.
-  [[nodiscard]] static plSimdTransform Make(const plSimdVec4f& vPosition, const plSimdQuat& qRotation = plSimdQuat::MakeIdentity(), const plSimdVec4f& vScale = plSimdVec4f(1.0f)); // [tested]
+  /// \brief Sets the position to be zero and the rotation to identity.
+  void SetIdentity(); // [tested]
 
-  /// \brief Creates an identity transform.
-  [[nodiscard]] static plSimdTransform MakeIdentity(); // [tested]
-
-  /// \brief Creates a transform that is the local transformation needed to get from the parent's transform to the child's.
-  [[nodiscard]] static plSimdTransform MakeLocalTransform(const plSimdTransform& globalTransformParent, const plSimdTransform& globalTransformChild); // [tested]
-
-  /// \brief Creates a transform that is the global transform, that is reached by applying the child's local transform to the parent's global one.
-  [[nodiscard]] static plSimdTransform MakeGlobalTransform(const plSimdTransform& globalTransformParent, const plSimdTransform& localTransformChild); // [tested]
+  /// \brief Returns an Identity Transform.
+  static plSimdTransform IdentityTransform(); // [tested]
 
   /// \brief Returns the scale component with maximum magnitude.
   plSimdFloat GetMaxScale() const; // [tested]
@@ -48,12 +43,20 @@ public:
   /// \brief Returns the inverse of this transform.
   plSimdTransform GetInverse() const; // [tested]
 
+public:
+  /// \brief Sets this transform to be the local transformation needed to get from the parent's transform to the child's.
+  void SetLocalTransform(const plSimdTransform& globalTransformParent, const plSimdTransform& globalTransformChild); // [tested]
+
+  /// \brief Sets this transform to the global transform, that is reached by applying the child's local transform to the parent's global
+  /// one.
+  void SetGlobalTransform(const plSimdTransform& globalTransformParent, const plSimdTransform& localTransformChild); // [tested]
+
   /// \brief Returns the transformation as a matrix.
   plSimdMat4f GetAsMat4() const; // [tested]
 
 public:
-  [[nodiscard]] plSimdVec4f TransformPosition(const plSimdVec4f& v) const;  // [tested]
-  [[nodiscard]] plSimdVec4f TransformDirection(const plSimdVec4f& v) const; // [tested]
+  plSimdVec4f TransformPosition(const plSimdVec4f& v) const;  // [tested]
+  plSimdVec4f TransformDirection(const plSimdVec4f& v) const; // [tested]
 
   /// \brief Concatenates the two transforms. This is the same as a matrix multiplication, thus not commutative.
   void operator*=(const plSimdTransform& other); // [tested]

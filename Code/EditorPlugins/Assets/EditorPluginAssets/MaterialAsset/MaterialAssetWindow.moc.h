@@ -49,7 +49,7 @@ private:
   void VisualShaderEventHandler(const plMaterialVisualShaderEvent& e);
   void SetupDirectoryWatcher(bool needIt);
 
-  plEngineViewConfig m_ViewConfig;
+  PlasmaEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget = nullptr;
   plQtVisualShaderScene* m_pScene = nullptr;
   plQtNodeView* m_pNodeView = nullptr;
@@ -78,7 +78,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapToolbarActions(plStringView sMapping);
+  static void MapActions(const char* szMapping, const char* szPath);
 
   static plActionDescriptorHandle s_hMaterialModelAction;
 };

@@ -79,6 +79,11 @@ PLASMA_ALWAYS_INLINE const plRectFloat& plView::GetViewport() const
   return m_Data.m_ViewPortRect;
 }
 
+PLASMA_ALWAYS_INLINE const plRectFloat& plView::GetTargetViewport() const
+{
+  return m_Data.m_TargetViewportRect;
+}
+
 PLASMA_ALWAYS_INLINE const plViewData& plView::GetData() const
 {
   UpdateCachedMatrices();
@@ -95,10 +100,10 @@ PLASMA_ALWAYS_INLINE const plSharedPtr<plTask>& plView::GetExtractTask()
   return m_pExtractTask;
 }
 
-PLASMA_FORCE_INLINE plResult plView::ComputePickingRay(float fScreenPosX, float fScreenPosY, plVec3& out_vRayStartPos, plVec3& out_vRayDir) const
+PLASMA_FORCE_INLINE plResult plView::ComputePickingRay(float fScreenPosX, float fScreenPosY, plVec3& out_RayStartPos, plVec3& out_RayDir) const
 {
   UpdateCachedMatrices();
-  return m_Data.ComputePickingRay(fScreenPosX, fScreenPosY, out_vRayStartPos, out_vRayDir);
+  return m_Data.ComputePickingRay(fScreenPosX, fScreenPosY, out_RayStartPos, out_RayDir);
 }
 
 PLASMA_FORCE_INLINE plResult plView::ComputeScreenSpacePos(const plVec3& vPoint, plVec3& out_vScreenPos) const

@@ -1,86 +1,59 @@
+# Asset Types
+
+Particle Effect;Particle Effect
+
+# Component Types
+
+plParticleComponent;Particle;;https://plasmaengine.github.io/PlasmaDocs/#effects/particle-effects/particle-effect-component/
+
+# UI
+
 PFX.Restart;Restart
 PFX.AutoRestart;Loop
 PFX.Pause;Pause
-PFX.Speed.Menu;Simulation Speed
-PFX.Speed.01;10%
-PFX.Speed.025;25%
-PFX.Speed.05;50%
-PFX.Speed.1;100%
-PFX.Speed.15;150%
-PFX.Speed.2;200%
-PFX.Speed.3;300%
-PFX.Speed.4;400%
+Expand All
+	@@ -13,82 +23,62 @@ PFX.Speed.4;400%
 PFX.Speed.5;500%
 PFX.Speed.10;1000%
 PFX.Render.Visualizers;Render Visualizers
-Particle Systems;Particle Systems
-plParticleSystemDescriptor;Particle System
-Emitters;Emitters
-Initializers;Initializers
-Behaviors;Behaviors
-ParticleSystems;Particle Systems
-plParticleTypeTrailFactory;Trail
+
+# Enums
+
+plParticleTypeRenderMode::BlendedForeground;Blended (Foreground)
+plParticleTypeRenderMode::BlendedBackground;Blended (Background)
+
+plEffectInvisibleUpdateRate::Max20fps;Max 20 FPS
+plEffectInvisibleUpdateRate::Max10fps;Max 10 FPS
+plEffectInvisibleUpdateRate::Max5fps;Max 5 FPS
+
+plParticleTextureAtlasType::RandomYAnimatedX;Random Row, Animated Column
+
 plParticleBehaviorFactory_ColorGradient;Color Gradient
 plParticleBehaviorFactory_Velocity;Velocity
 plParticleBehaviorFactory_Gravity;Gravity
 plParticleBehaviorFactory_Raycast;Raycast
 plParticleBehaviorFactory_FadeOut;Fade Out
+plParticleBehaviorFactory_PullAlong;Pull Along
+plParticleBehaviorFactory_SizeCurve;Size Curve
+plParticleBehaviorFactory_Flies;Flies
+plParticleBehaviorFactory_Bounds;Bounds
+
 plParticleEmitterFactory_Continuous;Continuous
 plParticleEmitterFactory_OnEvent;On Event
 plParticleEmitterFactory_Burst;Burst
 plParticleEmitterFactory_Distance;Distance
-plParticleTypeMeshFactory;Mesh
-plParticleInitializerFactory_VelocityCone;Velocity Cone
-plParticleComponent;Particle
+
 plParticleInitializerFactory_BoxPosition;Box Position
 plParticleInitializerFactory_CylinderPosition;Cylinder Position
 plParticleInitializerFactory_RandomColor;Random Color
 plParticleInitializerFactory_RandomSize;Random Size
 plParticleInitializerFactory_RandomRotationSpeed;Rotation Speed
 plParticleInitializerFactory_SpherePosition;Sphere Position
-plParticleBehaviorFactory_PullAlong;Pull Along
-plParticleBehaviorFactory_SizeCurve;Size Curve
-plParticleTypeQuadFactory;Quad
-plParticleTypeLightFactory;Light
-plParticleTypeEffectFactory;Effect
-plParticleTypePointFactory;Point
-Types;Renderers
-plParticleRaycastHitReaction::Bounce;Bounce
-plParticleRaycastHitReaction::Die;Die
-plParticleRaycastHitReaction::Stop;Stop
-plParticleTypeRenderMode::Additive;Additive
-plParticleTypeRenderMode::Blended;Blended
-plParticleTypeRenderMode::BlendedForeground;Blended (Foreground)
-plParticleTypeRenderMode::BlendedBackground;Blended (Background)
-plParticleTypeRenderMode::Opaque;Opaque
-plParticleTypeRenderMode::Distortion;Distortion
-plParticleTypeRenderMode::BlendAdd;Blend Add
-plEffectInvisibleUpdateRate::FullUpdate;Full Update
-plEffectInvisibleUpdateRate::Max20fps;Max 20 FPS
-plEffectInvisibleUpdateRate::Max10fps;Max 10 FPS
-plEffectInvisibleUpdateRate::Max5fps;Max 5 FPS
-plEffectInvisibleUpdateRate::Pause;Pause
-plEffectInvisibleUpdateRate::Discard;Discard
-FloatParameters;Number Parameters
-ColorParameters;Color Parameters
-plParticleTextureAtlasType::None;None
-plParticleTextureAtlasType::RandomVariations;Random Variations
-plParticleTextureAtlasType::FlipbookAnimation;Flipbook Animation
-plParticleTextureAtlasType::RandomYAnimatedX;Random Row, Animated Column
-TextureAtlas;Texture Atlas
-plParticleColorGradientMode::Age;Age
-plParticleColorGradientMode::Speed;Speed
-ColorGradientMode;Color From
-GradientMaxSpeed;Max Speed
-EventReactions;Event Reactions
+plParticleInitializerFactory_VelocityCone;Velocity Cone
+
 plParticleEventReactionFactory_Effect;Effect Reaction
 plParticleEventReactionFactory_Prefab;Prefab Reaction
-plParticleBehaviorFactory_Flies;Flies
-LifeTime;Life
-Orientation;Orientation
-Texture;Texture
-RenderMode;Render Mode
-plQuadParticleOrientation::Billboard;Billboard
+
 plQuadParticleOrientation::Rotating_OrthoEmitterDir;Rotating: Ortho Emitter Dir
 plQuadParticleOrientation::Rotating_EmitterDir;Rotating: Emitter Dir
 plQuadParticleOrientation::Fixed_EmitterDir;Fixed: Emitter Dir
@@ -88,6 +61,17 @@ plQuadParticleOrientation::Fixed_RandomDir;Fixed: Random Dir
 plQuadParticleOrientation::Fixed_WorldUp;Fixed: World Up
 plQuadParticleOrientation::FixedAxis_EmitterDir;Axis: Emitter Dir
 plQuadParticleOrientation::FixedAxis_ParticleDir;Axis: Particle Dir
-plParticleBehaviorFactory_Bounds;Bounds
-plParticleOutOfBoundsMode::Teleport;Teleport
-plParticleOutOfBoundsMode::Die;Die
+
+plParticleTypeTrailFactory;Trail
+plParticleTypeMeshFactory;Mesh
+plParticleTypeQuadFactory;Quad
+plParticleTypeLightFactory;Light
+plParticleTypeEffectFactory;Effect
+plParticleTypePointFactory;Point
+
+# Properties
+
+plParticleEffectDescriptor::PreSimulateDuration;Pre-Simulate Duration
+plParticleEffectDescriptor::SimulateInLocalSpace;Simulate In Local-Space
+
+plParticleBehaviorFactory_Bounds::OutOfBoundsMode;Out-Of-Bounds Mode

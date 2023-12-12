@@ -31,7 +31,6 @@ plResult plBakingSettings::Serialize(plStreamWriter& inout_stream) const
 plResult plBakingSettings::Deserialize(plStreamReader& inout_stream)
 {
   const plTypeVersion version = inout_stream.ReadVersion(s_BakingSettingsVersion);
-  PLASMA_IGNORE_UNUSED(version);
 
   inout_stream >> m_vProbeSpacing;
   inout_stream >> m_uiNumSamplesPerProbe;

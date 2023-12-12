@@ -25,7 +25,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeQuadFactory, 2, plRTTIDefaultA
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_ENUM_MEMBER_PROPERTY("Orientation", plQuadParticleOrientation, m_Orientation),
-    PLASMA_MEMBER_PROPERTY("Deviation", m_MaxDeviation)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(90))),
+    PLASMA_MEMBER_PROPERTY("Deviation", m_MaxDeviation)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0), plAngle::Degree(90))),
     PLASMA_ENUM_MEMBER_PROPERTY("RenderMode", plParticleTypeRenderMode, m_RenderMode),
     PLASMA_MEMBER_PROPERTY("Texture", m_sTexture)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D"), new plDefaultValueAttribute(plStringView("{ e00262e8-58f5-42f5-880d-569257047201 }"))),// wrap in plStringView to prevent a memory leak report
     PLASMA_ENUM_MEMBER_PROPERTY("TextureAtlas", plParticleTextureAtlasType, m_TextureAtlasType),
@@ -294,7 +294,8 @@ void plParticleTypeQuad::CreateExtractedData(const plHybridArray<sod, 64>* pSort
   };
 
   auto SetTangentDataEmitterDir = [&](plUInt32 dstIdx, plUInt32 srcIdx) {
-    plMat3 mRotation = plMat3::MakeAxisRotation(vEmitterDir, plAngle::MakeFromRadian((float)(tCur.GetSeconds() * pRotationSpeed[srcIdx]) + pRotationOffset[srcIdx]));
+    plMat3 mRotation;
+    mRotation.SetRotationMatrix(vEmitterDir, plAngle::Radian((float)(tCur.GetSeconds() * pRotationSpeed[srcIdx]) + pRotationOffset[srcIdx]));
 
     m_TangentParticleData[dstIdx].Position = pPosition[srcIdx].GetAsVec3();
     m_TangentParticleData[dstIdx].TangentX = mRotation * vEmitterDirOrtho;
@@ -306,7 +307,8 @@ void plParticleTypeQuad::CreateExtractedData(const plHybridArray<sod, 64>* pSort
     plVec3 vOrthoDir = vEmitterDir.CrossRH(vDirToParticle);
     vOrthoDir.NormalizeIfNotZero(plVec3(1, 0, 0)).IgnoreResult();
 
-    plMat3 mRotation = plMat3::MakeAxisRotation(vOrthoDir, plAngle::MakeFromRadian((float)(tCur.GetSeconds() * pRotationSpeed[srcIdx]) + pRotationOffset[srcIdx]));
+    plMat3 mRotation;
+    mRotation.SetRotationMatrix(vOrthoDir, plAngle::Radian((float)(tCur.GetSeconds() * pRotationSpeed[srcIdx]) + pRotationOffset[srcIdx]));
 
     m_TangentParticleData[dstIdx].Position = pPosition[srcIdx].GetAsVec3();
     m_TangentParticleData[dstIdx].TangentX = vOrthoDir;
@@ -319,7 +321,8 @@ void plParticleTypeQuad::CreateExtractedData(const plHybridArray<sod, 64>* pSort
 
     const plVec3 vTangentStart = vNormal.GetOrthogonalVector().GetNormalized();
 
-    plMat3 mRotation = plMat3::MakeAxisRotation(vNormal, plAngle::MakeFromRadian((float)(tCur.GetSeconds() * pRotationSpeed[srcIdx]) + pRotationOffset[srcIdx]));
+    plMat3 mRotation;
+    mRotation.SetRotationMatrix(vNormal, plAngle::Radian((float)(tCur.GetSeconds() * pRotationSpeed[srcIdx]) + pRotationOffset[srcIdx]));
 
     const plVec3 vTangentX = mRotation * vTangentStart;
 
@@ -479,7 +482,7 @@ void plParticleTypeQuad::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNu
       {
         const plUInt64 uiElementIdx = uiStartIndex + i;
 
-        pAxis[uiElementIdx] = plVec3::MakeRandomDirection(rng);
+        pAxis[uiElementIdx] = plVec3::CreateRandomDirection(rng);
       }
     }
     else if (m_Orientation == plQuadParticleOrientation::Fixed_EmitterDir || m_Orientation == plQuadParticleOrientation::Fixed_WorldUp)
@@ -500,15 +503,16 @@ void plParticleTypeQuad::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNu
         vNormal = coord.m_vUpDir;
       }
 
-      if (m_MaxDeviation > plAngle::MakeFromDegree(1.0f))
+      if (m_MaxDeviation > plAngle::Degree(1.0f))
       {
         // how to get from the X axis to the desired normal
-        plQuat qRotToDir = plQuat::MakeShortestRotation(plVec3(1, 0, 0), vNormal);
+        plQuat qRotToDir;
+        qRotToDir.SetShortestRotation(plVec3(1, 0, 0), vNormal);
 
         for (plUInt32 i = 0; i < uiNumElements; ++i)
         {
           const plUInt64 uiElementIdx = uiStartIndex + i;
-          const plVec3 vRandomX = plVec3::MakeRandomDeviationX(rng, m_MaxDeviation);
+          const plVec3 vRandomX = plVec3::CreateRandomDeviationX(rng, m_MaxDeviation);
 
           pAxis[uiElementIdx] = qRotToDir * vRandomX;
         }

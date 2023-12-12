@@ -30,15 +30,6 @@ public:
   operator plArrayPtr<T>(); // [tested]
 
   /// \brief Compares this array to another contiguous array type.
-  bool operator==(const plArrayBase<T, Derived>& rhs) const; // [tested]
-
-  /// \brief Compares this array to another contiguous array type.
-  bool operator!=(const plArrayBase<T, Derived>& rhs) const; // [tested]
-
-  /// \brief Compares this array to another contiguous array type.
-  bool operator<(const plArrayBase<T, Derived>& rhs) const; // [tested]
-
-  /// \brief Compares this array to another contiguous array type.
   bool operator==(const plArrayPtr<const T>& rhs) const; // [tested]
 
   /// \brief Compares this array to another contiguous array type.

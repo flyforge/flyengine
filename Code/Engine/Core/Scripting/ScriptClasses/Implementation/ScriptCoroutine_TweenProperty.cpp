@@ -18,7 +18,8 @@ namespace
     {
       if constexpr (std::is_same_v<T, plQuat>)
       {
-        plQuat q = plQuat::MakeSlerp(a.Get<plQuat>(), b.Get<plQuat>(), x);
+        plQuat q;
+        q.SetSlerp(a.Get<plQuat>(), b.Get<plQuat>(), x);
         out_res = q;
       }
       else if constexpr (CanInterpolate(static_cast<plVariantType::Enum>(plVariantTypeDeduction<T>::value)))
@@ -85,7 +86,7 @@ void plScriptCoroutine_TweenProperty::Start(plComponentHandle hComponent, plStri
   m_Easing = easing;
 
   m_Duration = duration;
-  m_TimePassed = plTime::MakeZero();
+  m_TimePassed = plTime::Zero();
 }
 
 plScriptCoroutine::Result plScriptCoroutine_TweenProperty::Update(plTime deltaTimeSinceLastUpdate)

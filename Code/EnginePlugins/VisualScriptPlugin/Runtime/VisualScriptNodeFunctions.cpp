@@ -1200,7 +1200,7 @@ namespace
       }
     }
 
-    return ExecResult::ContinueLater(plTime::MakeZero());
+    return ExecResult::ContinueLater(plTime::Zero());
   }
 
   static ExecResult NodeFunction_Builtin_Yield(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
@@ -1211,7 +1211,7 @@ namespace
       // set marker value of 0x1 to indicate we are in a yield
       inout_context.SetCurrentCoroutine(reinterpret_cast<plScriptCoroutine*>(0x1));
 
-      return ExecResult::ContinueLater(plTime::MakeZero());
+      return ExecResult::ContinueLater(plTime::Zero());
     }
 
     inout_context.SetCurrentCoroutine(nullptr);

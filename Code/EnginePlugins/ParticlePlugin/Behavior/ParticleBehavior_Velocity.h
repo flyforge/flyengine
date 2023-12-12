@@ -53,5 +53,5 @@ protected:
   plProcessingStream* m_pStreamPosition;
   plProcessingStream* m_pStreamVelocity;
 
-  plVec3 m_vLastWind = plVec3::MakeZero();
+  plVec3 m_vLastWind = plVec3::ZeroVector();
 };

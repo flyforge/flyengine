@@ -26,7 +26,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_CylinderPositio
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCylinderVisualizerAttribute(plBasisAxis::PositiveZ, "Height", "Radius", plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3(1,1,1), "PositionOffset")
+    new plCylinderVisualizerAttribute(plBasisAxis::PositiveZ, "Height", "Radius", plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "PositionOffset")
   }
   PLASMA_END_ATTRIBUTES;
 }

@@ -38,10 +38,10 @@ void plSkeletonActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hRenderPreviewMesh);
 }
 
-void plSkeletonActions::MapActions(plStringView sMapping)
+void plSkeletonActions::MapActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
   pMap->MapAction(s_hCategory, "", 11.0f);
 
@@ -86,7 +86,7 @@ plSkeletonAction::plSkeletonAction(const plActionContext& context, const char* s
       break;
 
     case ActionType::RenderPreviewMesh:
-      SetIconPath(":/EditorPluginAssets/PreviewMesh.svg");
+      SetIconPath(":/AssetIcons/PreviewMesh.svg");
       break;
   }
 

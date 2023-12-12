@@ -5,7 +5,6 @@
 #include <GuiFoundation/Widgets/ItemView.moc.h>
 #include <QItemDelegate>
 #include <QListView>
-#include <EditorFramework/Assets/AssetBrowserFolderView.moc.h>
 
 class plQtIconViewDelegate;
 
@@ -20,6 +19,11 @@ public:
   void SetIconMode(bool bIconMode);
   void SetIconScale(plInt32 iIconSizePercentage);
   plInt32 GetIconScale() const;
+
+  void dragEnterEvent(QDragEnterEvent* event) override;
+  void dragMoveEvent(QDragMoveEvent* event) override;
+  void dragLeaveEvent(QDragLeaveEvent* event) override;
+  void dropEvent(QDropEvent* event) override;
 
 Q_SIGNALS:
   void ViewZoomed(plInt32 iIconSizePercentage);
@@ -45,16 +49,12 @@ public:
 
   void SetIconScale(plInt32 iIconSizePercentage);
 
-  virtual bool mousePressEvent(QMouseEvent* pEvent, const QStyleOptionViewItem& option, const QModelIndex& index) override;
-  virtual bool mouseReleaseEvent(QMouseEvent* pEvent, const QStyleOptionViewItem& option, const QModelIndex& index) override;
-
+  virtual bool mousePressEvent(QMouseEvent* event, const QStyleOptionViewItem& option, const QModelIndex& index) override;
+  virtual bool mouseReleaseEvent(QMouseEvent* event, const QStyleOptionViewItem& option, const QModelIndex& index) override;
 
 public:
-  virtual void paint(QPainter* pPainter, const QStyleOptionViewItem& opt, const QModelIndex& index) const override;
+  virtual void paint(QPainter* painter, const QStyleOptionViewItem& opt, const QModelIndex& index) const override;
   virtual QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override;
-  virtual QWidget* createEditor(QWidget* pParent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-  virtual void setModelData(QWidget* pEditor, QAbstractItemModel* pModel, const QModelIndex& index) const override;
-  virtual void updateEditorGeometry(QWidget* pEditor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 private:
   QSize ItemSize() const;

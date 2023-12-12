@@ -28,8 +28,8 @@ struct PLASMA_RENDERERCORE_DLL plEditableSkeletonBoneShape : public plReflectedC
 
   plEnum<plSkeletonJointGeometryType> m_Geometry;
 
-  plVec3 m_vOffset = plVec3::MakeZero();
-  plQuat m_qRotation = plQuat::MakeIdentity();
+  plVec3 m_vOffset = plVec3::ZeroVector();
+  plQuat m_qRotation = plQuat::IdentityQuaternion();
 
   float m_fLength = 0;    // Box, Capsule; 0 means parent joint to this joint (auto mode)
   float m_fWidth = 0;     // Box
@@ -63,7 +63,7 @@ public:
   void CopyPropertiesFrom(const plEditableSkeletonJoint* pJoint);
 
   plHashedString m_sName;
-  plTransform m_LocalTransform = plTransform::MakeIdentity();
+  plTransform m_LocalTransform = plTransform::IdentityTransform();
 
   plEnum<plSkeletonJointType> m_JointType;
 
@@ -74,10 +74,10 @@ public:
   plAngle m_SwingLimitY;
   plAngle m_SwingLimitZ;
 
-  plVec3 m_vGizmoOffsetPositionRO = plVec3::MakeZero();
-  plQuat m_qGizmoOffsetRotationRO = plQuat::MakeIdentity();
+  plVec3 m_vGizmoOffsetPositionRO = plVec3::ZeroVector();
+  plQuat m_qGizmoOffsetRotationRO = plQuat::IdentityQuaternion();
 
-  plQuat m_qLocalJointRotation = plQuat::MakeIdentity();
+  plQuat m_qLocalJointRotation = plQuat::IdentityQuaternion();
 
   plHybridArray<plEditableSkeletonJoint*, 4> m_Children;
   plHybridArray<plEditableSkeletonBoneShape, 1> m_BoneShapes;

@@ -74,27 +74,27 @@ plActionDescriptorHandle plActionManager::RegisterAction(const plActionDescripto
   return hType;
 }
 
-bool plActionManager::UnregisterAction(plActionDescriptorHandle& ref_hAction)
+bool plActionManager::UnregisterAction(plActionDescriptorHandle& hAction)
 {
   plActionDescriptor* pDesc = nullptr;
-  if (!s_ActionTable.TryGetValue(ref_hAction, pDesc))
+  if (!s_ActionTable.TryGetValue(hAction, pDesc))
   {
-    ref_hAction.Invalidate();
+    hAction.Invalidate();
     return false;
   }
 
   auto it = s_CategoryPathToActions.Find(pDesc->m_sCategoryPath);
   PLASMA_ASSERT_DEV(it.IsValid(), "Action is present but not mapped in its category path!");
-  PLASMA_VERIFY(it.Value().m_Actions.Remove(ref_hAction), "Action is present but not in its category data!");
+  PLASMA_VERIFY(it.Value().m_Actions.Remove(hAction), "Action is present but not in its category data!");
   PLASMA_VERIFY(it.Value().m_ActionNameToHandle.Remove(pDesc->m_sActionName), "Action is present but its name is not in the map!");
   if (it.Value().m_Actions.IsEmpty())
   {
     s_CategoryPathToActions.Remove(it);
   }
 
-  s_ActionTable.Remove(ref_hAction);
+  s_ActionTable.Remove(hAction);
   DeleteActionDesc(pDesc);
-  ref_hAction.Invalidate();
+  hAction.Invalidate();
   return true;
 }
 
@@ -135,7 +135,8 @@ plString plActionManager::FindActionCategory(const char* szActionName)
   return plString();
 }
 
-plResult plActionManager::ExecuteAction(const char* szCategory, const char* szActionName, const plActionContext& context, const plVariant& value /*= plVariant()*/)
+plResult plActionManager::ExecuteAction(
+  const char* szCategory, const char* szActionName, const plActionContext& context, const plVariant& value /*= plVariant()*/)
 {
   plString sCategory = szCategory;
 

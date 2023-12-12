@@ -31,8 +31,8 @@ class PLASMA_GAMEENGINE_DLL plSensorComponent : public plComponent
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
-  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
+  virtual void SerializeComponent(plWorldWriter& stream) const override;
+  virtual void DeserializeComponent(plWorldReader& stream) override;
 
 protected:
   virtual void OnActivated() override;
@@ -45,7 +45,7 @@ public:
   plSensorComponent();
   ~plSensorComponent();
 
-  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const = 0;
+  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const = 0;
   virtual void DebugDrawSensorShape() const = 0;
 
   void SetSpatialCategory(const char* szCategory); // [ property ]
@@ -64,22 +64,7 @@ public:
   plColorGammaUB GetColor() const;     // [ property ]
 
   /// \brief Returns the list of objects that this sensor has detected during its last update
-  plArrayPtr<const plGameObjectHandle> GetLastDetectedObjects() const { return m_LastDetectedObjects; }
-
-  /// \brief Updates the sensor state right now.
-  ///
-  /// If the update rate isn't set to 'Never', this is periodically done automatically.
-  /// Otherwise, it has to be called manually to update the state on demand.
-  ///
-  /// Afterwards out_ObjectsInSensorVolume will contain all objects that were found inside the volume.
-  /// ref_DetectedObjects needs to be provided as a temp array, but will not contain a usable result afterwards,
-  /// call GetLastDetectedObjects() instead.
-  ///
-  /// If bPostChangeMsg is true, plMsgSensorDetectedObjectsChanged is posted in case there is a change.
-  /// Physical visibility checks are skipped in case pPhysicsWorldModule is null.
-  ///
-  /// Returns true, if there was a change in detected objects, false if the same objects were detected as last time.
-  bool RunSensorCheck(plPhysicsWorldModuleInterface* pPhysicsWorldModule, plDynamicArray<plGameObject*>& out_ObjectsInSensorVolume, plDynamicArray<plGameObjectHandle>& ref_DetectedObjects, bool bPostChangeMsg) const;
+  plArrayPtr<plGameObjectHandle> GetLastDetectedObjects() const { return m_LastDetectedObjects; }
 
 protected:
   void UpdateSpatialCategory();
@@ -113,13 +98,13 @@ class PLASMA_GAMEENGINE_DLL plSensorSphereComponent : public plSensorComponent
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
-  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
+  virtual void SerializeComponent(plWorldWriter& stream) const override;
+  virtual void DeserializeComponent(plWorldReader& stream) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plSensorComponent
 
-  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const override;
+  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const override;
   virtual void DebugDrawSensorShape() const override;
 
   //////////////////////////////////////////////////////////////////////////
@@ -144,13 +129,13 @@ class PLASMA_GAMEENGINE_DLL plSensorCylinderComponent : public plSensorComponent
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
-  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
+  virtual void SerializeComponent(plWorldWriter& stream) const override;
+  virtual void DeserializeComponent(plWorldReader& stream) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plSensorComponent
 
-  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const override;
+  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const override;
   virtual void DebugDrawSensorShape() const override;
 
   //////////////////////////////////////////////////////////////////////////
@@ -176,13 +161,13 @@ class PLASMA_GAMEENGINE_DLL plSensorConeComponent : public plSensorComponent
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
-  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
+  virtual void SerializeComponent(plWorldWriter& stream) const override;
+  virtual void DeserializeComponent(plWorldReader& stream) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plSensorComponent
 
-  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const override;
+  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const override;
   virtual void DebugDrawSensorShape() const override;
 
   //////////////////////////////////////////////////////////////////////////
@@ -194,7 +179,7 @@ public:
 
   float m_fNearDistance = 0.0f;             // [ property ]
   float m_fFarDistance = 10.0f;             // [ property ]
-  plAngle m_Angle = plAngle::MakeFromDegree(90.0f); // [ property ]
+  plAngle m_Angle = plAngle::Degree(90.0f); // [ property ]
 };
 
 //////////////////////////////////////////////////////////////////////////

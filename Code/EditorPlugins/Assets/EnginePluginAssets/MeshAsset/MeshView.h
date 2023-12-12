@@ -4,7 +4,7 @@
 
 class plMeshContext;
 
-class plMeshViewContext : public plEngineProcessViewContext
+class plMeshViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plMeshViewContext(plMeshContext* pMeshContext);

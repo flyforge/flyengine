@@ -26,7 +26,7 @@ class plSkeletonAssetDocument : public plSimpleAssetDocument<plEditableSkeleton>
   PLASMA_ADD_DYNAMIC_REFLECTION(plSkeletonAssetDocument, plSimpleAssetDocument<plEditableSkeleton>);
 
 public:
-  plSkeletonAssetDocument(plStringView sDocumentPath);
+  plSkeletonAssetDocument(const char* szDocumentPath);
   ~plSkeletonAssetDocument();
 
   static void PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
@@ -62,7 +62,7 @@ public:
 
 protected:
   virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
   virtual plTransformStatus InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo) override;
 
@@ -87,8 +87,9 @@ public:
   plSkeletonAssetDocumentGenerator();
   ~plSkeletonAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
+  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const override;
+  virtual plStatus Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
   virtual plStringView GetDocumentExtension() const override { return "plSkeletonAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "AnimationSkeletonGroup"; }
-  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
+  virtual plStringView GetNameSuffix() const override { return "skel"; }
 };

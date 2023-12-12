@@ -362,7 +362,8 @@ PLASMA_BEGIN_COMPONENT_TYPE(plProcVertexColorComponent, 2, plComponentMode::Stat
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction/PCG"),
+    new plCategoryAttribute("Procedural Generation"),
+    new plColorAttribute(plColorScheme::Construction),
   }
   PLASMA_END_ATTRIBUTES;
 }

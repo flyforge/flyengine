@@ -14,7 +14,7 @@ PLASMA_FOUNDATION_INTERNAL_HEADER
 // #define DEBUG_FILE_WATCHER
 
 #ifdef DEBUG_FILE_WATCHER
-#  define DEBUG_LOG(...) plLog::Warning(__VA_ARGS__)
+#  define DEBUG_LOG(...) plLog::Debug(__VA_ARGS__)
 #else
 #  define DEBUG_LOG(...)
 #endif
@@ -128,52 +128,10 @@ void plDirectoryWatcherImpl::DoRead()
 
 void plDirectoryWatcher::EnumerateChanges(EnumerateChangesFunction func, plTime waitUpTo)
 {
-  MoveEvent pendingRemoveOrRename;
-  const plBitflags<plDirectoryWatcher::Watch> whatToWatch = m_pImpl->m_whatToWatch;
-  plFileSystemMirrorType* mirror = m_pImpl->m_mirror.Borrow();
-  // Renaming a file to the same filename with different casing triggers the events REMOVED (old casing) -> RENAMED_OLD_NAME -> _RENAMED_NEW_NAME.
-  // Thus, we need to cache every remove event to make sure the very next event is not a rename of the exact same file.
-  auto FirePendingRemove = [&]() {
-    if (!pendingRemoveOrRename.IsEmpty())
-    {
-      if (pendingRemoveOrRename.isDirectory)
-      {
-        if (whatToWatch.IsSet(Watch::Deletes))
-        {
-          if (mirror && whatToWatch.IsSet(Watch::Subdirectories))
-          {
-            mirror->Enumerate(pendingRemoveOrRename.path, [&](const plStringBuilder& sPath, plFileSystemMirrorType::Type type) { func(sPath, plDirectoryWatcherAction::Removed, (type == plFileSystemMirrorType::Type::File) ? plDirectoryWatcherType::File : plDirectoryWatcherType::Directory); })
-              .AssertSuccess();
-          }
-          func(pendingRemoveOrRename.path, plDirectoryWatcherAction::Removed, plDirectoryWatcherType::Directory);
-        }
-        if (mirror)
-        {
-          mirror->RemoveDirectory(pendingRemoveOrRename.path).AssertSuccess();
-        }
-      }
-      else
-      {
-        if (mirror)
-        {
-          mirror->RemoveFile(pendingRemoveOrRename.path).AssertSuccess();
-        }
-        if (whatToWatch.IsSet(plDirectoryWatcher::Watch::Deletes))
-        {
-          func(pendingRemoveOrRename.path, plDirectoryWatcherAction::Removed, plDirectoryWatcherType::File);
-        }
-      }
-      pendingRemoveOrRename.Clear();
-    }
-  };
-
-  PLASMA_SCOPE_EXIT(FirePendingRemove());
-
-
   PLASMA_ASSERT_DEV(!m_sDirectoryPath.IsEmpty(), "No directory opened!");
   while (WaitForSingleObject(m_pImpl->m_overlappedEvent, static_cast<DWORD>(waitUpTo.GetMilliseconds())) == WAIT_OBJECT_0)
   {
-    waitUpTo = plTime::MakeZero(); // only wait on the first call to GetQueuedCompletionStatus
+    waitUpTo = plTime::Zero(); // only wait on the first call to GetQueuedCompletionStatus
 
     DWORD numberOfBytes = 0;
     GetOverlappedResult(m_pImpl->m_directoryHandle, &m_pImpl->m_overlapped, &numberOfBytes, FALSE);
@@ -190,6 +148,10 @@ void plDirectoryWatcher::EnumerateChanges(EnumerateChangesFunction func, plTime 
     {
       return;
     }
+
+    const plBitflags<plDirectoryWatcher::Watch> whatToWatch = m_pImpl->m_whatToWatch;
+
+    plFileSystemMirrorType* mirror = m_pImpl->m_mirror.Borrow();
 
     MoveEvent lastMoveFrom;
 
@@ -211,15 +173,7 @@ void plDirectoryWatcher::EnumerateChanges(EnumerateChangesFunction func, plTime 
         eventFilePath.AppendPath(plStringView(dir.GetData(), dir.GetCount()));
         eventFilePath.MakeCleanPath();
 
-        const bool isFile = (info->FileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
-        if (!pendingRemoveOrRename.IsEmpty() && isFile == !pendingRemoveOrRename.isDirectory && info->Action == FILE_ACTION_RENAMED_OLD_NAME && pendingRemoveOrRename.path == eventFilePath)
-        {
-          // This is the bogus removed event because we changed the casing of a file / directory, ignore.
-          pendingRemoveOrRename.Clear();
-        }
-        FirePendingRemove();
-
-        if (isFile)
+        if ((info->FileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
         {
           switch (info->Action)
           {
@@ -240,8 +194,11 @@ void plDirectoryWatcher::EnumerateChanges(EnumerateChangesFunction func, plTime 
             case FILE_ACTION_REMOVED:
               DEBUG_LOG("FILE_ACTION_REMOVED {} ({})", eventFilePath, info->LastModificationTime.QuadPart);
               action = plDirectoryWatcherAction::Removed;
-              fireEvent = false;
-              pendingRemoveOrRename = {eventFilePath, false};
+              fireEvent = whatToWatch.IsSet(plDirectoryWatcher::Watch::Deletes);
+              if (mirror)
+              {
+                mirror->RemoveFile(eventFilePath.GetData()).AssertSuccess();
+              }
               break;
             case FILE_ACTION_MODIFIED:
             {
@@ -348,7 +305,21 @@ void plDirectoryWatcher::EnumerateChanges(EnumerateChangesFunction func, plTime 
             break;
             case FILE_ACTION_REMOVED:
               DEBUG_LOG("DIR_ACTION_REMOVED {}", eventFilePath);
-              pendingRemoveOrRename = {eventFilePath, true};
+              if (whatToWatch.IsSet(Watch::Deletes))
+              {
+                if (mirror && whatToWatch.IsSet(Watch::Subdirectories))
+                {
+                  mirror->Enumerate(eventFilePath, [&](const plStringBuilder& sPath, plFileSystemMirrorType::Type type) {
+                          func(sPath, plDirectoryWatcherAction::Removed, (type == plFileSystemMirrorType::Type::File) ? plDirectoryWatcherType::File : plDirectoryWatcherType::Directory);
+                        })
+                    .AssertSuccess();
+                }
+                func(eventFilePath, plDirectoryWatcherAction::Removed, plDirectoryWatcherType::Directory);
+              }
+              if (mirror)
+              {
+                mirror->RemoveDirectory(eventFilePath).AssertSuccess();
+              }
               break;
             case FILE_ACTION_RENAMED_OLD_NAME:
               DEBUG_LOG("DIR_ACTION_OLD_NAME {}", eventFilePath);
@@ -375,9 +346,7 @@ void plDirectoryWatcher::EnumerateChanges(EnumerateChangesFunction func, plTime 
         }
       }
       if (info->NextEntryOffset == 0)
-      {
         break;
-      }
       else
         info = (const FILE_NOTIFY_EXTENDED_INFORMATION*)(((plUInt8*)info) + info->NextEntryOffset);
     }

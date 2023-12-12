@@ -19,8 +19,8 @@ namespace plModelImporter2
     bool m_bImportSkinningData = false;
     bool m_bRecomputeNormals = false;
     bool m_bRecomputeTangents = false;
-    bool m_bNormalizeWeights = false;
-    plMat3 m_RootTransform = plMat3::MakeIdentity();
+    bool m_bOptimize = false;
+    plMat3 m_RootTransform = plMat3::IdentityMatrix();
 
     plMeshResourceDescriptor* m_pMeshOutput = nullptr;
     plEnum<plMeshNormalPrecision> m_MeshNormalsPrecision = plMeshNormalPrecision::Default;
@@ -64,11 +64,8 @@ namespace plModelImporter2
 
   struct PLASMA_MODELIMPORTER2_DLL OutputTexture
   {
-    plString m_sFilename;
     plString m_sFileFormatExtension;
     plConstByteArrayPtr m_RawData;
-
-    void GenerateFileName(plStringBuilder& out_sName) const;
   };
 
   struct PLASMA_MODELIMPORTER2_DLL OutputMaterial

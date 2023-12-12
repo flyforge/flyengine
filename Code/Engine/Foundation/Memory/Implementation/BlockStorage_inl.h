@@ -256,7 +256,7 @@ PLASMA_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pO
   plUInt32 uiIndex = plInvalidIndex;
   for (plUInt32 uiBlockIndex = 0; uiBlockIndex < m_Blocks.GetCount(); ++uiBlockIndex)
   {
-    std::ptrdiff_t diff = pObject - m_Blocks[uiBlockIndex].m_pData;
+    ptrdiff_t diff = pObject - m_Blocks[uiBlockIndex].m_pData;
     if (diff >= 0 && diff < plDataBlock<T, BlockSize>::CAPACITY)
     {
       uiIndex = uiBlockIndex * plDataBlock<T, BlockSize>::CAPACITY + (plInt32)diff;

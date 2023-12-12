@@ -324,7 +324,7 @@ public:
   /// However, a flush is always ignored if not a single message was logged in between.
   ///
   /// \return Returns true if the flush is executed.
-  static bool Flush(plUInt32 uiNumNewMsgThreshold = 0, plTime timeIntervalThreshold = plTime::MakeFromSeconds(10), plLogInterface* pInterface = GetThreadLocalLogSystem());
+  static bool Flush(plUInt32 uiNumNewMsgThreshold = 0, plTime timeIntervalThreshold = plTime::Seconds(10), plLogInterface* pInterface = GetThreadLocalLogSystem());
 
   /// \brief Usually called internally by the other log functions, but can be called directly, if the message type is already known.
   /// pInterface must be != nullptr.

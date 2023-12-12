@@ -8,9 +8,9 @@
 #include <Foundation/Utilities/ConversionUtils.h>
 #include <ToolsFoundation/Utilities/RecentFilesList.h>
 
-void plRecentFilesList::Insert(plStringView sFile, plInt32 iContainerWindow)
+void plRecentFilesList::Insert(const char* szFile, plInt32 iContainerWindow)
 {
-  plStringBuilder sCleanPath = sFile;
+  plStringBuilder sCleanPath = szFile;
   sCleanPath.MakeCleanPath();
 
   plString s = sCleanPath;
@@ -29,10 +29,10 @@ void plRecentFilesList::Insert(plStringView sFile, plInt32 iContainerWindow)
     m_Files.SetCount(m_uiMaxElements);
 }
 
-void plRecentFilesList::Save(plStringView sFile)
+void plRecentFilesList::Save(const char* szFile)
 {
   plDeferredFileWriter File;
-  File.SetOutput(sFile);
+  File.SetOutput(szFile);
 
   for (const RecentFile& file : m_Files)
   {
@@ -43,15 +43,15 @@ void plRecentFilesList::Save(plStringView sFile)
   }
 
   if (File.Close().Failed())
-    plLog::Error("Unable to open file '{0}' for writing!", sFile);
+    plLog::Error("Unable to open file '{0}' for writing!", szFile);
 }
 
-void plRecentFilesList::Load(plStringView sFile)
+void plRecentFilesList::Load(const char* szFile)
 {
   m_Files.Clear();
 
   plFileReader File;
-  if (File.Open(sFile).Failed())
+  if (File.Open(szFile).Failed())
     return;
 
   plStringBuilder sAllLines;

@@ -5,8 +5,6 @@
 #include <Foundation/Math/Rect.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-struct plShaderResourceBinding;
-
 class PLASMA_RENDERERFOUNDATION_DLL plGALCommandEncoderCommonPlatformInterface
 {
 public:
@@ -14,10 +12,10 @@ public:
 
   virtual void SetShaderPlatform(const plGALShader* pShader) = 0;
 
-  virtual void SetConstantBufferPlatform(const plShaderResourceBinding& binding, const plGALBuffer* pBuffer) = 0;
-  virtual void SetSamplerStatePlatform(const plShaderResourceBinding& binding, const plGALSamplerState* pSamplerState) = 0;
-  virtual void SetResourceViewPlatform(const plShaderResourceBinding& binding, const plGALResourceView* pResourceView) = 0;
-  virtual void SetUnorderedAccessViewPlatform(const plShaderResourceBinding& binding, const plGALUnorderedAccessView* pUnorderedAccessView) = 0;
+  virtual void SetConstantBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer) = 0;
+  virtual void SetSamplerStatePlatform(plGALShaderStage::Enum stage, plUInt32 uiSlot, const plGALSamplerState* pSamplerState) = 0;
+  virtual void SetResourceViewPlatform(plGALShaderStage::Enum stage, plUInt32 uiSlot, const plGALResourceView* pResourceView) = 0;
+  virtual void SetUnorderedAccessViewPlatform(plUInt32 uiSlot, const plGALUnorderedAccessView* pUnorderedAccessView) = 0;
 
   // Query functions
 
@@ -76,6 +74,10 @@ public:
   virtual void DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) = 0;
   virtual void DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex) = 0;
   virtual void DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) = 0;
+  virtual void DrawAutoPlatform() = 0;
+
+  virtual void BeginStreamOutPlatform() = 0;
+  virtual void EndStreamOutPlatform() = 0;
 
   // State functions
 
@@ -90,6 +92,8 @@ public:
 
   virtual void SetViewportPlatform(const plRectFloat& rect, float fMinDepth, float fMaxDepth) = 0;
   virtual void SetScissorRectPlatform(const plRectU32& rect) = 0;
+
+  virtual void SetStreamOutBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer, plUInt32 uiOffset) = 0;
 };
 
 class PLASMA_RENDERERFOUNDATION_DLL plGALCommandEncoderComputePlatformInterface

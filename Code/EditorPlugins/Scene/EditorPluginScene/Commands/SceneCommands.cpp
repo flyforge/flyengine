@@ -143,7 +143,8 @@ void plDuplicateObjectsCommand::CreateOneDuplicate(plAbstractObjectGraph& graph,
   plSceneDocument* pDocument = static_cast<plSceneDocument*>(GetDocument());
 
   // Remap
-  plUuid seed = plUuid::MakeUuid();
+  plUuid seed;
+  seed.CreateNewUuid();
   graph.ReMapNodeGuids(seed);
 
   plDocumentObjectConverterReader reader(&graph, pDocument->GetObjectManager(), plDocumentObjectConverterReader::Mode::CreateOnly);
@@ -264,12 +265,14 @@ void plDuplicateObjectsCommand::AdjustObjectPositions(plHybridArray<plDocument::
 
     revolve += fStep * m_RevolveAngleStep;
 
-    plMat3 mRevolve = plMat3::MakeAxisRotation(vRevolveAxis, revolve);
+    plMat3 mRevolve;
+    mRevolve.SetRotationMatrix(vRevolveAxis, revolve);
 
     vPosOffset = mRevolve * vPosOffset;
   }
 
-  plQuat qRot = plQuat::MakeFromEulerAngles(plAngle::MakeFromDegree(fStep * m_vAccumulativeRotation.x + vRandR.x), plAngle::MakeFromDegree(fStep * m_vAccumulativeRotation.y + vRandR.y), plAngle::MakeFromDegree(fStep * m_vAccumulativeRotation.z + vRandR.z));
+  plQuat qRot;
+  qRot.SetFromEulerAngles(plAngle::Degree(fStep * m_vAccumulativeRotation.x + vRandR.x), plAngle::Degree(fStep * m_vAccumulativeRotation.y + vRandR.y), plAngle::Degree(fStep * m_vAccumulativeRotation.z + vRandR.z));
 
   for (const auto& pi : Duplicates)
   {

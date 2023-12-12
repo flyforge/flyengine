@@ -112,7 +112,7 @@ protected:
   virtual plUniquePtr<plWindowOutputTargetGAL> CreateMainOutputTarget(plWindow* pMainWindow);
 
   /// \brief Creates a default render view. Unless overridden, OnActivation() will do this for the main window.
-  virtual void SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 windowSize);
+  virtual void SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 renderSize, plSizeU32 windowSize);
 
   /// \brief Configures available input devices, e.g. sets mouse speed, cursor clipping, etc.
   /// Called by CreateActors() with the result of CreateMainWindow().

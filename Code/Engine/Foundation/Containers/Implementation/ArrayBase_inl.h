@@ -57,27 +57,6 @@ PLASMA_ALWAYS_INLINE plArrayBase<T, Derived>::operator plArrayPtr<T>()
 }
 
 template <typename T, typename Derived>
-bool plArrayBase<T, Derived>::operator==(const plArrayBase<T, Derived>& rhs) const
-{
-  if (m_uiCount != rhs.GetCount())
-    return false;
-
-  return plMemoryUtils::IsEqual(static_cast<const Derived*>(this)->GetElementsPtr(), rhs.GetData(), m_uiCount);
-}
-
-template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE bool plArrayBase<T, Derived>::operator!=(const plArrayBase<T, Derived>& rhs) const
-{
-  return !(*this == rhs);
-}
-
-template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE bool plArrayBase<T, Derived>::operator<(const plArrayBase<T, Derived>& rhs) const
-{
-  return GetArrayPtr() < rhs.GetArrayPtr();
-}
-
-template <typename T, typename Derived>
 bool plArrayBase<T, Derived>::operator==(const plArrayPtr<const T>& rhs) const
 {
   if (m_uiCount != rhs.GetCount())
@@ -171,8 +150,11 @@ void plArrayBase<T, Derived>::SetCountUninitialized(plUInt32 uiCount)
   if (uiNewCount > uiOldCount)
   {
     static_cast<Derived*>(this)->Reserve(uiNewCount);
-    // we already assert above that T is a POD type
-    // don't construct anything, leave the memory untouched
+    plMemoryUtils::Construct(static_cast<Derived*>(this)->GetElementsPtr() + uiOldCount, uiNewCount - uiOldCount);
+  }
+  else if (uiNewCount < uiOldCount)
+  {
+    plMemoryUtils::Destruct(static_cast<Derived*>(this)->GetElementsPtr() + uiNewCount, uiOldCount - uiNewCount);
   }
 
   m_uiCount = uiCount;

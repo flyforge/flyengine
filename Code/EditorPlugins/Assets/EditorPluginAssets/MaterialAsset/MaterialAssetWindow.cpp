@@ -54,12 +54,12 @@ void plMaterialAssetActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hMaterialModelAction);
 }
 
-void plMaterialAssetActions::MapToolbarActions(plStringView sMapping)
+void plMaterialAssetActions::MapActions(const char* szMapping, const char* szPath)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  pMap->MapAction(s_hMaterialModelAction, "", 45.0f);
+  pMap->MapAction(s_hMaterialModelAction, szPath, 45.0f);
 }
 
 
@@ -123,7 +123,7 @@ plQtMaterialAssetDocumentWindow::plQtMaterialAssetDocumentWindow(plMaterialAsset
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("MaterialAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Material Properties");
+    pPropertyPanel->setWindowTitle("MATERIAL PROPERTIES");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -136,7 +136,7 @@ plQtMaterialAssetDocumentWindow::plQtMaterialAssetDocumentWindow(plMaterialAsset
   {
     m_pVsePanel = new plQtDocumentPanel(this, pDocument);
     m_pVsePanel->setObjectName("VisualShaderDockWidget");
-    m_pVsePanel->setWindowTitle("Visual Shader Editor");
+    m_pVsePanel->setWindowTitle("VISUAL SHADER EDITOR");
 
     QSplitter* pSplitter = new QSplitter(Qt::Orientation::Horizontal, m_pVsePanel);
 
@@ -244,7 +244,7 @@ plMaterialAssetDocument* plQtMaterialAssetDocumentWindow::GetMaterialDocument()
 
 void plQtMaterialAssetDocumentWindow::InternalRedraw()
 {
-  plEditorInputContext::UpdateActiveInputContext();
+  PlasmaEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   if (s_pNodeConfigWatcher)
   {
@@ -282,7 +282,7 @@ void plQtMaterialAssetDocumentWindow::OnOpenShaderClicked(bool)
 
 void plQtMaterialAssetDocumentWindow::UpdatePreview()
 {
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   plResourceUpdateMsgToEngine msg;
@@ -307,10 +307,9 @@ void plQtMaterialAssetDocumentWindow::UpdatePreview()
   // Write Asset Data
   if (GetMaterialDocument()->WriteMaterialAsset(memoryWriter, plAssetCurator::GetSingleton()->GetActiveAssetProfile(), false).Failed())
     return;
-
   msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtMaterialAssetDocumentWindow::PropertyEventHandler(const plDocumentObjectPropertyEvent& e)
@@ -340,18 +339,19 @@ void plQtMaterialAssetDocumentWindow::SelectionEventHandler(const plSelectionMan
   {
     // delayed execution
     QTimer::singleShot(1, [this]() {
-      // Check again if the selection is empty. This could have changed due to the delayed execution.
-      if (GetDocument()->GetSelectionManager()->IsSelectionEmpty())
-      {
-        GetDocument()->GetSelectionManager()->SetSelection(GetMaterialDocument()->GetPropertyObject());
-      } });
+        // Check again if the selection is empty. This could have changed due to the delayed execution.
+        if (GetDocument()->GetSelectionManager()->IsSelectionEmpty())
+        {
+          GetDocument()->GetSelectionManager()->SetSelection(GetMaterialDocument()->GetPropertyObject());
+        }
+      });
   }
 }
 
 void plQtMaterialAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {
@@ -380,7 +380,7 @@ void plQtMaterialAssetDocumentWindow::RestoreResource()
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
 
-  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtMaterialAssetDocumentWindow::UpdateNodeEditorVisibility()
@@ -407,7 +407,7 @@ void plQtMaterialAssetDocumentWindow::OnVseConfigChanged(plStringView sFilename,
     return;
 
   // lalala ... this is to allow writes to the file to 'hopefully' finish before we try to read it
-  plThreadUtils::Sleep(plTime::MakeFromMilliseconds(100));
+  plThreadUtils::Sleep(plTime::Milliseconds(100));
 
   plVisualShaderTypeRegistry::GetSingleton()->UpdateNodeData(sFilename);
 
@@ -416,7 +416,7 @@ void plQtMaterialAssetDocumentWindow::OnVseConfigChanged(plStringView sFilename,
   // not what we want.
   plAssetFileHeader AssetHeader;
   AssetHeader.SetFileHashAndVersion(0, GetMaterialDocument()->GetAssetTypeVersion());
-  GetMaterialDocument()->RecreateVisualShaderFile(AssetHeader).LogFailure();
+  GetMaterialDocument()->RecreateVisualShaderFile(AssetHeader).IgnoreResult();
 }
 
 void plQtMaterialAssetDocumentWindow::VisualShaderEventHandler(const plMaterialVisualShaderEvent& e)

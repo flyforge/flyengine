@@ -13,7 +13,6 @@ plParticleEffectAssetDocumentManager::plParticleEffectAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Particle Effect";
   m_DocTypeDesc.m_sFileExtension = "plParticleEffectAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Particle_Effect.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Effects";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plParticleEffectAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Particle_Effect");
@@ -35,7 +34,8 @@ void plParticleEffectAssetDocumentManager::OnDocumentManagerEvent(const plDocume
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plParticleEffectAssetDocument>())
       {
-        new plQtParticleEffectAssetDocumentWindow(static_cast<plParticleEffectAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtParticleEffectAssetDocumentWindow* pDocWnd =
+          new plQtParticleEffectAssetDocumentWindow(static_cast<plParticleEffectAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -46,9 +46,9 @@ void plParticleEffectAssetDocumentManager::OnDocumentManagerEvent(const plDocume
 }
 
 void plParticleEffectAssetDocumentManager::InternalCreateDocument(
-  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plParticleEffectAssetDocument(sPath);
+  out_pDocument = new plParticleEffectAssetDocument(szPath);
 }
 
 void plParticleEffectAssetDocumentManager::InternalGetSupportedDocumentTypes(

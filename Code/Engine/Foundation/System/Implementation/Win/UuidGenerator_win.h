@@ -6,7 +6,7 @@ PLASMA_FOUNDATION_INTERNAL_HEADER
 
 PLASMA_CHECK_AT_COMPILETIME(sizeof(plUInt64) * 2 == sizeof(UUID));
 
-plUuid plUuid::MakeUuid()
+void plUuid::CreateNewUuid()
 {
   plUInt64 uiUuidData[2];
 
@@ -18,5 +18,6 @@ plUuid plUuid::MakeUuid()
   HRESULT hr = CoCreateGuid(guid);
   PLASMA_ASSERT_DEBUG(SUCCEEDED(hr), "CoCreateGuid failed, guid might be invalid!");
 
-  return plUuid(uiUuidData[1], uiUuidData[0]);
+  m_uiHigh = uiUuidData[0];
+  m_uiLow = uiUuidData[1];
 }

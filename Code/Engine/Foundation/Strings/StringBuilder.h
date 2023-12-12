@@ -89,12 +89,6 @@ public:
   /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
   /* implicit */ plStringBuilder(plStringView rhs, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
 
-  /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
-  /* implicit */ plStringBuilder(const std::string_view& rhs, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
-
-  /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
-  /* implicit */ plStringBuilder(const std::string& rhs, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
-
   /// \brief Copies the given string into this one.
   void operator=(const plStringBuilder& rhs); // [tested]
 
@@ -109,12 +103,6 @@ public:
 
   /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
   void operator=(plStringView rhs); // [tested]
-
-  /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
-  void operator=(const std::string_view& rhs); // [tested]
-
-  /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
-  void operator=(const std::string& rhs); // [tested]
 
   /// \brief Copies the given string into this one.
   template <plUInt16 Size>

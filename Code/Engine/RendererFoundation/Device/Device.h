@@ -67,10 +67,6 @@ public:
   plGALTextureHandle CreateProxyTexture(plGALTextureHandle hParentTexture, plUInt32 uiSlice);
   void DestroyProxyTexture(plGALTextureHandle hProxyTexture);
 
-  plGALTextureHandle CreateSharedTexture(const plGALTextureCreationDescription& description, plArrayPtr<plGALSystemMemoryDescription> initialData = {});
-  plGALTextureHandle OpenSharedTexture(const plGALTextureCreationDescription& description, plGALPlatformSharedHandle hSharedHandle);
-  void DestroySharedTexture(plGALTextureHandle hTexture);
-
   // Resource views
   plGALResourceViewHandle GetDefaultResourceView(plGALTextureHandle hTexture);
   plGALResourceViewHandle GetDefaultResourceView(plGALBufferHandle hBuffer);
@@ -131,7 +127,6 @@ public:
 
   const plGALShader* GetShader(plGALShaderHandle hShader) const;
   const plGALTexture* GetTexture(plGALTextureHandle hTexture) const;
-  virtual const plGALSharedTexture* GetSharedTexture(plGALTextureHandle hTexture) const = 0;
   const plGALBuffer* GetBuffer(plGALBufferHandle hBuffer) const;
   const plGALDepthStencilState* GetDepthStencilState(plGALDepthStencilStateHandle hDepthStencilState) const;
   const plGALBlendState* GetBlendState(plGALBlendStateHandle hBlendState) const;
@@ -152,8 +147,6 @@ public:
   static plGALDevice* GetDefaultDevice();
   static bool HasDefaultDevice();
 
-  // Sends the queued up commands to the GPU
-  void Flush();
   /// \brief Waits for the GPU to be idle and destroys any pending resources and GPU objects.
   void WaitIdle();
 
@@ -287,9 +280,6 @@ protected:
   virtual plGALTexture* CreateTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData) = 0;
   virtual void DestroyTexturePlatform(plGALTexture* pTexture) = 0;
 
-  virtual plGALTexture* CreateSharedTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, plEnum<plGALSharedTextureType> sharedType, plGALPlatformSharedHandle handle) = 0;
-  virtual void DestroySharedTexturePlatform(plGALTexture* pTexture) = 0;
-
   virtual plGALResourceView* CreateResourceViewPlatform(plGALResourceBase* pResource, const plGALResourceViewCreationDescription& Description) = 0;
   virtual void DestroyResourceViewPlatform(plGALResourceView* pResourceView) = 0;
 
@@ -319,7 +309,6 @@ protected:
 
   virtual void FillCapabilitiesPlatform() = 0;
 
-  virtual void FlushPlatform() = 0;
   virtual void WaitIdlePlatform() = 0;
 
 

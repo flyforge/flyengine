@@ -16,13 +16,6 @@ constexpr PLASMA_ALWAYS_INLINE plStringView::plStringView(T pStart, typename std
 }
 
 template <typename T>
-constexpr PLASMA_ALWAYS_INLINE plStringView::plStringView(T pStart, typename std::enable_if<std::is_same<T, const char8_t*>::value, int>::type*)
-  : m_pStart((const char*)pStart)
-  , m_pEnd((const char*)pStart + plStringUtils::GetStringElementCount((const char*)pStart))
-{
-}
-
-template <typename T>
 PLASMA_ALWAYS_INLINE plStringView::plStringView(const T&& str, typename std::enable_if<std::is_same<T, const char*>::value == false && std::is_convertible<T, const char*>::value, int>::type*)
 {
   m_pStart = str;

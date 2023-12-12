@@ -36,8 +36,8 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plReflectionProbeComponentBase, 2, plRTTINoA
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering/Reflections"),
     new plTransformManipulatorAttribute("CaptureOffset"),
+    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -46,10 +46,12 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 plReflectionProbeComponentBase::plReflectionProbeComponentBase()
 {
-  m_Desc.m_uniqueID = plUuid::MakeUuid();
+  m_Desc.m_uniqueID.CreateNewUuid();
 }
 
-plReflectionProbeComponentBase::~plReflectionProbeComponentBase() = default;
+plReflectionProbeComponentBase::~plReflectionProbeComponentBase()
+{
+}
 
 void plReflectionProbeComponentBase::SetReflectionProbeMode(plEnum<plReflectionProbeMode> mode)
 {
@@ -156,7 +158,7 @@ void plReflectionProbeComponentBase::SerializeComponent(plWorldWriter& inout_str
 void plReflectionProbeComponentBase::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
+  //const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
   plStreamReader& s = inout_stream.GetStream();
 
   m_Desc.m_IncludeTags.Load(s, plTagRegistry::GetGlobalRegistry());
@@ -176,7 +178,7 @@ float plReflectionProbeComponentBase::ComputePriority(plMsgExtractRenderData& ms
   // This sorting is only by size to make sure the probes in a cluster are iterating from smallest to largest on the GPU. Which probes are actually used is determined below by the returned priority.
   pRenderData->m_uiSortingKey = plMath::FloatToInt(static_cast<float>(plMath::MaxValue<plUInt32>()) * fLogVolume / 40.0f);
 
-  // #TODO This is a pretty poor distance / size based score.
+  //#TODO This is a pretty poor distance / size based score.
   if (msg.m_pView)
   {
     if (auto pCamera = msg.m_pView->GetLodCamera())

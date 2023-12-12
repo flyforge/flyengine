@@ -34,6 +34,6 @@ private:
 
   plVertexDeclarationInfo m_VertexDeclarationInfo;
 
-  mutable plMat4 m_mLastTransform = plMat4::MakeIdentity();
+  mutable plMat4 m_mLastTransform = plMat4::IdentityMatrix();
   mutable plRectFloat m_LastRect = plRectFloat(0, 0);
 };

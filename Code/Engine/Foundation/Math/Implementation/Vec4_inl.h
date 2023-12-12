@@ -82,15 +82,6 @@ PLASMA_ALWAYS_INLINE plVec4Template<Type>::plVec4Template(Type x, Type y, Type z
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE plVec4Template<Type>::plVec4Template(plVec3Template<Type> xyz, Type w)
-  : x(xyz.x)
-  , y(xyz.y)
-  , z(xyz.z)
-  , w(w)
-{
-}
-
-template <typename Type>
 PLASMA_ALWAYS_INLINE plVec4Template<Type>::plVec4Template(Type v)
   : x(v)
   , y(v)

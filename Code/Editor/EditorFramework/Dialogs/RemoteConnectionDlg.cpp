@@ -30,8 +30,8 @@ bool plQtRemoteConnectionDlg::Address::IsEmpty() const
   return part[0] == 0 && part[1] == 0 && part[2] == 0 && part[3] == 0;
 }
 
-plQtRemoteConnectionDlg::plQtRemoteConnectionDlg(QWidget* pParent)
-  : QDialog(pParent)
+plQtRemoteConnectionDlg::plQtRemoteConnectionDlg(QWidget* parent)
+  : QDialog(parent)
 {
   setupUi(this);
 
@@ -60,7 +60,7 @@ plQtRemoteConnectionDlg::plQtRemoteConnectionDlg(QWidget* pParent)
   m_UsedFsAddress = m_RecentFsAddresses[0];
 }
 
-plQtRemoteConnectionDlg::~plQtRemoteConnectionDlg() = default;
+plQtRemoteConnectionDlg::~plQtRemoteConnectionDlg() {}
 
 void plQtRemoteConnectionDlg::SetCurrentIP(const Address& addr)
 {

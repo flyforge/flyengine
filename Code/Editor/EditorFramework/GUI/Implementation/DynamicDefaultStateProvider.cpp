@@ -96,7 +96,7 @@ plVariant plDynamicDefaultStateProvider::GetDefaultValue(SuperArray superPtr, pl
     }
 
     plVariant defaultValue;
-    plResult res = propertyPath.ReadProperty(const_cast<plReflectedClass*>(pMeta), *pMeta->GetDynamicRTTI(), [&](void* pLeaf, const plRTTI& type, const plAbstractProperty* pNativeProp, const plVariant& index) {
+    plResult res = propertyPath.ReadProperty(const_cast<plReflectedClass*>(pMeta), *pMeta->GetDynamicRTTI(), [&](void* pLeaf, const plRTTI& pType, const plAbstractProperty* pNativeProp, const plVariant& index) {
       PLASMA_ASSERT_DEBUG(pProp->GetCategory() == pNativeProp->GetCategory(), "While properties don't need to match exactly, they need to be of the same category and type.");
 
       switch (pNativeProp->GetCategory())
@@ -298,10 +298,10 @@ plStatus plDynamicDefaultStateProvider::CreateRevertContainerDiff(SuperArray sup
         return true;
       });
 
-      auto WriteObject = [&](void* pLeafObject, const plRTTI& leafType, const plAbstractProperty* pLeafProp, const plVariant& index) {
+      auto WriteObject = [&](void* pLeafObject, const plRTTI& pLeafType, const plAbstractProperty* pLeafProp, const plVariant& index) {
         pNativeRootObject = pLeafObject;
-        context.RegisterObject(pObject->GetGuid(), &leafType, pLeafObject);
-        pPrefabSubRoot = rttiConverter.AddObjectToGraph(&leafType, pLeafObject);
+        context.RegisterObject(pObject->GetGuid(), &pLeafType, pLeafObject);
+        pPrefabSubRoot = rttiConverter.AddObjectToGraph(&pLeafType, pLeafObject);
         pPrefabSubRoot->RenameProperty(sRootPropertyName, pProp->GetPropertyName());
       };
 

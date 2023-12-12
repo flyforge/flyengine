@@ -1,6 +1,5 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Pipeline/Passes/SimpleRenderPass.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderContext/RenderContext.h>
@@ -29,7 +28,7 @@ plSimpleRenderPass::plSimpleRenderPass(const char* szName)
 {
 }
 
-plSimpleRenderPass::~plSimpleRenderPass() = default;
+plSimpleRenderPass::~plSimpleRenderPass() {}
 
 bool plSimpleRenderPass::GetRenderTargetDescriptions(
   const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
@@ -121,22 +120,6 @@ void plSimpleRenderPass::Execute(const plRenderViewContext& renderViewContext, c
   RenderDataWithCategory(renderViewContext, plDefaultRenderDataCategories::SimpleForeground);
 
   RenderDataWithCategory(renderViewContext, plDefaultRenderDataCategories::GUI);
-}
-
-plResult plSimpleRenderPass::Serialize(plStreamWriter& inout_stream) const
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
-  inout_stream << m_sMessage;
-  return PLASMA_SUCCESS;
-}
-
-plResult plSimpleRenderPass::Deserialize(plStreamReader& inout_stream)
-{
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-  PLASMA_IGNORE_UNUSED(uiVersion);
-  inout_stream >> m_sMessage;
-  return PLASMA_SUCCESS;
 }
 
 void plSimpleRenderPass::SetMessage(const char* szMessage)

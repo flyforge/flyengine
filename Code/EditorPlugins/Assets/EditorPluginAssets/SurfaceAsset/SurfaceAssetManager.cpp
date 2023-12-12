@@ -14,7 +14,6 @@ plSurfaceAssetDocumentManager::plSurfaceAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Surface";
   m_DocTypeDesc.m_sFileExtension = "plSurfaceAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Surface.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Utilities";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plSurfaceAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Surface");
@@ -38,7 +37,7 @@ void plSurfaceAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plSurfaceAssetDocument>())
       {
-        new plQtSurfaceAssetDocumentWindow(e.m_pDocument); // NOLINT: Not a memory leak
+        plQtSurfaceAssetDocumentWindow* pDocWnd = new plQtSurfaceAssetDocumentWindow(e.m_pDocument);
       }
     }
     break;
@@ -48,9 +47,10 @@ void plSurfaceAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
   }
 }
 
-void plSurfaceAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plSurfaceAssetDocumentManager::InternalCreateDocument(
+  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plSurfaceAssetDocument(sPath);
+  out_pDocument = new plSurfaceAssetDocument(szPath);
 }
 
 void plSurfaceAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

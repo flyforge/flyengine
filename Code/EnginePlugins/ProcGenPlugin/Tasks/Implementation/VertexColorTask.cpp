@@ -110,7 +110,7 @@ void VertexColorTask::Prepare(const plWorld& world, const plMeshBufferResourceDe
     auto& vert = m_InputVertices.ExpandAndGetRef();
     vert.m_vPosition = transform.TransformPosition(plVec3(pPositions[0], pPositions[1], pPositions[2]));
     vert.m_vNormal = normalTransform.TransformDirection(vNormal).GetNormalized();
-    vert.m_Color = pColors != nullptr ? plColor(*pColors) : plColor::MakeZero();
+    vert.m_Color = pColors != nullptr ? plColor(*pColors) : plColor::ZeroColor();
     vert.m_uiIndex = i;
 
     pPositions = plMemoryUtils::AddByteOffset(pPositions, uiElementStride);

@@ -10,16 +10,22 @@ class plQtAssetImportDlg : public QDialog, public Ui_AssetImportDlg
   Q_OBJECT
 
 public:
-  plQtAssetImportDlg(QWidget* pParent, plDynamicArray<plAssetDocumentGenerator::ImportGroupOptions>& ref_allImports);
+  plQtAssetImportDlg(QWidget* parent, plDynamicArray<plAssetDocumentGenerator::ImportData>& allImports, bool& bImported);
   ~plQtAssetImportDlg();
 
 private Q_SLOTS:
   void SelectedOptionChanged(int index);
   void on_ButtonImport_clicked();
+  void TableCellChanged(int row, int column);
+  void BrowseButtonClicked(bool);
 
 private:
   void InitRow(plUInt32 uiRow);
+  void UpdateRow(plUInt32 uiRow);
+  void QueryRow(plUInt32 uiRow);
+  void UpdateAllRows();
 
-  plDynamicArray<plAssetDocumentGenerator::ImportGroupOptions>& m_AllImports;
+  bool* m_Imported;
+  plDynamicArray<plAssetDocumentGenerator::ImportData>& m_AllImports;
 };
 

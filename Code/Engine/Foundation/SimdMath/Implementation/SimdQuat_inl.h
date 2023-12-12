@@ -7,27 +7,26 @@ PLASMA_ALWAYS_INLINE plSimdQuat::plSimdQuat(const plSimdVec4f& v)
 {
 }
 
-PLASMA_ALWAYS_INLINE const plSimdQuat plSimdQuat::MakeIdentity()
+// static
+PLASMA_ALWAYS_INLINE plSimdQuat plSimdQuat::IdentityQuaternion()
 {
   return plSimdQuat(plSimdVec4f(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
-PLASMA_ALWAYS_INLINE plSimdQuat plSimdQuat::MakeFromElements(plSimdFloat x, plSimdFloat y, plSimdFloat z, plSimdFloat w)
+PLASMA_ALWAYS_INLINE void plSimdQuat::SetIdentity()
 {
-  return plSimdQuat(plSimdVec4f(x, y, z, w));
+  m_v.Set(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-inline plSimdQuat plSimdQuat::MakeFromAxisAndAngle(const plSimdVec4f& vRotationAxis, const plSimdFloat& fAngle)
+PLASMA_ALWAYS_INLINE void plSimdQuat::SetFromAxisAndAngle(const plSimdVec4f& vRotationAxis, const plSimdFloat& fAngle)
 {
   ///\todo optimize
-  const plAngle halfAngle = plAngle::MakeFromRadian(fAngle) * 0.5f;
+  const plAngle halfAngle = plAngle::Radian(fAngle) * 0.5f;
   float s = plMath::Sin(halfAngle);
   float c = plMath::Cos(halfAngle);
 
-  plSimdQuat res;
-  res.m_v = vRotationAxis * s;
-  res.m_v.SetW(c);
-  return res;
+  m_v = vRotationAxis * s;
+  m_v.SetW(c);
 }
 
 PLASMA_ALWAYS_INLINE void plSimdQuat::Normalize()
@@ -68,7 +67,7 @@ PLASMA_ALWAYS_INLINE plSimdMat4f plSimdQuat::GetAsMat4() const
   const plSimdVec4f yy2_xx2_xx2 = xx2yy2zz2.Get<plSwizzle::YXXX>();
   const plSimdVec4f zz2_zz2_yy2 = xx2yy2zz2.Get<plSwizzle::ZZYX>();
   plSimdVec4f diagonal = plSimdVec4f(1.0f) - (yy2_xx2_xx2 + zz2_zz2_yy2);
-  diagonal.SetW(plSimdFloat::MakeZero());
+  diagonal.SetW(plSimdFloat::Zero());
 
   // non diagonal terms
   // xy2 +- wz2
@@ -99,7 +98,7 @@ PLASMA_ALWAYS_INLINE plSimdMat4f plSimdQuat::GetAsMat4() const
   const plSimdVec4f addZ_u_subY_u = adds.GetCombined<plSwizzle::ZXYX>(subs);
   const plSimdVec4f col2 = addZ_u_subY_u.GetCombined<plSwizzle::XZZW>(diagonal);
 
-  return plSimdMat4f::MakeFromColumns(col0, col1, col2, plSimdVec4f(0, 0, 0, 1));
+  return plSimdMat4f(col0, col1, col2, plSimdVec4f(0, 0, 0, 1));
 }
 
 PLASMA_ALWAYS_INLINE bool plSimdQuat::IsValid(const plSimdFloat& fEpsilon) const
@@ -114,7 +113,7 @@ PLASMA_ALWAYS_INLINE bool plSimdQuat::IsNaN() const
 
 PLASMA_ALWAYS_INLINE plSimdQuat plSimdQuat::operator-() const
 {
-  return plSimdQuat(m_v.FlipSign(plSimdVec4b(true, true, true, false)));
+  return m_v.FlipSign(plSimdVec4b(true, true, true, false));
 }
 
 PLASMA_ALWAYS_INLINE plSimdVec4f plSimdQuat::operator*(const plSimdVec4f& v) const

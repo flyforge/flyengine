@@ -18,19 +18,19 @@ public:
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
   virtual void OnTransformationChanged(const plTransform& transform) override;
 
 protected:
-  plEngineGizmoHandle m_hAxisX;
-  plEngineGizmoHandle m_hAxisY;
-  plEngineGizmoHandle m_hAxisZ;
-  plEngineGizmoHandle m_hAxisXYZ;
+  PlasmaEngineGizmoHandle m_hAxisX;
+  PlasmaEngineGizmoHandle m_hAxisY;
+  PlasmaEngineGizmoHandle m_hAxisZ;
+  PlasmaEngineGizmoHandle m_hAxisXYZ;
 
 private:
   plVec3 m_vScalingResult;
@@ -41,6 +41,8 @@ private:
   plTime m_LastInteraction;
   plVec3 m_vMoveAxis;
   plMat4 m_mInvViewProj;
+
+  bool m_bUseExperimentalGizmo = false;
 };
 
 /// \brief Scale gizmo version that only uses boxes that can be composited with

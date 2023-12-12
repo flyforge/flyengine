@@ -17,23 +17,20 @@
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/IO/OSFile.h>
-#include <Foundation/Profiling/ProfilingUtils.h>
 #include <GuiFoundation/Dialogs/ShortcutEditorDlg.moc.h>
 
-plActionDescriptorHandle plProjectActions::s_hCatProjectGeneral;
-plActionDescriptorHandle plProjectActions::s_hCatProjectAssets;
-plActionDescriptorHandle plProjectActions::s_hCatProjectConfig;
-plActionDescriptorHandle plProjectActions::s_hCatProjectExternal;
+plActionDescriptorHandle plProjectActions::s_hProjectMenu;
+plActionDescriptorHandle plProjectActions::s_hCategoryGeneral;
+plActionDescriptorHandle plProjectActions::s_hCategoryAssets;
+plActionDescriptorHandle plProjectActions::s_hCategoryConfig;
 
-plActionDescriptorHandle plProjectActions::s_hCatFilesGeneral;
-plActionDescriptorHandle plProjectActions::s_hCatFileCommon;
-plActionDescriptorHandle plProjectActions::s_hCatFileSpecial;
-plActionDescriptorHandle plProjectActions::s_hCatAssetDoc;
 
+plActionDescriptorHandle plProjectActions::s_hDocumentCategory;
 plActionDescriptorHandle plProjectActions::s_hCreateDocument;
 plActionDescriptorHandle plProjectActions::s_hOpenDocument;
 plActionDescriptorHandle plProjectActions::s_hRecentDocuments;
 
+plActionDescriptorHandle plProjectActions::s_hProjectCategory;
 plActionDescriptorHandle plProjectActions::s_hOpenDashboard;
 plActionDescriptorHandle plProjectActions::s_hCreateProject;
 plActionDescriptorHandle plProjectActions::s_hOpenProject;
@@ -41,24 +38,22 @@ plActionDescriptorHandle plProjectActions::s_hRecentProjects;
 plActionDescriptorHandle plProjectActions::s_hCloseProject;
 plActionDescriptorHandle plProjectActions::s_hDocsAndCommunity;
 
-plActionDescriptorHandle plProjectActions::s_hCatProjectSettings;
-plActionDescriptorHandle plProjectActions::s_hCatPluginSettings;
+plActionDescriptorHandle plProjectActions::s_hSettingsCategory;
+//plActionDescriptorHandle plProjectActions::s_hEditorSettingsMenu;
+plActionDescriptorHandle plProjectActions::s_hProjectSettingsMenu;
 plActionDescriptorHandle plProjectActions::s_hShortcutEditor;
 plActionDescriptorHandle plProjectActions::s_hDataDirectories;
 plActionDescriptorHandle plProjectActions::s_hWindowConfig;
 plActionDescriptorHandle plProjectActions::s_hInputConfig;
 plActionDescriptorHandle plProjectActions::s_hPreferencesDlg;
-plActionDescriptorHandle plProjectActions::s_hTagsConfig;
+plActionDescriptorHandle plProjectActions::s_hTagsDlg;
 plActionDescriptorHandle plProjectActions::s_hImportAsset;
 plActionDescriptorHandle plProjectActions::s_hAssetProfiles;
 plActionDescriptorHandle plProjectActions::s_hExportProject;
 plActionDescriptorHandle plProjectActions::s_hPluginSelection;
-plActionDescriptorHandle plProjectActions::s_hClearAssetCaches;
 
-plActionDescriptorHandle plProjectActions::s_hCatToolsExternal;
-plActionDescriptorHandle plProjectActions::s_hCatToolsEditor;
-plActionDescriptorHandle plProjectActions::s_hCatToolsDocument;
-plActionDescriptorHandle plProjectActions::s_hCatEditorSettings;
+plActionDescriptorHandle plProjectActions::s_hToolsMenu;
+plActionDescriptorHandle plProjectActions::s_hToolsCategory;
 plActionDescriptorHandle plProjectActions::s_hReloadResources;
 plActionDescriptorHandle plProjectActions::s_hReloadEngine;
 plActionDescriptorHandle plProjectActions::s_hLaunchFileserve;
@@ -66,72 +61,49 @@ plActionDescriptorHandle plProjectActions::s_hLaunchInspector;
 plActionDescriptorHandle plProjectActions::s_hSaveProfiling;
 plActionDescriptorHandle plProjectActions::s_hOpenVsCode;
 
+
 plActionDescriptorHandle plProjectActions::s_hCppProjectMenu;
 plActionDescriptorHandle plProjectActions::s_hSetupCppProject;
 plActionDescriptorHandle plProjectActions::s_hOpenCppProject;
 plActionDescriptorHandle plProjectActions::s_hCompileCppProject;
-plActionDescriptorHandle plProjectActions::s_hRegenerateCppSolution;
 
 void plProjectActions::RegisterActions()
 {
-  s_hCatProjectGeneral = PLASMA_REGISTER_CATEGORY("G.Project.General");
-  s_hCatProjectAssets = PLASMA_REGISTER_CATEGORY("G.Project.Assets");
-  s_hCatProjectExternal = PLASMA_REGISTER_CATEGORY("G.Project.External");
-  s_hCatProjectConfig = PLASMA_REGISTER_CATEGORY("G.Project.Config");
-  s_hCatEditorSettings = PLASMA_REGISTER_CATEGORY("G.Editor.Settings");
+  s_hProjectMenu = PLASMA_REGISTER_MENU("Menu.Editor");
+  s_hCategoryGeneral = PLASMA_REGISTER_CATEGORY("General");
+  s_hCategoryAssets = PLASMA_REGISTER_CATEGORY("Assets");
+  s_hCategoryConfig = PLASMA_REGISTER_CATEGORY("Config");
 
-  s_hCatFilesGeneral = PLASMA_REGISTER_CATEGORY("G.Files.General");
-  s_hCatFileCommon = PLASMA_REGISTER_CATEGORY("G.File.Common");
-  s_hCatFileSpecial = PLASMA_REGISTER_CATEGORY("G.File.Special");
-  s_hCatAssetDoc = PLASMA_REGISTER_CATEGORY("G.AssetDoc");
-
-
-  s_hOpenDashboard = PLASMA_REGISTER_ACTION_1("Editor.OpenDashboard", plActionScope::Global, "Editor", "Ctrl+Shift+D", plProjectAction, plProjectAction::ButtonType::OpenDashboard);
-
-  s_hCreateProject = PLASMA_REGISTER_ACTION_1("Project.Create", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::CreateProject);
-
-  s_hOpenProject = PLASMA_REGISTER_ACTION_1("Project.Open", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::OpenProject);
-
-  s_hRecentProjects = PLASMA_REGISTER_DYNAMIC_MENU("Project.RecentProjects.Menu", plRecentProjectsMenuAction, "");
-  s_hCloseProject = PLASMA_REGISTER_ACTION_1("Project.Close", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::CloseProject);
-
-  s_hImportAsset = PLASMA_REGISTER_ACTION_1("Project.ImportAsset", plActionScope::Global, "Project", "Ctrl+I", plProjectAction, plProjectAction::ButtonType::ImportAsset);
-  s_hClearAssetCaches = PLASMA_REGISTER_ACTION_1("Project.ClearAssetCaches", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::ClearAssetCaches);
-
-  s_hExportProject = PLASMA_REGISTER_ACTION_1("Project.ExportProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::ExportProject);
-
-  s_hCppProjectMenu = PLASMA_REGISTER_MENU("G.Project.Cpp");
-  {
-    s_hSetupCppProject = PLASMA_REGISTER_ACTION_1("Project.SetupCppProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::SetupCppProject);
-    s_hOpenCppProject = PLASMA_REGISTER_ACTION_1("Project.OpenCppProject", plActionScope::Global, "Project", "Ctrl+Shift+O", plProjectAction, plProjectAction::ButtonType::OpenCppProject);
-    s_hCompileCppProject = PLASMA_REGISTER_ACTION_1("Project.CompileCppProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::CompileCppProject);
-    s_hRegenerateCppSolution = PLASMA_REGISTER_ACTION_1("Project.RegenerateCppSolution", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::RegenerateCppSolution);
-  }
-
-  s_hCatProjectSettings = PLASMA_REGISTER_MENU("G.Project.Settings");
-
-  s_hPluginSelection = PLASMA_REGISTER_ACTION_1("Project.PluginSelection", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::PluginSelection);
-  s_hDataDirectories = PLASMA_REGISTER_ACTION_1("Project.DataDirectories", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::DataDirectories);
-  s_hTagsConfig = PLASMA_REGISTER_ACTION_1("Engine.Tags", plActionScope::Global, "Editor", "", plProjectAction, plProjectAction::ButtonType::TagsDialog);
-  s_hInputConfig = PLASMA_REGISTER_ACTION_1("Project.InputConfig", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::InputConfig);
-  s_hWindowConfig = PLASMA_REGISTER_ACTION_1("Project.WindowConfig", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::WindowConfig);
-  s_hAssetProfiles = PLASMA_REGISTER_ACTION_1("Project.AssetProfiles", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::AssetProfiles);
-
-  s_hCatPluginSettings = PLASMA_REGISTER_MENU("G.Plugins.Settings");
-
-  //////////////////////////////////////////////////////////////////////////
-
+  s_hDocumentCategory = PLASMA_REGISTER_CATEGORY("DocumentCategory");
   s_hCreateDocument = PLASMA_REGISTER_ACTION_1("Document.Create", plActionScope::Global, "Project", "Ctrl+N", plProjectAction, plProjectAction::ButtonType::CreateDocument);
   s_hOpenDocument = PLASMA_REGISTER_ACTION_1("Document.Open", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::OpenDocument);
   s_hRecentDocuments = PLASMA_REGISTER_DYNAMIC_MENU("Project.RecentDocuments.Menu", plRecentDocumentsMenuAction, "");
 
+  s_hProjectCategory = PLASMA_REGISTER_CATEGORY("ProjectCategory");
+  s_hOpenDashboard = PLASMA_REGISTER_ACTION_1("Editor.OpenDashboard", plActionScope::Global, "Editor", "Ctrl+Shift+D", plProjectAction, plProjectAction::ButtonType::OpenDashboard);
+  s_hCreateProject = PLASMA_REGISTER_ACTION_1("Project.Create", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::CreateProject);
+  s_hOpenProject = PLASMA_REGISTER_ACTION_1("Project.Open", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::OpenProject);
+  s_hRecentProjects = PLASMA_REGISTER_DYNAMIC_MENU("Project.RecentProjects.Menu", plRecentProjectsMenuAction, "");
+  s_hCloseProject = PLASMA_REGISTER_ACTION_1("Project.Close", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::CloseProject);
+
+  s_hSettingsCategory = PLASMA_REGISTER_CATEGORY("SettingsCategory");
+  //s_hEditorSettingsMenu = PLASMA_REGISTER_MENU_WITH_ICON("Menu.EditorSettings", ":/GuiFoundation/Icons/Settings.svg");
+  s_hProjectSettingsMenu = PLASMA_REGISTER_MENU("Menu.ProjectSettings");
+
   s_hShortcutEditor = PLASMA_REGISTER_ACTION_1("Editor.Shortcuts", plActionScope::Global, "Editor", "", plProjectAction, plProjectAction::ButtonType::Shortcuts);
   s_hPreferencesDlg = PLASMA_REGISTER_ACTION_1("Editor.Preferences", plActionScope::Global, "Editor", "", plProjectAction, plProjectAction::ButtonType::PreferencesDialog);
+  s_hTagsDlg = PLASMA_REGISTER_ACTION_1("Engine.Tags", plActionScope::Global, "Editor", "", plProjectAction, plProjectAction::ButtonType::TagsDialog);
+  s_hPluginSelection = PLASMA_REGISTER_ACTION_1("Project.PluginSelection", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::PluginSelection);
 
-  s_hCatToolsExternal = PLASMA_REGISTER_CATEGORY("G.Tools.External");
-  s_hCatToolsEditor = PLASMA_REGISTER_CATEGORY("G.Tools.Editor");
-  s_hCatToolsDocument = PLASMA_REGISTER_CATEGORY("G.Tools.Document");
+  s_hDataDirectories = PLASMA_REGISTER_ACTION_1("Project.DataDirectories", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::DataDirectories);
+  s_hInputConfig = PLASMA_REGISTER_ACTION_1("Project.InputConfig", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::InputConfig);
+  s_hWindowConfig = PLASMA_REGISTER_ACTION_1("Project.WindowConfig", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::WindowConfig);
+  s_hImportAsset = PLASMA_REGISTER_ACTION_1("Project.ImportAsset", plActionScope::Global, "Project", "Ctrl+I", plProjectAction, plProjectAction::ButtonType::ImportAsset);
+  s_hAssetProfiles = PLASMA_REGISTER_ACTION_1("Project.AssetProfiles", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::AssetProfiles);
+  s_hExportProject = PLASMA_REGISTER_ACTION_1("Project.ExportProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::ExportProject);
 
+  s_hToolsMenu = PLASMA_REGISTER_MENU("Menu.Tools");
+  s_hToolsCategory = PLASMA_REGISTER_CATEGORY("ToolsCategory");
   s_hReloadResources = PLASMA_REGISTER_ACTION_1("Engine.ReloadResources", plActionScope::Global, "Engine", "F4", plProjectAction, plProjectAction::ButtonType::ReloadResources);
   s_hReloadEngine = PLASMA_REGISTER_ACTION_1("Engine.ReloadEngine", plActionScope::Global, "Engine", "Ctrl+Shift+F4", plProjectAction, plProjectAction::ButtonType::ReloadEngine);
   s_hLaunchFileserve = PLASMA_REGISTER_ACTION_1("Editor.LaunchFileserve", plActionScope::Global, "Engine", "", plProjectAction, plProjectAction::ButtonType::LaunchFileserve);
@@ -140,37 +112,36 @@ void plProjectActions::RegisterActions()
   s_hOpenVsCode = PLASMA_REGISTER_ACTION_1("Editor.OpenVsCode", plActionScope::Global, "Project", "Ctrl+Alt+O", plProjectAction, plProjectAction::ButtonType::OpenVsCode);
 
 
+  s_hCppProjectMenu = PLASMA_REGISTER_MENU("Project.Cpp");
+  s_hSetupCppProject = PLASMA_REGISTER_ACTION_1("Project.SetupCppProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::SetupCppProject);
+  s_hOpenCppProject = PLASMA_REGISTER_ACTION_1("Project.OpenCppProject", plActionScope::Global, "Project", "Ctrl+Shift+O", plProjectAction, plProjectAction::ButtonType::OpenCppProject);
+  s_hCompileCppProject = PLASMA_REGISTER_ACTION_1("Project.CompileCppProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::CompileCppProject);
 
   s_hDocsAndCommunity = PLASMA_REGISTER_ACTION_1("Editor.DocsAndCommunity", plActionScope::Global, "Editor", "", plProjectAction, plProjectAction::ButtonType::ShowDocsAndCommunity);
 }
 
 void plProjectActions::UnregisterActions()
 {
-  plActionManager::UnregisterAction(s_hCatProjectGeneral);
-  plActionManager::UnregisterAction(s_hCatProjectAssets);
-  plActionManager::UnregisterAction(s_hCatProjectConfig);
-  plActionManager::UnregisterAction(s_hCatProjectExternal);
-
-  plActionManager::UnregisterAction(s_hCatFilesGeneral);
-  plActionManager::UnregisterAction(s_hCatFileCommon);
-  plActionManager::UnregisterAction(s_hCatFileSpecial);
-  plActionManager::UnregisterAction(s_hCatAssetDoc);
-
+  plActionManager::UnregisterAction(s_hProjectMenu);
+  plActionManager::UnregisterAction(s_hCategoryGeneral);
+  plActionManager::UnregisterAction(s_hCategoryAssets);
+  plActionManager::UnregisterAction(s_hCategoryConfig);
+  plActionManager::UnregisterAction(s_hDocumentCategory);
   plActionManager::UnregisterAction(s_hCreateDocument);
   plActionManager::UnregisterAction(s_hOpenDocument);
   plActionManager::UnregisterAction(s_hRecentDocuments);
+  plActionManager::UnregisterAction(s_hProjectCategory);
   plActionManager::UnregisterAction(s_hOpenDashboard);
   plActionManager::UnregisterAction(s_hDocsAndCommunity);
   plActionManager::UnregisterAction(s_hCreateProject);
   plActionManager::UnregisterAction(s_hOpenProject);
   plActionManager::UnregisterAction(s_hRecentProjects);
   plActionManager::UnregisterAction(s_hCloseProject);
-  plActionManager::UnregisterAction(s_hCatProjectSettings);
-  plActionManager::UnregisterAction(s_hCatPluginSettings);
-  plActionManager::UnregisterAction(s_hCatToolsExternal);
-  plActionManager::UnregisterAction(s_hCatToolsEditor);
-  plActionManager::UnregisterAction(s_hCatToolsDocument);
-  plActionManager::UnregisterAction(s_hCatEditorSettings);
+  plActionManager::UnregisterAction(s_hSettingsCategory);
+  //plActionManager::UnregisterAction(s_hEditorSettingsMenu);
+  plActionManager::UnregisterAction(s_hProjectSettingsMenu);
+  plActionManager::UnregisterAction(s_hToolsMenu);
+  plActionManager::UnregisterAction(s_hToolsCategory);
   plActionManager::UnregisterAction(s_hReloadResources);
   plActionManager::UnregisterAction(s_hReloadEngine);
   plActionManager::UnregisterAction(s_hLaunchFileserve);
@@ -179,98 +150,73 @@ void plProjectActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hOpenVsCode);
   plActionManager::UnregisterAction(s_hShortcutEditor);
   plActionManager::UnregisterAction(s_hPreferencesDlg);
-  plActionManager::UnregisterAction(s_hTagsConfig);
+  plActionManager::UnregisterAction(s_hTagsDlg);
   plActionManager::UnregisterAction(s_hDataDirectories);
   plActionManager::UnregisterAction(s_hWindowConfig);
   plActionManager::UnregisterAction(s_hImportAsset);
-  plActionManager::UnregisterAction(s_hClearAssetCaches);
   plActionManager::UnregisterAction(s_hInputConfig);
   plActionManager::UnregisterAction(s_hAssetProfiles);
   plActionManager::UnregisterAction(s_hCppProjectMenu);
   plActionManager::UnregisterAction(s_hSetupCppProject);
   plActionManager::UnregisterAction(s_hOpenCppProject);
   plActionManager::UnregisterAction(s_hCompileCppProject);
-  plActionManager::UnregisterAction(s_hRegenerateCppSolution);
   plActionManager::UnregisterAction(s_hExportProject);
   plActionManager::UnregisterAction(s_hPluginSelection);
 }
 
-void plProjectActions::MapActions(plStringView sMapping)
+void plProjectActions::MapActions(const char* szMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
-  plStringBuilder sPath;
+  pMap->MapAction(s_hProjectMenu, "", -1000000000.0f);
+  pMap->MapAction(s_hCategoryGeneral, "Menu.Editor", 1.0f);
+  pMap->MapAction(s_hCategoryAssets, "Menu.Editor", 2.0f);
+  pMap->MapAction(s_hCategoryConfig, "Menu.Editor", 3.0f);
 
-  // Add categories
-  pMap->MapAction(s_hCatProjectGeneral, "G.Project", 1.0f);
-  pMap->MapAction(s_hCatProjectConfig, "G.Project", 2.0f);
-  pMap->MapAction(s_hCatProjectAssets, "G.Project", 4.0f);
-  pMap->MapAction(s_hCatProjectExternal, "G.Project", 5.0f);
+  pMap->MapAction(s_hDocumentCategory, "Menu.File", 1.0f);
+  pMap->MapAction(s_hCreateDocument, "Menu.File/DocumentCategory", 1.0f);
+  pMap->MapAction(s_hOpenDocument, "Menu.File/DocumentCategory", 2.0f);
+  pMap->MapAction(s_hRecentDocuments, "Menu.File/DocumentCategory", 4.0f);
 
-  pMap->MapAction(s_hCatToolsExternal, "G.Tools", 1.0f);
-  pMap->MapAction(s_hCatToolsEditor, "G.Tools", 2.0f);
-  pMap->MapAction(s_hCatToolsDocument, "G.Tools", 3.0f);
-  pMap->MapAction(s_hCatEditorSettings, "G.Tools", 1000.0f);
+  pMap->MapAction(s_hProjectCategory, "Menu.Editor", 2.0f);
+  pMap->MapAction(s_hOpenDashboard, "Menu.Editor/ProjectCategory", 0.5f);
+  pMap->MapAction(s_hImportAsset, "Menu.Editor/ProjectCategory", 1.0f);
+  // pMap->MapAction(s_hCreateProject, "Menu.Editor/ProjectCategory", 1.0f); // use dashboard
+  // pMap->MapAction(s_hOpenProject, "Menu.Editor/ProjectCategory", 2.0f);   // use dashboard
+  // pMap->MapAction(s_hRecentProjects, "Menu.Editor/ProjectCategory", 3.0f);// use dashboard
+  pMap->MapAction(s_hCloseProject, "Menu.Editor/ProjectCategory", 4.0f);
+  pMap->MapAction(s_hExportProject, "Menu.Editor/ProjectCategory", 6.0f);
+  pMap->MapAction(s_hProjectSettingsMenu, "Menu.Editor/ProjectCategory", 1000.0f);
 
-  pMap->MapAction(s_hCatProjectSettings, "G.Project.Config", 1.0f);
-  pMap->MapAction(s_hCatPluginSettings, "G.Project.Config", 1.0f);
+  pMap->MapAction(s_hCppProjectMenu, "Menu.Editor/ProjectCategory", 5.0f);
+  pMap->MapAction(s_hSetupCppProject, "Menu.Editor/ProjectCategory/Project.Cpp", 1.0f);
+  pMap->MapAction(s_hOpenCppProject, "Menu.Editor/ProjectCategory/Project.Cpp", 2.0f);
+  pMap->MapAction(s_hCompileCppProject, "Menu.Editor/ProjectCategory/Project.Cpp", 3.0f);
 
-  if (pMap->SearchPathForAction("G.File", sPath).Succeeded())
-  {
-    pMap->MapAction(s_hCatFilesGeneral, sPath, 1.0f);
-    pMap->MapAction(s_hCatFileCommon, sPath, 2.0f);
-    pMap->MapAction(s_hCatAssetDoc, sPath, 3.0f);
-    pMap->MapAction(s_hCatFileSpecial, sPath, 4.0f);
-  }
+  pMap->MapAction(s_hSettingsCategory, "Menu.Editor", 3.0f);
+  //pMap->MapAction(s_hEditorSettingsMenu, "Menu.Editor/SettingsCategory", 1.0f);
 
-  // Add actions
-  pMap->MapAction(s_hOpenDashboard, "G.Project.General", 1.0f);
-  // pMap->MapAction(s_hCreateProject, "G.Project.General", 2.0f); // use dashboard
-  // pMap->MapAction(s_hOpenProject, "G.Project.General", 3.0f);   // use dashboard
-  // pMap->MapAction(s_hRecentProjects, "G.Project.General", 4.0f);// use dashboard
-  pMap->MapAction(s_hCloseProject, "G.Project.General", 5.0f);
+  pMap->MapAction(s_hToolsMenu, "", 4.5f);
+  pMap->MapAction(s_hToolsCategory, "Menu.Tools", 1.0f);
+  pMap->MapAction(s_hReloadResources, "Menu.Tools/ToolsCategory", 1.0f);
+  pMap->MapAction(s_hReloadEngine, "Menu.Tools/ToolsCategory", 2.0f);
+  pMap->MapAction(s_hLaunchFileserve, "Menu.Tools/ToolsCategory", 3.0f);
+  pMap->MapAction(s_hLaunchInspector, "Menu.Tools/ToolsCategory", 3.5f);
+  pMap->MapAction(s_hSaveProfiling, "Menu.Tools/ToolsCategory", 4.0f);
+  pMap->MapAction(s_hOpenVsCode, "Menu.Tools/ToolsCategory", 5.0f);
 
-  pMap->MapAction(s_hImportAsset, "G.Project.Assets", 1.0f);
-  pMap->MapAction(s_hClearAssetCaches, "G.Project.Assets", 5.0f);
+  pMap->MapAction(s_hShortcutEditor, "Menu.Tools/ToolsCategory", 1000.0f);
+  pMap->MapAction(s_hPreferencesDlg, "Menu.Tools/ToolsCategory", 10001.0f);
 
-  pMap->MapAction(s_hDataDirectories, "G.Project.Settings", 1.0f);
-  pMap->MapAction(s_hInputConfig, "G.Project.Settings", 2.0f);
-  pMap->MapAction(s_hWindowConfig, "G.Project.Settings", 3.0f);
-  pMap->MapAction(s_hTagsConfig, "G.Project.Settings", 4.0f);
-  pMap->MapAction(s_hAssetProfiles, "G.Project.Settings", 5.0f);
+  pMap->MapAction(s_hPluginSelection, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 0.5f);
+  pMap->MapAction(s_hDataDirectories, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 1.0f);
+  pMap->MapAction(s_hInputConfig, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 3.0f);
+  pMap->MapAction(s_hTagsDlg, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 4.0f);
+  pMap->MapAction(s_hWindowConfig, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 5.0f);
+  pMap->MapAction(s_hAssetProfiles, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 6.0f);
 
-  pMap->MapAction(s_hPluginSelection, "G.Plugins.Settings", -1000.0f);
-
-  pMap->MapAction(s_hCppProjectMenu, "G.Project.External", 1.0f);
-  pMap->MapAction(s_hSetupCppProject, "G.Project.Cpp", 1.0f);
-  pMap->MapAction(s_hOpenCppProject, "G.Project.Cpp", 2.0f);
-  pMap->MapAction(s_hCompileCppProject, "G.Project.Cpp", 3.0f);
-  pMap->MapAction(s_hRegenerateCppSolution, "G.Project.Cpp", 4.0f);
-  pMap->MapAction(s_hExportProject, "G.Project.External", 10.0f);
-
-  pMap->MapAction(s_hOpenVsCode, "G.Tools.External", 1.0f);
-  pMap->MapAction(s_hLaunchInspector, "G.Tools.External", 2.0f);
-  pMap->MapAction(s_hLaunchFileserve, "G.Tools.External", 3.0f);
-
-  pMap->MapAction(s_hReloadResources, "G.Tools.Editor", 1.0f);
-  pMap->MapAction(s_hReloadEngine, "G.Tools.Editor", 2.0f);
-  pMap->MapAction(s_hSaveProfiling, "G.Tools.Editor", 3.0f);
-
-  pMap->MapAction(s_hShortcutEditor, "G.Editor.Settings", 1.0f);
-  pMap->MapAction(s_hPreferencesDlg, "G.Editor.Settings", 2.0f);
-
-  if (pMap->SearchPathForAction("G.Help", sPath).Succeeded())
-  {
-    pMap->MapAction(s_hDocsAndCommunity, sPath, 0.0f);
-  }
-
-  if (pMap->SearchPathForAction("G.File.Common", sPath).Succeeded())
-  {
-    pMap->MapAction(s_hCreateDocument, sPath, 1.0f);
-    pMap->MapAction(s_hOpenDocument, sPath, 2.0f);
-    pMap->MapAction(s_hRecentDocuments, sPath, 3.0f);
-  }
+  pMap->MapAction(s_hDocsAndCommunity, "Menu.Help", 0.0f);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -278,11 +224,13 @@ void plProjectActions::MapActions(plStringView sMapping)
 ////////////////////////////////////////////////////////////////////////
 
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRecentDocumentsMenuAction, 0, plRTTINoAllocator)
+  ;
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-void plRecentDocumentsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries)
+
+void plRecentDocumentsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries)
 {
-  out_entries.Clear();
+  out_Entries.Clear();
 
   if (plQtEditorApp::GetSingleton()->GetRecentDocumentsList().GetFileList().IsEmpty())
     return;
@@ -302,7 +250,7 @@ void plRecentDocumentsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::
       continue;
 
     item.m_UserValue = file.m_File;
-    item.m_Icon = plQtUiServices::GetCachedIconResource(pTypeDesc->m_sIcon, plColorScheme::GetCategoryColor(pTypeDesc->m_sAssetCategory, plColorScheme::CategoryColorUsage::MenuEntryIcon));
+    item.m_Icon = plQtUiServices::GetCachedIconResource(pTypeDesc->m_sIcon);
 
     if (plToolsProject::IsProjectOpen())
     {
@@ -312,13 +260,13 @@ void plRecentDocumentsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::
 
       item.m_sDisplay = sRelativePath;
 
-      out_entries.PushBack(item);
+      out_Entries.PushBack(item);
     }
     else
     {
       item.m_sDisplay = file.m_File;
 
-      out_entries.PushBack(item);
+      out_Entries.PushBack(item);
     }
 
     --iMaxDocumentsToAdd;
@@ -339,11 +287,16 @@ void plRecentDocumentsMenuAction::Execute(const plVariant& value)
 ////////////////////////////////////////////////////////////////////////
 
 PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRecentProjectsMenuAction, 1, plRTTINoAllocator)
+  ;
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
-void plRecentProjectsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries)
+
+void plRecentProjectsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries)
 {
-  out_entries.Clear();
+  out_Entries.Clear();
+
+  if (plQtEditorApp::GetSingleton()->GetRecentProjectsList().GetFileList().IsEmpty())
+    return;
 
   plStringBuilder sTemp;
 
@@ -360,7 +313,7 @@ void plRecentProjectsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::I
     item.m_sDisplay = sTemp;
     item.m_UserValue = file.m_File;
 
-    out_entries.PushBack(item);
+    out_Entries.PushBack(item);
   }
 }
 
@@ -447,30 +400,24 @@ plProjectAction::plProjectAction(const plActionContext& context, const char* szN
     case plProjectAction::ButtonType::OpenVsCode:
       SetIconPath(":/GuiFoundation/Icons/vscode.svg");
       break;
+    case plProjectAction::ButtonType::OpenCppProject:
+      SetIconPath(":/EditorFramework/Icons/VisualStudio.svg");
+      break;
+    case plProjectAction::ButtonType::CompileCppProject:
+      SetIconPath(":/EditorFramework/Icons/VisualStudio.svg");
+      break;
     case plProjectAction::ButtonType::SaveProfiling:
       // no icon
       break;
     case plProjectAction::ButtonType::SetupCppProject:
       SetIconPath(":/EditorFramework/Icons/VisualStudio.svg");
       break;
-    case plProjectAction::ButtonType::OpenCppProject:
-      // SetIconPath(":/EditorFramework/Icons/VisualStudio.svg"); // TODO
-      break;
-    case plProjectAction::ButtonType::CompileCppProject:
-      // SetIconPath(":/EditorFramework/Icons/VisualStudio.svg"); // TODO
-      break;
-    case plProjectAction::ButtonType::RegenerateCppSolution:
-      // SetIconPath(":/EditorFramework/Icons/VisualStudio.svg"); // TODO
-      break;
     case plProjectAction::ButtonType::ShowDocsAndCommunity:
-      // SetIconPath(":/GuiFoundation/Icons/Project.svg"); // TODO
-      break;
-    case plProjectAction::ButtonType::ClearAssetCaches:
-      // SetIconPath(":/GuiFoundation/Icons/Project.svg"); // TODO
+      //SetIconPath(":/GuiFoundation/Icons/Project.svg"); // TODO
       break;
   }
 
-  if (m_ButtonType == ButtonType::CloseProject ||
+   if (m_ButtonType == ButtonType::CloseProject ||
       m_ButtonType == ButtonType::DataDirectories ||
       m_ButtonType == ButtonType::WindowConfig ||
       m_ButtonType == ButtonType::ImportAsset ||
@@ -486,7 +433,6 @@ plProjectAction::plProjectAction(const plActionContext& context, const char* szN
       m_ButtonType == ButtonType::OpenCppProject ||
       m_ButtonType == ButtonType::CompileCppProject ||
       m_ButtonType == ButtonType::ExportProject ||
-      m_ButtonType == ButtonType::ClearAssetCaches ||
       m_ButtonType == ButtonType::PluginSelection)
   {
     SetEnabled(plToolsProject::IsProjectOpen());
@@ -521,7 +467,6 @@ plProjectAction::~plProjectAction()
       m_ButtonType == ButtonType::OpenCppProject ||
       m_ButtonType == ButtonType::CompileCppProject ||
       m_ButtonType == ButtonType::ExportProject ||
-      m_ButtonType == ButtonType::ClearAssetCaches ||
       m_ButtonType == ButtonType::PluginSelection)
   {
     plToolsProject::s_Events.RemoveEventHandler(plMakeDelegate(&plProjectAction::ProjectEventHandler, this));
@@ -549,11 +494,7 @@ void plProjectAction::ProjectEventHandler(const plToolsProjectEvent& e)
 
 void plProjectAction::CppEventHandler(const plCppSettings& e)
 {
-  if (m_ButtonType == ButtonType::OpenCppProject ||
-      m_ButtonType == ButtonType::CompileCppProject)
-  {
-    SetEnabled(plCppProject::ExistsProjectCMakeListsTxt());
-  }
+  SetEnabled(plCppProject::ExistsProjectCMakeListsTxt());
 }
 
 void plProjectAction::Execute(const plVariant& value)
@@ -660,21 +601,10 @@ void plProjectAction::Execute(const plVariant& value)
     case plProjectAction::ButtonType::ExportProject:
     {
       plQtExportProjectDlg dlg(nullptr);
-      dlg.exec();
-    }
-    break;
-
-    case plProjectAction::ButtonType::ClearAssetCaches:
-    {
-      auto res = plQtUiServices::GetSingleton()->MessageBoxQuestion("Delete ALL cached asset files?\n\n* 'Yes All' deletes everything and takes a long time to re-process. This is rarely needed.\n* 'No All' only deletes assets that are likely to make problems.", QMessageBox::StandardButton::YesAll | QMessageBox::StandardButton::NoAll | QMessageBox::StandardButton::Cancel, QMessageBox::StandardButton::Cancel);
-
-      if (res == QMessageBox::StandardButton::Cancel)
-        break;
-
-      if (res == QMessageBox::StandardButton::YesAll)
-        plAssetCurator::GetSingleton()->ClearAssetCaches(plAssetDocumentManager::Perfect);
-      else
-        plAssetCurator::GetSingleton()->ClearAssetCaches(plAssetDocumentManager::Unknown);
+      if (dlg.exec() == QDialog::Accepted)
+      {
+        // TODO
+      }
     }
     break;
 
@@ -687,24 +617,19 @@ void plProjectAction::Execute(const plVariant& value)
 
     case plProjectAction::ButtonType::ReloadResources:
     {
-      plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage("Reloading Resources...", plTime::MakeFromSeconds(5));
+      plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage("Reloading Resources...", plTime::Seconds(5));
 
       plSimpleConfigMsgToEngine msg;
       msg.m_sWhatToDo = "ReloadResources";
-      msg.m_sPayload = "ReloadAllResources";
-      plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+      PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 
-      plEditorAppEvent e;
-      e.m_Type = plEditorAppEvent::Type::ReloadResources;
+      PlasmaEditorAppEvent e;
+      e.m_Type = PlasmaEditorAppEvent::Type::ReloadResources;
       plQtEditorApp::GetSingleton()->m_Events.Broadcast(e);
 
-      // keep this here to make live color palette editing available, when needed
-      if (false)
       {
-        QTimer::singleShot(1, [this]()
-          { plQtEditorApp::GetSingleton()->SetStyleSheet(); });
-        QTimer::singleShot(500, [this]()
-          { plQtEditorApp::GetSingleton()->SetStyleSheet(); });
+        QTimer::singleShot(1, [this]() { plQtEditorApp::GetSingleton()->SetStyleSheet(); });
+        QTimer::singleShot(500, [this]() { plQtEditorApp::GetSingleton()->SetStyleSheet(); });
       }
 
       if (m_Context.m_pDocument)
@@ -718,7 +643,7 @@ void plProjectAction::Execute(const plVariant& value)
 
     case plProjectAction::ButtonType::LaunchFileserve:
     {
-      plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage("Launching FileServe...", plTime::MakeFromSeconds(5));
+      plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage("Launching FileServe...", plTime::Seconds(5));
 
       plQtLaunchFileserveDlg dlg(nullptr);
       dlg.exec();
@@ -727,7 +652,7 @@ void plProjectAction::Execute(const plVariant& value)
 
     case plProjectAction::ButtonType::LaunchInspector:
     {
-      plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage("Launching plInspector...", plTime::MakeFromSeconds(5));
+      plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage("Launching Plasma Inspector...", plTime::Seconds(5));
 
       plQtEditorApp::GetSingleton()->RunInspector();
     }
@@ -735,7 +660,7 @@ void plProjectAction::Execute(const plVariant& value)
 
     case plProjectAction::ButtonType::ReloadEngine:
     {
-      plEditorEngineProcessConnection::GetSingleton()->RestartProcess().IgnoreResult();
+      PlasmaEditorEngineProcessConnection::GetSingleton()->RestartProcess().IgnoreResult();
     }
     break;
 
@@ -747,23 +672,41 @@ void plProjectAction::Execute(const plVariant& value)
         plSimpleConfigMsgToEngine msg;
         msg.m_sWhatToDo = "SaveProfiling";
         msg.m_sPayload = ":appdata/profilingEngine.json";
-        plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+        PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
       }
-      if (plProfilingUtils::SaveProfilingCapture(szEditorProfilingFile).Failed())
-        return;
+      {
+        // Capture profiling data on editor process
+        plFileWriter fileWriter;
+        if (fileWriter.Open(szEditorProfilingFile) == PLASMA_SUCCESS)
+        {
+          plProfilingSystem::ProfilingData profilingData;
+          plProfilingSystem::Capture(profilingData);
+          // Set sort index to -1 so that the editor is always on top when opening the trace.
+          profilingData.m_uiProcessSortIndex = -1;
+          if (profilingData.Write(fileWriter).Failed())
+          {
+            plLog::Error("Failed to write editor profiling capture: {}.", szEditorProfilingFile);
+            return;
+          }
 
+          plLog::Info("Editor profiling capture saved to '{0}'.", fileWriter.GetFilePathAbsolute().GetData());
+        }
+        else
+        {
+          plLog::Error("Could not write profiling capture to '{0}'.", fileWriter.GetFilePathAbsolute().GetData());
+        }
+      }
       plStringBuilder sEngineProfilingFile;
       {
         // Wait for engine process response
-        auto callback = [&](plProcessMessage* pMsg) -> bool
-        {
+        auto callback = [&](plProcessMessage* pMsg) -> bool {
           auto pSimpleCfg = static_cast<plSaveProfilingResponseToEditor*>(pMsg);
           sEngineProfilingFile = pSimpleCfg->m_sProfilingFile;
           return true;
         };
         plProcessCommunicationChannel::WaitForMessageCallback cb = callback;
 
-        if (plEditorEngineProcessConnection::GetSingleton()->WaitForMessage(plGetStaticRTTI<plSaveProfilingResponseToEditor>(), plTime::MakeFromSeconds(15), &cb).Failed())
+        if (PlasmaEditorEngineProcessConnection::GetSingleton()->WaitForMessage(plGetStaticRTTI<plSaveProfilingResponseToEditor>(), plTime::Seconds(15), &cb).Failed())
         {
           plLog::Error("Timeout while waiting for engine process to create profiling capture. Captures will not be merged.");
           return;
@@ -775,14 +718,50 @@ void plProjectAction::Execute(const plVariant& value)
         }
       }
 
-      plStringBuilder sMergedFile;
-      const plDateTime dt = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
-      sMergedFile.AppendFormat(":appdata/profiling_{0}-{1}-{2}_{3}-{4}-{5}-{6}.json", dt.GetYear(), plArgU(dt.GetMonth(), 2, true), plArgU(dt.GetDay(), 2, true), plArgU(dt.GetHour(), 2, true), plArgU(dt.GetMinute(), 2, true), plArgU(dt.GetSecond(), 2, true), plArgU(dt.GetMicroseconds() / 1000, 3, true));
-
-      plStringBuilder sAbsPath;
-      if (plProfilingUtils::MergeProfilingCaptures(sEngineProfilingFile, szEditorProfilingFile, sMergedFile).Succeeded() && plFileSystem::ResolvePath(sMergedFile, &sAbsPath, nullptr).Succeeded())
+      // Merge editor and engine profiling files by simply merging the arrays inside
       {
-        plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Merged profiling capture saved to '{0}'.", sAbsPath), plTime::MakeFromSeconds(5.0));
+        plString sEngineProfilingJson;
+        {
+          plFileReader reader;
+          if (reader.Open(sEngineProfilingFile).Failed())
+          {
+            plLog::Error("Failed to read engine profiling capture: {}.", sEngineProfilingFile);
+            return;
+          }
+          sEngineProfilingJson.ReadAll(reader);
+        }
+        plString sEditorProfilingJson;
+        {
+          plFileReader reader;
+          if (reader.Open(szEditorProfilingFile).Failed())
+          {
+            plLog::Error("Failed to read editor profiling capture: {}.", sEngineProfilingFile);
+            return;
+          }
+          sEditorProfilingJson.ReadAll(reader);
+        }
+
+        plStringBuilder sMergedProfilingJson;
+        {
+          // Just glue the array together
+          sMergedProfilingJson.Reserve(sEngineProfilingJson.GetElementCount() + 1 + sEditorProfilingJson.GetElementCount());
+          const char* szEndArray = sEngineProfilingJson.FindLastSubString("]");
+          sMergedProfilingJson.Append(plStringView(sEngineProfilingJson.GetData(), szEndArray - sEngineProfilingJson.GetData()));
+          sMergedProfilingJson.Append(",");
+          const char* szStartArray = sEditorProfilingJson.FindSubString("[") + 1;
+          sMergedProfilingJson.Append(plStringView(szStartArray, sEditorProfilingJson.GetElementCount() - (szStartArray - sEditorProfilingJson.GetData())));
+        }
+        plStringBuilder sMergedFile;
+        const plDateTime dt = plTimestamp::CurrentTimestamp();
+        sMergedFile.AppendFormat(":appdata/profiling_{0}-{1}-{2}_{3}-{4}-{5}-{6}.json", dt.GetYear(), plArgU(dt.GetMonth(), 2, true), plArgU(dt.GetDay(), 2, true), plArgU(dt.GetHour(), 2, true), plArgU(dt.GetMinute(), 2, true), plArgU(dt.GetSecond(), 2, true), plArgU(dt.GetMicroseconds() / 1000, 3, true));
+        plFileWriter fileWriter;
+        if (fileWriter.Open(sMergedFile).Failed() || fileWriter.WriteBytes(sMergedProfilingJson.GetData(), sMergedProfilingJson.GetElementCount()).Failed())
+        {
+          plLog::Error("Failed to write merged profiling capture: {}.", sMergedFile);
+          return;
+        }
+        plLog::Info("Merged profiling capture saved to '{0}'.", fileWriter.GetFilePathAbsolute().GetData());
+        plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Merged profiling capture saved to '{0}'.", fileWriter.GetFilePathAbsolute().GetData()), plTime::Seconds(5.0));
       }
     }
     break;
@@ -868,31 +847,7 @@ void plProjectAction::Execute(const plVariant& value)
       }
       else
       {
-        plQtUiServices::GetSingleton()->MessageBoxInformation("C++ code has not been set up, compilation is not possible (or necessary).");
-      }
-    }
-    break;
-
-    case plProjectAction::ButtonType::RegenerateCppSolution:
-    {
-      plCppSettings cpp;
-      cpp.Load().IgnoreResult();
-
-      if (!plCppProject::ExistsProjectCMakeListsTxt() || !plCppProject::ExistsSolution(cpp))
-      {
-        plQtCppProjectDlg dlg(nullptr);
-        dlg.exec();
-      }
-      else
-      {
-        if (plCppProject::RunCMake(cpp).Succeeded())
-        {
-          plQtUiServices::GetSingleton()->MessageBoxInformation("Successfully regenerated the C++ solution.");
-        }
-        else
-        {
-          plQtUiServices::GetSingleton()->MessageBoxWarning("Regenerating the solution failed. See log for details.");
-        }
+        plQtUiServices::GetSingleton()->MessageBoxInformation("C++ code has not been set up, compilation is not necessary.");
       }
     }
     break;

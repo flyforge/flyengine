@@ -129,6 +129,7 @@ plUInt32 plMath::SafeMultiply32(plUInt32 a, plUInt32 b, plUInt32 c, plUInt32 d)
 
   PLASMA_REPORT_FAILURE("Safe multiplication failed: {0} * {1} * {2} * {3} exceeds UInt32 range.", a, b, c, d);
   std::terminate();
+  return 0;
 }
 
 plResult plMath::TryMultiply64(plUInt64& out_uiResult, plUInt64 a, plUInt64 b, plUInt64 c, plUInt64 d)
@@ -197,6 +198,7 @@ plUInt64 plMath::SafeMultiply64(plUInt64 a, plUInt64 b, plUInt64 c, plUInt64 d)
 
   PLASMA_REPORT_FAILURE("Safe multiplication failed: {0} * {1} * {2} * {3} exceeds plUInt64 range.", a, b, c, d);
   std::terminate();
+  return 0;
 }
 
 #if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
@@ -210,6 +212,7 @@ size_t plMath::SafeConvertToSizeT(plUInt64 uiValue)
 
   PLASMA_REPORT_FAILURE("Given value ({}) can't be converted to size_t because it is too big.", uiValue);
   std::terminate();
+  return 0;
 }
 #endif
 
@@ -283,7 +286,7 @@ plVec3 plBasisAxis::GetBasisVector(Enum basisAxis)
 
     default:
       PLASMA_REPORT_FAILURE("Invalid basis dir {0}", basisAxis);
-      return plVec3::MakeZero();
+      return plVec3::ZeroVector();
   }
 }
 
@@ -307,19 +310,19 @@ plQuat plBasisAxis::GetBasisRotation_PosX(Enum axis)
       rotAxis.SetIdentity();
       break;
     case plBasisAxis::PositiveY:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
       break;
     case plBasisAxis::PositiveZ:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(-90));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
       break;
     case plBasisAxis::NegativeX:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(180));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(180));
       break;
     case plBasisAxis::NegativeY:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(-90));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(-90));
       break;
     case plBasisAxis::NegativeZ:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
       break;
   }
 
@@ -335,19 +338,19 @@ plQuat plBasisAxis::GetBasisRotation(Enum identity, Enum axis)
       rotId.SetIdentity();
       break;
     case plBasisAxis::PositiveY:
-      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(-90));
+      rotId.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(-90));
       break;
     case plBasisAxis::PositiveZ:
-      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
+      rotId.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
       break;
     case plBasisAxis::NegativeX:
-      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(180));
+      rotId.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(180));
       break;
     case plBasisAxis::NegativeY:
-      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
+      rotId.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
       break;
     case plBasisAxis::NegativeZ:
-      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
+      rotId.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
       break;
   }
 
@@ -358,19 +361,19 @@ plQuat plBasisAxis::GetBasisRotation(Enum identity, Enum axis)
       rotAxis.SetIdentity();
       break;
     case plBasisAxis::PositiveY:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
       break;
     case plBasisAxis::PositiveZ:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(-90));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
       break;
     case plBasisAxis::NegativeX:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(180));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(180));
       break;
     case plBasisAxis::NegativeY:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(-90));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(-90));
       break;
     case plBasisAxis::NegativeZ:
-      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
+      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
       break;
   }
 
@@ -387,19 +390,19 @@ plBasisAxis::Enum plBasisAxis::GetOrthogonalAxis(Enum axis1, Enum axis2, bool bF
   if (bFlip)
     c = -c;
 
-  if (c.IsEqual(plVec3::MakeAxisX(), 0.01f))
+  if (c.IsEqual(plVec3::UnitXAxis(), 0.01f))
     return plBasisAxis::PositiveX;
-  if (c.IsEqual(-plVec3::MakeAxisX(), 0.01f))
+  if (c.IsEqual(-plVec3::UnitXAxis(), 0.01f))
     return plBasisAxis::NegativeX;
 
-  if (c.IsEqual(plVec3::MakeAxisY(), 0.01f))
+  if (c.IsEqual(plVec3::UnitYAxis(), 0.01f))
     return plBasisAxis::PositiveY;
-  if (c.IsEqual(-plVec3::MakeAxisY(), 0.01f))
+  if (c.IsEqual(-plVec3::UnitYAxis(), 0.01f))
     return plBasisAxis::NegativeY;
 
-  if (c.IsEqual(plVec3::MakeAxisZ(), 0.01f))
+  if (c.IsEqual(plVec3::UnitZAxis(), 0.01f))
     return plBasisAxis::PositiveZ;
-  if (c.IsEqual(-plVec3::MakeAxisZ(), 0.01f))
+  if (c.IsEqual(-plVec3::UnitZAxis(), 0.01f))
     return plBasisAxis::NegativeZ;
 
   return axis1;
@@ -441,8 +444,8 @@ PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plCurveFunction, 1)
  PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutCirc),
  PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInBack),
  PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutBack),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutBack),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInElastic),
+ PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutBack), 
+ PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInElastic), 
  PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutElastic),
  PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutElastic),
  PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInBounce),

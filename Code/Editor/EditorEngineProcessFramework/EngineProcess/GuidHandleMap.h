@@ -3,7 +3,7 @@
 #include <EditorEngineProcessFramework/EditorEngineProcessFrameworkDLL.h>
 
 template <typename HandleType>
-class plEditorGuidEngineHandleMap
+class PlasmaEditorGuidEngineHandleMap
 {
 public:
   void Clear()

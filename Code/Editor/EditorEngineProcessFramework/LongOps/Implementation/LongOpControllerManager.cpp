@@ -119,7 +119,7 @@ void plLongOpControllerManager::RegisterLongOp(const plUuid& documentGuid, const
   auto& opInfo = *opInfoPtr;
   opInfo.m_DocumentGuid = documentGuid;
   opInfo.m_ComponentGuid = componentGuid;
-  opInfo.m_OperationGuid = plUuid::MakeUuid();
+  opInfo.m_OperationGuid.CreateNewUuid();
 
   opInfo.m_pProxyOp = pRtti->GetAllocator()->Allocate<plLongOpProxy>();
   opInfo.m_pProxyOp->InitializeRegistered(documentGuid, componentGuid);
@@ -145,13 +145,13 @@ void plLongOpControllerManager::UnregisterLongOp(const plUuid& documentGuid, con
   }
 }
 
-plLongOpControllerManager::ProxyOpInfo* plLongOpControllerManager::GetOperation(const plUuid& opGuid)
+plLongOpControllerManager::ProxyOpInfo* plLongOpControllerManager::GetOperation(const plUuid& guid)
 {
   PLASMA_LOCK(m_Mutex);
 
   for (auto& opInfoPtr : m_ProxyOps)
   {
-    if (opInfoPtr->m_OperationGuid == opGuid)
+    if (opInfoPtr->m_OperationGuid == guid)
       return opInfoPtr.Borrow();
   }
 
@@ -205,7 +205,7 @@ void plLongOpControllerManager::CancelAndRemoveAllOpsForDocument(const plUuid& d
 
     if (bOperationsStillActive)
     {
-      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(100));
+      plThreadUtils::Sleep(plTime::Milliseconds(100));
     }
   }
 }

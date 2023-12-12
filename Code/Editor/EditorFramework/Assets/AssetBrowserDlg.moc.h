@@ -9,23 +9,21 @@ class plQtAssetBrowserDlg : public QDialog, public Ui_AssetBrowserDlg
   Q_OBJECT
 
 public:
-  plQtAssetBrowserDlg(QWidget* pParent, const plUuid& preselectedAsset, plStringView sVisibleFilters);
-  plQtAssetBrowserDlg(QWidget* pParent, plStringView sWindowTitle, plStringView sPreselectedFileAbs, plStringView sFileExtensions);
+  plQtAssetBrowserDlg(QWidget* parent, const plUuid& preselectedAsset, const char* szVisibleFilters);
   ~plQtAssetBrowserDlg();
 
-  plStringView GetSelectedAssetPathRelative() const { return m_sSelectedAssetPathRelative; }
-  plStringView GetSelectedAssetPathAbsolute() const { return m_sSelectedAssetPathAbsolute; }
+  const char* GetSelectedAssetPathRelative() const { return m_sSelectedAssetPathRelative; }
+  const char* GetSelectedAssetPathAbsolute() const { return m_sSelectedAssetPathAbsolute; }
   const plUuid GetSelectedAssetGuid() const { return m_SelectedAssetGuid; }
 
 private Q_SLOTS:
-  void on_AssetBrowserWidget_ItemChosen(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute, plUInt8 uiAssetBrowserItemFlags);
-  void on_AssetBrowserWidget_ItemSelected(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute, plUInt8 uiAssetBrowserItemFlags);
+  void on_ButtonFileDialog_clicked();
+  void on_AssetBrowserWidget_ItemChosen(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute);
+  void on_AssetBrowserWidget_ItemSelected(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute);
   void on_AssetBrowserWidget_ItemCleared();
   void on_ButtonSelect_clicked();
 
 private:
-  void Init(QWidget* pParent);
-
   plString m_sSelectedAssetPathRelative;
   plString m_sSelectedAssetPathAbsolute;
   plUuid m_SelectedAssetGuid;

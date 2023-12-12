@@ -11,7 +11,7 @@ class PLASMA_GUIFOUNDATION_DLL plQGridBarWidget : public QWidget
   Q_OBJECT
 
 public:
-  plQGridBarWidget(QWidget* pParent);
+  plQGridBarWidget(QWidget* parent);
 
   void SetConfig(const QRectF& viewportSceneRect, double fTextGridStops, double fFineGridStops, plDelegate<QPointF(const QPointF&)> mapFromSceneFunc);
 

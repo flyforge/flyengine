@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{10397632043479265953,5177341319926404083}}
-		u4 %Hash{9010722949676386331}
+		u4 %Hash{10837595413405615201}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -1289,7 +1289,7 @@ o
 	p
 	{
 		b %Active{1}
-		f %Aperture{0x00008041}
+		f %Aperture{0x0000803F}
 		s %CameraRenderPipeline{""}
 		f %Dimensions{0x00002041}
 		f %EV100{0}
@@ -1308,7 +1308,7 @@ o
 		Vec2 %RenderTargetOffset{f{0,0}}
 		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
 		b %ShowStats{0}
-		Time %ShutterTime{d{0x7B14AE47E17A743F}}
+		Time %ShutterTime{d{0x000000000000F03F}}
 		s %UsageHint{"plCameraUsageHint::Thumbnail"}
 	}
 }
@@ -1354,7 +1354,6 @@ o
 			Uuid{u4{7762657555460290455,5152181436861837777}}
 			Uuid{u4{4184379643003521440,5345747637243799799}}
 			Uuid{u4{8253829191535739539,5417210495468666200}}
-			Uuid{u4{14802057523043493966,11014322325212563827}}
 		}
 		VarArray %Components{}
 		s %GlobalKey{""}
@@ -1587,8 +1586,8 @@ o
 	{
 		b %Active{1}
 		Color %Color{f{0xC6644E3E,0xC6644E3E,0xE2E0993E,0x0000803F}}
-		f %Density{0xCDCCCC3D}
-		f %HeightFalloff{0x00007041}
+		f %Density{0xCDCC4C3E}
+		f %HeightFalloff{0x00002041}
 		b %ModulateWithSkyColor{0}
 		f %SkyDistance{0x00007A44}
 	}
@@ -2153,7 +2152,7 @@ o
 		b %CastShadows{1}
 		f %ConstantBias{0xCDCCCC3D}
 		f %FadeOutStart{0xCDCC4C3F}
-		f %Intensity{0x0050C347}
+		f %Intensity{0x00002041}
 		ColorGamma %LightColor{u1{255,252,242,255}}
 		s %LightUnit{"plLightUnit::Lumen"}
 		f %MinShadowRange{0x00004842}
@@ -2839,7 +2838,7 @@ o
 	{
 		b %Active{1}
 		s %CubeMap{"{ 0b202e08-a64f-465d-b38e-15b81d161822 }"}
-		f %ExposureBias{0x00409C46}
+		f %ExposureBias{0x0000803F}
 		b %InverseTonemap{0}
 		b %UseFog{1}
 		f %VirtualDistance{0x00007A44}
@@ -2854,7 +2853,7 @@ o
 	{
 		b %Active{1}
 		ColorGamma %BottomColor{u1{89,89,108,255}}
-		f %Intensity{0x00504348}
+		f %Intensity{0x00004040}
 		ColorGamma %TopColor{u1{124,124,149,255}}
 	}
 }
@@ -3247,7 +3246,7 @@ o
 		b %Active{1}
 		VarDict %Parameters
 		{
-			s %Label{"plasma Impacts"}
+			s %Label{"Plasma Impacts"}
 		}
 		s %Prefab{"{ c49af1cd-233c-4af2-9edc-5c12d1456e32 }"}
 	}
@@ -4268,37 +4267,6 @@ o
 }
 o
 {
-	Uuid %id{u4{5078057122840448092,10339941582434014282}}
-	s %t{"plCameraComponent"}
-	u3 %v{11}
-	p
-	{
-		b %Active{1}
-		f %Aperture{0x00008041}
-		s %CameraRenderPipeline{""}
-		f %Dimensions{0x00002041}
-		f %EV100{0}
-		i1 %EditorShortcut{1}
-		VarArray %ExcludeTags{}
-		f %ExposureCompensation{0}
-		f %FOV{0x00007042}
-		f %FarPlane{0x00007A44}
-		f %FinalExposure{0}
-		f %FocusDistance{0xCDCC4C3E}
-		f %ISO{0x0000C842}
-		VarArray %IncludeTags{}
-		s %Mode{"plCameraMode::PerspectiveFixedFovY"}
-		f %NearPlane{0x0000803E}
-		s %RenderTarget{""}
-		Vec2 %RenderTargetOffset{f{0,0}}
-		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
-		b %ShowStats{0}
-		Time %ShutterTime{d{0x7B14AE47E17A743F}}
-		s %UsageHint{"plCameraUsageHint::EditorView"}
-	}
-}
-o
-{
 	Uuid %id{u4{5408660747912174604,10371887445160459720}}
 	s %t{"plParticleComponent"}
 	u3 %v{5}
@@ -4773,33 +4741,6 @@ o
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0x000080C0,0x00000041,0}}
 		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-			s{"AutoColMesh"}
-		}
-	}
-}
-o
-{
-	Uuid %id{u4{14802057523043493966,11014322325212563827}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{5078057122840448092,10339941582434014282}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0xD60AC5C0,0xAC26F0C1,0x6C02DE40}}
-		Quat %LocalRotation{f{0x026D0ABE,0x84E5313E,0x3B5B193F,0x9D15453F}}
 		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
 		f %LocalUniformScaling{0x0000803F}
 		s %Mode{"plObjectMode::Automatic"}

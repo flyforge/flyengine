@@ -87,9 +87,9 @@ public:
   /// \brief The 'raw' data for a single path control point
   struct ControlPoint
   {
-    plVec3 m_vPosition = plVec3::MakeZero();
-    plVec3 m_vTangentIn = plVec3::MakeZero();
-    plVec3 m_vTangentOut = plVec3::MakeZero();
+    plVec3 m_vPosition = plVec3::ZeroVector();
+    plVec3 m_vTangentIn = plVec3::ZeroVector();
+    plVec3 m_vTangentOut = plVec3::ZeroVector();
     plAngle m_Roll;
 
     plResult Serialize(plStreamWriter& ref_writer) const;
@@ -106,8 +106,8 @@ public:
   /// \brief If the path is linearized, this represents a single sample point
   struct LinearizedElement
   {
-    plVec3 m_vPosition = plVec3::MakeZero();
-    plVec3 m_vUpDirection = plVec3::MakeAxisZ();
+    plVec3 m_vPosition = plVec3::ZeroVector();
+    plVec3 m_vUpDirection = plVec3::UnitZAxis();
   };
 
   /// \brief If the control points changed recently, this makes sure the linearized representation gets recreated. Call this before GetLinearizedRepresentation(), if necessary.
@@ -155,7 +155,7 @@ public:
   /// \brief Specifies how large the error of the linearized path representation is allowed to be.
   ///
   /// The lower the allowed error, the more detailed the linearized path will be, to match the
-  /// Bezier representation as closely as possible.
+  /// Bplier representation as closely as possible.
   ///
   /// The error is a distance measure. Thus a value of 0.01 means that the linearized representation
   /// may at most deviate a centimeter from the real curve.

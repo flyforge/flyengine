@@ -36,6 +36,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAudioAnimationComponent, kVersion_AudioAnimationCo
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Sound"),
+    new plColorAttribute(plColorScheme::Sound),
   }
   PLASMA_END_ATTRIBUTES;
 
@@ -234,8 +235,8 @@ void plAudioAnimationComponent::Update()
 
       plAudioSystemTransform transform;
       transform.m_vPosition = GetOwner()->GetGlobalPosition();
-      transform.m_vForward = (rotation * plVec3::MakeAxisX()).GetNormalized();
-      transform.m_vUp = (rotation * plVec3::MakeAxisZ()).GetNormalized();
+      transform.m_vForward = (rotation * plVec3::UnitXAxis()).GetNormalized();
+      transform.m_vUp = (rotation * plVec3::UnitZAxis()).GetNormalized();
       transform.m_vVelocity = GetOwner()->GetLinearVelocity();
 
       if (transform == entry.m_LastTransform)
@@ -282,8 +283,8 @@ void plAudioAnimationComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated
 
     plAudioSystemTransform transform;
     transform.m_vPosition = GetOwner()->GetGlobalPosition() + bone.GetTranslationVector();
-    transform.m_vForward = (boneRot * plVec3::MakeAxisX()).GetNormalized();
-    transform.m_vUp = (boneRot * plVec3::MakeAxisZ()).GetNormalized();
+    transform.m_vForward = (boneRot * plVec3::UnitXAxis()).GetNormalized();
+    transform.m_vUp = (boneRot * plVec3::UnitZAxis()).GetNormalized();
     transform.m_vVelocity = transform.m_vPosition - entry.m_LastTransform.m_vPosition; // We can just mimic a velocity, since we have not this data in the bone transform
 
     if (transform == entry.m_LastTransform)

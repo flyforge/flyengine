@@ -33,6 +33,7 @@ void plAnimController::GetRootMotion(plVec3& ref_vTranslation, plAngle& ref_rota
 
 void plAnimController::Update(plTime diff, plGameObject* pTarget)
 {
+  PLASMA_PROFILE_SCOPE("AnimController_Update");
   if (!m_hSkeleton.IsValid())
     return;
 
@@ -44,7 +45,7 @@ void plAnimController::Update(plTime diff, plGameObject* pTarget)
 
   m_CurrentLocalTransformOutputs.Clear();
 
-  m_vRootMotion = plVec3::MakeZero();
+  m_vRootMotion = plVec3::ZeroVector();
   m_RootRotationX = {};
   m_RootRotationY = {};
   m_RootRotationZ = {};
@@ -265,7 +266,7 @@ void plAnimController::GenerateLocalResultProcessors(const plSkeletonResource* p
 
   // model space to output
   {
-    plVec3 rootMotion = plVec3::MakeZero();
+    plVec3 rootMotion = plVec3::ZeroVector();
     plAngle rootRotationX;
     plAngle rootRotationY;
     plAngle rootRotationZ;

@@ -3,7 +3,22 @@
 #include <Foundation/Basics.h>
 #include <Foundation/Math/Math.h>
 
-inline plTimestamp::plTimestamp() = default;
+static const plInt64 PLASMA_INVALID_TIME_STAMP = 0x7FFFFFFFFFFFFFFFLL;
+
+inline plTimestamp::plTimestamp()
+{
+  Invalidate();
+}
+
+inline plTimestamp::plTimestamp(plInt64 iTimeValue, plSIUnitOfTime::Enum unitOfTime)
+{
+  SetInt64(iTimeValue, unitOfTime);
+}
+
+inline void plTimestamp::Invalidate()
+{
+  m_iTimestamp = PLASMA_INVALID_TIME_STAMP;
+}
 
 inline bool plTimestamp::IsValid() const
 {
@@ -26,25 +41,25 @@ inline const plTime plTimestamp::operator-(const plTimestamp& other) const
 {
   PLASMA_ASSERT_DEBUG(IsValid(), "Arithmetics on invalid time stamps are not allowed!");
   PLASMA_ASSERT_DEBUG(other.IsValid(), "Arithmetics on invalid time stamps are not allowed!");
-  return plTime::MakeFromMicroseconds((double)(m_iTimestamp - other.m_iTimestamp));
+  return plTime::Microseconds((double)(m_iTimestamp - other.m_iTimestamp));
 }
 
 inline const plTimestamp plTimestamp::operator+(const plTime& timeSpan) const
 {
   PLASMA_ASSERT_DEBUG(IsValid(), "Arithmetics on invalid time stamps are not allowed!");
-  return plTimestamp::MakeFromInt(m_iTimestamp + (plInt64)timeSpan.GetMicroseconds(), plSIUnitOfTime::Microsecond);
+  return plTimestamp(m_iTimestamp + (plInt64)timeSpan.GetMicroseconds(), plSIUnitOfTime::Microsecond);
 }
 
 inline const plTimestamp plTimestamp::operator-(const plTime& timeSpan) const
 {
   PLASMA_ASSERT_DEBUG(IsValid(), "Arithmetics on invalid time stamps are not allowed!");
-  return plTimestamp::MakeFromInt(m_iTimestamp - (plInt64)timeSpan.GetMicroseconds(), plSIUnitOfTime::Microsecond);
+  return plTimestamp(m_iTimestamp - (plInt64)timeSpan.GetMicroseconds(), plSIUnitOfTime::Microsecond);
 }
 
 inline const plTimestamp operator+(const plTime& timeSpan, const plTimestamp& timestamp)
 {
   PLASMA_ASSERT_DEBUG(timestamp.IsValid(), "Arithmetics on invalid time stamps are not allowed!");
-  return plTimestamp::MakeFromInt(timestamp.GetInt64(plSIUnitOfTime::Microsecond) + (plInt64)timeSpan.GetMicroseconds(), plSIUnitOfTime::Microsecond);
+  return plTimestamp(timestamp.GetInt64(plSIUnitOfTime::Microsecond) + (plInt64)timeSpan.GetMicroseconds(), plSIUnitOfTime::Microsecond);
 }
 
 
@@ -66,8 +81,7 @@ inline plUInt8 plDateTime::GetMonth() const
 
 inline void plDateTime::SetMonth(plUInt8 uiMonth)
 {
-  PLASMA_ASSERT_DEBUG(uiMonth >= 1 && uiMonth <= 12, "Invalid month value");
-  m_uiMonth = uiMonth;
+  m_uiMonth = plMath::Clamp<plUInt8>(uiMonth, 1, 12);
 }
 
 inline plUInt8 plDateTime::GetDay() const
@@ -77,8 +91,7 @@ inline plUInt8 plDateTime::GetDay() const
 
 inline void plDateTime::SetDay(plUInt8 uiDay)
 {
-  PLASMA_ASSERT_DEBUG(uiDay >= 1 && uiDay <= 31, "Invalid day value");
-  m_uiDay = uiDay;
+  m_uiDay = plMath::Clamp<plUInt8>(uiDay, 1u, 31u);
 }
 
 inline plUInt8 plDateTime::GetDayOfWeek() const
@@ -88,8 +101,7 @@ inline plUInt8 plDateTime::GetDayOfWeek() const
 
 inline void plDateTime::SetDayOfWeek(plUInt8 uiDayOfWeek)
 {
-  PLASMA_ASSERT_DEBUG(uiDayOfWeek <= 6, "Invalid day of week value");
-  m_uiDayOfWeek = uiDayOfWeek;
+  m_uiDayOfWeek = plMath::Clamp<plUInt8>(uiDayOfWeek, 0u, 6u);
 }
 
 inline plUInt8 plDateTime::GetHour() const
@@ -99,8 +111,7 @@ inline plUInt8 plDateTime::GetHour() const
 
 inline void plDateTime::SetHour(plUInt8 uiHour)
 {
-  PLASMA_ASSERT_DEBUG(uiHour <= 23, "Invalid hour value");
-  m_uiHour = uiHour;
+  m_uiHour = plMath::Clamp<plUInt8>(uiHour, 0u, 23u);
 }
 
 inline plUInt8 plDateTime::GetMinute() const
@@ -110,8 +121,7 @@ inline plUInt8 plDateTime::GetMinute() const
 
 inline void plDateTime::SetMinute(plUInt8 uiMinute)
 {
-  PLASMA_ASSERT_DEBUG(uiMinute <= 59, "Invalid minute value");
-  m_uiMinute = uiMinute;
+  m_uiMinute = plMath::Clamp<plUInt8>(uiMinute, 0u, 59u);
 }
 
 inline plUInt8 plDateTime::GetSecond() const
@@ -121,8 +131,7 @@ inline plUInt8 plDateTime::GetSecond() const
 
 inline void plDateTime::SetSecond(plUInt8 uiSecond)
 {
-  PLASMA_ASSERT_DEBUG(uiSecond <= 59, "Invalid second value");
-  m_uiSecond = uiSecond;
+  m_uiSecond = plMath::Clamp<plUInt8>(uiSecond, 0u, 59u);
 }
 
 inline plUInt32 plDateTime::GetMicroseconds() const
@@ -132,6 +141,5 @@ inline plUInt32 plDateTime::GetMicroseconds() const
 
 inline void plDateTime::SetMicroseconds(plUInt32 uiMicroSeconds)
 {
-  PLASMA_ASSERT_DEBUG(uiMicroSeconds <= 999999u, "Invalid micro-second value");
-  m_uiMicroseconds = uiMicroSeconds;
+  m_uiMicroseconds = plMath::Clamp<plUInt32>(uiMicroSeconds, 0u, 999999u);
 }

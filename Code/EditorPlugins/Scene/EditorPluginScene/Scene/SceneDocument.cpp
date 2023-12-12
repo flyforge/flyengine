@@ -56,8 +56,8 @@ void plSceneDocument_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e)
   props["Tags"].m_Visibility = plPropertyUiState::Invisible;
 }
 
-plSceneDocument::plSceneDocument(plStringView sDocumentPath, DocumentType documentType)
-  : plGameObjectDocument(sDocumentPath, PLASMA_DEFAULT_NEW(plSceneObjectManager))
+plSceneDocument::plSceneDocument(const char* szDocumentPath, DocumentType documentType)
+  : plGameObjectDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plSceneObjectManager))
 {
   m_DocumentType = documentType;
   m_GameMode = GameMode::Off;
@@ -79,18 +79,24 @@ plSceneDocument::plSceneDocument(plStringView sDocumentPath, DocumentType docume
 
 void plSceneDocument::InitializeAfterLoading(bool bFirstTimeCreation)
 {
-  SUPER::InitializeAfterLoading(bFirstTimeCreation);
-
   // (Local mirror only mirrors settings)
-  m_ObjectMirror.SetFilterFunction([pManager = GetObjectManager()](const plDocumentObject* pObject, plStringView sProperty) -> bool { return pManager->IsUnderRootProperty("Settings", pObject, sProperty); });
+  m_ObjectMirror.SetFilterFunction([pManager = GetObjectManager()](const plDocumentObject* pObject, const char* szProperty) -> bool
+  {
+    return pManager->IsUnderRootProperty("Settings", pObject, szProperty); 
+  });
+  
   // (Remote IPC mirror only sends scene)
-  m_pMirror->SetFilterFunction([pManager = GetObjectManager()](const plDocumentObject* pObject, plStringView sProperty) -> bool { return pManager->IsUnderRootProperty("Children", pObject, sProperty); });
+  m_Mirror.SetFilterFunction([pManager = GetObjectManager()](const plDocumentObject* pObject, const char* szProperty) -> bool
+  {
+    return pManager->IsUnderRootProperty("Children", pObject, szProperty); 
+  });
 
+  SUPER::InitializeAfterLoading(bFirstTimeCreation);
   EnsureSettingsObjectExist();
 
   m_DocumentObjectMetaData->m_DataModifiedEvent.AddEventHandler(plMakeDelegate(&plSceneDocument::DocumentObjectMetaDataEventHandler, this));
   plToolsProject::s_Events.AddEventHandler(plMakeDelegate(&plSceneDocument::ToolsProjectEventHandler, this));
-  plEditorEngineProcessConnection::GetSingleton()->s_Events.AddEventHandler(plMakeDelegate(&plSceneDocument::EngineConnectionEventHandler, this));
+  PlasmaEditorEngineProcessConnection::GetSingleton()->s_Events.AddEventHandler(plMakeDelegate(&plSceneDocument::EngineConnectionEventHandler, this));
 
   m_ObjectMirror.InitSender(GetObjectManager());
   m_ObjectMirror.InitReceiver(&m_Context);
@@ -103,7 +109,7 @@ plSceneDocument::~plSceneDocument()
 
   plToolsProject::s_Events.RemoveEventHandler(plMakeDelegate(&plSceneDocument::ToolsProjectEventHandler, this));
 
-  plEditorEngineProcessConnection::GetSingleton()->s_Events.RemoveEventHandler(plMakeDelegate(&plSceneDocument::EngineConnectionEventHandler, this));
+  PlasmaEditorEngineProcessConnection::GetSingleton()->s_Events.RemoveEventHandler(plMakeDelegate(&plSceneDocument::EngineConnectionEventHandler, this));
 
   m_ObjectMirror.Clear();
   m_ObjectMirror.DeInit();
@@ -118,12 +124,6 @@ void plSceneDocument::GroupSelection()
 
   plVec3 vCenter(0.0f);
   const plDocumentObject* pCommonParent = sel[0]->GetParent();
-
-  // this happens for top-level objects, their parent object is an plDocumentRootObject
-  if (pCommonParent->GetType() != plGetStaticRTTI<plGameObject>())
-  {
-    pCommonParent = nullptr;
-  }
 
   for (const auto& item : sel)
   {
@@ -141,7 +141,8 @@ void plSceneDocument::GroupSelection()
 
   pHistory->StartTransaction("Group Selection");
 
-  plUuid groupObj = plUuid::MakeUuid();
+  plUuid groupObj;
+  groupObj.CreateNewUuid();
 
   plAddObjectCommand cmdAdd;
   cmdAdd.m_NewObjectGuid = groupObj;
@@ -149,7 +150,7 @@ void plSceneDocument::GroupSelection()
   cmdAdd.m_Index = -1;
   cmdAdd.m_sParentProperty = "Children";
 
-  pHistory->AddCommand(cmdAdd).AssertSuccess();
+  pHistory->AddCommand(cmdAdd).IgnoreResult();
 
   // put the new group object under the shared parent
   if (pCommonParent != nullptr)
@@ -160,7 +161,7 @@ void plSceneDocument::GroupSelection()
     cmdMove.m_sParentProperty = "Children";
 
     cmdMove.m_Object = cmdAdd.m_NewObjectGuid;
-    pHistory->AddCommand(cmdMove).AssertSuccess();
+    pHistory->AddCommand(cmdMove).IgnoreResult();
   }
 
   auto pGroupObject = GetObjectManager()->GetObject(cmdAdd.m_NewObjectGuid);
@@ -174,7 +175,7 @@ void plSceneDocument::GroupSelection()
   for (const auto& item : sel)
   {
     cmdMove.m_Object = item->GetGuid();
-    pHistory->AddCommand(cmdMove).AssertSuccess();
+    pHistory->AddCommand(cmdMove).IgnoreResult();
   }
 
   pHistory->FinishTransaction();
@@ -225,8 +226,8 @@ void plSceneDocument::DuplicateSpecial()
   cmd.m_bGroupDuplicates = dlg.s_bGroupCopies;
   cmd.m_iRevolveAxis = dlg.s_iRevolveAxis;
   cmd.m_fRevolveRadius = dlg.s_fRevolveRadius;
-  cmd.m_RevolveStartAngle = plAngle::MakeFromDegree(dlg.s_iRevolveStartAngle);
-  cmd.m_RevolveAngleStep = plAngle::MakeFromDegree(dlg.s_iRevolveAngleStep);
+  cmd.m_RevolveStartAngle = plAngle::Degree(dlg.s_iRevolveStartAngle);
+  cmd.m_RevolveAngleStep = plAngle::Degree(dlg.s_iRevolveAngleStep);
 
   auto history = GetCommandHistory();
 
@@ -276,7 +277,7 @@ void plSceneDocument::SnapObjectToCamera()
   mRot.SetColumn(0, camera.GetCenterDirForwards());
   mRot.SetColumn(1, camera.GetCenterDirRight());
   mRot.SetColumn(2, camera.GetCenterDirUp());
-  transform.m_qRotation = plQuat::MakeFromMat3(mRot);
+  transform.m_qRotation.SetFromMat3(mRot);
 
   auto* pHistory = GetCommandHistory();
 
@@ -382,7 +383,7 @@ void plSceneDocument::CopyReference()
 
   QApplication::clipboard()->setText(sGuid.GetData());
 
-  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied Object Reference: {}", sGuid), plTime::MakeFromSeconds(5));
+  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied Object Reference: {}", sGuid), plTime::Seconds(5));
 }
 
 plStatus plSceneDocument::CreateEmptyObject(bool bAttachToParent, bool bAtPickedPosition)
@@ -402,7 +403,7 @@ plStatus plSceneDocument::CreateEmptyObject(bool bAttachToParent, bool bAtPicked
 
   if (Sel.IsEmpty() || !bAttachToParent)
   {
-    cmdAdd.m_NewObjectGuid = plUuid::MakeUuid();
+    cmdAdd.m_NewObjectGuid.CreateNewUuid();
     NewNode = cmdAdd.m_NewObjectGuid;
 
     auto res = history->AddCommand(cmdAdd);
@@ -414,7 +415,7 @@ plStatus plSceneDocument::CreateEmptyObject(bool bAttachToParent, bool bAtPicked
   }
   else
   {
-    cmdAdd.m_NewObjectGuid = plUuid::MakeUuid();
+    cmdAdd.m_NewObjectGuid.CreateNewUuid();
     NewNode = cmdAdd.m_NewObjectGuid;
 
     cmdAdd.m_Parent = Sel[0]->GetGuid();
@@ -572,7 +573,7 @@ void plSceneDocument::SetGameMode(GameMode::Enum mode)
   ScheduleSendObjectSelection();
 }
 
-plStatus plSceneDocument::CreatePrefabDocumentFromSelection(plStringView sFile, const plRTTI* pRootType, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB /* = {} */, plDelegate<void(plDocumentObject*)> adjustNewNodesCB /* = {} */, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB /* = {} */)
+plStatus plSceneDocument::CreatePrefabDocumentFromSelection(const char* szFile, const plRTTI* pRootType, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB /* = {} */, plDelegate<void(plDocumentObject*)> adjustNewNodesCB /* = {} */, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB /* = {} */)
 {
   auto Selection = GetSelectionManager()->GetTopLevelSelection(pRootType);
 
@@ -596,7 +597,7 @@ plStatus plSceneDocument::CreatePrefabDocumentFromSelection(plStringView sFile, 
     if (auto pRotation = pGraphNode->FindProperty("LocalRotation"))
     {
       plQuat rot = pRotation->m_Value.ConvertTo<plQuat>();
-      rot = tReference.m_qRotation.GetInverse() * rot;
+      rot = -tReference.m_qRotation * rot;
 
       pGraphNode->ChangeProperty("LocalRotation", rot);
     }
@@ -613,39 +614,40 @@ plStatus plSceneDocument::CreatePrefabDocumentFromSelection(plStringView sFile, 
 
     cmd.m_sProperty = "LocalPosition";
     cmd.m_NewValue = tOld.m_vPosition + tReference.m_vPosition;
-    GetCommandHistory()->AddCommand(cmd).AssertSuccess();
+    GetCommandHistory()->AddCommand(cmd).IgnoreResult();
 
     cmd.m_sProperty = "LocalRotation";
     cmd.m_NewValue = tReference.m_qRotation * tOld.m_qRotation;
-    GetCommandHistory()->AddCommand(cmd).AssertSuccess();
+    GetCommandHistory()->AddCommand(cmd).IgnoreResult();
   };
 
-  auto finalizeGraph = [this, &varChildren](plAbstractObjectGraph& ref_graph, plDynamicArray<plAbstractObjectNode*>& ref_graphRootNodes) {
-    if (ref_graphRootNodes.GetCount() == 1)
+  auto finalizeGraph = [this, &varChildren](plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)
+  {
+    if (graphRootNodes.GetCount() == 1)
     {
-      ref_graphRootNodes[0]->ChangeProperty("Name", "<Prefab-Root>");
+      graphRootNodes[0]->ChangeProperty("Name", "<Prefab-Root>");
     }
     else
     {
       const plRTTI* pRtti = plGetStaticRTTI<plGameObject>();
 
-      plAbstractObjectNode* pRoot = ref_graph.AddNode(plUuid::MakeUuid(), pRtti->GetTypeName(), pRtti->GetTypeVersion());
+      plAbstractObjectNode* pRoot = graph.AddNode(plUuid::CreateUuid(), pRtti->GetTypeName(), pRtti->GetTypeVersion());
       pRoot->AddProperty("Name", "<Prefab-Root>");
       pRoot->AddProperty("Children", varChildren);
 
-      ref_graphRootNodes.Clear();
-      ref_graphRootNodes.PushBack(pRoot);
+      graphRootNodes.Clear();
+      graphRootNodes.PushBack(pRoot);
     }
   };
 
-  if (!adjustGraphNodeCB.IsValid())
+   if (!adjustGraphNodeCB.IsValid())
     adjustGraphNodeCB = centerNodes;
   if (!adjustNewNodesCB.IsValid())
     adjustNewNodesCB = adjustResult;
   if (!finalizeGraphCB.IsValid())
     finalizeGraphCB = finalizeGraph;
 
-  return SUPER::CreatePrefabDocumentFromSelection(sFile, pRootType, adjustGraphNodeCB, adjustNewNodesCB, finalizeGraphCB);
+  return SUPER::CreatePrefabDocumentFromSelection(szFile, pRootType, adjustGraphNodeCB, adjustNewNodesCB, finalizeGraphCB);
 }
 
 bool plSceneDocument::CanEngineProcessBeRestarted() const
@@ -773,12 +775,12 @@ void plSceneDocument::ShowOrHideAllObjects(ShowOrHide action)
 }
 void plSceneDocument::GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_mimeTypes) const
 {
-  out_mimeTypes.PushBack("application/plEditor.plAbstractGraph");
+  out_mimeTypes.PushBack("application/PlasmaEditor.plAbstractGraph");
 }
 
 bool plSceneDocument::CopySelectedObjects(plAbstractObjectGraph& ref_graph, plStringBuilder& out_sMimeType) const
 {
-  out_sMimeType = "application/plEditor.plAbstractGraph";
+  out_sMimeType = "application/PlasmaEditor.plAbstractGraph";
   return CopySelectedObjects(ref_graph, nullptr);
 }
 
@@ -875,7 +877,7 @@ bool plSceneDocument::PasteAtOrignalPosition(const plArrayPtr<PasteInfo>& info, 
   return true;
 }
 
-bool plSceneDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
+bool plSceneDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
 {
   const auto& ctxt = plQtEngineViewWidget::GetInteractionContext();
 
@@ -973,7 +975,7 @@ void plSceneDocument::EnsureSettingsObjectExist()
     PLASMA_VERIFY(pSettings, "Document corrupt, root references a non-existing object");
     if (pSettings->GetType() != pSettingsType)
     {
-      accessor.RemoveObject(pSettings).AssertSuccess();
+      accessor.RemoveObject(pSettings).IgnoreResult();
       GetObjectManager()->DestroyObject(pSettings);
       PLASMA_VERIFY(accessor.plObjectAccessorBase::AddObject(pRoot, "Settings", plVariant(), pSettingsType, id).Succeeded(), "Adding scene settings object to root failed.");
     }
@@ -1240,7 +1242,7 @@ plResult plSceneDocument::CreateLevelCamera(plUInt8 uiSlot)
   mRot.SetColumn(1, vUp.CrossRH(vDir).GetNormalized());
   mRot.SetColumn(2, vUp);
   plQuat qRot;
-  qRot = plQuat::MakeFromMat3(mRot);
+  qRot.SetFromMat3(mRot);
   qRot.Normalize();
 
   SetGlobalTransform(pAccessor->GetObject(camObjGuid), plTransform(vPos, qRot), TransformationChanges::Translation | TransformationChanges::Rotation);
@@ -1275,13 +1277,13 @@ void plSceneDocument::DocumentObjectMetaDataEventHandler(const plObjectMetaData<
   }
 }
 
-void plSceneDocument::EngineConnectionEventHandler(const plEditorEngineProcessConnection::Event& e)
+void plSceneDocument::EngineConnectionEventHandler(const PlasmaEditorEngineProcessConnection::Event& e)
 {
   switch (e.m_Type)
   {
-    case plEditorEngineProcessConnection::Event::Type::ProcessCrashed:
-    case plEditorEngineProcessConnection::Event::Type::ProcessShutdown:
-    case plEditorEngineProcessConnection::Event::Type::ProcessStarted:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessCrashed:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessShutdown:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessStarted:
       SetGameMode(GameMode::Off);
       break;
 
@@ -1364,7 +1366,6 @@ void plSceneDocument::SendObjectMsg(const plDocumentObject* pObj, plObjectTagMsg
   pMsg->m_ObjectGuid = pObj->GetGuid();
   GetEditorEngineConnection()->SendMessage(pMsg);
 }
-
 void plSceneDocument::SendObjectMsgRecursive(const plDocumentObject* pObj, plObjectTagMsgToEngine* pMsg)
 {
   // if plObjectTagMsgToEngine were derived from a general 'object msg' one could send other message types as well
@@ -1541,10 +1542,10 @@ void plSceneDocument::ExportSceneGeometry(const char* szFile, bool bOnlySelectio
 
   SendMessageToEngine(&msg);
 
-  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Geometry exported to '{0}'", szFile), plTime::MakeFromSeconds(5.0f));
+  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Geometry exported to '{0}'", szFile), plTime::Seconds(5.0f));
 }
 
-void plSceneDocument::HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg)
+void plSceneDocument::HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   plGameObjectDocument::HandleEngineMessage(pMsg);
 
@@ -1565,7 +1566,7 @@ void plSceneDocument::HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg)
   }
 }
 
-plTransformStatus plSceneDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plSceneDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   if (m_DocumentType == DocumentType::Prefab)
   {
@@ -1583,7 +1584,7 @@ plTransformStatus plSceneDocument::InternalTransformAsset(const char* szTargetFi
 }
 
 
-plTransformStatus plSceneDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plSceneDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   PLASMA_ASSERT_NOT_IMPLEMENTED;
 

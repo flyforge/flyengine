@@ -36,13 +36,13 @@ struct PLASMA_EDITORFRAMEWORK_DLL plPluginBundle
   plHybridArray<plString, 1> m_EnabledInTemplates;  ///< In which project templates this plugin should be active by default.
 
   /// \brief Reads the bundle description, but not the state.
-  plResult ReadBundleFromDDL(plOpenDdlReader& ref_ddl);
+  plResult ReadBundleFromDDL(plOpenDdlReader& ddl);
 
   /// \brief Writes only the bundle's state to a DDL file.
-  void WriteStateToDDL(plOpenDdlWriter& ref_ddl, const char* szOwnName) const;
+  void WriteStateToDDL(plOpenDdlWriter& ddl, const char* szOwnName) const;
 
   /// \brief Reads only the bundle's state from a DDL file.
-  void ReadStateFromDDL(plOpenDdlReader& ref_ddl, const char* szOwnName);
+  void ReadStateFromDDL(plOpenDdlReader& ddl, const char* szOwnName);
 
   /// \brief Checks whether two bundles have the same state.
   bool IsStateEqual(const plPluginBundle& rhs) const
@@ -57,10 +57,10 @@ struct PLASMA_EDITORFRAMEWORK_DLL plPluginBundleSet
   plMap<plString, plPluginBundle> m_Plugins;
 
   /// \brief Writes the state of all bundles to a DDL file.
-  void WriteStateToDDL(plOpenDdlWriter& ref_ddl) const;
+  void WriteStateToDDL(plOpenDdlWriter& ddl) const;
 
   /// \brief Reads the state of all bundles from a DDL file.
-  void ReadStateFromDDL(plOpenDdlReader& ref_ddl);
+  void ReadStateFromDDL(plOpenDdlReader& ddl);
 
   /// \brief Checks whether two bundle sets have the same state.
   bool IsStateEqual(const plPluginBundleSet& rhs) const;

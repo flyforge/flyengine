@@ -30,9 +30,9 @@ plQuat plUwpUtils::ConvertQuat(const ABI::Windows::Foundation::Numerics::Quatern
 
 void plUwpUtils::ConvertQuat(const plQuat& in, ABI::Windows::Foundation::Numerics::Quaternion& out)
 {
-  out.X = in.x;
-  out.Y = in.y;
-  out.Z = in.z;
+  out.X = in.v.x;
+  out.Y = in.v.y;
+  out.Z = in.v.z;
   out.W = in.w;
 }
 

@@ -581,6 +581,12 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetOrthogonalVector() const
 }
 
 // static
+PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::ZeroVector()
+{
+  return _mm_setzero_ps();
+}
+
+// static
 PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulAdd(const plSimdVec4f& a, const plSimdVec4f& b, const plSimdVec4f& c)
 {
 #if PLASMA_SSE_LEVEL >= PLASMA_SSE_AVX2

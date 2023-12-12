@@ -23,7 +23,7 @@ plResult plGALVertexDeclarationVulkan::InitPlatform(plGALDevice* pDevice)
     return PLASMA_FAILURE;
   }
 
-  plHybridArray<plShaderVertexInputAttribute, 8> vias(pShader->GetVertexInputAttributes());
+  plHybridArray<plGALShaderVulkan::VertexInputAttribute, 8> vias(pShader->GetVertexInputAttributes());
   auto FindLocation = [&](plGALVertexAttributeSemantic::Enum sematic, plGALResourceFormat::Enum format) -> plUInt32 {
     for (plUInt32 i = 0; i < vias.GetCount(); i++)
     {
@@ -53,7 +53,7 @@ plResult plGALVertexDeclarationVulkan::InitPlatform(plGALDevice* pDevice)
     vk::VertexInputAttributeDescription& attrib = m_attributes.ExpandAndGetRef();
     attrib.binding = Current.m_uiVertexBufferSlot;
     attrib.location = uiLocation;
-    attrib.format = pVulkanDevice->GetFormatLookupTable().GetFormatInfo(Current.m_eFormat).m_format;
+    attrib.format = pVulkanDevice->GetFormatLookupTable().GetFormatInfo(Current.m_eFormat).m_eVertexAttributeType;
     attrib.offset = Current.m_uiOffset;
 
     if (attrib.format == vk::Format::eUndefined)

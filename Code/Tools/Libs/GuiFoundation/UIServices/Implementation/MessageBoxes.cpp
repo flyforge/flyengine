@@ -42,9 +42,8 @@ void plQtUiServices::MessageBoxInformation(const plFormatString& msg)
   if (s_bHeadless)
     plLog::Info(msg.GetText(tmp));
   else
-  {
-    QMessageBox::information(QApplication::activeWindow(), plApplication::GetApplicationInstance()->GetApplicationName().GetData(), QString::fromUtf8(msg.GetTextCStr(tmp)), QMessageBox::StandardButton::Ok);
-  }
+    QMessageBox::information(QApplication::activeWindow(), plApplication::GetApplicationInstance()->GetApplicationName().GetData(),
+      QString::fromUtf8(msg.GetTextCStr(tmp)), QMessageBox::StandardButton::Ok);
 }
 
 void plQtUiServices::MessageBoxWarning(const plFormatString& msg)
@@ -54,9 +53,8 @@ void plQtUiServices::MessageBoxWarning(const plFormatString& msg)
   if (s_bHeadless)
     plLog::Warning(msg.GetText(tmp));
   else
-  {
-    QMessageBox::warning(QApplication::activeWindow(), plApplication::GetApplicationInstance()->GetApplicationName().GetData(), QString::fromUtf8(msg.GetTextCStr(tmp)), QMessageBox::StandardButton::Ok);
-  }
+    QMessageBox::warning(QApplication::activeWindow(), plApplication::GetApplicationInstance()->GetApplicationName().GetData(),
+      QString::fromUtf8(msg.GetTextCStr(tmp)), QMessageBox::StandardButton::Ok);
 }
 
 QMessageBox::StandardButton plQtUiServices::MessageBoxQuestion(
@@ -69,7 +67,7 @@ QMessageBox::StandardButton plQtUiServices::MessageBoxQuestion(
   else
   {
     plStringBuilder tmp;
-
-    return QMessageBox::question(QApplication::activeWindow(), plApplication::GetApplicationInstance()->GetApplicationName().GetData(), QString::fromUtf8(msg.GetTextCStr(tmp)), buttons, defaultButton);
+    return QMessageBox::question(QApplication::activeWindow(), plApplication::GetApplicationInstance()->GetApplicationName().GetData(),
+      QString::fromUtf8(msg.GetTextCStr(tmp)), buttons, defaultButton);
   }
 }

@@ -8,7 +8,7 @@
 
 namespace
 {
-  static const char* s_szPlasmaKeys[] = {plInputSlot_KeyTab, plInputSlot_KeyLeft, plInputSlot_KeyUp, plInputSlot_KeyRight, plInputSlot_KeyDown,
+  static const char* s_szEzKeys[] = {plInputSlot_KeyTab, plInputSlot_KeyLeft, plInputSlot_KeyUp, plInputSlot_KeyRight, plInputSlot_KeyDown,
     plInputSlot_KeyPageUp, plInputSlot_KeyPageDown, plInputSlot_KeyHome, plInputSlot_KeyEnd, plInputSlot_KeyDelete, plInputSlot_KeyBackspace,
     plInputSlot_KeyReturn, plInputSlot_KeyNumpadEnter, plInputSlot_KeyEscape};
 
@@ -17,7 +17,7 @@ namespace
     Rml::Input::KI_END, Rml::Input::KI_DELETE, Rml::Input::KI_BACK, Rml::Input::KI_RETURN, Rml::Input::KI_RETURN,
     Rml::Input::KI_ESCAPE};
 
-  PLASMA_CHECK_AT_COMPILETIME(PLASMA_ARRAY_SIZE(s_szPlasmaKeys) == PLASMA_ARRAY_SIZE(s_rmlKeys));
+  PLASMA_CHECK_AT_COMPILETIME(PLASMA_ARRAY_SIZE(s_szEzKeys) == PLASMA_ARRAY_SIZE(s_rmlKeys));
 } // namespace
 
 plRmlUiContext::plRmlUiContext(const Rml::String& name)
@@ -150,9 +150,9 @@ void plRmlUiContext::UpdateInput(const plVec2& mousePos)
       }
     }
 
-    for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_szPlasmaKeys); ++i)
+    for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_szEzKeys); ++i)
     {
-      plKeyState::Enum state = plInputManager::GetInputSlotState(s_szPlasmaKeys[i]);
+      plKeyState::Enum state = plInputManager::GetInputSlotState(s_szEzKeys[i]);
       if (state == plKeyState::Pressed)
       {
         m_bWantsInput |= !ProcessKeyDown(s_rmlKeys[i], modifierState);

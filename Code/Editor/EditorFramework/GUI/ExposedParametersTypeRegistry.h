@@ -32,12 +32,13 @@ private:
   struct ParamData
   {
     ParamData()
-
-      = default;
+      : m_pType(nullptr)
+    {
+    }
 
     plUuid m_SubAssetGuid;
     bool m_bUpToDate = true;
-    const plRTTI* m_pType = nullptr;
+    const plRTTI* m_pType;
   };
   void UpdateExposedParametersType(ParamData& data, const plExposedParameters& params);
   void AssetCuratorEventHandler(const plAssetCuratorEvent& e);

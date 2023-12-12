@@ -15,7 +15,7 @@ public:
   plGreyBoxEditTool();
   ~plGreyBoxEditTool();
 
-  virtual plEditorInputContext* GetEditorInputContextOverride() override;
+  virtual PlasmaEditorInputContext* GetEditorInputContextOverride() override;
   virtual plEditToolSupportedSpaces GetSupportedSpaces() const override;
   virtual bool GetSupportsMoveParentOnly() const override;
   virtual void GetGridSettings(plGridSettingsMsgToEngine& outGridSettings) override;

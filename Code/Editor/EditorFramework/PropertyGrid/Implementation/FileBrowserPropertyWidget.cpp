@@ -1,9 +1,7 @@
 #include <EditorFramework/EditorFrameworkPCH.h>
 
-#include <EditorFramework/Assets/AssetBrowserDlg.moc.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <EditorFramework/PropertyGrid/FileBrowserPropertyWidget.moc.h>
-#include <EditorFramework/PropertyGrid/QtFileLineEdit.moc.h>
 #include <GuiFoundation/PropertyGrid/PropertyGridWidget.moc.h>
 
 
@@ -14,7 +12,7 @@ plQtFilePropertyWidget::plQtFilePropertyWidget()
   m_pLayout->setContentsMargins(0, 0, 0, 0);
   setLayout(m_pLayout);
 
-  m_pWidget = new plQtFileLineEdit(this);
+  m_pWidget = new QLineEdit(this);
   m_pWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
   m_pWidget->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
   setFocusProxy(m_pWidget);
@@ -35,8 +33,7 @@ plQtFilePropertyWidget::plQtFilePropertyWidget()
     QAction* pDocAction = pMenu->addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Document.svg")), QLatin1String("Open File"), this, SLOT(OnOpenFile())) /*->setEnabled(!m_pWidget->text().isEmpty())*/;
     pMenu->addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/OpenFolder.svg")), QLatin1String("Open in Explorer"), this, SLOT(OnOpenExplorer()));
 
-    connect(pMenu, &QMenu::aboutToShow, pMenu, [=]()
-      { pDocAction->setEnabled(!m_pWidget->text().isEmpty()); });
+    connect(pMenu, &QMenu::aboutToShow, pMenu, [=]() { pDocAction->setEnabled(!m_pWidget->text().isEmpty()); });
 
     m_pButton->setMenu(pMenu);
   }
@@ -45,31 +42,14 @@ plQtFilePropertyWidget::plQtFilePropertyWidget()
   m_pLayout->addWidget(m_pButton);
 }
 
-bool plQtFilePropertyWidget::IsValidFileReference(plStringView sFile) const
-{
-  auto pAttr = m_pProp->GetAttributeByType<plFileBrowserAttribute>();
-
-  plHybridArray<plStringView, 8> extensions;
-  plStringView sTemp = pAttr->GetTypeFilter();
-  sTemp.Split(false, extensions, ";");
-  for (plStringView& ext : extensions)
-  {
-    ext.TrimWordStart("*.");
-    if (sFile.GetFileExtension().IsEqual_NoCase(ext))
-      return true;
-  }
-
-  return false;
-}
-
 void plQtFilePropertyWidget::OnInit()
 {
   auto pAttr = m_pProp->GetAttributeByType<plFileBrowserAttribute>();
   PLASMA_ASSERT_DEV(pAttr != nullptr, "plQtFilePropertyWidget was created without a plFileBrowserAttribute!");
 
-  if (!pAttr->GetCustomAction().IsEmpty())
+  if (!plStringUtils::IsNullOrEmpty(pAttr->GetCustomAction()))
   {
-    m_pButton->menu()->addAction(QIcon(), plMakeQString(plTranslate(pAttr->GetCustomAction())), this, SLOT(OnCustomAction()));
+    m_pButton->menu()->addAction(QIcon(), plTranslate(pAttr->GetCustomAction()), this, SLOT(OnCustomAction()));
   }
 }
 
@@ -169,23 +149,21 @@ void plQtFilePropertyWidget::on_BrowseFile_clicked()
   if (sStartDir.IsEmpty())
     sStartDir = plToolsProject::GetSingleton()->GetProjectFile();
 
-  plQtAssetBrowserDlg dlg(this, pFileAttribute->GetDialogTitle(), sFile, pFileAttribute->GetTypeFilter());
-  if (dlg.exec() == QDialog::Rejected)
+  QString sResult = QFileDialog::getOpenFileName(this, pFileAttribute->GetDialogTitle(), sStartDir.GetData(), pFileAttribute->GetTypeFilter(), nullptr, QFileDialog::Option::DontResolveSymlinks);
+
+  if (sResult.isEmpty())
     return;
 
-  plStringView sResult = dlg.GetSelectedAssetPathRelative();
+  sFile = sResult.toUtf8().data();
+  sStartDir = sFile;
 
-  if (sResult.IsEmpty())
-    return;
-
-  // the returned path is a "datadir parent relative path" and we must remove the first folder
-  if (const char* nextSep = sResult.FindSubString("/"))
+  if (!plQtEditorApp::GetSingleton()->MakePathDataDirectoryRelative(sFile))
   {
-    sResult.SetStartPosition(nextSep + 1);
+    plQtUiServices::GetSingleton()->MessageBoxInformation("The selected file is not under any data directory.\nPlease select another file "
+                                                          "or copy it into one of the project's data directories.");
+    return;
   }
 
-  sStartDir = sResult;
-
-  m_pWidget->setText(plMakeQString(sResult));
+  m_pWidget->setText(sFile.GetData());
   on_TextFinished_triggered();
 }

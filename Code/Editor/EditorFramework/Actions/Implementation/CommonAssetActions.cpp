@@ -51,31 +51,31 @@ void plCommonAssetActions::UnregisterActions()
     plActionManager::UnregisterAction(s_hSimulationSpeed[i]);
 }
 
-void plCommonAssetActions::MapToolbarActions(plStringView sMapping, plUInt32 uiStateMask)
+void plCommonAssetActions::MapActions(const char* szMapping, const char* szPath, plUInt32 stateMask)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
 
   pMap->MapAction(s_hCategory, "", 11.0f);
 
   const char* szSubPath = "CommonAssetCategory";
 
-  if (uiStateMask & plCommonAssetUiState::Pause)
+  if (stateMask & plCommonAssetUiState::Pause)
   {
     pMap->MapAction(s_hPause, szSubPath, 0.5f);
   }
 
-  if (uiStateMask & plCommonAssetUiState::Restart)
+  if (stateMask & plCommonAssetUiState::Restart)
   {
     pMap->MapAction(s_hRestart, szSubPath, 1.0f);
   }
 
-  if (uiStateMask & plCommonAssetUiState::Loop)
+  if (stateMask & plCommonAssetUiState::Loop)
   {
     pMap->MapAction(s_hLoop, szSubPath, 2.0f);
   }
 
-  if (uiStateMask & plCommonAssetUiState::SimulationSpeed)
+  if (stateMask & plCommonAssetUiState::SimulationSpeed)
   {
     pMap->MapAction(s_hSimulationSpeedMenu, szSubPath, 3.0f);
 
@@ -87,12 +87,12 @@ void plCommonAssetActions::MapToolbarActions(plStringView sMapping, plUInt32 uiS
     }
   }
 
-  if (uiStateMask & plCommonAssetUiState::Grid)
+  if (stateMask & plCommonAssetUiState::Grid)
   {
     pMap->MapAction(s_hGrid, szSubPath, 4.0f);
   }
 
-  if (uiStateMask & plCommonAssetUiState::Visualizers)
+  if (stateMask & plCommonAssetUiState::Visualizers)
   {
     pMap->MapAction(s_hVisualizers, szSubPath, 5.0f);
   }

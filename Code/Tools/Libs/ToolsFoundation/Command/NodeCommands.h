@@ -35,7 +35,7 @@ public:
 
 public: // Properties
   plUuid m_Object;
-  plVec2 m_NewPos = plVec2::MakeZero();
+  plVec2 m_NewPos = plVec2::ZeroVector();
 
 private:
   virtual plStatus DoInternal(bool bRedo) override;
@@ -44,7 +44,7 @@ private:
 
 private:
   plDocumentObject* m_pObject = nullptr;
-  plVec2 m_vOldPos = plVec2::MakeZero();
+  plVec2 m_vOldPos = plVec2::ZeroVector();
 };
 
 
@@ -101,6 +101,6 @@ private:
 class PLASMA_TOOLSFOUNDATION_DLL plNodeCommands
 {
 public:
-  static plStatus AddAndConnectCommand(plCommandHistory* pHistory, const plRTTI* pConnectionType, const plPin& sourcePin, const plPin& targetPin);
-  static plStatus DisconnectAndRemoveCommand(plCommandHistory* pHistory, const plUuid& connectionObject);
+  static plStatus AddAndConnectCommand(plCommandHistory* history, const plRTTI* pConnectionType, const plPin& sourcePin, const plPin& targetPin);
+  static plStatus DisconnectAndRemoveCommand(plCommandHistory* history, const plUuid& connectionObject);
 };

@@ -15,10 +15,10 @@ class PLASMA_GUIFOUNDATION_DLL plQtLogWidget : public QWidget, public Ui_LogWidg
   Q_OBJECT
 
 public:
-  plQtLogWidget(QWidget* pParent);
+  plQtLogWidget(QWidget* parent);
   ~plQtLogWidget();
 
-  void ShowControls(bool bShow);
+  void ShowControls(bool show);
 
   plQtLogModel* GetLog();
   plQtSearchWidget* GetSearchWidget();

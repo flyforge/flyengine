@@ -11,6 +11,7 @@ FLIP_WINDING = FALSE
 SHADING_MODE = SHADING_MODE_FULLBRIGHT
 SHADING_QUALITY = SHADING_QUALITY_NORMAL
 CAMERA_MODE
+GAMEOBJECT_VELOCITY
 
 [RENDERSTATE]
 
@@ -126,6 +127,11 @@ float3 GetSpecularColor()
 float GetRoughness()
 {
   return 1.0f;
+}
+
+float GetMetallic()
+{
+  return 0.0f;
 }
 
 float GetOpacity()

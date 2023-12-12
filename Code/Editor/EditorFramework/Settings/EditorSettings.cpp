@@ -7,9 +7,6 @@
 
 void plQtEditorApp::SaveRecentFiles()
 {
-  if (m_StartupFlags.IsAnySet(StartupFlags::Headless | StartupFlags::UnitTest | StartupFlags::Background))
-    return;
-
   m_RecentProjects.Save(":appdata/Settings/RecentProjects.txt");
   m_RecentDocuments.Save(":appdata/Settings/RecentDocuments.txt");
 }
@@ -70,7 +67,7 @@ plRecentFilesList plQtEditorApp::LoadOpenDocumentsList()
 void plQtEditorApp::SaveSettings()
 {
   // headless mode should never store any settings on disk
-  if (m_StartupFlags.IsAnySet(StartupFlags::Headless | StartupFlags::UnitTest | StartupFlags::Background))
+  if (m_StartupFlags.IsAnySet(StartupFlags::Headless | StartupFlags::UnitTest))
     return;
 
   SaveRecentFiles();
@@ -79,7 +76,7 @@ void plQtEditorApp::SaveSettings()
 
   // this setting is needed before we have loaded the preferences, so we duplicate it in the QSettings (registry)
   {
-    plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+    PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
 
     QSettings s;
     s.beginGroup("EditorPreferences");

@@ -78,8 +78,8 @@ public:
   float m_fThickness = 0.05f;               // [ property ]
   float m_fSlack = 0.3f;                    // [ property ]
   bool m_bCCD = false;                      // [ property ]
-  plAngle m_MaxBend = plAngle::MakeFromDegree(30);  // [ property ]
-  plAngle m_MaxTwist = plAngle::MakeFromDegree(15); // [ property ]
+  plAngle m_MaxBend = plAngle::Degree(30);  // [ property ]
+  plAngle m_MaxTwist = plAngle::Degree(15); // [ property ]
 
   void SetAnchor1Reference(const char* szReference); // [ property ]
   void SetAnchor2Reference(const char* szReference); // [ property ]
@@ -97,7 +97,7 @@ public:
   plEnum<plJoltRopeAnchorConstraintMode> GetAnchor2ConstraintMode() const { return m_Anchor2ConstraintMode; } // [ property ]
 
   /// \brief Makes sure that the rope's connection to a removed body also gets removed.
-  void OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& ref_msg); // [ msg handler ]
+  void OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& msg); // [ msg handler ]
 
 private:
   void CreateRope();

@@ -18,12 +18,10 @@ class plBlackboardTemplateAssetDocument : public plSimpleAssetDocument<plBlackbo
   PLASMA_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateAssetDocument, plSimpleAssetDocument<plBlackboardTemplateAssetObject>);
 
 public:
-  plBlackboardTemplateAssetDocument(plStringView sDocumentPath);
-
-  plStatus WriteAsset(plStreamWriter& inout_stream, const plPlatformProfile* pAssetProfile) const;
+  plBlackboardTemplateAssetDocument(const char* szDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& inout_stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
-  plStatus RetrieveState(const plBlackboardTemplateAssetObject* pProp, plBlackboardTemplateResourceDescriptor& inout_Desc) const;
+  plStatus RetrieveState(const plBlackboardTemplateAssetObject* pProp, plBlackboardTemplateResourceDescriptor& inout_Desc);
 };

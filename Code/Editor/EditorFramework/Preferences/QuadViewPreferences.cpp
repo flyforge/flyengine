@@ -4,7 +4,7 @@
 #include <Foundation/Serialization/GraphPatch.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plEngineViewPreferences, plNoBase, 2, plRTTIDefaultAllocator<plEngineViewPreferences>)
+PLASMA_BEGIN_STATIC_REFLECTED_TYPE(PlasmaEngineViewPreferences, plNoBase, 2, plRTTIDefaultAllocator<PlasmaEngineViewPreferences>)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -30,9 +30,9 @@ namespace
       : plGraphPatch("plSceneViewPreferences", 2)
     {
     }
-    virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+    virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
     {
-      ref_context.RenameClass("plEngineViewPreferences");
+      context.RenameClass("PlasmaEngineViewPreferences");
     }
   };
   plSceneViewPreferencesPatch_1_2 g_plSceneViewPreferencesPatch_1_2;

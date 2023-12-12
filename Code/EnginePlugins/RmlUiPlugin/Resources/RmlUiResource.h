@@ -53,7 +53,7 @@ private:
 
   plString m_sRmlFile;
   plEnum<plRmlUiScaleMode> m_ScaleMode;
-  plVec2U32 m_vReferenceResolution = plVec2U32::MakeZero();
+  plVec2U32 m_vReferenceResolution = plVec2U32::ZeroVector();
 };
 
 class plRmlUiResourceLoader : public plResourceLoaderFromFile

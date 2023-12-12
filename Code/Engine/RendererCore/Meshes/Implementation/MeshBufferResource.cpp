@@ -396,7 +396,8 @@ plUInt32 plMeshBufferResourceDescriptor::GetPrimitiveCount() const
 
 plBoundingBoxSphere plMeshBufferResourceDescriptor::ComputeBounds() const
 {
-  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
+  plBoundingBoxSphere bounds;
+  bounds.SetInvalid();
 
   for (plUInt32 i = 0; i < m_VertexDeclaration.m_VertexStreams.GetCount(); ++i)
   {
@@ -408,7 +409,7 @@ plBoundingBoxSphere plMeshBufferResourceDescriptor::ComputeBounds() const
 
       if (!m_VertexStreamData.IsEmpty() && m_uiVertexCount > 0)
       {
-        bounds = plBoundingBoxSphere::MakeFromPoints(reinterpret_cast<const plVec3*>(&m_VertexStreamData[offset]), m_uiVertexCount, m_uiVertexSize);
+        bounds.SetFromPoints(reinterpret_cast<const plVec3*>(&m_VertexStreamData[offset]), m_uiVertexCount, m_uiVertexSize);
       }
 
       return bounds;
@@ -487,7 +488,7 @@ plResult plMeshBufferResourceDescriptor::RecomputeNormals()
   for (plUInt32 i = 0; i < newNormals.GetCount(); ++i)
   {
     // normalize the new normal
-    if (newNormals[i].NormalizeIfNotZero(plVec3::MakeAxisX()).Failed())
+    if (newNormals[i].NormalizeIfNotZero(plVec3::UnitXAxis()).Failed())
       res = PLASMA_FAILURE;
 
     // then encode it in the target format precision and write it back to the buffer
@@ -501,6 +502,11 @@ plResult plMeshBufferResourceDescriptor::RecomputeNormals()
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
+
+plMeshBufferResource::plMeshBufferResource()
+  : plResource(DoUpdate::OnAnyThread, 1)
+{
+}
 
 plMeshBufferResource::~plMeshBufferResource()
 {

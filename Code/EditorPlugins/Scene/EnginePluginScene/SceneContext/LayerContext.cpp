@@ -22,20 +22,20 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerContext, 1, plRTTIDefaultAllocator<pl
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plEngineProcessDocumentContext* plLayerContext::AllocateContext(const plDocumentOpenMsgToEngine* pMsg)
+PlasmaEngineProcessDocumentContext* plLayerContext::AllocateContext(const plDocumentOpenMsgToEngine* pMsg)
 {
   if (pMsg->m_DocumentMetaData.IsA<plUuid>())
   {
-    return plGetStaticRTTI<plLayerContext>()->GetAllocator()->Allocate<plEngineProcessDocumentContext>();
+    return plGetStaticRTTI<plLayerContext>()->GetAllocator()->Allocate<PlasmaEngineProcessDocumentContext>();
   }
   else
   {
-    return plGetStaticRTTI<plSceneContext>()->GetAllocator()->Allocate<plEngineProcessDocumentContext>();
+    return plGetStaticRTTI<plSceneContext>()->GetAllocator()->Allocate<PlasmaEngineProcessDocumentContext>();
   }
 }
 
 plLayerContext::plLayerContext()
-  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::None)
+  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::None)
 {
 }
 
@@ -43,12 +43,12 @@ plLayerContext::~plLayerContext()
 {
 }
 
-void plLayerContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
+void plLayerContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
 {
   // Everything in the picking buffer needs a unique ID. As layers and scene share the same world we need to make sure no id is used twice.
   // To achieve this the scene's next ID is retrieved on every change and written back in base new IDs were used up.
   m_Context.m_uiNextComponentPickingID = m_pParentSceneContext->m_Context.m_uiNextComponentPickingID;
-  plEngineProcessDocumentContext::HandleMessage(pMsg);
+  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
   m_pParentSceneContext->m_Context.m_uiNextComponentPickingID = m_Context.m_uiNextComponentPickingID;
 
   if (pMsg->IsInstanceOf<plEntityMsgToEngine>())
@@ -73,7 +73,7 @@ const plTag& plLayerContext::GetLayerTag() const
 void plLayerContext::OnInitialize()
 {
   plUuid parentScene = m_MetaData.Get<plUuid>();
-  plEngineProcessDocumentContext* pContext = GetDocumentContext(parentScene);
+  PlasmaEngineProcessDocumentContext* pContext = GetDocumentContext(parentScene);
   m_pParentSceneContext = plDynamicCast<plSceneContext*>(pContext);
 
   m_pWorld = m_pParentSceneContext->GetWorld();
@@ -102,13 +102,13 @@ void plLayerContext::OnDeinitialize()
   m_pParentSceneContext = nullptr;
 }
 
-plEngineProcessViewContext* plLayerContext::CreateViewContext()
+PlasmaEngineProcessViewContext* plLayerContext::CreateViewContext()
 {
   PLASMA_REPORT_FAILURE("Layers should not create views.");
   return nullptr;
 }
 
-void plLayerContext::DestroyViewContext(plEngineProcessViewContext* pContext)
+void plLayerContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
 {
   PLASMA_REPORT_FAILURE("Layers should not create views.");
 }

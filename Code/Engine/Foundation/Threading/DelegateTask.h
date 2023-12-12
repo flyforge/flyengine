@@ -9,11 +9,11 @@ class plDelegateTask final : public plTask
 public:
   using FunctionType = plDelegate<void(const T&)>;
 
-  plDelegateTask(const char* szTaskName, plTaskNesting taskNesting, FunctionType func, const T& param)
+  plDelegateTask(const char* szTaskName, FunctionType func, const T& param)
   {
     m_Func = func;
     m_param = param;
-    ConfigureTask(szTaskName, taskNesting);
+    ConfigureTask(szTaskName, plTaskNesting::Never);
   }
 
 private:
@@ -29,10 +29,10 @@ class plDelegateTask<void> final : public plTask
 public:
   using FunctionType = plDelegate<void()>;
 
-  plDelegateTask(const char* szTaskName, plTaskNesting taskNesting, FunctionType func)
+  plDelegateTask(const char* szTaskName, FunctionType func)
   {
     m_Func = func;
-    ConfigureTask(szTaskName, taskNesting);
+    ConfigureTask(szTaskName, plTaskNesting::Never);
   }
 
 private:

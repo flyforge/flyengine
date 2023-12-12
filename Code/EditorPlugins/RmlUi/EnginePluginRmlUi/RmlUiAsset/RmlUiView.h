@@ -4,7 +4,7 @@
 
 class plRmlUiDocumentContext;
 
-class plRmlUiViewContext : public plEngineProcessViewContext
+class plRmlUiViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plRmlUiViewContext(plRmlUiDocumentContext* pRmlUiContext);

@@ -129,8 +129,8 @@ public:
 
   static const PropertyBinding* FindPropertyBinding(plUInt32 uiHash);
 
-  static void SyncPlasmaObjectToTsObject(duk_context* pDuk, const plRTTI* pRtti, const void* pObject, plInt32 iObjIdx);
-  static void SyncTsObjectPlasmaTsObject(duk_context* pDuk, const plRTTI* pRtti, void* pObject, plInt32 iObjIdx);
+  static void SyncEzObjectToTsObject(duk_context* pDuk, const plRTTI* pRtti, const void* pObject, plInt32 iObjIdx);
+  static void SyncTsObjectEzTsObject(duk_context* pDuk, const plRTTI* pRtti, void* pObject, plInt32 iObjIdx);
 
 private:
   static plUInt32 ComputePropertyBindingHash(const plRTTI* pType, const plAbstractMemberProperty* pMember);
@@ -227,32 +227,32 @@ public:
   static void PushVec2(duk_context* pDuk, const plVec2& value);
   static void SetVec2(duk_context* pDuk, plInt32 iObjIdx, const plVec2& value);
   static void SetVec2Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plVec2& value);
-  static plVec2 GetVec2(duk_context* pDuk, plInt32 iObjIdx, const plVec2& vFallback = plVec2::MakeZero());
-  static plVec2 GetVec2Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plVec2& vFallback = plVec2::MakeZero());
+  static plVec2 GetVec2(duk_context* pDuk, plInt32 iObjIdx, const plVec2& vFallback = plVec2::ZeroVector());
+  static plVec2 GetVec2Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plVec2& vFallback = plVec2::ZeroVector());
 
   static void PushVec3(duk_context* pDuk, const plVec3& value);
   static void SetVec3(duk_context* pDuk, plInt32 iObjIdx, const plVec3& value);
   static void SetVec3Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plVec3& value);
-  static plVec3 GetVec3(duk_context* pDuk, plInt32 iObjIdx, const plVec3& vFallback = plVec3::MakeZero());
-  static plVec3 GetVec3Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plVec3& vFallback = plVec3::MakeZero());
+  static plVec3 GetVec3(duk_context* pDuk, plInt32 iObjIdx, const plVec3& vFallback = plVec3::ZeroVector());
+  static plVec3 GetVec3Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plVec3& vFallback = plVec3::ZeroVector());
 
   static void PushMat3(duk_context* pDuk, const plMat3& value);
   static void SetMat3(duk_context* pDuk, plInt32 iObjIdx, const plMat3& value);
   static void SetMat3Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plMat3& value);
-  static plMat3 GetMat3(duk_context* pDuk, plInt32 iObjIdx, const plMat3& mFallback = plMat3::MakeIdentity());
-  static plMat3 GetMat3Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plMat3& mFallback = plMat3::MakeIdentity());
+  static plMat3 GetMat3(duk_context* pDuk, plInt32 iObjIdx, const plMat3& mFallback = plMat3::IdentityMatrix());
+  static plMat3 GetMat3Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plMat3& mFallback = plMat3::IdentityMatrix());
 
   static void PushMat4(duk_context* pDuk, const plMat4& value);
   static void SetMat4(duk_context* pDuk, plInt32 iObjIdx, const plMat4& value);
   static void SetMat4Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plMat4& value);
-  static plMat4 GetMat4(duk_context* pDuk, plInt32 iObjIdx, const plMat4& mFallback = plMat4::MakeIdentity());
-  static plMat4 GetMat4Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plMat4& mFallback = plMat4::MakeIdentity());
+  static plMat4 GetMat4(duk_context* pDuk, plInt32 iObjIdx, const plMat4& mFallback = plMat4::IdentityMatrix());
+  static plMat4 GetMat4Property(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plMat4& mFallback = plMat4::IdentityMatrix());
 
   static void PushQuat(duk_context* pDuk, const plQuat& value);
   static void SetQuat(duk_context* pDuk, plInt32 iObjIdx, const plQuat& value);
   static void SetQuatProperty(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plQuat& value);
-  static plQuat GetQuat(duk_context* pDuk, plInt32 iObjIdx, plQuat qFallback = plQuat::MakeIdentity());
-  static plQuat GetQuatProperty(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, plQuat qFallback = plQuat::MakeIdentity());
+  static plQuat GetQuat(duk_context* pDuk, plInt32 iObjIdx, plQuat qFallback = plQuat::IdentityQuaternion());
+  static plQuat GetQuatProperty(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, plQuat qFallback = plQuat::IdentityQuaternion());
 
   static void PushColor(duk_context* pDuk, const plColor& value);
   static void SetColor(duk_context* pDuk, plInt32 iObjIdx, const plColor& value);
@@ -263,8 +263,8 @@ public:
   static void PushTransform(duk_context* pDuk, const plTransform& value);
   static void SetTransform(duk_context* pDuk, plInt32 iObjIdx, const plTransform& value);
   static void SetTransformProperty(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plTransform& value);
-  static plTransform GetTransform(duk_context* pDuk, plInt32 iObjIdx, const plTransform& fallback = plTransform::MakeIdentity());
-  static plTransform GetTransformProperty(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plTransform& fallback = plTransform::MakeIdentity());
+  static plTransform GetTransform(duk_context* pDuk, plInt32 iObjIdx, const plTransform& fallback = plTransform::IdentityTransform());
+  static plTransform GetTransformProperty(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plTransform& fallback = plTransform::IdentityTransform());
 
   static void PushVariant(duk_context* pDuk, const plVariant& value);
   static void SetVariantProperty(duk_context* pDuk, const char* szPropertyName, plInt32 iObjIdx, const plVariant& value);

@@ -29,7 +29,7 @@ void plObjectPickingResult::Reset()
 
 plSizeU32 plQtEngineViewWidget::s_FixedResolution(0, 0);
 
-plQtEngineViewWidget::plQtEngineViewWidget(QWidget* pParent, plQtEngineDocumentWindow* pDocumentWindow, plEngineViewConfig* pViewConfig)
+plQtEngineViewWidget::plQtEngineViewWidget(QWidget* pParent, plQtEngineDocumentWindow* pDocumentWindow, PlasmaEngineViewConfig* pViewConfig)
   : QWidget(pParent)
   , m_pDocumentWindow(pDocumentWindow)
   , m_pViewConfig(pViewConfig)
@@ -58,35 +58,33 @@ plQtEngineViewWidget::plQtEngineViewWidget(QWidget* pParent, plQtEngineDocumentW
   m_fCameraLerp = 1.0f;
   m_fCameraTargetFovOrDim = 70.0f;
 
-  plEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtEngineViewWidget::EngineViewProcessEventHandler, this));
+  PlasmaEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtEngineViewWidget::EngineViewProcessEventHandler, this));
 
-  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     ShowRestartButton(true);
 }
 
 
 plQtEngineViewWidget::~plQtEngineViewWidget()
 {
-  plEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtEngineViewWidget::EngineViewProcessEventHandler, this));
+  PlasmaEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtEngineViewWidget::EngineViewProcessEventHandler, this));
 
   {
     // Ensure the engine process swap chain is destroyed before the window.
     plViewDestroyedMsgToEngine msg;
     msg.m_uiViewID = GetViewID();
-    // If we fail to send the message the engine process is down and we don't need to clean up.
-    if (m_pDocumentWindow->GetDocument()->SendMessageToEngine(&msg))
-    {
-      // Wait for engine process response
-      auto callback = [&](plProcessMessage* pMsg) -> bool {
-        auto pResponse = static_cast<plViewDestroyedResponseMsgToEditor*>(pMsg);
-        return pResponse->m_DocumentGuid == m_pDocumentWindow->GetDocument()->GetGuid() && pResponse->m_uiViewID == msg.m_uiViewID;
-      };
-      plProcessCommunicationChannel::WaitForMessageCallback cb = callback;
+    m_pDocumentWindow->GetDocument()->SendMessageToEngine(&msg);
 
-      if (plEditorEngineProcessConnection::GetSingleton()->WaitForMessage(plGetStaticRTTI<plViewDestroyedResponseMsgToEditor>(), plTime::MakeFromSeconds(5), &cb).Failed())
-      {
-        plLog::Error("Timeout while waiting for engine process to destroy view.");
-      }
+    // Wait for engine process response
+    auto callback = [&](plProcessMessage* pMsg) -> bool {
+      auto pResponse = static_cast<plViewDestroyedResponseMsgToEditor*>(pMsg);
+      return pResponse->m_DocumentGuid == m_pDocumentWindow->GetDocument()->GetGuid() && pResponse->m_uiViewID == msg.m_uiViewID;
+    };
+    plProcessCommunicationChannel::WaitForMessageCallback cb = callback;
+
+    if (PlasmaEditorEngineProcessConnection::GetSingleton()->WaitForMessage(plGetStaticRTTI<plViewDestroyedResponseMsgToEditor>(), plTime::Seconds(5), &cb).Failed())
+    {
+      plLog::Error("Timeout while waiting for engine process to destroy view.");
     }
   }
 
@@ -101,7 +99,7 @@ void plQtEngineViewWidget::SyncToEngine()
   float fov = m_pViewConfig->m_Camera.GetFovOrDim();
   if (m_pViewConfig->m_Camera.IsPerspective())
   {
-    plEditorPreferencesUser* pPref = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+    PlasmaEditorPreferencesUser* pPref = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
     fov = pPref->m_fPerspectiveFieldOfView;
   }
 
@@ -122,7 +120,7 @@ void plQtEngineViewWidget::SyncToEngine()
   cam.m_uiWindowWidth = width() * this->devicePixelRatio();
   cam.m_uiWindowHeight = height() * this->devicePixelRatio();
   cam.m_bUpdatePickingData = m_bUpdatePickingData;
-  cam.m_bEnablePickingSelected = IsPickingAgainstSelectionAllowed() && (!plEditorInputContext::IsAnyInputContextActive() || plEditorInputContext::GetActiveInputContext()->IsPickingSelectedAllowed());
+  cam.m_bEnablePickingSelected = IsPickingAgainstSelectionAllowed() && (!PlasmaEditorInputContext::IsAnyInputContextActive() || PlasmaEditorInputContext::GetActiveInputContext()->IsPickingSelectedAllowed());
   cam.m_bEnablePickTransparent = m_bPickTransparent;
 
   if (s_FixedResolution.HasNonZeroArea())
@@ -135,10 +133,10 @@ void plQtEngineViewWidget::SyncToEngine()
 }
 
 
-void plQtEngineViewWidget::GetCameraMatrices(plMat4& out_mViewMatrix, plMat4& out_mProjectionMatrix) const
+void plQtEngineViewWidget::GetCameraMatrices(plMat4& out_ViewMatrix, plMat4& out_ProjectionMatrix) const
 {
-  out_mViewMatrix = m_pViewConfig->m_Camera.GetViewMatrix();
-  m_pViewConfig->m_Camera.GetProjectionMatrix((float)width() / (float)height(), out_mProjectionMatrix);
+  out_ViewMatrix = m_pViewConfig->m_Camera.GetViewMatrix();
+  m_pViewConfig->m_Camera.GetProjectionMatrix((float)width() / (float)height(), out_ProjectionMatrix);
 }
 
 void plQtEngineViewWidget::UpdateCameraInterpolation()
@@ -157,11 +155,11 @@ void plQtEngineViewWidget::UpdateCameraInterpolation()
 
   plCamera& cam = m_pViewConfig->m_Camera;
 
-  const float fLerpValue = plMath::Sin(plAngle::MakeFromDegree(90.0f * m_fCameraLerp));
+  const float fLerpValue = plMath::Sin(plAngle::Degree(90.0f * m_fCameraLerp));
 
   plQuat qRot, qRotFinal;
-  qRot = plQuat::MakeShortestRotation(m_vCameraStartDirection, m_vCameraTargetDirection);
-  qRotFinal = plQuat::MakeSlerp(plQuat::MakeIdentity(), qRot, fLerpValue);
+  qRot.SetShortestRotation(m_vCameraStartDirection, m_vCameraTargetDirection);
+  qRotFinal.SetSlerp(plQuat::IdentityQuaternion(), qRot, fLerpValue);
 
   const plVec3 vNewDirection = qRotFinal * m_vCameraStartDirection;
   const plVec3 vNewPosition = plMath::Lerp(m_vCameraStartPosition, m_vCameraTargetPosition, fLerpValue);
@@ -207,7 +205,7 @@ void plQtEngineViewWidget::InterpolateCameraTo(const plVec3& vPosition, const pl
   if (bImmediate)
   {
     // make sure the next camera update interpolates all the way
-    m_LastCameraUpdate -= plTime::MakeFromSeconds(10);
+    m_LastCameraUpdate -= plTime::Seconds(10);
     m_fCameraLerp = 0.9f;
   }
 }
@@ -237,7 +235,7 @@ void plQtEngineViewWidget::OpenContextMenu(QPoint globalPos)
 
 const plObjectPickingResult& plQtEngineViewWidget::PickObject(plUInt16 uiScreenPosX, plUInt16 uiScreenPosY) const
 {
-  if (!plEditorEngineProcessConnection::GetSingleton()->IsEngineSetup())
+  if (!PlasmaEditorEngineProcessConnection::GetSingleton()->IsEngineSetup())
   {
     m_LastPickingResult.Reset();
   }
@@ -255,7 +253,7 @@ const plObjectPickingResult& plQtEngineViewWidget::PickObject(plUInt16 uiScreenP
 }
 
 
-plResult plQtEngineViewWidget::PickPlane(plUInt16 uiScreenPosX, plUInt16 uiScreenPosY, const plPlane& plane, plVec3& out_vPosition) const
+plResult plQtEngineViewWidget::PickPlane(plUInt16 uiScreenPosX, plUInt16 uiScreenPosY, const plPlane& plane, plVec3& out_Position) const
 {
   const auto& cam = m_pViewConfig->m_Camera;
 
@@ -271,13 +269,13 @@ plResult plQtEngineViewWidget::PickPlane(plUInt16 uiScreenPosX, plUInt16 uiScree
   if (plGraphicsUtils::ConvertScreenPosToWorldPos(mInvViewProj, 0, 0, width(), height(), vScreenPos, vResPos, &vResRay).Failed())
     return PLASMA_FAILURE;
 
-  if (plane.GetRayIntersection(vResPos, vResRay, nullptr, &out_vPosition))
+  if (plane.GetRayIntersection(vResPos, vResRay, nullptr, &out_Position))
     return PLASMA_SUCCESS;
 
   return PLASMA_FAILURE;
 }
 
-void plQtEngineViewWidget::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
+void plQtEngineViewWidget::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg)
 {
   if (const plViewPickingResultMsgToEditor* pFullMsg = plDynamicCast<const plViewPickingResultMsgToEditor*>(pMsg))
   {
@@ -291,7 +289,8 @@ void plQtEngineViewWidget::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
 
     return;
   }
-  else if (const plViewMarqueePickingResultMsgToEditor* pFullMsg = plDynamicCast<const plViewMarqueePickingResultMsgToEditor*>(pMsg))
+
+  if (const plViewMarqueePickingResultMsgToEditor* pFullMsg = plDynamicCast<const plViewMarqueePickingResultMsgToEditor*>(pMsg))
   {
     HandleMarqueePickingResult(pFullMsg);
     return;
@@ -302,11 +301,11 @@ plPlane plQtEngineViewWidget::GetFallbackPickingPlane(plVec3 vPointOnPlane) cons
 {
   if (m_pViewConfig->m_Camera.IsPerspective())
   {
-    return plPlane::MakeFromNormalAndPoint(plVec3(0, 0, 1), vPointOnPlane);
+    return plPlane(plVec3(0, 0, 1), vPointOnPlane);
   }
   else
   {
-    return plPlane::MakeFromNormalAndPoint(-m_pViewConfig->m_Camera.GetCenterDirForwards(), vPointOnPlane);
+    return plPlane(-m_pViewConfig->m_Camera.GetCenterDirForwards(), vPointOnPlane);
   }
 }
 
@@ -326,12 +325,12 @@ bool plQtEngineViewWidget::eventFilter(QObject* object, QEvent* event)
 {
   if (event->type() == QEvent::Type::ShortcutOverride)
   {
-    if (plEditorInputContext::IsAnyInputContextActive())
+    if (PlasmaEditorInputContext::IsAnyInputContextActive())
     {
       // if the active input context does not like other shortcuts,
       // accept this event and thus block further shortcut processing
       // instead Qt will then send a keypress event
-      if (plEditorInputContext::GetActiveInputContext()->GetShortcutsDisabled())
+      if (PlasmaEditorInputContext::GetActiveInputContext()->GetShortcutsDisabled())
         event->accept();
     }
   }
@@ -356,21 +355,21 @@ void plQtEngineViewWidget::keyPressEvent(QKeyEvent* e)
     return;
 
   // if a context is active, it gets exclusive access to the input data
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
-    if (plEditorInputContext::GetActiveInputContext()->KeyPressEvent(e) == plEditorInput::WasExclusivelyHandled)
+    if (PlasmaEditorInputContext::GetActiveInputContext()->KeyPressEvent(e) == PlasmaEditorInput::WasExclusivelyHandled)
       return;
   }
 
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
     return;
 
   // Override context
   {
-    plEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
+    PlasmaEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
     if (pOverride != nullptr)
     {
-      if (pOverride->KeyPressEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+      if (pOverride->KeyPressEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
         return;
     }
   }
@@ -378,7 +377,7 @@ void plQtEngineViewWidget::keyPressEvent(QKeyEvent* e)
   // if no context is active, pass the input through in a certain order, until someone handles it
   for (auto pContext : m_InputContexts)
   {
-    if (pContext->KeyPressEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+    if (pContext->KeyPressEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
       return;
   }
 
@@ -391,21 +390,21 @@ void plQtEngineViewWidget::keyReleaseEvent(QKeyEvent* e)
     return;
 
   // if a context is active, it gets exclusive access to the input data
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
-    if (plEditorInputContext::GetActiveInputContext()->KeyReleaseEvent(e) == plEditorInput::WasExclusivelyHandled)
+    if (PlasmaEditorInputContext::GetActiveInputContext()->KeyReleaseEvent(e) == PlasmaEditorInput::WasExclusivelyHandled)
       return;
   }
 
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
     return;
 
   // Override context
   {
-    plEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
+    PlasmaEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
     if (pOverride != nullptr)
     {
-      if (pOverride->KeyReleaseEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+      if (pOverride->KeyReleaseEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
         return;
     }
   }
@@ -413,7 +412,7 @@ void plQtEngineViewWidget::keyReleaseEvent(QKeyEvent* e)
   // if no context is active, pass the input through in a certain order, until someone handles it
   for (auto pContext : m_InputContexts)
   {
-    if (pContext->KeyReleaseEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+    if (pContext->KeyReleaseEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
       return;
   }
 
@@ -423,16 +422,16 @@ void plQtEngineViewWidget::keyReleaseEvent(QKeyEvent* e)
 void plQtEngineViewWidget::mousePressEvent(QMouseEvent* e)
 {
   // if a context is active, it gets exclusive access to the input data
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
-    if (plEditorInputContext::GetActiveInputContext()->MousePressEvent(e) == plEditorInput::WasExclusivelyHandled)
+    if (PlasmaEditorInputContext::GetActiveInputContext()->MousePressEvent(e) == PlasmaEditorInput::WasExclusivelyHandled)
     {
       e->accept();
       return;
     }
   }
 
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
     e->accept();
     return;
@@ -440,10 +439,10 @@ void plQtEngineViewWidget::mousePressEvent(QMouseEvent* e)
 
   // Override context
   {
-    plEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
+    PlasmaEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
     if (pOverride != nullptr)
     {
-      if (pOverride->MousePressEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+      if (pOverride->MousePressEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
         return;
     }
   }
@@ -451,7 +450,7 @@ void plQtEngineViewWidget::mousePressEvent(QMouseEvent* e)
   // if no context is active, pass the input through in a certain order, until someone handles it
   for (auto pContext : m_InputContexts)
   {
-    if (pContext->MousePressEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+    if (pContext->MousePressEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
     {
       e->accept();
       return;
@@ -464,16 +463,16 @@ void plQtEngineViewWidget::mousePressEvent(QMouseEvent* e)
 void plQtEngineViewWidget::mouseReleaseEvent(QMouseEvent* e)
 {
   // if a context is active, it gets exclusive access to the input data
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
-    if (plEditorInputContext::GetActiveInputContext()->MouseReleaseEvent(e) == plEditorInput::WasExclusivelyHandled)
+    if (PlasmaEditorInputContext::GetActiveInputContext()->MouseReleaseEvent(e) == PlasmaEditorInput::WasExclusivelyHandled)
     {
       e->accept();
       return;
     }
   }
 
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
     e->accept();
     return;
@@ -481,10 +480,10 @@ void plQtEngineViewWidget::mouseReleaseEvent(QMouseEvent* e)
 
   // Override context
   {
-    plEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
+    PlasmaEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
     if (pOverride != nullptr)
     {
-      if (pOverride->MouseReleaseEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+      if (pOverride->MouseReleaseEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
         return;
     }
   }
@@ -492,7 +491,7 @@ void plQtEngineViewWidget::mouseReleaseEvent(QMouseEvent* e)
   // if no context is active, pass the input through in a certain order, until someone handles it
   for (auto pContext : m_InputContexts)
   {
-    if (pContext->MouseReleaseEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+    if (pContext->MouseReleaseEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
     {
       e->accept();
       return;
@@ -511,16 +510,16 @@ void plQtEngineViewWidget::mouseMoveEvent(QMouseEvent* e)
   PickObject(e->pos().x(), e->pos().y());
 
   // if a context is active, it gets exclusive access to the input data
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
-    if (plEditorInputContext::GetActiveInputContext()->MouseMoveEvent(e) == plEditorInput::WasExclusivelyHandled)
+    if (PlasmaEditorInputContext::GetActiveInputContext()->MouseMoveEvent(e) == PlasmaEditorInput::WasExclusivelyHandled)
     {
       e->accept();
       return;
     }
   }
 
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
     e->accept();
     return;
@@ -528,10 +527,10 @@ void plQtEngineViewWidget::mouseMoveEvent(QMouseEvent* e)
 
   // Override context
   {
-    plEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
+    PlasmaEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
     if (pOverride != nullptr)
     {
-      if (pOverride->MouseMoveEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+      if (pOverride->MouseMoveEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
         return;
     }
   }
@@ -539,7 +538,7 @@ void plQtEngineViewWidget::mouseMoveEvent(QMouseEvent* e)
   // if no context is active, pass the input through in a certain order, until someone handles it
   for (auto pContext : m_InputContexts)
   {
-    if (pContext->MouseMoveEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+    if (pContext->MouseMoveEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
     {
       e->accept();
       return;
@@ -552,21 +551,21 @@ void plQtEngineViewWidget::mouseMoveEvent(QMouseEvent* e)
 void plQtEngineViewWidget::wheelEvent(QWheelEvent* e)
 {
   // if a context is active, it gets exclusive access to the input data
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
-    if (plEditorInputContext::GetActiveInputContext()->WheelEvent(e) == plEditorInput::WasExclusivelyHandled)
+    if (PlasmaEditorInputContext::GetActiveInputContext()->WheelEvent(e) == PlasmaEditorInput::WasExclusivelyHandled)
       return;
   }
 
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
     return;
 
   // Override context
   {
-    plEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
+    PlasmaEditorInputContext* pOverride = GetDocumentWindow()->GetDocument()->GetEditorInputContextOverride();
     if (pOverride != nullptr)
     {
-      if (pOverride->WheelEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+      if (pOverride->WheelEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
         return;
     }
   }
@@ -574,7 +573,7 @@ void plQtEngineViewWidget::wheelEvent(QWheelEvent* e)
   // if no context is active, pass the input through in a certain order, until someone handles it
   for (auto pContext : m_InputContexts)
   {
-    if (pContext->WheelEvent(e) == plEditorInput::WasExclusivelyHandled || plEditorInputContext::IsAnyInputContextActive())
+    if (pContext->WheelEvent(e) == PlasmaEditorInput::WasExclusivelyHandled || PlasmaEditorInputContext::IsAnyInputContextActive())
       return;
   }
 
@@ -583,10 +582,10 @@ void plQtEngineViewWidget::wheelEvent(QWheelEvent* e)
 
 void plQtEngineViewWidget::focusOutEvent(QFocusEvent* e)
 {
-  if (plEditorInputContext::IsAnyInputContextActive())
+  if (PlasmaEditorInputContext::IsAnyInputContextActive())
   {
-    plEditorInputContext::GetActiveInputContext()->FocusLost(false);
-    plEditorInputContext::SetActiveInputContext(nullptr);
+    PlasmaEditorInputContext::GetActiveInputContext()->FocusLost(false);
+    PlasmaEditorInputContext::SetActiveInputContext(nullptr);
   }
 
   QWidget::focusOutEvent(e);
@@ -615,33 +614,33 @@ void plQtEngineViewWidget::dropEvent(QDropEvent* e)
 // plQtEngineViewWidget protected functions
 ////////////////////////////////////////////////////////////////////////
 
-void plQtEngineViewWidget::EngineViewProcessEventHandler(const plEditorEngineProcessConnection::Event& e)
+void plQtEngineViewWidget::EngineViewProcessEventHandler(const PlasmaEditorEngineProcessConnection::Event& e)
 {
   switch (e.m_Type)
   {
-    case plEditorEngineProcessConnection::Event::Type::ProcessCrashed:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessCrashed:
     {
       ShowRestartButton(true);
     }
     break;
 
-    case plEditorEngineProcessConnection::Event::Type::ProcessStarted:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessStarted:
     {
       ShowRestartButton(false);
     }
     break;
 
-    case plEditorEngineProcessConnection::Event::Type::ProcessShutdown:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessShutdown:
       break;
 
-    case plEditorEngineProcessConnection::Event::Type::ProcessMessage:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessMessage:
       break;
 
-    case plEditorEngineProcessConnection::Event::Type::Invalid:
+    case PlasmaEditorEngineProcessConnection::Event::Type::Invalid:
       PLASMA_ASSERT_DEV(false, "Invalid message should never happen");
       break;
 
-    case plEditorEngineProcessConnection::Event::Type::ProcessRestarted:
+    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessRestarted:
       break;
   }
 }
@@ -659,7 +658,7 @@ void plQtEngineViewWidget::ShowRestartButton(bool bShow)
 
     m_pRestartButton = new QPushButton(this);
     m_pRestartButton->setText("Restart Engine View Process");
-    m_pRestartButton->setVisible(plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed());
+    m_pRestartButton->setVisible(PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed());
     m_pRestartButton->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     m_pRestartButton->connect(m_pRestartButton, &QPushButton::clicked, this, &plQtEngineViewWidget::SlotRestartEngineProcess);
 
@@ -682,7 +681,7 @@ void plQtEngineViewWidget::ShowRestartButton(bool bShow)
 
 void plQtEngineViewWidget::SlotRestartEngineProcess()
 {
-  plEditorEngineProcessConnection::GetSingleton()->RestartProcess().IgnoreResult();
+  PlasmaEditorEngineProcessConnection::GetSingleton()->RestartProcess().IgnoreResult();
 }
 
 
@@ -719,4 +718,4 @@ plQtViewWidgetContainer::plQtViewWidgetContainer(QWidget* pParent, plQtEngineVie
   m_pLayout->addWidget(m_pViewWidget, 1);
 }
 
-plQtViewWidgetContainer::~plQtViewWidgetContainer() = default;
+plQtViewWidgetContainer::~plQtViewWidgetContainer() {}

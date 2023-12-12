@@ -8,7 +8,7 @@ plGALBlendState::plGALBlendState(const plGALBlendStateCreationDescription& Descr
 {
 }
 
-plGALBlendState::~plGALBlendState() = default;
+plGALBlendState::~plGALBlendState() {}
 
 
 
@@ -17,7 +17,7 @@ plGALDepthStencilState::plGALDepthStencilState(const plGALDepthStencilStateCreat
 {
 }
 
-plGALDepthStencilState::~plGALDepthStencilState() = default;
+plGALDepthStencilState::~plGALDepthStencilState() {}
 
 
 
@@ -26,7 +26,7 @@ plGALRasterizerState::plGALRasterizerState(const plGALRasterizerStateCreationDes
 {
 }
 
-plGALRasterizerState::~plGALRasterizerState() = default;
+plGALRasterizerState::~plGALRasterizerState() {}
 
 
 plGALSamplerState::plGALSamplerState(const plGALSamplerStateCreationDescription& Description)
@@ -34,7 +34,7 @@ plGALSamplerState::plGALSamplerState(const plGALSamplerStateCreationDescription&
 {
 }
 
-plGALSamplerState::~plGALSamplerState() = default;
+plGALSamplerState::~plGALSamplerState() {}
 
 
 

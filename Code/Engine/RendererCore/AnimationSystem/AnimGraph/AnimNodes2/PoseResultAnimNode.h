@@ -24,7 +24,7 @@ public:
   ~plPoseResultAnimNode();
 
 private:
-  plTime m_FadeDuration = plTime::MakeFromMilliseconds(200); // [ property ]
+  plTime m_FadeDuration = plTime::Milliseconds(200); // [ property ]
 
   plAnimGraphLocalPoseInputPin m_InPose;         // [ property ]
   plAnimGraphNumberInputPin m_InTargetWeight;    // [ property ]

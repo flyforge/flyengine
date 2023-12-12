@@ -13,7 +13,6 @@ plJoltCollisionMeshAssetDocumentManager::plJoltCollisionMeshAssetDocumentManager
   m_DocTypeDesc.m_sDocumentTypeName = "Jolt_Colmesh_Triangle";
   m_DocTypeDesc.m_sFileExtension = "plJoltCollisionMeshAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Jolt_Collision_Mesh.svg";
-  m_DocTypeDesc.m_sAssetCategory = "Physics";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plJoltCollisionMeshAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Jolt_Colmesh_Triangle");
@@ -24,7 +23,6 @@ plJoltCollisionMeshAssetDocumentManager::plJoltCollisionMeshAssetDocumentManager
   m_DocTypeDesc2.m_sDocumentTypeName = "Jolt_Colmesh_Convex";
   m_DocTypeDesc2.m_sFileExtension = "plJoltConvexCollisionMeshAsset";
   m_DocTypeDesc2.m_sIcon = ":/AssetIcons/Jolt_Collision_Mesh_Convex.svg";
-  m_DocTypeDesc2.m_sAssetCategory = "Physics";
   m_DocTypeDesc2.m_pDocumentType = plGetStaticRTTI<plJoltCollisionMeshAssetDocument>();
   m_DocTypeDesc2.m_pManager = this;
   m_DocTypeDesc2.m_CompatibleTypes.PushBack("CompatibleAsset_Jolt_Colmesh_Triangle"); // convex meshes can also be used as triangle meshes (concave)
@@ -47,7 +45,7 @@ void plJoltCollisionMeshAssetDocumentManager::OnDocumentManagerEvent(const plDoc
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plJoltCollisionMeshAssetDocument>())
       {
-        new plQtJoltCollisionMeshAssetDocumentWindow(static_cast<plAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
+        plQtJoltCollisionMeshAssetDocumentWindow* pDocWnd = new plQtJoltCollisionMeshAssetDocumentWindow(static_cast<plAssetDocument*>(e.m_pDocument));
       }
     }
     break;
@@ -56,15 +54,15 @@ void plJoltCollisionMeshAssetDocumentManager::OnDocumentManagerEvent(const plDoc
   }
 }
 
-void plJoltCollisionMeshAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plJoltCollisionMeshAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  if (sDocumentTypeName.IsEqual("Jolt_Colmesh_Convex"))
+  if (plStringUtils::IsEqual(szDocumentTypeName, "Jolt_Colmesh_Convex"))
   {
-    out_pDocument = new plJoltCollisionMeshAssetDocument(sPath, true);
+    out_pDocument = new plJoltCollisionMeshAssetDocument(szPath, true);
   }
   else
   {
-    out_pDocument = new plJoltCollisionMeshAssetDocument(sPath, false);
+    out_pDocument = new plJoltCollisionMeshAssetDocument(szPath, false);
   }
 }
 

@@ -160,7 +160,7 @@
            </property>
            <property name="icon">
             <iconset resource="../../../Tools/Libs/GuiFoundation/QtResources/resources.qrc">
-             <normaloff>:/GuiFoundation/Icons/Add.svg</normaloff>:/GuiFoundation/Icons/Add.svg</iconset>
+             <normaloff>:/GuiFoundation/Icons/Add.svg*</normaloff>:/GuiFoundation/Icons/Add.svg</iconset>
            </property>
            <property name="autoDefault">
             <bool>false</bool>
@@ -401,7 +401,7 @@
               </size>
              </property>
              <property name="text">
-              <string>@plEngineProject on Twitter</string>
+              <string>@PlasmaEngineProject on Twitter</string>
              </property>
              <property name="icon">
               <iconset resource="../QtResources/resources.qrc">

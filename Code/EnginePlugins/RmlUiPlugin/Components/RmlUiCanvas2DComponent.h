@@ -77,10 +77,10 @@ protected:
   plRmlUiResourceHandle m_hResource;
   plEvent<const plResourceEvent&, plMutex>::Unsubscriber m_ResourceEventUnsubscriber;
 
-  plVec2I32 m_vOffset = plVec2I32::MakeZero();
-  plVec2U32 m_vSize = plVec2U32::MakeZero();
-  plVec2 m_vAnchorPoint = plVec2::MakeZero();
-  plVec2U32 m_vReferenceResolution = plVec2U32::MakeZero();
+  plVec2I32 m_vOffset = plVec2I32::ZeroVector();
+  plVec2U32 m_vSize = plVec2U32::ZeroVector();
+  plVec2 m_vAnchorPoint = plVec2::ZeroVector();
+  plVec2U32 m_vReferenceResolution = plVec2U32::ZeroVector();
   bool m_bPassInput = true;
   bool m_bAutobindBlackboards = true;
 

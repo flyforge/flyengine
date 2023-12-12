@@ -311,7 +311,7 @@ plResult plTexConvProcessor::ClampInputValues(plImage& image, float maxValue) co
 
 static bool FillAvgImageColor(plImage& img)
 {
-  plColor avg = plColor::MakeZero();
+  plColor avg = plColor::ZeroColor();
   plUInt32 uiValidCount = 0;
 
   for (const plColor& col : img.GetBlobPtr<plColor>())
@@ -372,7 +372,8 @@ static plColor GetAvgColor(plColor* pPixels, plInt32 iWidth, plInt32 iHeight, pl
   if (colAt.a > 0)
     return colAt;
 
-  plColor avg = plColor::MakeZero();
+  plColor avg;
+  avg.SetZero();
   plUInt32 uiValidCount = 0;
 
   const plInt32 iRadius = 1;

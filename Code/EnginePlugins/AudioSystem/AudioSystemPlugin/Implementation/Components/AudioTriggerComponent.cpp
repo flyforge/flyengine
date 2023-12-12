@@ -97,7 +97,7 @@ plAudioTriggerComponentManager::plAudioTriggerComponentManager(plWorld* pWorld)
 
     for (auto& pos : s_InSpherePositions)
     {
-      pos = plVec3::MakeRandomPointInSphere(rngPhi);
+      pos = plVec3::CreateRandomPointInSphere(rngPhi);
       pos.SetLength(cvar_AudioSystemOcclusionMaxDistance).IgnoreResult();
     }
   }

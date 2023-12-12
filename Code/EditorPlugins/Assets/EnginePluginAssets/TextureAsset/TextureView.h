@@ -4,7 +4,7 @@
 
 class plTextureContext;
 
-class plTextureViewContext : public plEngineProcessViewContext
+class plTextureViewContext : public PlasmaEngineProcessViewContext
 {
 public:
   plTextureViewContext(plTextureContext* pMaterialContext);

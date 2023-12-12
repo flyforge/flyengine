@@ -30,6 +30,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plWindVolumeComponent, 2)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Wind"),
+    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
 }
@@ -204,7 +205,7 @@ void plWindVolumeSphereComponent::SetRadius(float val)
 
 void plWindVolumeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
 {
-  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fRadius), plWindVolumeComponent::SpatialDataCategory);
+  msg.AddBounds(plBoundingSphere(plVec3::ZeroVector(), m_fRadius), plWindVolumeComponent::SpatialDataCategory);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -271,13 +272,13 @@ plSimdVec4f plWindVolumeCylinderComponent::ComputeForceAtLocalPosition(const plS
   const plSimdFloat fCylDist = localPos.x();
 
   if (fCylDist <= -m_fLength * 0.5f || fCylDist >= m_fLength * 0.5f)
-    return plSimdVec4f::MakeZero();
+    return plSimdVec4f::ZeroVector();
 
   plSimdVec4f orthoDir = localPos;
   orthoDir.SetX(0.0f);
 
   if (orthoDir.GetLengthSquared<3>() >= plMath::Square(m_fRadius))
-    return plSimdVec4f::MakeZero();
+    return plSimdVec4f::ZeroVector();
 
   if (m_Mode == plWindVolumeCylinderMode::Vortex)
   {
@@ -327,7 +328,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plWindVolumeConeComponent, 1, plComponentMode::Stati
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Angle", GetAngle, SetAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(45)), new plClampValueAttribute(plAngle::MakeFromDegree(1), plAngle::MakeFromDegree(179))),
+    PLASMA_ACCESSOR_PROPERTY("Angle", GetAngle, SetAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(45)), new plClampValueAttribute(plAngle::Degree(1), plAngle::Degree(179))),
     PLASMA_ACCESSOR_PROPERTY("Length", GetLength, SetLength)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, plVariant())),
   }
   PLASMA_END_PROPERTIES;
@@ -371,8 +372,8 @@ plSimdVec4f plWindVolumeConeComponent::ComputeForceAtLocalPosition(const plSimdV
 {
   const plSimdFloat fConeDist = localPos.x();
 
-  if (fConeDist <= plSimdFloat::MakeZero() || fConeDist >= m_fLength)
-    return plSimdVec4f::MakeZero();
+  if (fConeDist <= plSimdFloat::Zero() || fConeDist >= m_fLength)
+    return plSimdVec4f::ZeroVector();
 
   // TODO: precompute base radius
   const float fBaseRadius = plMath::Tan(m_Angle * 0.5f) * m_fLength;
@@ -384,7 +385,7 @@ plSimdVec4f plWindVolumeConeComponent::ComputeForceAtLocalPosition(const plSimdV
   orthoDir.SetX(0.0f);
 
   if (orthoDir.GetLengthSquared<3>() >= fConeRadius * fConeRadius)
-    return plSimdVec4f::MakeZero();
+    return plSimdVec4f::ZeroVector();
 
   return localPos.GetNormalized<3>() * GetWindInMetersPerSecond();
 }
@@ -401,7 +402,7 @@ void plWindVolumeConeComponent::SetLength(float val)
 
 void plWindVolumeConeComponent::SetAngle(plAngle val)
 {
-  m_Angle = plMath::Max(val, plAngle::MakeFromDegree(1.0f));
+  m_Angle = plMath::Max(val, plAngle::Degree(1.0f));
 
   if (IsActiveAndInitialized())
   {

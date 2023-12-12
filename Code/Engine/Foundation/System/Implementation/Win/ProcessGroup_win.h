@@ -97,7 +97,7 @@ plResult plProcessGroup::Launch(const plProcessOptions& opt)
   return PLASMA_SUCCESS;
 }
 
-plResult plProcessGroup::WaitToFinish(plTime timeout /*= plTime::MakeZero()*/)
+plResult plProcessGroup::WaitToFinish(plTime timeout /*= plTime::Zero()*/)
 {
   if (m_pImpl->m_hJobObject == INVALID_HANDLE_VALUE)
     return PLASMA_SUCCESS;
