@@ -272,7 +272,7 @@ plResult plGALSwapChainVulkan::CreateSwapChainInternal()
   swapChainCreateInfo.imageExtent.height = plMath::Clamp(swapChainCreateInfo.imageExtent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
   swapChainCreateInfo.imageFormat = desiredFormat;
 
-  swapChainCreateInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eStorage; // We need eTransferDst to be able to resolve msaa textures into the backbuffer.
+  swapChainCreateInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst ; // We need eTransferDst to be able to resolve msaa textures into the backbuffer.
   if (m_WindowDesc.m_bAllowScreenshots)
     swapChainCreateInfo.imageUsage |= vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eSampled;
 
