@@ -350,12 +350,12 @@ float GetLuminance(float4 color)
 
 float3 SrgbToLinear(float3 color)
 {
-    return (color < 0.04045) ? (color / 12.92) : pow(abs(color) / 1.055 + 0.0521327, 2.4);
+    return select(color < 0.04045, color / 12.92, pow(abs(color) / 1.055 + 0.0521327, 2.4));
 }
 
 float3 LinearToSrgb(float3 color)
 {
-    return (color < 0.0031308) ? (color * 12.92) : (1.055 * pow(abs(color), 1.0 / 2.4) - 0.055);
+    return select(color < 0.0031308, color * 12.92, 1.055 * pow(abs(color), 1.0 / 2.4) - 0.055);
 }
 
 float3 DecodeNormalTexture(float4 normalTex, in float intensity = 1.0f)
