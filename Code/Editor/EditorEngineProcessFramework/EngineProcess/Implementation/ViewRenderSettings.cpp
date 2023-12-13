@@ -268,6 +268,7 @@ void PlasmaEngineViewLightSettings::UpdateForEngine(plWorld* pWorld)
     {
       pDirLight->SetCastShadows(m_bDirectionalLightShadows);
       pDirLight->SetIntensity(m_fDirectionalLightIntensity);
+      pDirLight->SetVolumetricIntensity(0.0f);
     }
 
     if (plSkyLightComponent* pSkyLight = SyncComponent<plSkyLightComponent>(m_pWorld, pParent, m_hSkyLight, m_bSkyLight))

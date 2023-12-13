@@ -13,7 +13,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSkyBoxComponent, 4, plComponentMode::Static)
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_ACCESSOR_PROPERTY("CubeMap", GetCubeMapFile, SetCubeMapFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
-    PLASMA_ACCESSOR_PROPERTY("ExposureBias", GetExposureBias, SetExposureBias)->AddAttributes(new plDefaultValueAttribute(64000.0f)),
+    PLASMA_ACCESSOR_PROPERTY("ExposureBias", GetExposureBias, SetExposureBias)->AddAttributes(new plDefaultValueAttribute(1.0f)),
     PLASMA_ACCESSOR_PROPERTY("InverseTonemap", GetInverseTonemap, SetInverseTonemap),
     PLASMA_ACCESSOR_PROPERTY("UseFog", GetUseFog, SetUseFog)->AddAttributes(new plDefaultValueAttribute(true)),
     PLASMA_ACCESSOR_PROPERTY("VirtualDistance", GetVirtualDistance, SetVirtualDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1000.0f)),
