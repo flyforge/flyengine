@@ -27,14 +27,17 @@ o
 		s %AssetType{"Prefab"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{9554234785370230426,5467105250672530083}}
-		u4 %Hash{7847815800243304268}
+		u4 %Hash{4595376053874688206}
 		VarArray %MetaInfo
 		{
 			Uuid{u4{5058072697638833757,15841374294097003470}}
 		}
 		VarArray %Outputs{}
-		VarArray %PackageDeps{}
-		VarArray %References{}
+		VarArray %References
+		{
+			s{"{ 7e42491b-1a9b-4300-9827-a7332e256f70 }"}
+			s{"{ cc51be30-5b78-445c-a9b5-779066b074f2 }"}
+		}
 	}
 }
 o
@@ -66,7 +69,7 @@ Objects
 {
 o
 {
-	Uuid %id{u4{3212229804758841530,4854934614024535086}}
+	Uuid %id{u4{13863242433395658667,5062526517391961489}}
 	s %t{"plExposedSceneProperty"}
 	u3 %v{1}
 	p
@@ -78,14 +81,57 @@ o
 }
 o
 {
-	Uuid %id{u4{5088865125491960976,5178003160029222705}}
+	Uuid %id{u4{17712531959013770420,5064744365310234457}}
 	s %t{"plExposedSceneProperty"}
 	u3 %v{1}
 	p
 	{
 		s %Name{"Material"}
-		Uuid %Object{u4{6724978363745695079,10460517069894996236}}
-		s %PropertyPath{"Material"}
+		Uuid %Object{u4{8188961369272769173,5065681928452321358}}
+		s %PropertyPath{"Materials[0]"}
+	}
+}
+o
+{
+	Uuid %id{u4{8188961369272769173,5065681928452321358}}
+	s %t{"plMeshComponent"}
+	u3 %v{3}
+	p
+	{
+		b %Active{1}
+		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		VarArray %Materials
+		{
+			s{""}
+		}
+		s %Mesh{"{ cc51be30-5b78-445c-a9b5-779066b074f2 }"}
+	}
+}
+o
+{
+	Uuid %id{u4{10451996791062949023,5471451957779734268}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{8188961369272769173,5065681928452321358}}
+			Uuid{u4{1951270158574277795,5588434132482001563}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0,0,0xB06DF23E}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000A83F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{""}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
 	}
 }
 o
@@ -97,89 +143,20 @@ o
 	{
 		VarArray %ExposedProperties
 		{
-			Uuid{u4{3212229804758841530,4854934614024535086}}
-			Uuid{u4{5088865125491960976,5178003160029222705}}
-			Uuid{u4{16039776123327298449,5729703871021399628}}
-			Uuid{u4{15508576473403343542,5738235543082948957}}
+			Uuid{u4{17712531959013770420,5064744365310234457}}
+			Uuid{u4{13863242433395658667,5062526517391961489}}
 		}
 	}
 }
 o
 {
-	Uuid %id{u4{11218973099157091489,5719244332389350007}}
-	s %t{"plGreyBoxComponent"}
-	u3 %v{5}
-	p
-	{
-		b %Active{1}
-		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
-		Angle %Curvature{f{0}}
-		u3 %Detail{6}
-		b %GenerateCollision{1}
-		b %IncludeInNavmesh{1}
-		s %Material{""}
-		s %Shape{"plGreyBoxShape::Column"}
-		f %SizeNegX{0x0000403F}
-		f %SizeNegY{0x000080BE}
-		f %SizeNegZ{0}
-		f %SizePosX{0x0000403F}
-		f %SizePosY{0x0000E03F}
-		f %SizePosZ{0x0000403F}
-		b %SlopedBottom{0}
-		b %SlopedTop{0}
-		f %Thickness{0x0000003F}
-		b %UseAsOccluder{1}
-	}
-}
-o
-{
-	Uuid %id{u4{7462268368871006357,5723314292719111726}}
-	s %t{"plGameObject"}
+	Uuid %id{u4{1951270158574277795,5588434132482001563}}
+	s %t{"plJoltShapeConvexHullComponent"}
 	u3 %v{1}
 	p
 	{
 		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{11218973099157091489,5719244332389350007}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0x000080BF,0x0000003F}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-			s{"AutoColMesh"}
-		}
-	}
-}
-o
-{
-	Uuid %id{u4{16039776123327298449,5729703871021399628}}
-	s %t{"plExposedSceneProperty"}
-	u3 %v{1}
-	p
-	{
-		s %Name{"Material"}
-		Uuid %Object{u4{2695380919510134051,15324558872845949395}}
-		s %PropertyPath{"Material"}
-	}
-}
-o
-{
-	Uuid %id{u4{15508576473403343542,5738235543082948957}}
-	s %t{"plExposedSceneProperty"}
-	u3 %v{1}
-	p
-	{
-		s %Name{"Material"}
-		Uuid %Object{u4{11218973099157091489,5719244332389350007}}
-		s %PropertyPath{"Material"}
+		s %CollisionMesh{"{ 7e42491b-1a9b-4300-9827-a7332e256f70 }"}
 	}
 }
 o
@@ -193,63 +170,9 @@ o
 		VarArray %Children
 		{
 			Uuid{u4{15747268981102880756,15882892305185028852}}
-			Uuid{u4{7462268368871006357,5723314292719111726}}
+			Uuid{u4{10451996791062949023,5471451957779734268}}
 		}
 		Uuid %Settings{u4{4382445102829173398,5580823196043543123}}
-	}
-}
-o
-{
-	Uuid %id{u4{6724978363745695079,10460517069894996236}}
-	s %t{"plGreyBoxComponent"}
-	u3 %v{5}
-	p
-	{
-		b %Active{1}
-		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
-		Angle %Curvature{f{0}}
-		u3 %Detail{16}
-		b %GenerateCollision{1}
-		b %IncludeInNavmesh{1}
-		s %Material{""}
-		s %Shape{"plGreyBoxShape::Column"}
-		f %SizeNegX{0x0000003F}
-		f %SizeNegY{0x0000003F}
-		f %SizeNegZ{0}
-		f %SizePosX{0x0000003F}
-		f %SizePosY{0x0000003F}
-		f %SizePosZ{0x00000040}
-		b %SlopedBottom{0}
-		b %SlopedTop{0}
-		f %Thickness{0x0000003F}
-		b %UseAsOccluder{1}
-	}
-}
-o
-{
-	Uuid %id{u4{15260037727158717794,11028080214577979205}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{6724978363745695079,10460517069894996236}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0,0x0000003F}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-			s{"AutoColMesh"}
-		}
 	}
 }
 o
@@ -281,44 +204,13 @@ o
 }
 o
 {
-	Uuid %id{u4{2695380919510134051,15324558872845949395}}
-	s %t{"plGreyBoxComponent"}
-	u3 %v{5}
-	p
-	{
-		b %Active{1}
-		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
-		Angle %Curvature{f{0}}
-		u3 %Detail{16}
-		b %GenerateCollision{1}
-		b %IncludeInNavmesh{1}
-		s %Material{""}
-		s %Shape{"plGreyBoxShape::Box"}
-		f %SizeNegX{0x0000803F}
-		f %SizeNegY{0x0000803F}
-		f %SizeNegZ{0}
-		f %SizePosX{0x0000803F}
-		f %SizePosY{0x0000803F}
-		f %SizePosZ{0x0000803E}
-		b %SlopedBottom{0}
-		b %SlopedTop{0}
-		f %Thickness{0x0000003F}
-		b %UseAsOccluder{1}
-	}
-}
-o
-{
 	Uuid %id{u4{15747268981102880756,15882892305185028852}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
 	{
 		b %Active{1}
-		VarArray %Children
-		{
-			Uuid{u4{15260037727158717794,11028080214577979205}}
-			Uuid{u4{11230440282923156766,15892122017528932364}}
-		}
+		VarArray %Children{}
 		VarArray %Components
 		{
 			Uuid{u4{7212209617689858041,15315329160502045883}}
@@ -337,56 +229,12 @@ o
 		}
 	}
 }
-o
-{
-	Uuid %id{u4{11230440282923156766,15892122017528932364}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{2695380919510134051,15324558872845949395}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0,0x00002040}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-			s{"AutoColMesh"}
-		}
-	}
-}
 }
 Types
 {
 o
 {
-	Uuid %id{u4{6914292285925798136,1108246313736053318}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plComponent"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{15501499876559131010,2215366623898344174}}
+	Uuid %id{u4{17355104657019131422,2603934264610161431}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -403,75 +251,7 @@ o
 }
 o
 {
-	Uuid %id{u4{11638255232360359673,3108610646416571142}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginScene"}
-		VarArray %Properties{}
-		s %TypeName{"plExposedSceneProperty"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{14332645745114734426,3197497487504472660}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plSceneDocumentSettingsBase"}
-		s %PluginName{"PlasmaEditorPluginScene"}
-		VarArray %Properties{}
-		s %TypeName{"plPrefabDocumentSettings"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{13649880205026559927,7297274558339895637}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{""}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plGameObject"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{6089094783765586323,8705960867921430659}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plDocumentRoot"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{3251891958765718680,9159887340540620231}}
+	Uuid %id{u4{5090140418944865950,3172852594581671215}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -480,7 +260,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plDocumentRoot"}
-		s %PluginName{"PlasmaEditorPluginScene"}
+		s %PluginName{"plasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plSceneDocumentRoot"}
 		u3 %TypeVersion{2}
@@ -488,7 +268,62 @@ o
 }
 o
 {
-	Uuid %id{u4{14543630447052729839,9459039542380974471}}
+	Uuid %id{u4{8351431977533639674,5063311031373884206}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{7122674370288739913,5218031859803074572}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{14271657949996971221,8685359011034779822}}
+			Uuid{u4{11166322143026092951,9904855637868442860}}
+		}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plComponent"}
+		s %PluginName{"plasmaJoltPlugin"}
+		VarArray %Properties{}
+		s %TypeName{"plJoltShapeComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{2490466214221766975,5839995135696447901}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plColorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{14187911491586291717,6357927790796962117}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -505,24 +340,7 @@ o
 }
 o
 {
-	Uuid %id{u4{14700230518358869173,11472901527618371423}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginScene"}
-		VarArray %Properties{}
-		s %TypeName{"plSceneDocumentSettingsBase"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{16777871838542487558,12116962178824346014}}
+	Uuid %id{u4{10411385167834517523,6666974454840060292}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -539,7 +357,24 @@ o
 }
 o
 {
-	Uuid %id{u4{10244937169896853361,14776906713232524690}}
+	Uuid %id{u4{3294892078126623227,7172327487756919129}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plNonUniformBoxManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15762322430047782439,7432360605352045857}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -556,7 +391,89 @@ o
 }
 o
 {
-	Uuid %id{u4{2947336711354777548,15013008608905564043}}
+	Uuid %id{u4{10902240544446455838,7974591609925396582}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Jolt_Colmesh_Convex;"}
+	}
+}
+o
+{
+	Uuid %id{u4{14271657949996971221,8685359011034779822}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Physics/Jolt/Shapes"}
+	}
+}
+o
+{
+	Uuid %id{u4{16327902051560403381,9549694019668826253}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plMeshComponentBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshComponent"}
+		u3 %TypeVersion{3}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{11166322143026092951,9904855637868442860}}
+	s %t{"plColorAttribute"}
+	u3 %v{1}
+	p
+	{
+		Color %Color{f{0x1083F23B,0x293E823D,0xA637493E,0x0000803F}}
+	}
+}
+o
+{
+	Uuid %id{u4{8399423596297715122,9970706930732107724}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -573,7 +490,144 @@ o
 }
 o
 {
-	Uuid %id{u4{983387834180907111,17935407260904399048}}
+	Uuid %id{u4{14209585135339028478,11308263336862562356}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plPropertyAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10799938453523757431,11702988725276979427}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginScene"}
+		VarArray %Properties{}
+		s %TypeName{"plSceneDocumentSettingsBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{12702173672668551041,11899314833995959136}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plRenderComponent"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshComponentBase"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{17344855267500754522,12198870391063964378}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plSceneDocumentSettingsBase"}
+		s %PluginName{"plasmaEditorPluginScene"}
+		VarArray %Properties{}
+		s %TypeName{"plPrefabDocumentSettings"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{12621501544260860891,15719976691117957393}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plasmaEditorPluginScene"}
+		VarArray %Properties{}
+		s %TypeName{"plExposedSceneProperty"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4862719181471848392,16023915775579166190}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plGameObject"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15223166347154283672,16316725835924938816}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{10902240544446455838,7974591609925396582}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Phantom"}
+		s %Name{"CollisionMesh"}
+		s %Type{"plConstCharPtr"}
+	}
+}
+o
+{
+	Uuid %id{u4{6853598190348858983,16453551367257532047}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCategoryAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -585,6 +639,26 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{9593981349459361090,18384122037127896321}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plJoltShapeComponent"}
+		s %PluginName{"plasmaJoltPlugin"}
+		VarArray %Properties
+		{
+			Uuid{u4{15223166347154283672,16316725835924938816}}
+		}
+		s %TypeName{"plJoltShapeConvexHullComponent"}
 		u3 %TypeVersion{1}
 	}
 }
