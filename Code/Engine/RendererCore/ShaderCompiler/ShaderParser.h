@@ -2,6 +2,7 @@
 
 #include <Foundation/Strings/String.h>
 #include <RendererCore/Declarations.h>
+#include <RendererFoundation/Shader/ShaderByteCode.h>
 
 class plPropertyAttribute;
 
@@ -45,4 +46,17 @@ public:
     plStringView sPermutationSection, plHybridArray<plHashedString, 16>& out_permVars, plHybridArray<plPermutationVar, 16>& out_fixedPermVars);
 
   static void ParsePermutationVarConfig(plStringView sPermutationVarConfig, plVariant& out_defaultValue, EnumDefinition& out_enumDefinition);
+
+  struct ResourceDefinition
+  {
+    plStringView m_sDeclaration;
+    plStringView m_sDeclarationAndRegister;
+    plShaderResourceBinding m_Binding;
+  };
+
+  static void ParseShaderResources(plStringView sShaderStageSource, plDynamicArray<ResourceDefinition>& out_Resources);
+
+  typedef plDelegate<void(plStringView sDeclaration, const plShaderResourceBinding& binding, plStringBuilder& out_sDeclaration)> CreateResourceDeclaration;
+
+  static void ApplyShaderResourceBindings(plStringView sShaderStageSource, const plDynamicArray<ResourceDefinition>& resources, const plHashTable<plHashedString, plShaderResourceBinding>& bindings, const CreateResourceDeclaration& createDeclaration, plStringBuilder& out_shaderStageSource);
 };

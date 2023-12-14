@@ -599,6 +599,11 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
 
     m_StateFlags.Remove(plRenderContextFlags::ShaderStateChanged);
   }
+  else
+  {
+    pShaderPermutation = plResourceManager::BeginAcquireResource(
+      m_hActiveShaderPermutation, m_bAllowAsyncShaderLoading ? plResourceAcquireMode::AllowLoadingFallback : plResourceAcquireMode::BlockTillLoaded);
+  }
 
   if (m_hActiveShaderPermutation.IsValid())
   {
@@ -607,62 +612,41 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
                                          plRenderContextFlags::ConstantBufferBindingChanged)))
     {
       if (pShaderPermutation == nullptr)
+      {
         pShaderPermutation = plResourceManager::BeginAcquireResource(m_hActiveShaderPermutation, plResourceAcquireMode::BlockTillLoaded);
+      }
     }
 
     plLogBlock applyBindingsBlock("Applying Shader Bindings", pShaderPermutation != nullptr ? pShaderPermutation->GetResourceDescription().GetData() : "");
 
+    if (pShaderPermutation == nullptr)
+    {
+      return PLASMA_FAILURE;
+    }
+    plGALShaderHandle hShader = pShaderPermutation->GetGALShader();
+    const plGALShader* pShader = plGALDevice::GetDefaultDevice()->GetShader(hShader);
+
     if (bForce || m_StateFlags.IsSet(plRenderContextFlags::UAVBindingChanged))
     {
-      // RWTextures/UAV are usually only supported in compute and pixel shader.
-      if (auto pBin = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::ComputeShader))
-      {
-        ApplyUAVBindings(pBin);
-      }
-      if (auto pBin = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::PixelShader))
-      {
-        ApplyUAVBindings(pBin);
-      }
-
+      ApplyUAVBindings(pShader);
       m_StateFlags.Remove(plRenderContextFlags::UAVBindingChanged);
     }
 
     if (bForce || m_StateFlags.IsSet(plRenderContextFlags::TextureBindingChanged))
     {
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-      {
-        if (auto pBin = pShaderPermutation->GetShaderStageBinary((plGALShaderStage::Enum)stage))
-        {
-          ApplyTextureBindings((plGALShaderStage::Enum)stage, pBin);
-        }
-      }
-
+      ApplyTextureBindings(pShader);
       m_StateFlags.Remove(plRenderContextFlags::TextureBindingChanged);
     }
 
     if (bForce || m_StateFlags.IsSet(plRenderContextFlags::SamplerBindingChanged))
     {
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-      {
-        if (auto pBin = pShaderPermutation->GetShaderStageBinary((plGALShaderStage::Enum)stage))
-        {
-          ApplySamplerBindings((plGALShaderStage::Enum)stage, pBin);
-        }
-      }
-
+      ApplySamplerBindings(pShader);
       m_StateFlags.Remove(plRenderContextFlags::SamplerBindingChanged);
     }
 
     if (bForce || m_StateFlags.IsSet(plRenderContextFlags::BufferBindingChanged))
     {
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-      {
-        if (auto pBin = pShaderPermutation->GetShaderStageBinary((plGALShaderStage::Enum)stage))
-        {
-          ApplyBufferBindings((plGALShaderStage::Enum)stage, pBin);
-        }
-      }
-
+      ApplyBufferBindings(pShader);
       m_StateFlags.Remove(plRenderContextFlags::BufferBindingChanged);
     }
 
@@ -676,14 +660,7 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
 
     if (bForce || m_StateFlags.IsSet(plRenderContextFlags::ConstantBufferBindingChanged))
     {
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-      {
-        if (auto pBin = pShaderPermutation->GetShaderStageBinary((plGALShaderStage::Enum)stage))
-        {
-          ApplyConstantBufferBindings(pBin);
-        }
-      }
-
+      ApplyConstantBufferBindings(pShader);
       m_StateFlags.Remove(plRenderContextFlags::ConstantBufferBindingChanged);
     }
   }
@@ -1173,11 +1150,12 @@ plMaterialResource* plRenderContext::ApplyMaterialState()
   return nullptr;
 }
 
-void plRenderContext::ApplyConstantBufferBindings(const plShaderStageBinary* pBinary)
+void plRenderContext::ApplyConstantBufferBindings(const plGALShader* pShader)
 {
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
   {
-    if (binding.m_Type != plShaderResourceType::ConstantBuffer)
+    if (binding.m_DescriptorType != plGALShaderDescriptorType::ConstantBuffer)
       continue;
 
     const plUInt64 uiResourceHash = binding.m_sName.GetHash();
@@ -1187,111 +1165,125 @@ void plRenderContext::ApplyConstantBufferBindings(const plShaderStageBinary* pBi
     {
       // If the shader was compiled with debug info the shader compiler will not strip unused resources and
       // thus this error would trigger although the shader doesn't actually uses the resource.
-      if (!pBinary->m_bWasCompiledWithDebug)
+      // #TODO_SHADER if (!pBinary->GetByteCode()->m_bWasCompiledWithDebug)
       {
         plLog::Error("No resource is bound for constant buffer slot '{0}'", binding.m_sName);
       }
-      m_pGALCommandEncoder->SetConstantBuffer(binding.m_iSlot, plGALBufferHandle());
+      m_pGALCommandEncoder->SetConstantBuffer(binding, plGALBufferHandle());
       continue;
     }
 
     if (!boundConstantBuffer.m_hConstantBuffer.IsInvalidated())
     {
-      m_pGALCommandEncoder->SetConstantBuffer(binding.m_iSlot, boundConstantBuffer.m_hConstantBuffer);
+      m_pGALCommandEncoder->SetConstantBuffer(binding, boundConstantBuffer.m_hConstantBuffer);
     }
     else
     {
       plConstantBufferStorageBase* pConstantBufferStorage = nullptr;
       if (TryGetConstantBufferStorage(boundConstantBuffer.m_hConstantBufferStorage, pConstantBufferStorage))
       {
-        m_pGALCommandEncoder->SetConstantBuffer(binding.m_iSlot, pConstantBufferStorage->GetGALBufferHandle());
+        m_pGALCommandEncoder->SetConstantBuffer(binding, pConstantBufferStorage->GetGALBufferHandle());
       }
       else
       {
         plLog::Error("Invalid constant buffer storage is bound for slot '{0}'", binding.m_sName);
-        m_pGALCommandEncoder->SetConstantBuffer(binding.m_iSlot, plGALBufferHandle());
+        m_pGALCommandEncoder->SetConstantBuffer(binding, plGALBufferHandle());
       }
     }
   }
 }
 
-void plRenderContext::ApplyTextureBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary)
+void plRenderContext::ApplyTextureBindings(const plGALShader* pShader)
 {
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
   {
-    // we currently only support 2D and cube textures
-
     const plUInt64 uiResourceHash = binding.m_sName.GetHash();
     plGALResourceViewHandle hResourceView;
 
-    if (binding.m_Type >= plShaderResourceType::Texture2D && binding.m_Type <= plShaderResourceType::Texture2DMSArray)
+    if (binding.m_DescriptorType == plGALShaderDescriptorType::Texture)
     {
-      m_BoundTextures2D.TryGetValue(uiResourceHash, hResourceView);
-      m_pGALCommandEncoder->SetResourceView(stage, binding.m_iSlot, hResourceView);
-    }
-
-    if (binding.m_Type == plShaderResourceType::Texture3D)
-    {
-      m_BoundTextures3D.TryGetValue(uiResourceHash, hResourceView);
-      m_pGALCommandEncoder->SetResourceView(stage, binding.m_iSlot, hResourceView);
-    }
-
-    if (binding.m_Type >= plShaderResourceType::TextureCube && binding.m_Type <= plShaderResourceType::TextureCubeArray)
-    {
-      m_BoundTexturesCube.TryGetValue(uiResourceHash, hResourceView);
-      m_pGALCommandEncoder->SetResourceView(stage, binding.m_iSlot, hResourceView);
+      switch (binding.m_TextureType)
+      {
+        case plGALShaderTextureType::Texture2D:
+        case plGALShaderTextureType::Texture2DArray:
+        case plGALShaderTextureType::Texture2DMS:
+        case plGALShaderTextureType::Texture2DMSArray:
+          m_BoundTextures2D.TryGetValue(uiResourceHash, hResourceView);
+          m_pGALCommandEncoder->SetResourceView(binding, hResourceView);
+          break;
+        case plGALShaderTextureType::Texture3D:
+          m_BoundTextures3D.TryGetValue(uiResourceHash, hResourceView);
+          m_pGALCommandEncoder->SetResourceView(binding, hResourceView);
+          break;
+        case plGALShaderTextureType::TextureCube:
+        case plGALShaderTextureType::TextureCubeArray:
+          m_BoundTexturesCube.TryGetValue(uiResourceHash, hResourceView);
+          m_pGALCommandEncoder->SetResourceView(binding, hResourceView);
+          break;
+        case plGALShaderTextureType::Texture1D:
+        case plGALShaderTextureType::Texture1DArray:
+        default:
+          PLASMA_ASSERT_NOT_IMPLEMENTED;
+          break;
+      }
     }
   }
 }
 
-void plRenderContext::ApplyUAVBindings(const plShaderStageBinary* pBinary)
+void plRenderContext::ApplyUAVBindings(const plGALShader* pShader)
 {
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
   {
-    if (binding.m_Type != plShaderResourceType::UAV)
-      continue;
-
-    const plUInt64 uiResourceHash = binding.m_sName.GetHash();
-
-    plGALUnorderedAccessViewHandle hResourceView;
-    m_BoundUAVs.TryGetValue(uiResourceHash, hResourceView);
-
-    m_pGALCommandEncoder->SetUnorderedAccessView(binding.m_iSlot, hResourceView);
-  }
-}
-
-void plRenderContext::ApplySamplerBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary)
-{
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
-  {
-    if (binding.m_Type != plShaderResourceType::Sampler)
-      continue;
-
-    const plUInt64 uiResourceHash = binding.m_sName.GetHash();
-
-    plGALSamplerStateHandle hSamplerState;
-    if (!m_BoundSamplers.TryGetValue(uiResourceHash, hSamplerState))
+    auto type = plGALShaderResourceType::MakeFromShaderDescriptorType(binding.m_DescriptorType);
+    if (type == plGALShaderResourceType::UAV)
     {
-      hSamplerState = GetDefaultSamplerState(plDefaultSamplerFlags::LinearFiltering); // Bind a default state to avoid DX11 errors.
-    }
+      const plUInt64 uiResourceHash = binding.m_sName.GetHash();
 
-    m_pGALCommandEncoder->SetSamplerState(stage, binding.m_iSlot, hSamplerState);
+      plGALUnorderedAccessViewHandle hResourceView;
+      m_BoundUAVs.TryGetValue(uiResourceHash, hResourceView);
+
+      m_pGALCommandEncoder->SetUnorderedAccessView(binding, hResourceView);
+    }
   }
 }
 
-void plRenderContext::ApplyBufferBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary)
+void plRenderContext::ApplySamplerBindings(const plGALShader* pShader)
 {
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
   {
-    if (binding.m_Type != plShaderResourceType::GenericBuffer)
-      continue;
+    auto type = plGALShaderResourceType::MakeFromShaderDescriptorType(binding.m_DescriptorType);
+    if (type == plGALShaderResourceType::Sampler)
+    {
+      const plUInt64 uiResourceHash = binding.m_sName.GetHash();
 
-    const plUInt64 uiResourceHash = binding.m_sName.GetHash();
+      plGALSamplerStateHandle hSamplerState;
+      if (!m_BoundSamplers.TryGetValue(uiResourceHash, hSamplerState))
+      {
+        hSamplerState = GetDefaultSamplerState(plDefaultSamplerFlags::LinearFiltering); // Bind a default state to avoid DX11 errors.
+      }
 
-    plGALResourceViewHandle hResourceView;
-    m_BoundBuffer.TryGetValue(uiResourceHash, hResourceView);
+      m_pGALCommandEncoder->SetSamplerState(binding, hSamplerState);
+    }
+  }
+}
 
-    m_pGALCommandEncoder->SetResourceView(stage, binding.m_iSlot, hResourceView);
+void plRenderContext::ApplyBufferBindings(const plGALShader* pShader)
+{
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
+  {
+    if (binding.m_DescriptorType >= plGALShaderDescriptorType::TexelBuffer && binding.m_DescriptorType >= plGALShaderDescriptorType::StructuredBuffer)
+    {
+      const plUInt64 uiResourceHash = binding.m_sName.GetHash();
+
+      plGALResourceViewHandle hResourceView;
+      m_BoundBuffer.TryGetValue(uiResourceHash, hResourceView);
+
+      m_pGALCommandEncoder->SetResourceView(binding, hResourceView);
+    }
   }
 }
 

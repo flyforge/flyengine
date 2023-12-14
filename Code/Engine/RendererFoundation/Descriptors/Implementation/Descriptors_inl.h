@@ -1,16 +1,3 @@
-inline bool plShaderResourceType::IsArray(plShaderResourceType::Enum format)
-{
-  switch (format)
-  {
-    case plShaderResourceType::Texture1DArray:
-    case plShaderResourceType::Texture2DArray:
-    case plShaderResourceType::Texture2DMSArray:
-    case plShaderResourceType::TextureCubeArray:
-      return true;
-    default:
-      return false;
-  }
-}
 
 inline plGALShaderCreationDescription::plGALShaderCreationDescription()
   : plHashableStruct()

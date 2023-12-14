@@ -90,7 +90,7 @@ namespace
     }
   }
 
-  static const char* s_szStageDefines[plGALShaderStage::ENUM_COUNT] = {"VERTEX_SHADER", "HULL_SHADER", "DOMAIN_SHADER", "GEOMETRY_SHADER", "PIXEL_SHADER", "COMPUTE_SHADER"};
+  static const char* s_szStageDefines[plGALShaderStage::ENUM_COUNT] = {"VERTEX_SHADER", "HULL_SHADER", "DOMAIN_SHADER", "GEOMETRY_SHADER", "PIXEL_SHADER", "COMPUTE_SHADER", "TASK_SHADER", "MESH_SHADER", "RAYGEN_SHADER", "RAYANYHIT_SHADDER", "RAYCLOSESTHIT_SHADER", "RAYMISS_SHADER", "RAYINTERSECTION_SHADER"};
 } // namespace
 
 plResult plShaderCompiler::FileOpen(plStringView sAbsoluteFile, plDynamicArray<plUInt8>& FileContent, plTimestamp& out_FileModification)
@@ -261,7 +261,8 @@ plResult plShaderCompiler::CompileShaderPermutationForPlatforms(plStringView sFi
   // try out every compiler that we can find
   plResult result = PLASMA_SUCCESS;
   plRTTI::ForEachDerivedType<plShaderProgramCompiler>(
-    [&](const plRTTI* pRtti) {
+    [&](const plRTTI* pRtti)
+    {
       plUniquePtr<plShaderProgramCompiler> pCompiler = pRtti->GetAllocator()->Allocate<plShaderProgramCompiler>();
 
       if (RunShaderCompiler(sFile, sPlatform, pCompiler.Borrow(), pLog).Failed())
@@ -330,13 +331,14 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
       }
 
       bool bFoundUndefinedVars = false;
-      pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e) {
-          if (e.m_Type == plPreprocessor::ProcessingEvent::EvaluateUnknown)
-          {
-            bFoundUndefinedVars = true;
+      pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e)
+        {
+        if (e.m_Type == plPreprocessor::ProcessingEvent::EvaluateUnknown)
+        {
+          bFoundUndefinedVars = true;
 
-            plLog::Error("Undefined variable is evaluated: '{0}' (File: '{1}', Line: {2}", e.m_pToken->m_DataView, e.m_pToken->m_File, e.m_pToken->m_uiLine);
-          } });
+          plLog::Error("Undefined variable is evaluated: '{0}' (File: '{1}', Line: {2}", e.m_pToken->m_DataView, e.m_pToken->m_File, e.m_pToken->m_uiLine);
+        } });
 
       plStringBuilder sOutput;
       if (pp.Process("ShaderRenderState", sOutput, false).Failed() || bFoundUndefinedVars)
@@ -354,10 +356,10 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
       }
     }
 
+    // Shader Preprocessing
     for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
     {
-      spd.m_StageBinary[stage].m_Stage = (plGALShaderStage::Enum)stage;
-      spd.m_StageBinary[stage].m_uiSourceHash = 0;
+      spd.m_uiSourceHash[stage] = 0;
 
       if (m_ShaderData.m_ShaderStageSource[stage].IsEmpty())
         continue;
@@ -371,13 +373,14 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
       pp.SetPassThroughPragma(true);
       pp.SetPassThroughUnknownCmdsCB(plMakeDelegate(&plShaderCompiler::PassThroughUnknownCommandCB, this));
       pp.SetPassThroughLine(false);
-      pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e) {
-          if (e.m_Type == plPreprocessor::ProcessingEvent::EvaluateUnknown)
-          {
-            bFoundUndefinedVars = true;
+      pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e)
+        {
+        if (e.m_Type == plPreprocessor::ProcessingEvent::EvaluateUnknown)
+        {
+          bFoundUndefinedVars = true;
 
-            plLog::Error("Undefined variable is evaluated: '{0}' (File: '{1}', Line: {2}", e.m_pToken->m_DataView, e.m_pToken->m_File, e.m_pToken->m_uiLine);
-          } });
+          plLog::Error("Undefined variable is evaluated: '{0}' (File: '{1}', Line: {2}", e.m_pToken->m_DataView, e.m_pToken->m_File, e.m_pToken->m_uiLine);
+        } });
 
       PLASMA_SUCCEED_OR_RETURN(pp.AddCustomDefine(s_szStageDefines[stage]));
       for (auto& define : defines)
@@ -385,7 +388,6 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
         PLASMA_SUCCEED_OR_RETURN(pp.AddCustomDefine(define));
       }
 
-      plUInt32 uiSourceStringLen = 0;
       if (pp.Process(m_StageSourceFile[stage], sProcessed[stage], true, true, true).Failed() || bFoundUndefinedVars)
       {
         sProcessed[stage].Clear();
@@ -397,19 +399,87 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
       else
       {
         spd.m_sShaderSource[stage] = sProcessed[stage];
-        uiSourceStringLen = sProcessed[stage].GetElementCount();
       }
+    }
 
-      spd.m_StageBinary[stage].m_uiSourceHash = plHashingUtils::xxHash32(spd.m_sShaderSource[stage].GetStartPointer(), uiSourceStringLen);
+    // Parse shader resources
+    for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+    {
+      if (spd.m_sShaderSource[stage].IsEmpty())
+        continue;
+      plShaderParser::ParseShaderResources(spd.m_sShaderSource[stage], spd.m_Resources[stage]);
+    }
 
-      if (spd.m_StageBinary[stage].m_uiSourceHash != 0)
+    // Merge shader resources
+    plHashTable<plHashedString, plShaderResourceBinding> bindings;
+    if (MergeShaderResourceBindings(spd, bindings).Failed())
+    {
+      WriteFailedShaderSource(spd, pLog);
+      return PLASMA_FAILURE;
+    }
+
+    // Define shader resource bindings
+    if (pCompiler->DefineShaderResourceBindings(spd, bindings, plLog::GetThreadLocalLogSystem()).Failed())
+    {
+      WriteFailedShaderSource(spd, pLog);
+      return PLASMA_FAILURE;
+    }
+    for (auto it : bindings)
+    {
+      if (it.Value().m_iSet < 0)
       {
-        plShaderStageBinary* pBinary = plShaderStageBinary::LoadStageBinary((plGALShaderStage::Enum)stage, spd.m_StageBinary[stage].m_uiSourceHash);
+        plLog::Error("Shader resource '{}' does not have a set defined.", it.Key());
+        return PLASMA_FAILURE;
+      }
+      if (it.Value().m_iSlot < 0)
+      {
+        plLog::Error("Shader resource '{}' does not have a slot defined.", it.Key());
+        return PLASMA_FAILURE;
+      }
+      if (it.Value().m_DescriptorType == plGALShaderDescriptorType::ConstantBuffer && it.Value().m_iSlot >= PLASMA_GAL_MAX_CONSTANT_BUFFER_COUNT)
+      {
+        plLog::Error("Shader constant buffer resource '{}' has slot index {}. PLASMA only supports up to {} slots.", it.Key(), it.Value().m_iSlot, PLASMA_GAL_MAX_CONSTANT_BUFFER_COUNT);
+        return PLASMA_FAILURE;
+      }
+      if (it.Value().m_DescriptorType == plGALShaderDescriptorType::Sampler && it.Value().m_iSlot >= PLASMA_GAL_MAX_SAMPLER_COUNT)
+      {
+        plLog::Error("Shader sampler resource '{}' has slot index {}. PLASMA only supports up to {} slots.", it.Key(), it.Value().m_iSlot, PLASMA_GAL_MAX_SAMPLER_COUNT);
+        return PLASMA_FAILURE;
+      }
+    }
+
+    // Apply shader resource bindings
+    plStringBuilder sNewShaderCode;
+    for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+    {
+      if (spd.m_sShaderSource[stage].IsEmpty())
+        continue;
+      plShaderParser::ApplyShaderResourceBindings(spd.m_sShaderSource[stage], spd.m_Resources[stage], bindings, plMakeDelegate(&plShaderProgramCompiler::CreateShaderResourceDeclaration, pCompiler), sNewShaderCode);
+      spd.m_sShaderSource[stage] = sNewShaderCode;
+      spd.m_Resources[stage].Clear();
+    }
+
+    // Load shader cache
+    for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+    {
+      plUInt32 uiSourceStringLen = spd.m_sShaderSource[stage].GetElementCount();
+      spd.m_uiSourceHash[stage] = uiSourceStringLen == 0 ? 0u : plHashingUtils::xxHash32(spd.m_sShaderSource[stage].GetData(), uiSourceStringLen);
+
+      if (spd.m_uiSourceHash[stage] != 0)
+      {
+        plShaderStageBinary* pBinary = plShaderStageBinary::LoadStageBinary((plGALShaderStage::Enum)stage, spd.m_uiSourceHash[stage]);
 
         if (pBinary)
         {
-          spd.m_StageBinary[stage] = *pBinary;
-          spd.m_bWriteToDisk[stage] = pBinary->GetByteCode().IsEmpty();
+          spd.m_ByteCode[stage] = pBinary->m_GALByteCode;
+          spd.m_bWriteToDisk[stage] = false;
+        }
+        else
+        {
+          // Can't find shader with given hash on disk, create a new plGALShaderByteCode and let the compiler build it.
+          spd.m_ByteCode[stage] = PLASMA_DEFAULT_NEW(plGALShaderByteCode);
+          spd.m_ByteCode[stage]->m_Stage = (plGALShaderStage::Enum)stage;
+          spd.m_ByteCode[stage]->m_bWasCompiledWithDebug = spd.m_Flags.IsSet(plShaderCompilerFlags::Debug);
         }
       }
     }
@@ -417,7 +487,7 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
     // copy the source hashes
     for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
     {
-      shaderPermutationBinary.m_uiShaderStageHashes[stage] = spd.m_StageBinary[stage].m_uiSourceHash;
+      shaderPermutationBinary.m_uiShaderStageHashes[stage] = spd.m_uiSourceHash[stage];
     }
 
     // if compilation failed, the stage binary for the source hash will simply not exist and therefore cannot be loaded
@@ -430,15 +500,18 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
 
     for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
     {
-      if (spd.m_StageBinary[stage].m_uiSourceHash != 0 && spd.m_bWriteToDisk[stage])
+      if (spd.m_uiSourceHash[stage] != 0 && spd.m_bWriteToDisk[stage])
       {
-        spd.m_StageBinary[stage].m_bWasCompiledWithDebug = spd.m_Flags.IsSet(plShaderCompilerFlags::Debug);
+        plShaderStageBinary bin;
+        bin.m_uiSourceHash = spd.m_uiSourceHash[stage];
+        bin.m_GALByteCode = spd.m_ByteCode[stage];
 
-        if (spd.m_StageBinary[stage].WriteStageBinary(pLog).Failed())
+        if (bin.WriteStageBinary(pLog).Failed())
         {
           plLog::Error(pLog, "Writing stage {0} binary failed", stage);
           return PLASMA_FAILURE;
         }
+        plShaderStageBinary::s_ShaderStageBinaries[stage].Insert(bin.m_uiSourceHash, bin);
       }
     }
 
@@ -476,22 +549,62 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
   return PLASMA_SUCCESS;
 }
 
+plResult plShaderCompiler::MergeShaderResourceBindings(const plShaderProgramCompiler::plShaderProgramData& spd, plHashTable<plHashedString, plShaderResourceBinding>& out_bindings)
+{
+  plUInt32 uiSize = 0;
+  for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+  {
+    uiSize += spd.m_Resources[stage].GetCount();
+  }
+
+  out_bindings.Clear();
+  out_bindings.Reserve(uiSize);
+
+  plMap<plHashedString, const plShaderParser::ResourceDefinition*> resourceFirstOccurence;
+
+  for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+  {
+    for (const plShaderParser::ResourceDefinition& res : spd.m_Resources[stage])
+    {
+      plHashedString sName = res.m_Binding.m_sName;
+      auto it = out_bindings.Find(sName);
+      if (it.IsValid())
+      {
+        plShaderResourceBinding& current = it.Value();
+        if (current.m_DescriptorType != res.m_Binding.m_DescriptorType || current.m_TextureType != res.m_Binding.m_TextureType || current.m_uiArraySize != res.m_Binding.m_uiArraySize)
+        {
+          plLog::Error("A shared shader resource '{}' has a mismatching signatures between stages: '{}' vs '{}'", sName, resourceFirstOccurence.Find(sName).Value()->m_sDeclarationAndRegister, res.m_sDeclarationAndRegister);
+          return PLASMA_FAILURE;
+        }
+
+        current.m_Stages |= plGALShaderStageFlags::MakeFromShaderStage((plGALShaderStage::Enum)stage);
+      }
+      else
+      {
+        out_bindings.Insert(sName, res.m_Binding);
+        resourceFirstOccurence.Insert(sName, &res);
+        out_bindings.Find(sName).Value().m_Stages |= plGALShaderStageFlags::MakeFromShaderStage((plGALShaderStage::Enum)stage);
+      }
+    }
+  }
+  return PLASMA_SUCCESS;
+}
 
 void plShaderCompiler::WriteFailedShaderSource(plShaderProgramCompiler::plShaderProgramData& spd, plLogInterface* pLog)
 {
   for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
   {
-    if (spd.m_StageBinary[stage].m_uiSourceHash != 0 && spd.m_bWriteToDisk[stage])
+    if (spd.m_uiSourceHash[stage] != 0 && spd.m_bWriteToDisk[stage])
     {
       plStringBuilder sShaderStageFile = plShaderManager::GetCacheDirectory();
 
       sShaderStageFile.AppendPath(plShaderManager::GetActivePlatform());
-      sShaderStageFile.AppendFormat("/_Failed_{0}_{1}.plShaderSource", plGALShaderStage::Names[stage], plArgU(spd.m_StageBinary[stage].m_uiSourceHash, 8, true, 16, true));
+      sShaderStageFile.AppendFormat("/_Failed_{0}_{1}.plShaderSource", plGALShaderStage::Names[stage], plArgU(spd.m_uiSourceHash[stage], 8, true, 16, true));
 
       plFileWriter StageFileOut;
       if (StageFileOut.Open(sShaderStageFile).Succeeded())
       {
-        StageFileOut.WriteBytes(spd.m_sShaderSource[stage].GetStartPointer(), spd.m_sShaderSource[stage].GetElementCount()).AssertSuccess();
+        StageFileOut.WriteBytes(spd.m_sShaderSource[stage].GetData(), spd.m_sShaderSource[stage].GetElementCount()).AssertSuccess();
         plLog::Info(pLog, "Failed shader source written to '{0}'", sShaderStageFile);
       }
     }

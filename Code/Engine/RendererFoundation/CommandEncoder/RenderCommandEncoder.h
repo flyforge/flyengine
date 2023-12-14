@@ -24,7 +24,6 @@ public:
   void DrawIndexedInstancedIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes);
   void DrawInstanced(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex);
   void DrawInstancedIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes);
-  void DrawAuto();
 
   void BeginStreamOut();
   void EndStreamOut();

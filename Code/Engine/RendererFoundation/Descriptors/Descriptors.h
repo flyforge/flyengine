@@ -9,53 +9,10 @@
 #include <RendererFoundation/RendererFoundationDLL.h>
 #include <RendererFoundation/Resources/ResourceFormats.h>
 #include <RendererFoundation/Shader/ShaderByteCode.h>
+#include <RendererFoundation/Descriptors/Enumerations.h>
 #include <Texture/Image/ImageEnums.h>
 
 class plWindowBase;
-
-struct PLASMA_RENDERERFOUNDATION_DLL plShaderResourceType
-{
-  typedef plUInt8 StorageType;
-  enum Enum : plUInt8
-  {
-    Unknown = 0,
-
-    Texture1D = 1,
-    Texture1DArray = 2,
-    Texture2D = 3,
-    Texture2DArray = 4,
-    Texture2DMS = 5,
-    Texture2DMSArray = 6,
-    Texture3D = 7,
-    TextureCube = 8,
-    TextureCubeArray = 9,
-
-    UAV = 10,            ///< RW textures and buffers
-    ConstantBuffer = 20, ///< Constant buffers
-    GenericBuffer = 21,  ///< Read only (structured) buffers
-    Sampler = 22,        ///< Separate sampler states
-
-    Default = Unknown,
-  };
-
-  static bool IsArray(plShaderResourceType::Enum format);
-};
-
-
-/// \brief Defines a swap chain's present mode.
-/// \sa plGALWindowSwapChainCreationDescription
-struct PLASMA_RENDERERFOUNDATION_DLL plGALPresentMode
-{
-  typedef plUInt8 StorageType;
-
-  enum Enum
-  {
-    Immediate,
-    VSync,
-    ENUM_COUNT,
-    Default = VSync
-  };
-};
 
 struct plGALWindowSwapChainCreationDescription : public plHashableStruct<plGALWindowSwapChainCreationDescription>
 {
@@ -93,13 +50,13 @@ struct plGALShaderCreationDescription : public plHashableStruct<plGALShaderCreat
 
 struct plGALRenderTargetBlendDescription : public plHashableStruct<plGALRenderTargetBlendDescription>
 {
-  plGALBlend::Enum m_SourceBlend = plGALBlend::One;
-  plGALBlend::Enum m_DestBlend = plGALBlend::One;
-  plGALBlendOp::Enum m_BlendOp = plGALBlendOp::Add;
+  plEnum<plGALBlend> m_SourceBlend = plGALBlend::One;
+  plEnum<plGALBlend> m_DestBlend = plGALBlend::One;
+  plEnum<plGALBlendOp> m_BlendOp = plGALBlendOp::Add;
 
-  plGALBlend::Enum m_SourceBlendAlpha = plGALBlend::One;
-  plGALBlend::Enum m_DestBlendAlpha = plGALBlend::One;
-  plGALBlendOp::Enum m_BlendOpAlpha = plGALBlendOp::Add;
+  plEnum<plGALBlend> m_SourceBlendAlpha = plGALBlend::One;
+  plEnum<plGALBlend> m_DestBlendAlpha = plGALBlend::One;
+  plEnum<plGALBlendOp> m_BlendOpAlpha = plGALBlendOp::Add;
 
   plUInt8 m_uiWriteMask = 0xFF;    ///< Enables writes to color channels. Bit1 = Red Channel, Bit2 = Green Channel, Bit3 = Blue Channel, Bit4 = Alpha
                                    ///< Channel, Bit 5-8 are unused
@@ -149,8 +106,8 @@ struct plGALRasterizerStateCreationDescription : public plHashableStruct<plGALRa
   float m_fDepthBiasClamp = 0.0f;                         ///< The pixel depth bias clamp. Default is 0
   float m_fSlopeScaledDepthBias = 0.0f;                   ///< The pixel slope scaled depth bias clamp. Default is 0
   bool m_bWireFrame = false;                              ///< Whether triangles are rendered filled or as wireframe. Default is false
-  bool m_bFrontCounterClockwise = false; ///< Sets which triangle winding order defines the 'front' of a triangle. If true, the front of a triangle
-                                         ///< is the one where the vertices appear in counter clockwise order. Default is false
+  bool m_bFrontCounterClockwise = false;                  ///< Sets which triangle winding order defines the 'front' of a triangle. If true, the front of a triangle
+                                                          ///< is the one where the vertices appear in counter clockwise order. Default is false
   bool m_bScissorTest = false;
   bool m_bConservativeRasterization = false; ///< Whether conservative rasterization is enabled
 };
@@ -176,43 +133,7 @@ struct plGALSamplerStateCreationDescription : public plHashableStruct<plGALSampl
   plUInt32 m_uiMaxAnisotropy = 4;
 };
 
-struct plGALVertexAttributeSemantic
-{
-  enum Enum : plUInt8
-  {
-    Position,
-    Normal,
-    Tangent,
-    Color0,
-    Color1,
-    Color2,
-    Color3,
-    Color4,
-    Color5,
-    Color6,
-    Color7,
-    TexCoord0,
-    TexCoord1,
-    TexCoord2,
-    TexCoord3,
-    TexCoord4,
-    TexCoord5,
-    TexCoord6,
-    TexCoord7,
-    TexCoord8,
-    TexCoord9,
-
-    BiTangent,
-    BoneIndices0,
-    BoneIndices1,
-    BoneWeights0,
-    BoneWeights1,
-
-    ENUM_COUNT
-  };
-};
-
-struct plGALVertexAttribute
+struct PLASMA_RENDERERFOUNDATION_DLL plGALVertexAttribute
 {
   plGALVertexAttribute() = default;
 
@@ -232,29 +153,14 @@ struct PLASMA_RENDERERFOUNDATION_DLL plGALVertexDeclarationCreationDescription :
   plStaticArray<plGALVertexAttribute, 16> m_VertexAttributes;
 };
 
+// Need to add: immutable (GPU only), default(GPU only, but allows CopyToTempStorage updates), transient (allows plGALUpdateMode::Discard), staging: read(back), staging: write (constantly mapped), unified memory (mobile, onboard GPU, allows all ops)
+// Or use VmaMemoryUsage  + read write flags?
 struct plGALResourceAccess
 {
   PLASMA_ALWAYS_INLINE bool IsImmutable() const { return m_bImmutable; }
 
   bool m_bReadBack = false;
   bool m_bImmutable = true;
-};
-
-struct plGALBufferType
-{
-  typedef plUInt8 StorageType;
-
-  enum Enum
-  {
-    Generic = 0,
-    VertexBuffer,
-    IndexBuffer,
-    ConstantBuffer,
-
-    ENUM_COUNT,
-
-    Default = Generic
-  };
 };
 
 struct plGALBufferCreationDescription : public plHashableStruct<plGALBufferCreationDescription>
@@ -276,21 +182,16 @@ struct plGALBufferCreationDescription : public plHashableStruct<plGALBufferCreat
 
 struct plGALTextureCreationDescription : public plHashableStruct<plGALTextureCreationDescription>
 {
-  void SetAsRenderTarget(
-    plUInt32 uiWidth, plUInt32 uiHeight, plGALResourceFormat::Enum format, plGALMSAASampleCount::Enum sampleCount = plGALMSAASampleCount::None);
+  void SetAsRenderTarget(plUInt32 uiWidth, plUInt32 uiHeight, plGALResourceFormat::Enum format, plGALMSAASampleCount::Enum sampleCount = plGALMSAASampleCount::None);
 
   plUInt32 m_uiWidth = 0;
   plUInt32 m_uiHeight = 0;
   plUInt32 m_uiDepth = 1;
-
   plUInt32 m_uiMipLevelCount = 1;
-
   plUInt32 m_uiArraySize = 1;
 
   plEnum<plGALResourceFormat> m_Format = plGALResourceFormat::Invalid;
-
   plEnum<plGALMSAASampleCount> m_SampleCount = plGALMSAASampleCount::None;
-
   plEnum<plGALTextureType> m_Type = plGALTextureType::Texture2D;
 
   bool m_bAllowShaderResourceView = true;
@@ -310,8 +211,6 @@ struct plGALResourceViewCreationDescription : public plHashableStruct<plGALResou
   plGALBufferHandle m_hBuffer;
 
   plEnum<plGALResourceFormat> m_OverrideViewFormat = plGALResourceFormat::Invalid;
-
-  bool m_bUnsetUAV = true;
 
   // Texture only
   plUInt32 m_uiMostDetailedMipLevel = 0;
@@ -348,8 +247,6 @@ struct plGALUnorderedAccessViewCreationDescription : public plHashableStruct<plG
 
   plEnum<plGALResourceFormat> m_OverrideViewFormat = plGALResourceFormat::Invalid;
 
-  bool m_bUnsetResourceView = true;
-
   // Texture only
   plUInt32 m_uiMipLevelToUse = 0;   ///< Which MipLevel is accessed with this UAV
   plUInt32 m_uiFirstArraySlice = 0; ///< First depth slice for 3D Textures.
@@ -360,24 +257,6 @@ struct plGALUnorderedAccessViewCreationDescription : public plHashableStruct<plG
   plUInt32 m_uiNumElements = 0;
   bool m_bRawView = false;
   bool m_bAppend = false; // Allows appending data to the end of the buffer.
-};
-
-struct plGALQueryType
-{
-  typedef plUInt8 StorageType;
-
-  enum Enum
-  {
-    /// Number of samples that passed the depth and stencil test between begin and end (on a context).
-    NumSamplesPassed,
-    /// Boolean version of NumSamplesPassed.
-    AnySamplesPassed,
-
-    Default = NumSamplesPassed
-
-    // Note:
-    // GALFence provides an implementation of "event queries".
-  };
 };
 
 struct plGALQueryCreationDescription : public plHashableStruct<plGALQueryCreationDescription>
@@ -405,6 +284,17 @@ struct plGALDeviceEvent
 
   Type m_Type;
   class plGALDevice* m_pDevice;
+};
+
+// Opaque platform specific handle
+// Typically holds a platform specific handle for the texture and it's synchronization primitive
+struct plGALPlatformSharedHandle : public plHashableStruct<plGALPlatformSharedHandle>
+{
+  plUInt64 m_hSharedTexture = 0;
+  plUInt64 m_hSemaphore = 0;
+  plUInt32 m_uiProcessId = 0;
+  plUInt32 m_uiMemoryTypeIndex = 0;
+  plUInt64 m_uiSize = 0;
 };
 
 #include <RendererFoundation/Descriptors/Implementation/Descriptors_inl.h>

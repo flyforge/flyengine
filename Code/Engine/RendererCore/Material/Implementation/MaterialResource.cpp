@@ -1007,10 +1007,10 @@ void plMaterialResource::UpdateConstantBuffer(plShaderPermutationResource* pShad
     return;
 
   plTempHashedString sConstantBufferName("plMaterialConstants");
-  const plShaderResourceBinding* pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::PixelShader)->GetShaderResourceBinding(sConstantBufferName);
+  const plShaderResourceBinding* pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::PixelShader)->GetByteCode()->GetShaderResourceBinding(sConstantBufferName);
   if (pBinding == nullptr)
   {
-    pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::VertexShader)->GetShaderResourceBinding(sConstantBufferName);
+    pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::VertexShader)->GetByteCode()->GetShaderResourceBinding(sConstantBufferName);
   }
 
   const plShaderConstantBufferLayout* pLayout = pBinding != nullptr ? pBinding->m_pLayout : nullptr;
@@ -1040,7 +1040,7 @@ void plMaterialResource::UpdateConstantBuffer(plShaderPermutationResource* pShad
 
     for (auto& constant : pLayout->m_Constants)
     {
-      if (constant.m_uiOffset + plShaderConstantBufferLayout::Constant::s_TypeSize[constant.m_Type.GetValue()] <= data.GetCount())
+      if (constant.m_uiOffset + plShaderConstant::s_TypeSize[constant.m_Type.GetValue()] <= data.GetCount())
       {
         plUInt8* pDest = &data[constant.m_uiOffset];
 

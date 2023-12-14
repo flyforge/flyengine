@@ -30,10 +30,11 @@ public:
 
   virtual void SetShaderPlatform(const plGALShader* pShader) override;
 
-  virtual void SetConstantBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer) override;
-  virtual void SetSamplerStatePlatform(plGALShaderStage::Enum Stage, plUInt32 uiSlot, const plGALSamplerState* pSamplerState) override;
-  virtual void SetResourceViewPlatform(plGALShaderStage::Enum Stage, plUInt32 uiSlot, const plGALResourceView* pResourceView) override;
-  virtual void SetUnorderedAccessViewPlatform(plUInt32 uiSlot, const plGALUnorderedAccessView* pUnorderedAccessView) override;
+  virtual void SetConstantBufferPlatform(const plShaderResourceBinding& binding, const plGALBuffer* pBuffer) override;
+  virtual void SetSamplerStatePlatform(const plShaderResourceBinding& binding, const plGALSamplerState* pSamplerState) override;
+  virtual void SetResourceViewPlatform(const plShaderResourceBinding& binding, const plGALResourceView* pResourceView) override;
+  virtual void SetUnorderedAccessViewPlatform(const plShaderResourceBinding& binding, const plGALUnorderedAccessView* pUnorderedAccessView) override;
+
 
   // Query functions
 
@@ -95,7 +96,6 @@ public:
   virtual void DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) override;
   virtual void DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex) override;
   virtual void DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) override;
-  virtual void DrawAutoPlatform() override;
 
   virtual void BeginStreamOutPlatform() override;
   virtual void EndStreamOutPlatform() override;
@@ -126,6 +126,8 @@ public:
 private:
   friend class plGALPassDX11;
 
+  bool UnsetResourceViews(const plGALResourceBase* pResource);
+  bool UnsetUnorderedAccessViews(const plGALResourceBase* pResource);
   void FlushDeferredStateChanges();
 
   plGALDeviceDX11& m_GALDeviceDX11;
@@ -139,9 +141,11 @@ private:
   plGAL::ModifiedRange m_BoundConstantBuffersRange[plGALShaderStage::ENUM_COUNT];
 
   plHybridArray<ID3D11ShaderResourceView*, 16> m_pBoundShaderResourceViews[plGALShaderStage::ENUM_COUNT] = {};
+  plHybridArray<const plGALResourceBase*, 16> m_ResourcesForResourceViews[plGALShaderStage::ENUM_COUNT];
   plGAL::ModifiedRange m_BoundShaderResourceViewsRange[plGALShaderStage::ENUM_COUNT];
 
   plHybridArray<ID3D11UnorderedAccessView*, 16> m_BoundUnoderedAccessViews;
+  plHybridArray<const plGALResourceBase*, 16> m_ResourcesForUnorderedAccessViews;
   plGAL::ModifiedRange m_BoundUnoderedAccessViewsRange;
 
   ID3D11SamplerState* m_pBoundSamplerStates[plGALShaderStage::ENUM_COUNT][PLASMA_GAL_MAX_SAMPLER_COUNT] = {};

@@ -1,5 +1,12 @@
 #pragma once
 
+# define SET_FRAME 0
+# define SET_RENDER_PASS 1
+# define SET_MATERIAL 2
+# define SET_DRAW_CALL 3
+
+#define RESOURCE(name, Slot, Set) RES_##Name_##Slot_##Set
+
 #ifndef PLASMA_CONCAT
 
 /// \brief Concatenates two strings, even when the strings are macros themselves

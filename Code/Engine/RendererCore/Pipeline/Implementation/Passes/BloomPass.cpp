@@ -202,7 +202,6 @@ void plBloomPass::Execute(const plRenderViewContext& renderViewContext, const pl
       desc.m_hTexture = m_hBloomTexture;
       desc.m_uiMostDetailedMipLevel = 0;
       desc.m_uiMipLevelsToUse = 1;
-      desc.m_bUnsetUAV = false;
       hBloomInput = pDevice->CreateResourceView(desc);
     }
 
@@ -232,7 +231,6 @@ void plBloomPass::Execute(const plRenderViewContext& renderViewContext, const pl
         plGALUnorderedAccessViewCreationDescription desc;
         desc.m_hTexture = m_hBloomTexture;
         desc.m_uiMipLevelToUse = i + 1;
-        desc.m_bUnsetResourceView = false;
         hDownsampleOutput = pDevice->CreateUnorderedAccessView(desc);
       }
 
@@ -269,7 +267,6 @@ void plBloomPass::Execute(const plRenderViewContext& renderViewContext, const pl
         desc.m_hTexture = m_hBloomTexture;
         desc.m_uiMostDetailedMipLevel = uiMipSmall;
         desc.m_uiMipLevelsToUse = 1;
-        desc.m_bUnsetUAV = false;
         hUpscaleBlendInput = pDevice->CreateResourceView(desc);
       }
 
@@ -278,7 +275,6 @@ void plBloomPass::Execute(const plRenderViewContext& renderViewContext, const pl
         plGALUnorderedAccessViewCreationDescription desc;
         desc.m_hTexture = m_hBloomTexture;
         desc.m_uiMipLevelToUse = uiMipLarge;
-        desc.m_bUnsetResourceView = false;
         hUpscaleBlendOutput = pDevice->CreateUnorderedAccessView(desc);
       }
 

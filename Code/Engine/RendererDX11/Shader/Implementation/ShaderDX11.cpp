@@ -55,6 +55,8 @@ void plGALShaderDX11::SetDebugName(const char* szName) const
 
 plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
 {
+  PLASMA_SUCCEED_OR_RETURN(CreateBindingMapping());
+
   plGALDeviceDX11* pDXDevice = static_cast<plGALDeviceDX11*>(pDevice);
   ID3D11Device* pD3D11Device = pDXDevice->GetDXDevice();
 
@@ -124,6 +126,7 @@ plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
 
 plResult plGALShaderDX11::DeInitPlatform(plGALDevice* pDevice)
 {
+  DestroyBindingMapping();
   PLASMA_GAL_DX11_RELEASE(m_pVertexShader);
   PLASMA_GAL_DX11_RELEASE(m_pHullShader);
   PLASMA_GAL_DX11_RELEASE(m_pDomainShader);
@@ -133,7 +136,5 @@ plResult plGALShaderDX11::DeInitPlatform(plGALDevice* pDevice)
 
   return PLASMA_SUCCESS;
 }
-
-
 
 PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Shader_Implementation_ShaderDX11);

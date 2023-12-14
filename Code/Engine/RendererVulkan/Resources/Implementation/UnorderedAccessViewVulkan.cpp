@@ -91,6 +91,18 @@ plResult plGALUnorderedAccessViewVulkan::InitPlatform(plGALDevice* pDevice)
     {
       m_resourceBufferInfo.offset = pBuffer->GetDescription().m_uiStructSize * m_Description.m_uiFirstElement;
       m_resourceBufferInfo.range = pBuffer->GetDescription().m_uiStructSize * m_Description.m_uiNumElements;
+
+      plGALResourceFormat::Enum viewFormat = m_Description.m_OverrideViewFormat;
+      if (viewFormat == plGALResourceFormat::Invalid)
+        viewFormat = plGALResourceFormat::RUInt;
+
+      vk::BufferViewCreateInfo viewCreateInfo;
+      viewCreateInfo.buffer = pParentBuffer->GetVkBuffer();
+      viewCreateInfo.format = pVulkanDevice->GetFormatLookupTable().GetFormatInfo(viewFormat).m_eResourceViewType;
+      viewCreateInfo.offset = pBuffer->GetDescription().m_uiStructSize * m_Description.m_uiFirstElement;
+      viewCreateInfo.range = pBuffer->GetDescription().m_uiStructSize * m_Description.m_uiNumElements;
+
+      VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(pVulkanDevice->GetVulkanDevice().createBufferView(&viewCreateInfo, nullptr, &m_bufferView));
     }
   }
 
@@ -103,6 +115,7 @@ plResult plGALUnorderedAccessViewVulkan::DeInitPlatform(plGALDevice* pDevice)
   pVulkanDevice->DeleteLater(m_resourceImageInfo.imageView);
   m_resourceImageInfo = vk::DescriptorImageInfo();
   m_resourceBufferInfo = vk::DescriptorBufferInfo();
+  pVulkanDevice->DeleteLater(m_bufferView);
   return PLASMA_SUCCESS;
 }
 

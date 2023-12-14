@@ -23,7 +23,7 @@ plResult plGALVertexDeclarationVulkan::InitPlatform(plGALDevice* pDevice)
     return PLASMA_FAILURE;
   }
 
-  plHybridArray<plGALShaderVulkan::VertexInputAttribute, 8> vias(pShader->GetVertexInputAttributes());
+  plHybridArray<plShaderVertexInputAttribute, 8> vias(pShader->GetVertexInputAttributes());
   auto FindLocation = [&](plGALVertexAttributeSemantic::Enum sematic, plGALResourceFormat::Enum format) -> plUInt32 {
     for (plUInt32 i = 0; i < vias.GetCount(); i++)
     {

@@ -125,11 +125,11 @@ plResourceLoadDesc plShaderPermutationResource::UpdateContent(plStreamReader* St
     // since it contains other useful information (resource bindings), that we need for shader binding
     m_pShaderStageBinaries[stage] = pStageBin;
 
-    PLASMA_ASSERT_DEV(pStageBin->m_Stage == stage, "Invalid shader stage! Expected stage '{0}', but loaded data is for stage '{1}'", plGALShaderStage::Names[stage], plGALShaderStage::Names[pStageBin->m_Stage]);
+    PLASMA_ASSERT_DEV(pStageBin->m_GALByteCode->m_Stage == stage, "Invalid shader stage! Expected stage '{0}', but loaded data is for stage '{1}'", plGALShaderStage::Names[stage], plGALShaderStage::Names[pStageBin->m_GALByteCode->m_Stage]);
 
     ShaderDesc.m_ByteCodes[stage] = pStageBin->m_GALByteCode;
 
-    uiGPUMem += pStageBin->m_ByteCode.GetCount();
+    uiGPUMem += pStageBin->m_GALByteCode->m_ByteCode.GetCount();
   }
 
   m_hShader = pDevice->CreateShader(ShaderDesc);

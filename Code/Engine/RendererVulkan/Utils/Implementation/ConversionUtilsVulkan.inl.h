@@ -1,4 +1,5 @@
 #include <RendererFoundation/Resources/ResourceFormats.h>
+#include <RendererVulkan/Utils/ConversionUtilsVulkan.h>
 
 namespace
 {
@@ -241,10 +242,24 @@ PLASMA_ALWAYS_INLINE vk::ShaderStageFlagBits plConversionUtilsVulkan::GetShaderS
       return vk::ShaderStageFlagBits::eGeometry;
     case plGALShaderStage::PixelShader:
       return vk::ShaderStageFlagBits::eFragment;
+    case plGALShaderStage::ComputeShader:
+      return vk::ShaderStageFlagBits::eCompute;
+    case plGALShaderStage::TaskShader:
+      return vk::ShaderStageFlagBits::eTaskEXT;
+    case plGALShaderStage::MeshShader:
+      return vk::ShaderStageFlagBits::eMeshEXT;
+    case plGALShaderStage::RayGenShader:
+      return vk::ShaderStageFlagBits::eRaygenKHR;
+    case plGALShaderStage::RayAnyHitShader:
+      return vk::ShaderStageFlagBits::eAnyHitKHR;
+    case plGALShaderStage::RayClosestHitShader:
+      return vk::ShaderStageFlagBits::eClosestHitKHR;
+    case plGALShaderStage::RayMissShader:
+      return vk::ShaderStageFlagBits::eMissKHR;
+    case plGALShaderStage::RayIntersectionShader:
+      return vk::ShaderStageFlagBits::eIntersectionKHR;
     default:
       PLASMA_ASSERT_NOT_IMPLEMENTED;
-      [[fallthrough]];
-    case plGALShaderStage::ComputeShader:
       return vk::ShaderStageFlagBits::eCompute;
   }
 }
@@ -263,11 +278,26 @@ PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipeline
       return vk::PipelineStageFlagBits::eGeometryShader;
     case plGALShaderStage::PixelShader:
       return vk::PipelineStageFlagBits::eFragmentShader;
-    default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-      [[fallthrough]];
     case plGALShaderStage::ComputeShader:
       return vk::PipelineStageFlagBits::eComputeShader;
+    case plGALShaderStage::TaskShader:
+      return vk::PipelineStageFlagBits::eTaskShaderEXT;
+    case plGALShaderStage::MeshShader:
+      return vk::PipelineStageFlagBits::eMeshShaderEXT;
+    case plGALShaderStage::RayGenShader:
+      return vk::PipelineStageFlagBits::eRayTracingShaderKHR;
+    case plGALShaderStage::RayAnyHitShader:
+      return vk::PipelineStageFlagBits::eRayTracingShaderKHR;
+    case plGALShaderStage::RayClosestHitShader:
+      return vk::PipelineStageFlagBits::eRayTracingShaderKHR;
+    case plGALShaderStage::RayMissShader:
+      return vk::PipelineStageFlagBits::eRayTracingShaderKHR;
+    case plGALShaderStage::RayIntersectionShader:
+      return vk::PipelineStageFlagBits::eRayTracingShaderKHR;
+    default:
+      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      return vk::PipelineStageFlagBits::eComputeShader;
+
   }
 }
 
@@ -289,3 +319,56 @@ PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipeline
 
   return res;
 }
+
+PLASMA_ALWAYS_INLINE vk::DescriptorType plConversionUtilsVulkan::GetDescriptorType(plGALShaderDescriptorType::Enum type)
+{
+  switch (type)
+  {
+    case plGALShaderDescriptorType::Unknown:
+      PLASMA_REPORT_FAILURE("Unknown descriptor type");
+    case plGALShaderDescriptorType::Sampler:
+      return vk::DescriptorType::eSampler;
+    case plGALShaderDescriptorType::ConstantBuffer:
+      return vk::DescriptorType::eUniformBuffer;
+    case plGALShaderDescriptorType::Texture:
+      return vk::DescriptorType::eSampledImage;
+    case plGALShaderDescriptorType::TexelBuffer:
+      return vk::DescriptorType::eUniformTexelBuffer;
+    case plGALShaderDescriptorType::StructuredBuffer:
+      return vk::DescriptorType::eStorageBuffer;
+    case plGALShaderDescriptorType::TextureRW:
+      return vk::DescriptorType::eStorageImage;
+    case plGALShaderDescriptorType::TexelBufferRW:
+      return vk::DescriptorType::eStorageTexelBuffer;
+    case plGALShaderDescriptorType::StructuredBufferRW:
+      return vk::DescriptorType::eStorageBuffer;
+  }
+  
+  return vk::DescriptorType::eMutableVALVE;
+}
+
+PLASMA_ALWAYS_INLINE vk::ShaderStageFlagBits plConversionUtilsVulkan::GetShaderStages(plBitflags<plGALShaderStageFlags> stages)
+{
+  return (vk::ShaderStageFlagBits)stages.GetValue();
+}
+
+PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipelineStages(plBitflags<plGALShaderStageFlags> stages)
+{
+  vk::PipelineStageFlags res;
+  for (int i = 0; i < plGALShaderStage::ENUM_COUNT; ++i)
+  {
+    plGALShaderStageFlags::Enum flag = plGALShaderStageFlags::MakeFromShaderStage((plGALShaderStage::Enum)i);
+    if (stages.IsSet(flag))
+    {
+      res |= GetPipelineStage((plGALShaderStage::Enum)i);
+    }
+  }
+  return res;
+}
+
+PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eVertex == (plUInt32)plGALShaderStageFlags::VertexShader);
+PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eTessellationControl == (plUInt32)plGALShaderStageFlags::HullShader);
+PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eTessellationEvaluation == (plUInt32)plGALShaderStageFlags::DomainShader);
+PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eGeometry == (plUInt32)plGALShaderStageFlags::GeometryShader);
+PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eFragment == (plUInt32)plGALShaderStageFlags::PixelShader);
+PLASMA_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eCompute == (plUInt32)plGALShaderStageFlags::ComputeShader);

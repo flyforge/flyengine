@@ -39,8 +39,11 @@ public:
   static bool IsStencilFormat(vk::Format format);
   static vk::PrimitiveTopology GetPrimitiveTopology(plEnum<plGALPrimitiveTopology> topology);
   static vk::ShaderStageFlagBits GetShaderStage(plGALShaderStage::Enum stage);
+  static vk::ShaderStageFlagBits GetShaderStages(plBitflags<plGALShaderStageFlags> stages);
   static vk::PipelineStageFlags GetPipelineStage(plGALShaderStage::Enum stage);
   static vk::PipelineStageFlags GetPipelineStage(vk::ShaderStageFlags flags);
+  static vk::PipelineStageFlags GetPipelineStages(plBitflags<plGALShaderStageFlags> stages);
+  static vk::DescriptorType GetDescriptorType(plGALShaderDescriptorType::Enum type);
 };
 
 #include <RendererVulkan/Utils/Implementation/ConversionUtilsVulkan.inl.h>

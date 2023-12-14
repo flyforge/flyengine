@@ -13,6 +13,8 @@ using namespace plTokenParseUtils;
 namespace
 {
   static plHashTable<plStringView, const plRTTI*> s_NameToTypeTable;
+  static plHashTable<plStringView, plEnum<plGALShaderDescriptorType>> s_NameToDescriptorTable;
+  static plHashTable<plStringView, plEnum<plGALShaderTextureType>> s_NameToTextureTable;
 
   void InitializeTables()
   {
@@ -37,6 +39,48 @@ namespace
     s_NameToTypeTable.Insert("Texture2D", plGetStaticRTTI<plString>());
     s_NameToTypeTable.Insert("Texture3D", plGetStaticRTTI<plString>());
     s_NameToTypeTable.Insert("TextureCube", plGetStaticRTTI<plString>());
+
+    s_NameToDescriptorTable.Insert("cbuffer"_plsv, plGALShaderDescriptorType::ConstantBuffer);
+    s_NameToDescriptorTable.Insert("ConstantBuffer"_plsv, plGALShaderDescriptorType::ConstantBuffer);
+    s_NameToDescriptorTable.Insert("SamplerState"_plsv, plGALShaderDescriptorType::Sampler);
+    s_NameToDescriptorTable.Insert("SamplerComparisonState"_plsv, plGALShaderDescriptorType::Sampler);
+    s_NameToDescriptorTable.Insert("Texture1D"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("Texture1DArray"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("Texture2D"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("Texture2DArray"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("Texture2DMS"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("Texture2DMSArray"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("Texture3D"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("TextureCube"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("TextureCubeArray"_plsv, plGALShaderDescriptorType::Texture);
+    s_NameToDescriptorTable.Insert("Buffer"_plsv, plGALShaderDescriptorType::TexelBuffer);
+    s_NameToDescriptorTable.Insert("StructuredBuffer"_plsv, plGALShaderDescriptorType::StructuredBuffer);
+    s_NameToDescriptorTable.Insert("ByteAddressBuffer"_plsv, plGALShaderDescriptorType::StructuredBuffer);
+    s_NameToDescriptorTable.Insert("RWTexture1D"_plsv, plGALShaderDescriptorType::TextureRW);
+    s_NameToDescriptorTable.Insert("RWTexture1DArray"_plsv, plGALShaderDescriptorType::TextureRW);
+    s_NameToDescriptorTable.Insert("RWTexture2D"_plsv, plGALShaderDescriptorType::TextureRW);
+    s_NameToDescriptorTable.Insert("RWTexture2DArray"_plsv, plGALShaderDescriptorType::TextureRW);
+    s_NameToDescriptorTable.Insert("RWTexture3D"_plsv, plGALShaderDescriptorType::TextureRW);
+    s_NameToDescriptorTable.Insert("RWBuffer"_plsv, plGALShaderDescriptorType::TexelBufferRW);
+    s_NameToDescriptorTable.Insert("RWStructuredBuffer"_plsv, plGALShaderDescriptorType::StructuredBufferRW);
+    s_NameToDescriptorTable.Insert("RWByteAddressBuffer"_plsv, plGALShaderDescriptorType::StructuredBufferRW);
+    s_NameToDescriptorTable.Insert("AppendStructuredBuffer"_plsv, plGALShaderDescriptorType::StructuredBufferRW);
+    s_NameToDescriptorTable.Insert("ConsumeStructuredBuffer"_plsv, plGALShaderDescriptorType::StructuredBufferRW);
+    
+    s_NameToTextureTable.Insert("Texture1D"_plsv, plGALShaderTextureType::Texture1D);
+    s_NameToTextureTable.Insert("Texture1DArray"_plsv, plGALShaderTextureType::Texture1DArray);
+    s_NameToTextureTable.Insert("Texture2D"_plsv, plGALShaderTextureType::Texture2D);
+    s_NameToTextureTable.Insert("Texture2DArray"_plsv, plGALShaderTextureType::Texture2DArray);
+    s_NameToTextureTable.Insert("Texture2DMS"_plsv, plGALShaderTextureType::Texture2DMS);
+    s_NameToTextureTable.Insert("Texture2DMSArray"_plsv, plGALShaderTextureType::Texture2DMSArray);
+    s_NameToTextureTable.Insert("Texture3D"_plsv, plGALShaderTextureType::Texture3D);
+    s_NameToTextureTable.Insert("TextureCube"_plsv, plGALShaderTextureType::TextureCube);
+    s_NameToTextureTable.Insert("TextureCubeArray"_plsv, plGALShaderTextureType::TextureCubeArray);
+    s_NameToTextureTable.Insert("RWTexture1D"_plsv, plGALShaderTextureType::Texture1D);
+    s_NameToTextureTable.Insert("RWTexture1DArray"_plsv, plGALShaderTextureType::Texture1DArray);
+    s_NameToTextureTable.Insert("RWTexture2D"_plsv, plGALShaderTextureType::Texture2D);
+    s_NameToTextureTable.Insert("RWTexture2DArray"_plsv, plGALShaderTextureType::Texture2DArray);
+    s_NameToTextureTable.Insert("RWTexture3D"_plsv, plGALShaderTextureType::Texture3D);
   }
 
   const plRTTI* GetType(const char* szType)
@@ -421,7 +465,7 @@ void plShaderParser::ParsePermutationSection(plStringView s, plHybridArray<plHas
     if (token.m_iType == plTokenType::Whitespace || token.m_iType == plTokenType::BlockComment || token.m_iType == plTokenType::LineComment)
       continue;
 
-    if (token.m_iType == plTokenType::String1 || token.m_iType == plTokenType::String2)
+    if (token.m_iType == plTokenType::String1 || token.m_iType == plTokenType::String2 || token.m_iType == plTokenType::RawString1)
     {
       sToken = token.m_DataView;
       plLog::Error("Strings are not allowed in the permutation section: '{0}'", sToken);
@@ -532,6 +576,141 @@ void plShaderParser::ParsePermutationVarConfig(plStringView s, plVariant& out_de
   }
 }
 
+plResult ParseResource(plArrayPtr<const plUInt8> sShaderStageSource, const TokenStream& tokens, plUInt32& ref_uiCurToken, plShaderParser::ResourceDefinition& out_resourceDefinition)
+{
+  // Match type
+  plUInt32 uiTypeToken = ref_uiCurToken;
+  if (!Accept(tokens, ref_uiCurToken, plTokenType::Identifier, &uiTypeToken))
+  {
+    return PLASMA_FAILURE;
+  }
+  if (!s_NameToDescriptorTable.TryGetValue(tokens[uiTypeToken]->m_DataView, out_resourceDefinition.m_Binding.m_DescriptorType))
+    return PLASMA_FAILURE;
+  s_NameToTextureTable.TryGetValue(tokens[uiTypeToken]->m_DataView, out_resourceDefinition.m_Binding.m_TextureType);
 
+  // Skip optional template
+  TokenMatch templatePattern[] = {"<"_plsv,plTokenType::Identifier, ">"_plsv};
+  plHybridArray<plUInt32, 8> acceptedTokens;
+  Accept(tokens, ref_uiCurToken, templatePattern, &acceptedTokens);
+  
+  // Match name
+  plUInt32 uiNameToken = ref_uiCurToken;
+  if (!Accept(tokens, ref_uiCurToken, plTokenType::Identifier, &uiNameToken))
+  {
+    return PLASMA_FAILURE;
+  }
+  out_resourceDefinition.m_Binding.m_sName.Assign(tokens[uiNameToken]->m_DataView);
+  plUInt32 uiEndToken = uiNameToken;
+
+  // Match optional array
+  TokenMatch arrayPattern[] = {"["_plsv,plTokenType::Integer, "]"_plsv};
+  TokenMatch bindlessPattern[] = {"["_plsv, "]"_plsv};
+  if (Accept(tokens, ref_uiCurToken, arrayPattern, &acceptedTokens))
+  {
+    plConversionUtils::StringToUInt(tokens[acceptedTokens[1]]->m_DataView, out_resourceDefinition.m_Binding.m_uiArraySize).AssertSuccess("Tokenizer error");
+    uiEndToken = acceptedTokens.PeekBack();
+  }
+  else if (Accept(tokens, ref_uiCurToken, bindlessPattern, &acceptedTokens))
+  {
+    out_resourceDefinition.m_Binding.m_uiArraySize = 0;
+    uiEndToken = acceptedTokens.PeekBack();
+  }
+  out_resourceDefinition.m_sDeclaration = plStringView(tokens[uiTypeToken]->m_DataView.GetStartPointer(), tokens[uiEndToken]->m_DataView.GetEndPointer());
+
+  // Match optional register
+  TokenMatch slotPattern[] = {":"_plsv,"register"_plsv, "("_plsv,plTokenType::Identifier, ")"_plsv};
+  TokenMatch slotAndSetPattern[] = {":"_plsv,"register"_plsv, "("_plsv,plTokenType::Identifier, ","_plsv, plTokenType::Identifier, ")"_plsv};
+  if (Accept(tokens, ref_uiCurToken, slotPattern, &acceptedTokens))
+  {
+    plStringView sSlot = tokens[acceptedTokens[3]]->m_DataView;
+    sSlot.Trim("tsub");
+    plInt32 iSlot;
+    plConversionUtils::StringToInt(sSlot, iSlot).AssertSuccess("Failed to parse slot index of shader resource");
+    out_resourceDefinition.m_Binding.m_iSlot = static_cast<plInt16>(iSlot);
+    uiEndToken = acceptedTokens.PeekBack();
+  }
+  else if (Accept(tokens, ref_uiCurToken, slotAndSetPattern, &acceptedTokens))
+  {
+    plStringView sSlot = tokens[acceptedTokens[3]]->m_DataView;
+    sSlot.Trim("tsub");
+    plInt32 iSlot;
+    plConversionUtils::StringToInt(sSlot, iSlot).AssertSuccess("Failed to parse slot index of shader resource");
+    out_resourceDefinition.m_Binding.m_iSlot = static_cast<plInt16>(iSlot);
+
+    plStringView sSet = tokens[acceptedTokens[5]]->m_DataView;
+    sSet.TrimWordStart("space"_plsv);
+    plInt32 iSet;
+    plConversionUtils::StringToInt(sSet, iSet).AssertSuccess("Failed to parse set index of shader resource");
+    out_resourceDefinition.m_Binding.m_iSet = static_cast<plInt16>(iSet);
+    uiEndToken = acceptedTokens.PeekBack();
+  }
+
+  out_resourceDefinition.m_sDeclarationAndRegister = plStringView(tokens[uiTypeToken]->m_DataView.GetStartPointer(), tokens[uiEndToken]->m_DataView.GetEndPointer());
+  // Match ; (resource declaration done) or { (constant buffer member declaration starts)
+  if (!Accept(tokens, ref_uiCurToken, ";"_plsv) && !Accept(tokens, ref_uiCurToken, "{"_plsv))
+    return PLASMA_FAILURE;
+
+  return PLASMA_SUCCESS;
+}
+
+void plShaderParser::ParseShaderResources(plStringView sShaderStageSource, plDynamicArray<plShaderParser::ResourceDefinition>& out_Resources)
+{
+  InitializeTables();
+
+  plTokenizer tokenizer;
+  tokenizer.SetTreatHashSignAsLineComment(true);
+  tokenizer.TokenizeReference(plArrayPtr<const plUInt8>((const plUInt8*)sShaderStageSource.GetStartPointer(), sShaderStageSource.GetElementCount()), plLog::GetThreadLocalLogSystem());
+
+  TokenStream tokens;
+  tokenizer.GetAllLines(tokens);
+
+  plUInt32 uiCurToken = 0;
+
+  while (!Accept(tokens, uiCurToken, plTokenType::EndOfFile))
+  {
+    ResourceDefinition resourceDef;
+    if (ParseResource(tokenizer.GetData(), tokens, uiCurToken, resourceDef).Succeeded())
+    {
+      out_Resources.PushBack(std::move(resourceDef));
+      continue;
+    }
+    ++uiCurToken;
+  }
+}
+
+void plShaderParser::ApplyShaderResourceBindings(plStringView sShaderStageSource, const plDynamicArray<ResourceDefinition>& resources, const plHashTable<plHashedString, plShaderResourceBinding>& bindings, const CreateResourceDeclaration& createDeclaration, plStringBuilder& out_shaderStageSource)
+{
+  plDeque<plString> partStorage;
+  plHybridArray<plStringView, 16> parts;
+
+  plStringBuilder sDeclaration;
+  const char* szStart = sShaderStageSource.GetStartPointer();
+  for (int i = 0; i < resources.GetCount(); ++i)
+  {
+    parts.PushBack(plStringView(szStart, resources[i].m_sDeclarationAndRegister.GetStartPointer()));
+
+    plShaderResourceBinding* pBinding = nullptr;
+    PLASMA_ASSERT_DEV(bindings.TryGetValue(resources[i].m_Binding.m_sName, pBinding), "Every resource should be present in the map.");
+    PLASMA_ASSERT_DEV(pBinding->m_iSlot >= 0 && pBinding->m_iSet >= 0, "Unbound shader resource binding found: '{}', slot: {}, set: {}", pBinding->m_sName, pBinding->m_iSlot, pBinding->m_iSet);
+    createDeclaration(resources[i].m_sDeclaration, *pBinding, sDeclaration);
+    plString& sStorage = partStorage.ExpandAndGetRef();
+    sStorage = sDeclaration;
+    parts.PushBack(sStorage);
+    szStart = resources[i].m_sDeclarationAndRegister.GetEndPointer();
+  }
+  parts.PushBack(plStringView(szStart, sShaderStageSource.GetEndPointer()));
+
+  plUInt32 uiSize = 0;
+  for (const plStringView& sPart : parts)
+    uiSize += sPart.GetElementCount();
+
+  out_shaderStageSource.Clear();
+  out_shaderStageSource.Reserve(uiSize);
+
+  for (const plStringView& sPart : parts)
+  {
+    out_shaderStageSource.Append(sPart);
+  }
+}
 
 PLASMA_STATICLINK_FILE(RendererCore, RendererCore_ShaderCompiler_Implementation_ShaderParser);

@@ -35,11 +35,11 @@ public:
 
   virtual void SetShaderPlatform(const plGALShader* pShader) override;
 
-  virtual void SetConstantBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer) override;
-  virtual void SetSamplerStatePlatform(plGALShaderStage::Enum Stage, plUInt32 uiSlot, const plGALSamplerState* pSamplerState) override;
-  virtual void SetResourceViewPlatform(plGALShaderStage::Enum Stage, plUInt32 uiSlot, const plGALResourceView* pResourceView) override;
-  virtual void SetUnorderedAccessViewPlatform(plUInt32 uiSlot, const plGALUnorderedAccessView* pUnorderedAccessView) override;
-
+  virtual void SetConstantBufferPlatform(const plShaderResourceBinding& binding, const plGALBuffer* pBuffer) override;
+  virtual void SetSamplerStatePlatform(const plShaderResourceBinding& binding, const plGALSamplerState* pSamplerState) override;
+  virtual void SetResourceViewPlatform(const plShaderResourceBinding& binding, const plGALResourceView* pResourceView) override;
+  virtual void SetUnorderedAccessViewPlatform(const plShaderResourceBinding& binding, const plGALUnorderedAccessView* pUnorderedAccessView) override;
+  
   // Query functions
 
   virtual void BeginQueryPlatform(const plGALQuery* pQuery) override;
@@ -99,7 +99,6 @@ public:
   virtual void DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) override;
   virtual void DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex) override;
   virtual void DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) override;
-  virtual void DrawAutoPlatform() override;
 
   virtual void BeginStreamOutPlatform() override;
   virtual void EndStreamOutPlatform() override;
@@ -173,9 +172,10 @@ private:
   vk::DeviceSize m_VertexBufferOffsets[PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT] = {};
 
   const plGALBufferVulkan* m_pBoundConstantBuffers[PLASMA_GAL_MAX_CONSTANT_BUFFER_COUNT] = {};
-  plHybridArray<const plGALResourceViewVulkan*, 16> m_pBoundShaderResourceViews[plGALShaderStage::ENUM_COUNT] = {};
+  plHybridArray<const plGALResourceViewVulkan*, 16> m_pBoundShaderResourceViews;
   plHybridArray<const plGALUnorderedAccessViewVulkan*, 16> m_pBoundUnoderedAccessViews;
-  const plGALSamplerStateVulkan* m_pBoundSamplerStates[plGALShaderStage::ENUM_COUNT][PLASMA_GAL_MAX_SAMPLER_COUNT] = {};
+  const plGALSamplerStateVulkan* m_pBoundSamplerStates[PLASMA_GAL_MAX_SAMPLER_COUNT] = {};
 
   plHybridArray<vk::WriteDescriptorSet, 16> m_DescriptorWrites;
+  plHybridArray<vk::DescriptorSet, 4> m_DescriptorSets;
 };

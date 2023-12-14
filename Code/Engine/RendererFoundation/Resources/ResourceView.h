@@ -9,8 +9,6 @@ class PLASMA_RENDERERFOUNDATION_DLL plGALResourceView : public plGALObject<plGAL
 public:
   PLASMA_ALWAYS_INLINE plGALResourceBase* GetResource() const { return m_pResource; }
 
-  PLASMA_ALWAYS_INLINE bool ShouldUnsetUAV() const { return m_bUnsetUAV; }
-
 protected:
   friend class plGALDevice;
 
@@ -23,5 +21,4 @@ protected:
   virtual plResult DeInitPlatform(plGALDevice* pDevice) = 0;
 
   plGALResourceBase* m_pResource;
-  bool m_bUnsetUAV;
 };

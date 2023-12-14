@@ -100,6 +100,8 @@ private:
 
 struct PLASMA_RENDERERFOUNDATION_DLL plGALShaderStage
 {
+  using StorageType = plUInt8;
+
   enum Enum : plUInt8
   {
     VertexShader,
@@ -107,14 +109,68 @@ struct PLASMA_RENDERERFOUNDATION_DLL plGALShaderStage
     DomainShader,
     GeometryShader,
     PixelShader,
-
     ComputeShader,
-
-    ENUM_COUNT
+    TaskShader,
+    MeshShader,
+    RayGenShader,
+    RayAnyHitShader,
+    RayClosestHitShader,
+    RayMissShader,
+    RayIntersectionShader,
+    ENUM_COUNT,
+    Default = VertexShader
   };
 
   static const char* Names[ENUM_COUNT];
 };
+
+struct PLASMA_RENDERERFOUNDATION_DLL plGALShaderStageFlags
+{
+  using StorageType = plUInt16;
+
+  enum Enum : plUInt16
+  {
+    VertexShader = PLASMA_BIT(0),
+    HullShader = PLASMA_BIT(1),
+    DomainShader = PLASMA_BIT(2),
+    GeometryShader = PLASMA_BIT(3),
+    PixelShader = PLASMA_BIT(4),
+    ComputeShader = PLASMA_BIT(5),
+    TaskShader = PLASMA_BIT(6),
+    MeshShader = PLASMA_BIT(7),
+    RayGenShader = PLASMA_BIT(8),
+    RayAnyHitShader = PLASMA_BIT(9),
+    RayClosestHitShader = PLASMA_BIT(10),
+    RayMissShader = PLASMA_BIT(11),
+    RayIntersectionShader = PLASMA_BIT(12),
+    Default = 0
+  };
+
+  struct Bits
+  {
+    StorageType VertexShader : 1;
+    StorageType HullShader : 1;
+    StorageType DomainShader : 1;
+    StorageType GeometryShader : 1;
+    StorageType PixelShader : 1;
+    StorageType ComputeShader : 1;
+    StorageType TaskShader : 1;
+    StorageType MeshShader : 1;
+    StorageType RayGenShader : 1;
+    StorageType RayAnyHitShader : 1;
+    StorageType RayClosestHitShader : 1;
+    StorageType RayMissShader : 1;
+    StorageType RayIntersectionShader : 1;
+  };
+
+  inline static plGALShaderStageFlags::Enum MakeFromShaderStage(plGALShaderStage::Enum stage)
+  {
+    return static_cast<plGALShaderStageFlags::Enum>(PLASMA_BIT(stage));
+  }
+};
+
+PLASMA_DECLARE_FLAGS_OPERATORS(plGALShaderStageFlags);
+
 
 struct PLASMA_RENDERERFOUNDATION_DLL plGALMSAASampleCount
 {
@@ -155,6 +211,8 @@ struct plGALTextureType
 
 struct plGALBlend
 {
+  using StorageType = plUInt8;
+
   enum Enum
   {
     Zero = 0,
@@ -171,12 +229,16 @@ struct plGALBlend
     BlendFactor,
     InvBlendFactor,
 
-    ENUM_COUNT
+    ENUM_COUNT,
+
+    Default = One
   };
 };
 
 struct plGALBlendOp
 {
+  using StorageType = plUInt8;
+
   enum Enum
   {
     Add = 0,
@@ -185,7 +247,8 @@ struct plGALBlendOp
     Min,
     Max,
 
-    ENUM_COUNT
+    ENUM_COUNT,
+    Default = Add
   };
 };
 
@@ -269,9 +332,9 @@ struct plGALUpdateMode
 {
   enum Enum
   {
-    Discard,
-    NoOverwrite,
-    CopyToTempStorage
+    Discard,          ///< Buffer must be completely overwritten. No old data will be read. Data will not persist across frames.
+    NoOverwrite,      ///< User is responsible for synchronizing access between GPU and CPU.
+    CopyToTempStorage ///< Upload to temp buffer, then buffer to buffer transfer at the current time in the command buffer.
   };
 };
 
