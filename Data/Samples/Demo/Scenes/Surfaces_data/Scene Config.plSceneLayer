@@ -11,11 +11,12 @@ o
 		s %AssetType{"Layer"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{3872236734607355539,5264883800516172798}}
-		u4 %Hash{1907186352473706848}
+		u4 %Hash{15555515802040211157}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
 		{
+			s{"{ 6449d7e0-a8ff-4b43-9f84-df1c870a4748 }"}
 			s{"{ 8044a36f-e313-4204-973d-796231798973 }"}
 			s{"{ 8349d7e3-bfef-4747-8d26-654340ae2407 }"}
 		}
@@ -130,7 +131,7 @@ o
 	p
 	{
 		b %Active{1}
-		s %CubeMap{"{ 8349d7e3-bfef-4747-8d26-654340ae2407 }"}
+		s %CubeMap{"{ 6449d7e0-a8ff-4b43-9f84-df1c870a4748 }"}
 		f %ExposureBias{0x9A99193F}
 		b %InverseTonemap{0}
 		b %UseFog{1}
