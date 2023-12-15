@@ -143,9 +143,6 @@ void plBloomPass::Execute(const plRenderViewContext& renderViewContext, const pl
   renderViewContext.m_pRenderContext->SetAllowAsyncShaderLoading(false);
 
   plGALPass* pPass = pDevice->BeginPass(GetName());
-  PLASMA_SCOPE_EXIT(
-    pDevice->EndPass(pPass);
-    renderViewContext.m_pRenderContext->SetAllowAsyncShaderLoading(bAllowAsyncShaderLoading););
 
   const plUInt32 uiWidth = pOutput->m_Desc.m_uiWidth;
   const plUInt32 uiHeight = pOutput->m_Desc.m_uiHeight;
@@ -334,6 +331,9 @@ void plBloomPass::Execute(const plRenderViewContext& renderViewContext, const pl
 
     renderViewContext.m_pRenderContext->Dispatch(uiDispatchX, uiDispatchY, 1).IgnoreResult();
   }
+
+  pDevice->EndPass(pPass);
+  renderViewContext.m_pRenderContext->SetAllowAsyncShaderLoading(bAllowAsyncShaderLoading);
 }
 
 void plBloomPass::ExecuteInactive(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs)

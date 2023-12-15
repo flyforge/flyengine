@@ -280,7 +280,13 @@ void plGameApplication::RenderFps()
     {
       const plSystemInformation sysInfo = plSystemInformation::Get();
 
-      plStringView rednererName = plCommandLineUtils::GetGlobalInstance()->GetStringOption("-renderer", 0, "DX11");
+#ifdef BUILDSYSTEM_ENABLE_VULKAN_SUPPORT
+      constexpr const char* szDefaultRenderer = "Vulkan";
+#else
+      constexpr const char* szDefaultRenderer = "DX11";
+#endif
+
+      plStringView rednererName = plCommandLineUtils::GetGlobalInstance()->GetStringOption("-renderer", 0, szDefaultRenderer);
       plStringBuilder tmp;
       plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopRight, "Platform", plFmt("Renderer: {0}", rednererName.GetData(tmp)));
 
