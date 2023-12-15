@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{16033299415433335720,5748835052109362040}}
-		u4 %Hash{12617486125485491970}
+		u4 %Hash{11704217170167557889}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -35,7 +35,6 @@ o
 			s{"{ 6bd5e7e6-b7be-9801-e032-14226cba1e96 }"}
 			s{"{ 6d2f2203-1c29-417b-bb1b-b434080e8fed }"}
 			s{"{ 72748b9e-00b2-4899-ac1f-57d64866228b }"}
-			s{"{ 8044a36f-e313-4204-973d-796231798973 }"}
 			s{"{ 8156b4eb-9610-4b40-8053-67211496cad5 }"}
 			s{"{ 9fc82cb4-e800-cc3d-feed-61a7c88e2a20 }"}
 			s{"{ a0ccc0eb-9782-4245-b892-a31cc42bcf7b }"}
@@ -44,6 +43,7 @@ o
 			s{"{ c814fe78-9702-2f7d-71b0-c28cc6b8f57c }"}
 			s{"{ cb3fcb70-258b-4b4e-a79e-0537ace7d7e3 }"}
 			s{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+			s{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 			s{"{ e12eff21-6f53-4b0e-8dc4-4e9f9852d224 }"}
 			s{"{ f220c89e-9b1d-4fea-bf04-2ecc34799db6 }"}
 			s{"{ f8b8814b-2f73-4ba1-93f7-b8fe8a0b4b85 }"}
@@ -4310,7 +4310,7 @@ o
 		{
 			Uuid{u4{1377023503152179345,5611782642857704400}}
 			Uuid{u4{18158644783344028828,5145048891365706276}}
-			Uuid{u4{17939392660679484351,5396453880199510710}}
+			Uuid{u4{5172648478157168312,5731454955842859155}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0x27FFC3BF,0x90B93FC0,0x5CD6BD40}}
@@ -4323,6 +4323,7 @@ o
 		{
 			s{"CastShadow"}
 			s{"AutoColMesh"}
+			s{"SkyLight"}
 		}
 	}
 }
@@ -4400,18 +4401,6 @@ o
 			s{"CastShadow"}
 			s{"AutoColMesh"}
 		}
-	}
-}
-o
-{
-	Uuid %id{u4{2218534607440324023,4627375400899939404}}
-	s %t{"plGlobalRenderSettingsComponent"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		b %TaaActive{1}
-		b %TaaUpscale{0}
 	}
 }
 o
@@ -6183,32 +6172,6 @@ o
 		b %ReverseAtStart{1}
 		b %Running{1}
 		f %Speed{0x00004040}
-	}
-}
-o
-{
-	Uuid %id{u4{4289765386179009416,4817228140018202353}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{2218534607440324023,4627375400899939404}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0x2E1DB7C1,0x757F1AC1,0x33E5803F}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-		}
 	}
 }
 o
@@ -8122,7 +8085,7 @@ o
 			b %GiveAllWeapons{1}
 			b %Invincible{1}
 		}
-		s %PlayerPrefab{"{ 8044a36f-e313-4204-973d-796231798973 }"}
+		s %PlayerPrefab{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 	}
 }
 o
@@ -9263,18 +9226,6 @@ o
 }
 o
 {
-	Uuid %id{u4{18014134532034891686,5198280504388504014}}
-	s %t{"plVisNavMeshComponent"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		b %VisGeometry{0}
-		b %VisPath{1}
-	}
-}
-o
-{
 	Uuid %id{u4{9402449884103659435,5202960372486020930}}
 	s %t{"plTypeScriptComponent"}
 	u3 %v{4}
@@ -9678,7 +9629,7 @@ o
 			Uuid{u4{7589256083913529474,5036172188972190023}}
 		}
 		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0x000088C1,0x000028C1,0x0000803F}}
+		Vec3 %LocalPosition{f{0x000088C1,0x000028C1,0x14962240}}
 		Quat %LocalRotation{f{0,0,0,0x0000803F}}
 		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
 		f %LocalUniformScaling{0x0000803F}
@@ -9864,6 +9815,29 @@ o
 		b %Active{1}
 		f %Height{0x9A99193F}
 		f %Radius{0x0000003F}
+	}
+}
+o
+{
+	Uuid %id{u4{16347256933019904444,5281150116625746655}}
+	s %t{"plSkyLightComponent"}
+	u3 %v{3}
+	p
+	{
+		b %Active{1}
+		s %CubeMap{""}
+		VarArray %ExcludeTags{}
+		f %FarPlane{0x0000C842}
+		VarArray %IncludeTags
+		{
+			s{"SkyLight"}
+		}
+		f %Intensity{0xCDCCCC3D}
+		f %NearPlane{0}
+		s %ReflectionProbeMode{"plReflectionProbeMode::Dynamic"}
+		f %Saturation{0x0000803F}
+		b %ShowDebugInfo{0}
+		b %ShowMipMaps{0}
 	}
 }
 o
@@ -10579,32 +10553,6 @@ o
 }
 o
 {
-	Uuid %id{u4{8239598183107394443,5369469773508687415}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{18014134532034891686,5198280504388504014}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0x0DEF2BC0,0x5D3D8CC0,0xA92D813F}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{""}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-		}
-	}
-}
-o
-{
 	Uuid %id{u4{10785291576200092579,5370184685518816135}}
 	s %t{"plJoltDynamicActorComponent"}
 	u3 %v{3}
@@ -10798,25 +10746,28 @@ o
 }
 o
 {
-	Uuid %id{u4{17939392660679484351,5396453880199510710}}
-	s %t{"plAtmosphericScatteringComponent"}
+	Uuid %id{u4{9687330267015036850,5396434733924501570}}
+	s %t{"plGameObject"}
 	u3 %v{1}
 	p
 	{
-		Color %Absorption{f{0x0AD7233C,0x0AD7233C,0x0AD7233C,0x0000803F}}
-		f %AbsorptionFalloff{0x00007A45}
-		f %AbsorptionHeight{0x0060EA46}
 		b %Active{1}
-		Color %AmbientScattering{f{0x0AD7233C,0x0AD7A33C,0x0AD7A33C,0x0000803F}}
-		f %AtmosphereRadius{0xC052E74A}
-		f %LightSteps{0x00000041}
-		f %MieHeight{0x0080BB45}
-		f %MieScatterDirection{0x3333333F}
-		Color %MieScattering{f{0x2058353F,0x5079213F,0x0E46023F,0x0000803F}}
-		f %PlanetRadius{0xC0B3C24A}
-		f %RaySteps{0x00000042}
-		f %RayleighHeight{0x00401C46}
-		Color %RayleighScattering{f{0x0753593E,0xE2E0993E,0x690FAF3E,0x0000803F}}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{16347256933019904444,5281150116625746655}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0x886E90C0,0x28B12CC1,0x1740803F}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{""}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
 	}
 }
 o
@@ -13449,6 +13400,29 @@ o
 }
 o
 {
+	Uuid %id{u4{5172648478157168312,5731454955842859155}}
+	s %t{"plAtmosphericScatteringComponent"}
+	u3 %v{1}
+	p
+	{
+		Color %Absorption{f{0x0AD7233C,0x0AD7233C,0x0AD7233C,0x0000803F}}
+		f %AbsorptionFalloff{0x00007A45}
+		f %AbsorptionHeight{0x0060EA46}
+		b %Active{1}
+		Color %AmbientScattering{f{0x0AD7233C,0x0AD7A33C,0x0AD7A33C,0x0000803F}}
+		f %AtmosphereRadius{0xC052E74A}
+		f %LightSteps{0x00000041}
+		f %MieHeight{0x00009644}
+		f %MieScatterDirection{0x3333333F}
+		Color %MieScattering{f{0x0AD7233F,0x0AD7233F,0x0AD7233F,0x0000803F}}
+		f %PlanetRadius{0xC0B3C24A}
+		f %RaySteps{0x00000042}
+		f %RayleighHeight{0x0000FA45}
+		Color %RayleighScattering{f{0x0AD7233D,0xAE47613E,0x0000403F,0x0000803F}}
+	}
+}
+o
+{
 	Uuid %id{u4{7242337380764176770,5732274011729194127}}
 	s %t{"plGreyBoxComponent"}
 	u3 %v{5}
@@ -14357,6 +14331,7 @@ o
 			Uuid{u4{4571308331243103908,4670223957156564199}}
 			Uuid{u4{1574542424891590816,4934785444043847285}}
 			Uuid{u4{4364524368742340543,4621356167221899837}}
+			Uuid{u4{9687330267015036850,5396434733924501570}}
 			Uuid{u4{2498293686895390537,10384201137436998687}}
 			Uuid{u4{18015203693568410537,5244151211994291075}}
 			Uuid{u4{2316827425939071669,5602564682685486941}}
@@ -14429,8 +14404,6 @@ o
 			Uuid{u4{10395177625574730908,4988264273994097354}}
 			Uuid{u4{11199600404750658204,5291641336822379212}}
 			Uuid{u4{311488343710421314,10283124862910323554}}
-			Uuid{u4{4289765386179009416,4817228140018202353}}
-			Uuid{u4{8239598183107394443,5369469773508687415}}
 		}
 		Uuid %Settings{u4{17165472681167466672,5590908592681332920}}
 	}
@@ -37426,27 +37399,6 @@ o
 }
 o
 {
-	Uuid %id{u4{11559278698999849625,949717732378850726}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plComponent"}
-		s %PluginName{"plasmaAiPlugin"}
-		VarArray %Properties
-		{
-			Uuid{u4{8334183894893950713,7262370204178545334}}
-			Uuid{u4{14406347718272071561,5478499434010824146}}
-		}
-		s %TypeName{"plVisNavMeshComponent"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
 	Uuid %id{u4{861524135704582963,974745871402704588}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -37646,16 +37598,6 @@ o
 }
 o
 {
-	Uuid %id{u4{5706194955983406691,1941422606792907908}}
-	s %t{"plDefaultValueAttribute"}
-	u3 %v{1}
-	p
-	{
-		i3 %Value{0}
-	}
-}
-o
-{
 	Uuid %id{u4{2328899928986038195,1976297956624440085}}
 	s %t{"plBoxVisualizerAttribute"}
 	u3 %v{1}
@@ -37699,6 +37641,23 @@ o
 	{
 		Angle %Max{f{0x147A4340}}
 		Angle %Min{f{0}}
+	}
+}
+o
+{
+	Uuid %id{u4{4966385278310489566,2248469418069360609}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plSettingsComponent"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSkyLightComponent"}
+		u3 %TypeVersion{3}
 	}
 }
 o
@@ -38366,24 +38325,6 @@ o
 }
 o
 {
-	Uuid %id{u4{14406347718272071561,5478499434010824146}}
-	s %t{"plReflectedPropertyDescriptor"}
-	u3 %v{2}
-	p
-	{
-		VarArray %Attributes
-		{
-			Uuid{u4{5706194955983406691,1941422606792907908}}
-		}
-		s %Category{"plPropertyCategory::Member"}
-		Invalid %ConstantValue{}
-		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
-		s %Name{"VisGeometry"}
-		s %Type{"bool"}
-	}
-}
-o
-{
 	Uuid %id{u4{7686264350309387071,5577346989055205841}}
 	s %t{"plDefaultValueAttribute"}
 	u3 %v{1}
@@ -38433,23 +38374,6 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Phantom"}
 		s %Name{"ChildActorAnchor"}
 		s %Type{"plConstCharPtr"}
-	}
-}
-o
-{
-	Uuid %id{u4{3732577084724502557,5746252454835186083}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plComponent"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plGlobalRenderSettingsComponent"}
-		u3 %TypeVersion{1}
 	}
 }
 o
@@ -38794,24 +38718,6 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
 		s %Name{"UpperLimit"}
 		s %Type{"plAngle"}
-	}
-}
-o
-{
-	Uuid %id{u4{8334183894893950713,7262370204178545334}}
-	s %t{"plReflectedPropertyDescriptor"}
-	u3 %v{2}
-	p
-	{
-		VarArray %Attributes
-		{
-			Uuid{u4{3864288970080438596,13901188854663863918}}
-		}
-		s %Category{"plPropertyCategory::Member"}
-		Invalid %ConstantValue{}
-		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
-		s %Name{"VisPath"}
-		s %Type{"bool"}
 	}
 }
 o
@@ -39818,6 +39724,23 @@ o
 }
 o
 {
+	Uuid %id{u4{18280810740528026191,13632423690753413415}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectionProbeMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{13985915862957499096,13667540031100479129}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -39888,16 +39811,6 @@ o
 	{
 		s %Flags{"plPropertyFlags::StandardType"}
 		s %Type{"plUInt32"}
-	}
-}
-o
-{
-	Uuid %id{u4{3864288970080438596,13901188854663863918}}
-	s %t{"plDefaultValueAttribute"}
-	u3 %v{1}
-	p
-	{
-		i3 %Value{1}
 	}
 }
 o

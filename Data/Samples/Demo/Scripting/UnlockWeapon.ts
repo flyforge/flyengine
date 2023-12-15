@@ -33,10 +33,6 @@ export class UnlockWeapon extends pl.TypescriptComponent {
             if (hm.return_consumed == false)
                 return;
 
-            let sound = this.GetOwner().TryGetComponentOfBaseType(pl.FmodEventComponent);
-            if (sound != null)
-                sound.StartOneShot();
-
             let del = new pl.MsgDeleteGameObject();
             this.GetOwner().PostMessage(del, 0.1);
         }

@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{14862950645315497606,4688600984674379026}}
-		u4 %Hash{9786924652491606607}
+		u4 %Hash{6360099186623746168}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -25,12 +25,12 @@ o
 			s{"{ 58d44330-37a1-4c9d-9fa2-0540a1d8ee90 }"}
 			s{"{ 6d2f2203-1c29-417b-bb1b-b434080e8fed }"}
 			s{"{ 7dd16d0c-a7cf-47d4-8356-0ad854b37c24 }"}
-			s{"{ 8044a36f-e313-4204-973d-796231798973 }"}
 			s{"{ 8cf1538a-b0b5-4a34-ba93-436e1609c204 }"}
 			s{"{ aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 }"}
 			s{"{ abf38e0f-af01-4f2d-a167-d95defc809b7 }"}
 			s{"{ c814fe78-9702-2f7d-71b0-c28cc6b8f57c }"}
 			s{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+			s{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 			s{"{ e12eff21-6f53-4b0e-8dc4-4e9f9852d224 }"}
 		}
 	}
@@ -866,11 +866,13 @@ o
 		f %Aperture{0x0000803F}
 		s %CameraRenderPipeline{""}
 		f %Dimensions{0x00002041}
+		f %EV100{0}
 		i1 %EditorShortcut{1}
 		VarArray %ExcludeTags{}
 		f %ExposureCompensation{0}
 		f %FOV{0x00007042}
 		f %FarPlane{0x00007A44}
+		f %FinalExposure{0}
 		f %FocusDistance{0xCDCC4C3E}
 		f %ISO{0x0000C842}
 		VarArray %IncludeTags{}
@@ -1381,7 +1383,7 @@ o
 			b %GiveAllWeapons{1}
 			b %Invincible{1}
 		}
-		s %PlayerPrefab{"{ 8044a36f-e313-4204-973d-796231798973 }"}
+		s %PlayerPrefab{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 	}
 }
 o
@@ -9157,6 +9159,23 @@ o
 }
 o
 {
+	Uuid %id{u4{5029820202441089334,225222788418309325}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBoxManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{2189974221573536380,234044946219702461}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -9186,6 +9205,23 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
 		s %Name{"CollisionLayer"}
 		s %Type{"plUInt8"}
+	}
+}
+o
+{
+	Uuid %id{u4{11538464635628493600,530491051274225601}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDirectionVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -9556,6 +9592,23 @@ o
 }
 o
 {
+	Uuid %id{u4{12223204493048157076,3316158501449178400}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Bitflags|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plBitflagsBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualizerAnchor"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{4166896946117797251,3528888323670374316}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -9579,6 +9632,23 @@ o
 	p
 	{
 		i3 %Value{16}
+	}
+}
+o
+{
+	Uuid %id{u4{12485413893421258756,3989414361314950576}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBoxVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -9631,6 +9701,7 @@ o
 		VarArray %Attributes
 		{
 			Uuid{u4{5498038243339251724,2092890809279803192}}
+			Uuid{u4{17131124530142946200,16526215037469349347}}
 		}
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
 		VarArray %Functions{}
@@ -9701,7 +9772,7 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plLightComponent"}
-		u3 %TypeVersion{6}
+		u3 %TypeVersion{7}
 	}
 }
 o
@@ -9768,6 +9839,23 @@ o
 }
 o
 {
+	Uuid %id{u4{8351431977533639674,5063311031373884206}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{5466979977915011090,5066853109628745746}}
 	s %t{"plScriptableFunctionAttribute"}
 	u3 %v{1}
@@ -9814,6 +9902,23 @@ o
 }
 o
 {
+	Uuid %id{u4{974555555213735133,5204571497945009174}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plTransformManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{7122674370288739913,5218031859803074572}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -9822,6 +9927,7 @@ o
 		VarArray %Attributes
 		{
 			Uuid{u4{14271657949996971221,8685359011034779822}}
+			Uuid{u4{11166322143026092951,9904855637868442860}}
 		}
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
 		VarArray %Functions{}
@@ -9909,6 +10015,23 @@ o
 }
 o
 {
+	Uuid %id{u4{2490466214221766975,5839995135696447901}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plColorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{9506520764747966480,6313113098983946276}}
 	s %t{"plFunctionArgumentDescriptor"}
 	u3 %v{1}
@@ -9916,6 +10039,23 @@ o
 	{
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Reference"}
 		s %Type{"plVec3"}
+	}
+}
+o
+{
+	Uuid %id{u4{11813441318768494441,6326290762033662329}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCylinderVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -10067,6 +10207,23 @@ o
 }
 o
 {
+	Uuid %id{u4{1044895776969024829,7120721283990820986}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSphereManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{16969256132483342807,7158473203222913794}}
 	s %t{"plClampValueAttribute"}
 	u3 %v{1}
@@ -10074,6 +10231,23 @@ o
 	{
 		Angle %Max{f{0xDB0FC93F}}
 		Angle %Min{f{0xC2B8B23D}}
+	}
+}
+o
+{
+	Uuid %id{u4{3294892078126623227,7172327487756919129}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plNonUniformBoxManipulatorAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -10133,6 +10307,7 @@ o
 		VarArray %Attributes
 		{
 			Uuid{u4{14427674692218633494,10080130465054632920}}
+			Uuid{u4{7349559659550894461,15054445923176285202}}
 		}
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
 		VarArray %Functions
@@ -10274,6 +10449,23 @@ o
 	{
 		s %Flags{""}
 		s %Type{""}
+	}
+}
+o
+{
+	Uuid %id{u4{13593399947534819651,8810410798093967671}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -10471,6 +10663,16 @@ o
 }
 o
 {
+	Uuid %id{u4{11166322143026092951,9904855637868442860}}
+	s %t{"plColorAttribute"}
+	u3 %v{1}
+	p
+	{
+		Color %Color{f{0x1083F23B,0x293E823D,0xA637493E,0x0000803F}}
+	}
+}
+o
+{
 	Uuid %id{u4{10351828258771539942,9930948294580473423}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -10602,6 +10804,23 @@ o
 }
 o
 {
+	Uuid %id{u4{13600466029340300681,10737962176160299945}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plPointLightVisualizerAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{16718024692421131029,11085305253353956608}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -10712,6 +10931,23 @@ o
 		s %Name{"AddAngularImpulse"}
 		Uuid %ReturnValue{u4{14123901549545870094,8809133158745196422}}
 		s %Type{"plFunctionType::Member"}
+	}
+}
+o
+{
+	Uuid %id{u4{14209585135339028478,11308263336862562356}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plPropertyAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -10959,6 +11195,23 @@ o
 }
 o
 {
+	Uuid %id{u4{13985915862957499096,13667540031100479129}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCameraVisualizerAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{17001173250643240858,13826320932565293325}}
 	s %t{"plFunctionArgumentDescriptor"}
 	u3 %v{1}
@@ -11091,6 +11344,16 @@ o
 }
 o
 {
+	Uuid %id{u4{7349559659550894461,15054445923176285202}}
+	s %t{"plColorAttribute"}
+	u3 %v{1}
+	p
+	{
+		Color %Color{f{0x1083F23B,0x293E823D,0xA637493E,0x0000803F}}
+	}
+}
+o
+{
 	Uuid %id{u4{11329410779208269671,15214768068935402424}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -11156,6 +11419,23 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plAmbientLightComponent"}
 		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{3351054477311475377,15504064184053016110}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCapsuleManipulatorAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -11257,6 +11537,23 @@ o
 }
 o
 {
+	Uuid %id{u4{6853598190348858983,16453551367257532047}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCategoryAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{15902986225652390530,16461629939562391074}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -11270,6 +11567,16 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plCameraMode"}
 		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17131124530142946200,16526215037469349347}}
+	s %t{"plColorAttribute"}
+	u3 %v{1}
+	p
+	{
+		Color %Color{f{0x1083F23B,0x293E823D,0xA637493E,0x0000803F}}
 	}
 }
 o

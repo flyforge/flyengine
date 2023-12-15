@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{17626430219778045362,5283987167320039176}}
-		u4 %Hash{9299386921139897359}
+		u4 %Hash{6752907280009478279}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -23,10 +23,10 @@ o
 			s{"{ 6240a925-6584-48c5-8559-6981f5d9bedd }"}
 			s{"{ 69ce5162-8938-4fcf-af58-4b590317f807 }"}
 			s{"{ 7c71fc2d-2a1a-4938-9305-f3a0f26d73cc }"}
-			s{"{ 8044a36f-e313-4204-973d-796231798973 }"}
 			s{"{ aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 }"}
 			s{"{ cb72eed3-66b5-8bc9-43b4-004de80188e6 }"}
 			s{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+			s{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 			s{"{ e12eff21-6f53-4b0e-8dc4-4e9f9852d224 }"}
 			s{"{ f85cd38d-6cb0-492c-9566-fd1e1ebfda68 }"}
 		}
@@ -399,7 +399,7 @@ o
 			b %GiveAllWeapons{1}
 			b %Invincible{1}
 		}
-		s %PlayerPrefab{"{ 8044a36f-e313-4204-973d-796231798973 }"}
+		s %PlayerPrefab{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 	}
 }
 o

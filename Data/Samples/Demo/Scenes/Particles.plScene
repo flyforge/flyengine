@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{10397632043479265953,5177341319926404083}}
-		u4 %Hash{10837595413405615201}
+		u4 %Hash{10164719778942572546}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -27,7 +27,6 @@ o
 			s{"{ 64477407-277f-4867-84b1-2a7e89095f27 }"}
 			s{"{ 659ea078-3c40-49c3-8c61-7caf0431f820 }"}
 			s{"{ 6647c90c-1552-4217-8ba8-f010b656d931 }"}
-			s{"{ 8044a36f-e313-4204-973d-796231798973 }"}
 			s{"{ 9404918d-afcf-4ab3-8a14-d46a53ae6ee0 }"}
 			s{"{ a1c9c953-f4d3-4688-8e36-7b98d53d6606 }"}
 			s{"{ abf38e0f-af01-4f2d-a167-d95defc809b7 }"}
@@ -38,6 +37,7 @@ o
 			s{"{ c49af1cd-233c-4af2-9edc-5c12d1456e32 }"}
 			s{"{ c814fe78-9702-2f7d-71b0-c28cc6b8f57c }"}
 			s{"{ d615cd66-0904-00ca-81f9-768ff4fc24ee }"}
+			s{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 			s{"{ dd849390-ce22-4f58-a898-b7d828e9356c }"}
 			s{"{ f45eb3dd-ea46-41fe-b927-63c5122d0c34 }"}
 			s{"{ ffd8b44e-e8e1-4d5b-8437-e84de0974f06 }"}
@@ -1426,7 +1426,7 @@ o
 	{
 		b %Active{1}
 		VarDict %Parameters{}
-		s %PlayerPrefab{"{ 8044a36f-e313-4204-973d-796231798973 }"}
+		s %PlayerPrefab{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 	}
 }
 o

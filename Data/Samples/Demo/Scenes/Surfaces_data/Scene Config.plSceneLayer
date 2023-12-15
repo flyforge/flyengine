@@ -11,14 +11,14 @@ o
 		s %AssetType{"Layer"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{3872236734607355539,5264883800516172798}}
-		u4 %Hash{15555515802040211157}
+		u4 %Hash{4965163430225308579}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
 		{
 			s{"{ 6449d7e0-a8ff-4b43-9f84-df1c870a4748 }"}
-			s{"{ 8044a36f-e313-4204-973d-796231798973 }"}
 			s{"{ 8349d7e3-bfef-4747-8d26-654340ae2407 }"}
+			s{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 		}
 	}
 }
@@ -230,7 +230,7 @@ o
 		{
 			b %GiveAllWeapons{1}
 		}
-		s %PlayerPrefab{"{ 8044a36f-e313-4204-973d-796231798973 }"}
+		s %PlayerPrefab{"{ dc78fde9-0684-4483-8615-ffa5de1d1180 }"}
 	}
 }
 o
