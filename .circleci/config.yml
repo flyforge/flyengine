@@ -2,8 +2,6 @@ version: 2.1
 
 orbs:
     win: circleci/windows@4.1.1
-    discord: antonioned/discord@0.1.0
-
 jobs:
   windows-msvc:
     executor: win/server-2022
@@ -24,9 +22,6 @@ jobs:
           command: Compress-Archive -Path C:\Users\circleci\project\Output -DestinationPath C:\Users\circleci\project\build
       - store_artifacts:
           path: C:\Users\circleci\project\build.zip
-      - discord/status:
-          success_message: "$CIRCLE_JOB job has succeeded!"
-          failure_message: "$CIRCLE_JOB job has failed!"
 workflows:
   plasma-workflow:
     jobs:
