@@ -8,7 +8,6 @@ export class Turret extends pl.TickedTypescriptComponent {
 
     target: pl.GameObject = null;
     gunSpawn: pl.SpawnComponent = null;
-    gunSound: pl.FmodEventComponent = null;
 
     constructor() {
         super()
@@ -46,7 +45,6 @@ export class Turret extends pl.TickedTypescriptComponent {
         let gun = this.GetOwner().FindChildByName("Gun", true);
 
         this.gunSpawn = gun.TryGetComponentOfBaseType(pl.SpawnComponent);
-        this.gunSound = gun.TryGetComponentOfBaseType(pl.FmodEventComponent);
     }
 
 
@@ -96,7 +94,6 @@ export class Turret extends pl.TickedTypescriptComponent {
         if (dirToTarget.Dot(owner.GetGlobalDirForwards()) > Math.cos(pl.Angle.DegreeToRadian(15))) {
 
             this.gunSpawn.ScheduleSpawn();
-            this.gunSound.StartOneShot();
         }
     }
 }

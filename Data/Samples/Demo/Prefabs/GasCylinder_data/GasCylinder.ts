@@ -72,12 +72,6 @@ export class GasCylinder extends pl.TickedTypescriptComponent {
                         if (leakFX != null) {
                             leakFX.StartEffect();
                         }
-
-                        let leakSound = leakObj.TryGetComponentOfBaseType(pl.FmodEventComponent);
-
-                        if (leakSound != null) {
-                            leakSound.Restart();
-                        }
                     }
 
                     // trigger code path below
