@@ -47,6 +47,7 @@ void PlasmaEditorEngineProcessApp::CreateRemoteWindow()
     desc.m_uiWindowNumber = 0;
     desc.m_bClipMouseCursor = true;
     desc.m_bShowMouseCursor = true;
+    desc.m_RenderResolution = plSizeU32(1024, 768);
     desc.m_Resolution = plSizeU32(1024, 768);
     desc.m_WindowMode = plWindowMode::WindowFixedResolution;
     desc.m_Title = "Engine View";
