@@ -60,6 +60,48 @@ void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
         m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2DArray, false}] = hView;
       }
       {
+        plGALTextureCreationDescription desc;
+        desc.m_uiWidth = 4;
+        desc.m_uiHeight = 4;
+        desc.m_uiMipLevelCount = 1;
+        desc.m_Format = plGALResourceFormat::RGBAHalf;
+        desc.m_Type = plGALTextureType::Texture2D;
+        desc.m_SampleCount = plGALMSAASampleCount::None;
+        desc.m_ResourceAccess.m_bImmutable = false;
+        desc.m_bCreateRenderTarget = false;
+        desc.m_bAllowUAV = true;
+        plGALTextureHandle hTexture = s_pDevice->CreateTexture(desc);
+        PLASMA_ASSERT_DEV(!hTexture.IsInvalidated(), "Failed to create fallback resource");
+        // Debug device not set yet.
+        s_pDevice->GetTexture(hTexture)->SetDebugName("FallbackResourceVulkan");
+        m_Textures.PushBack(hTexture);
+        plGALUnorderedAccessViewCreationDescription descUAV;
+        descUAV.m_hTexture = hTexture;
+        auto hUAV = s_pDevice->CreateUnorderedAccessView(descUAV);
+        m_UAVs[{vk::DescriptorType::eStorageImage, plShaderResourceType::UAV, false}] = hUAV;
+      }
+      {
+        plGALTextureCreationDescription desc;
+        desc.m_uiWidth = 4;
+        desc.m_uiHeight = 4;
+        desc.m_uiMipLevelCount = 1;
+        desc.m_Format = plGALResourceFormat::RGBAHalf;
+        desc.m_Type = plGALTextureType::Texture2D;
+        desc.m_SampleCount = plGALMSAASampleCount::None;
+        desc.m_ResourceAccess.m_bImmutable = false;
+        desc.m_bCreateRenderTarget = false;
+        desc.m_bAllowUAV = true;
+        plGALTextureHandle hTexture = s_pDevice->CreateTexture(desc);
+        PLASMA_ASSERT_DEV(!hTexture.IsInvalidated(), "Failed to create fallback resource");
+        // Debug device not set yet.
+        s_pDevice->GetTexture(hTexture)->SetDebugName("FallbackResourceVulkan");
+        m_Textures.PushBack(hTexture);
+        plGALUnorderedAccessViewCreationDescription descUAV;
+        descUAV.m_hTexture = hTexture;
+        auto hUAV = s_pDevice->CreateUnorderedAccessView(descUAV);
+        m_UAVs[{vk::DescriptorType::eStorageImage, plShaderResourceType::ConstantBuffer, false}] = hUAV;
+      }
+      {
         plGALResourceViewHandle hView = CreateTexture(plGALTextureType::Texture2D, plGALMSAASampleCount::None, true);
         m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2D, true}] = hView;
         m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2DArray, true}] = hView;

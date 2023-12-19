@@ -890,7 +890,7 @@ void plGALCommandEncoderImplVulkan::GenerateMipMapsPlatform(const plGALResourceV
 
 void plGALCommandEncoderImplVulkan::FlushPlatform()
 {
-  FlushDeferredStateChanges();
+  //FlushDeferredStateChanges();
 }
 
 // Debug helper functions
@@ -1472,6 +1472,10 @@ void plGALCommandEncoderImplVulkan::FlushDeferredStateChanges()
         case plGALShaderVulkan::BindingMapping::UAV:
         {
           const plGALUnorderedAccessViewVulkan* pUAV = m_pBoundUnoderedAccessViews[mapping.m_uiSource];
+          if (pUAV == nullptr)
+          {
+            pUAV = plFallbackResourcesVulkan::GetFallbackUnorderedAccessView(mapping.m_descriptorType, mapping.m_plType);
+          }
           if (!pUAV->GetDescription().m_hTexture.IsInvalidated())
           {
             write.pImageInfo = &pUAV->GetImageInfo();

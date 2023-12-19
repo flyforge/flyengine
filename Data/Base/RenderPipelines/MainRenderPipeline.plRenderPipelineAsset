@@ -11,7 +11,7 @@ o
 		s %AssetType{"RenderPipeline"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{12099190295688988325,5711173786673602835}}
-		u4 %Hash{15982704092457380346}
+		u4 %Hash{3434703999206350311}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -85,6 +85,13 @@ o
 o
 {
 	Uuid %id{u4{8585470075124698003,2716617892859069161}}
+	s %t{"plRenderPipelineNodeInputPin"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{10104742027697949953,2867156070875154583}}
 	s %t{"plRenderPipelineNodeInputPin"}
 	u3 %v{1}
 	p{}
@@ -223,6 +230,19 @@ o
 }
 o
 {
+	Uuid %id{u4{1072345034542208187,4704914311196580192}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{17813593561390058118,5259621265480336041}}
+		s %Connection::SourcePin{"Output"}
+		Uuid %Connection::Target{u4{10506466120201264552,5167919038171775616}}
+		s %Connection::TargetPin{"Input"}
+	}
+}
+o
+{
 	Uuid %id{u4{8510245324702294201,4705259946692176212}}
 	s %t{"DocumentNodeManager_DefaultConnection"}
 	u3 %v{1}
@@ -251,19 +271,6 @@ o
 		Uuid %Connection::Source{u4{4573067531081673353,4872166065879751935}}
 		s %Connection::SourcePin{"Output"}
 		Uuid %Connection::Target{u4{17645530743364087687,5219727394441906986}}
-		s %Connection::TargetPin{"Input"}
-	}
-}
-o
-{
-	Uuid %id{u4{15658589025084639635,4726357420315155323}}
-	s %t{"DocumentNodeManager_DefaultConnection"}
-	u3 %v{1}
-	p
-	{
-		Uuid %Connection::Source{u4{15911382904768051603,5419814548748940967}}
-		s %Connection::SourcePin{"Output"}
-		Uuid %Connection::Target{u4{10506466120201264552,5167919038171775616}}
 		s %Connection::TargetPin{"Input"}
 	}
 }
@@ -467,6 +474,19 @@ o
 		s %Connection::SourcePin{"MaterialAdvanced"}
 		Uuid %Connection::Target{u4{12243328563503071422,5322624624288217279}}
 		s %Connection::TargetPin{"MaterialAdvanced"}
+	}
+}
+o
+{
+	Uuid %id{u4{6756758755523002783,4945092417891391500}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{15911382904768051603,5419814548748940967}}
+		s %Connection::SourcePin{"Output"}
+		Uuid %Connection::Target{u4{17813593561390058118,5259621265480336041}}
+		s %Connection::TargetPin{"Input"}
 	}
 }
 o
@@ -715,6 +735,23 @@ o
 		s %Connection::SourcePin{"Output"}
 		Uuid %Connection::Target{u4{9666966738792679818,5349921931679207013}}
 		s %Connection::TargetPin{"Input"}
+	}
+}
+o
+{
+	Uuid %id{u4{17813593561390058118,5259621265480336041}}
+	s %t{"plFXAAPass"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		s %EdgeThreshold{"plEdgeThresholdQuality::Overkill"}
+		s %EdgeThresholdMin{"plEdgeThresholdMinQuality::UpperLimit"}
+		Uuid %Input{u4{10104742027697949953,2867156070875154583}}
+		s %Name{""}
+		Vec2 %Node::Pos{f{0x8C2D7044,0x42753CC3}}
+		Uuid %Output{u4{7980933768701832734,6841264436071963790}}
+		f %SubPixelAliasingRemovalAmount{0x0000403F}
 	}
 }
 o
@@ -1189,6 +1226,7 @@ o
 			Uuid{u4{10574244796437574569,5573501548616155191}}
 			Uuid{u4{10506466120201264552,5167919038171775616}}
 			Uuid{u4{1720609021428101007,5226086300424504983}}
+			Uuid{u4{17813593561390058118,5259621265480336041}}
 			Uuid{u4{15911382904768051603,5419814548748940967}}
 			Uuid{u4{16423900340487397025,4784413304580502463}}
 			Uuid{u4{7759087749956091802,4900306514438004103}}
@@ -1227,7 +1265,9 @@ o
 			Uuid{u4{8872267793016610960,5641136773025529200}}
 			Uuid{u4{6963475977867873446,5441141788056870486}}
 			Uuid{u4{12645621272444855737,5398562091537051411}}
+			Uuid{u4{1072345034542208187,4704914311196580192}}
 			Uuid{u4{3073995696601163925,4954613022676601860}}
+			Uuid{u4{6756758755523002783,4945092417891391500}}
 			Uuid{u4{6763280642255446932,5526072285380244427}}
 			Uuid{u4{1736511909959176075,4965525273013184650}}
 			Uuid{u4{9526868482054755977,4971285240311341611}}
@@ -1252,7 +1292,6 @@ o
 			Uuid{u4{16653587924570463923,4690610636950304436}}
 			Uuid{u4{12144391284108200121,5585863941463224585}}
 			Uuid{u4{13341901216228773254,5501470647814307931}}
-			Uuid{u4{15658589025084639635,4726357420315155323}}
 		}
 	}
 }
@@ -1266,6 +1305,13 @@ o
 o
 {
 	Uuid %id{u4{312368341445464007,6517845942728507271}}
+	s %t{"plRenderPipelineNodeOutputPin"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{7980933768701832734,6841264436071963790}}
 	s %t{"plRenderPipelineNodeOutputPin"}
 	u3 %v{1}
 	p{}
@@ -1959,6 +2005,23 @@ o
 }
 o
 {
+	Uuid %id{u4{3654712286497139818,6545138759559247353}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEdgeThresholdMinQuality"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{12282953082434743357,7818330007058179663}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -2367,6 +2430,23 @@ o
 }
 o
 {
+	Uuid %id{u4{1610535103364181822,14296371502281460231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plRenderPipelinePass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plFXAAPass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{3963318034058347064,14473690088468607870}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -2481,6 +2561,23 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plSkyRenderPass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{1137937733262036295,16819858325104698069}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEdgeThresholdQuality"}
 		u3 %TypeVersion{1}
 	}
 }
