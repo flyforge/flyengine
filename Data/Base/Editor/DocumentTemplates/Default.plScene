@@ -2,7 +2,7 @@ HeaderV2
 {
 o
 {
-	Uuid %id{u4{14841776606954812814,5457590759842316574}}
+	Uuid %id{u4{6189582866698283403,4726614492253645070}}
 	s %t{"plAssetDocumentInfo"}
 	u3 %v{2}
 	s %n{"Header"}
@@ -10,8 +10,8 @@ o
 	{
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
-		Uuid %DocumentID{u4{14841776606954812814,5457590759842316574}}
-		u4 %Hash{8877722832174963461}
+		Uuid %DocumentID{u4{6189582866698283403,4726614492253645070}}
+		u4 %Hash{5951398115764896773}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -31,7 +31,24 @@ Objects
 {
 o
 {
-	Uuid %id{u4{3255264728565060481,4690918396111258786}}
+	Uuid %id{u4{17401054598798848146,919178620196865203}}
+	s %t{"plSceneDocumentRoot"}
+	u3 %v{2}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{6976123544185987201,4073291312891805767}}
+			Uuid{u4{288838585457211579,4293225591889284113}}
+			Uuid{u4{1378947850754165167,4585460842525551681}}
+		}
+		Uuid %Settings{u4{2099863780135442593,4255476094979901179}}
+	}
+}
+o
+{
+	Uuid %id{u4{13049815062018082686,3959942128522587282}}
 	s %t{"plJoltShapeBoxComponent"}
 	u3 %v{1}
 	p
@@ -42,17 +59,17 @@ o
 }
 o
 {
-	Uuid %id{u4{10798882506869384630,4696811982967372957}}
+	Uuid %id{u4{2146688766612855219,3965835715378701453}}
 	s %t{"plSceneLayer"}
 	u3 %v{1}
 	p
 	{
-		Uuid %Layer{u4{14841776606954812814,5457590759842316574}}
+		Uuid %Layer{u4{6189582866698283403,4726614492253645070}}
 	}
 }
 o
 {
-	Uuid %id{u4{2396896726356983992,4714548004823139304}}
+	Uuid %id{u4{12191447059810006197,3983571737234467800}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -61,7 +78,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{18160609396920391316,5270200823255435766}}
+			Uuid{u4{9508415656663861905,4539224555666764262}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0,0x38C41940,0x94158440}}
@@ -78,7 +95,7 @@ o
 }
 o
 {
-	Uuid %id{u4{8257773089240308387,4722672200837538469}}
+	Uuid %id{u4{6976123544185987201,4073291312891805767}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -86,36 +103,10 @@ o
 		b %Active{1}
 		VarArray %Children
 		{
-			Uuid{u4{9750259911629894575,5182224870914474343}}
-		}
-		VarArray %Components{}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0,0}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{"Editor"}
-		VarArray %Tags
-		{
-			s{"Exclude From Export"}
-		}
-	}
-}
-o
-{
-	Uuid %id{u4{15628317284442516612,4804267580480477271}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children
-		{
-			Uuid{u4{1286123741406317213,4908300027459856365}}
-			Uuid{u4{3321675616207001738,5180111284974951590}}
-			Uuid{u4{11132620235227075468,4879882893570377543}}
-			Uuid{u4{2396896726356983992,4714548004823139304}}
+			Uuid{u4{11080674074859339418,4177323759871184861}}
+			Uuid{u4{13116225949660023943,4449135017386280086}}
+			Uuid{u4{2480426494970546057,4148906625981706039}}
+			Uuid{u4{12191447059810006197,3983571737234467800}}
 		}
 		VarArray %Components{}
 		s %GlobalKey{""}
@@ -133,7 +124,7 @@ o
 }
 o
 {
-	Uuid %id{u4{3000172267105012926,4824742916675021359}}
+	Uuid %id{u4{12794722600558035131,4093766649086349855}}
 	s %t{"plSkyBoxComponent"}
 	u3 %v{4}
 	p
@@ -148,7 +139,7 @@ o
 }
 o
 {
-	Uuid %id{u4{11132620235227075468,4879882893570377543}}
+	Uuid %id{u4{2480426494970546057,4148906625981706039}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -157,7 +148,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{12889383775113616281,5171512885735365735}}
+			Uuid{u4{4237190034857086870,4440536618146694231}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0x0000A0C0,0,0x00000040}}
@@ -174,7 +165,7 @@ o
 }
 o
 {
-	Uuid %id{u4{10738248879687085996,4888841997144155252}}
+	Uuid %id{u4{2086055139430556585,4157865729555483748}}
 	s %t{"plJoltShapeBoxComponent"}
 	u3 %v{1}
 	p
@@ -185,7 +176,7 @@ o
 }
 o
 {
-	Uuid %id{u4{1286123741406317213,4908300027459856365}}
+	Uuid %id{u4{11080674074859339418,4177323759871184861}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -194,8 +185,8 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{3203333098438434696,5315482043124287675}}
-			Uuid{u4{1296428472975282860,5759232001160757308}}
+			Uuid{u4{12997883431891456901,4584505775535616171}}
+			Uuid{u4{11090978806428305065,5028255733572085804}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0,0x40B7E0BD,0xDC14EA40}}
@@ -212,20 +203,20 @@ o
 }
 o
 {
-	Uuid %id{u4{10752057520391972004,4986452362568572683}}
+	Uuid %id{u4{2099863780135442593,4255476094979901179}}
 	s %t{"plSceneDocumentSettings"}
 	u3 %v{2}
 	p
 	{
 		VarArray %Layers
 		{
-			Uuid{u4{10798882506869384630,4696811982967372957}}
+			Uuid{u4{2146688766612855219,3965835715378701453}}
 		}
 	}
 }
 o
 {
-	Uuid %id{u4{8941032325713740990,5024201859477955617}}
+	Uuid %id{u4{288838585457211579,4293225591889284113}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -233,12 +224,12 @@ o
 		b %Active{1}
 		VarArray %Children
 		{
-			Uuid{u4{11941136280558136454,5204258368080342347}}
-			Uuid{u4{16664221425091965846,5594269295398144856}}
-			Uuid{u4{8284973811487382598,10534337881093686109}}
-			Uuid{u4{4151224434992092901,16224908300241020970}}
-			Uuid{u4{18373883156788045598,10423334463023194378}}
-			Uuid{u4{290081552337642956,16077400528191904050}}
+			Uuid{u4{3288942540301607043,4473282100491670843}}
+			Uuid{u4{8012027684835436435,4863293027809473352}}
+			Uuid{u4{18079524144940404803,9803361613505014605}}
+			Uuid{u4{13945774768445115106,15493932032652349466}}
+			Uuid{u4{9721689416531516187,9692358195434522874}}
+			Uuid{u4{10084631885790665161,15346424260603232546}}
 		}
 		VarArray %Components{}
 		s %GlobalKey{""}
@@ -256,7 +247,7 @@ o
 }
 o
 {
-	Uuid %id{u4{17666988474806758798,5081610691545775088}}
+	Uuid %id{u4{9014794734550229387,4350634423957103584}}
 	s %t{"plJoltShapeBoxComponent"}
 	u3 %v{1}
 	p
@@ -267,7 +258,7 @@ o
 }
 o
 {
-	Uuid %id{u4{4346034914023225500,5142465782966922177}}
+	Uuid %id{u4{14140585247476247705,4411489515378250673}}
 	s %t{"plPlayerStartPointComponent"}
 	u3 %v{2}
 	p
@@ -279,7 +270,7 @@ o
 }
 o
 {
-	Uuid %id{u4{12889383775113616281,5171512885735365735}}
+	Uuid %id{u4{4237190034857086870,4440536618146694231}}
 	s %t{"plCameraComponent"}
 	u3 %v{11}
 	p
@@ -288,11 +279,13 @@ o
 		f %Aperture{0x0000803F}
 		s %CameraRenderPipeline{""}
 		f %Dimensions{0x00002041}
+		f %EV100{0}
 		i1 %EditorShortcut{1}
 		VarArray %ExcludeTags{}
 		f %ExposureCompensation{0}
 		f %FOV{0x00007042}
 		f %FarPlane{0x00007A44}
+		f %FinalExposure{0}
 		f %FocusDistance{0xCDCC4C3E}
 		f %ISO{0x0000C842}
 		VarArray %IncludeTags{}
@@ -308,7 +301,7 @@ o
 }
 o
 {
-	Uuid %id{u4{14951355943064611733,5178505004736180676}}
+	Uuid %id{u4{6299162202808082322,4447528737147509172}}
 	s %t{"plMeshComponent"}
 	u3 %v{3}
 	p
@@ -324,7 +317,7 @@ o
 }
 o
 {
-	Uuid %id{u4{3321675616207001738,5180111284974951590}}
+	Uuid %id{u4{13116225949660023943,4449135017386280086}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -333,7 +326,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{3000172267105012926,4824742916675021359}}
+			Uuid{u4{12794722600558035131,4093766649086349855}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0,0,0x0000803F}}
@@ -350,7 +343,7 @@ o
 }
 o
 {
-	Uuid %id{u4{9750259911629894575,5182224870914474343}}
+	Uuid %id{u4{3288942540301607043,4473282100491670843}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -359,33 +352,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{8389690849268539314,5262277621378678943}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0,0}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{"Editor Camera"}
-		VarArray %Tags
-		{
-			s{"Exclude From Export"}
-		}
-	}
-}
-o
-{
-	Uuid %id{u4{11941136280558136454,5204258368080342347}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{14219116393013989564,5319465009230803302}}
+			Uuid{u4{5566922652757460153,4588488741642131798}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0,0,0}}
@@ -402,7 +369,7 @@ o
 }
 o
 {
-	Uuid %id{u4{13552668321652310707,5214278090498080303}}
+	Uuid %id{u4{4900474581395781296,4483301822909408799}}
 	s %t{"plJoltShapeBoxComponent"}
 	u3 %v{1}
 	p
@@ -413,36 +380,7 @@ o
 }
 o
 {
-	Uuid %id{u4{8389690849268539314,5262277621378678943}}
-	s %t{"plCameraComponent"}
-	u3 %v{11}
-	p
-	{
-		b %Active{1}
-		f %Aperture{0x00008041}
-		s %CameraRenderPipeline{""}
-		f %Dimensions{0x00002041}
-		i1 %EditorShortcut{-1}
-		VarArray %ExcludeTags{}
-		f %ExposureCompensation{0}
-		f %FOV{0x0000A042}
-		f %FarPlane{0x00007A44}
-		f %FocusDistance{0xCDCC4C3E}
-		f %ISO{0x0000C842}
-		VarArray %IncludeTags{}
-		s %Mode{"plCameraMode::PerspectiveFixedFovX"}
-		f %NearPlane{0x0000803E}
-		s %RenderTarget{""}
-		Vec2 %RenderTargetOffset{f{0,0}}
-		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
-		b %ShowStats{0}
-		Time %ShutterTime{d{0x7B14AE47E17A743F}}
-		s %UsageHint{"plCameraUsageHint::EditorView"}
-	}
-}
-o
-{
-	Uuid %id{u4{18160609396920391316,5270200823255435766}}
+	Uuid %id{u4{9508415656663861905,4539224555666764262}}
 	s %t{"plSphereReflectionProbeComponent"}
 	u3 %v{2}
 	p
@@ -466,7 +404,7 @@ o
 }
 o
 {
-	Uuid %id{u4{3203333098438434696,5315482043124287675}}
+	Uuid %id{u4{12997883431891456901,4584505775535616171}}
 	s %t{"plSkyLightComponent"}
 	u3 %v{3}
 	p
@@ -489,7 +427,7 @@ o
 }
 o
 {
-	Uuid %id{u4{10031141591010694578,5316437110114223185}}
+	Uuid %id{u4{1378947850754165167,4585460842525551681}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -498,7 +436,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{4346034914023225500,5142465782966922177}}
+			Uuid{u4{14140585247476247705,4411489515378250673}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0x0024FD3C,0x57062BC0,0}}
@@ -515,7 +453,7 @@ o
 }
 o
 {
-	Uuid %id{u4{14219116393013989564,5319465009230803302}}
+	Uuid %id{u4{5566922652757460153,4588488741642131798}}
 	s %t{"plGreyBoxComponent"}
 	u3 %v{5}
 	p
@@ -542,7 +480,7 @@ o
 }
 o
 {
-	Uuid %id{u4{10931995699010223028,5437230868261968666}}
+	Uuid %id{u4{2279801958753693617,4706254600673297162}}
 	s %t{"plJoltDynamicActorComponent"}
 	u3 %v{3}
 	p
@@ -565,7 +503,7 @@ o
 }
 o
 {
-	Uuid %id{u4{16664221425091965846,5594269295398144856}}
+	Uuid %id{u4{8012027684835436435,4863293027809473352}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -574,9 +512,9 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{14951355943064611733,5178505004736180676}}
-			Uuid{u4{10931995699010223028,5437230868261968666}}
-			Uuid{u4{13552668321652310707,5214278090498080303}}
+			Uuid{u4{6299162202808082322,4447528737147509172}}
+			Uuid{u4{2279801958753693617,4706254600673297162}}
+			Uuid{u4{4900474581395781296,4483301822909408799}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0xA630EE3E,0xD8FF28BF,0x0000403F}}
@@ -593,7 +531,7 @@ o
 }
 o
 {
-	Uuid %id{u4{1296428472975282860,5759232001160757308}}
+	Uuid %id{u4{11090978806428305065,5028255733572085804}}
 	s %t{"plDirectionalLightComponent"}
 	u3 %v{3}
 	p
@@ -602,7 +540,7 @@ o
 		b %CastShadows{1}
 		f %ConstantBias{0xCDCCCC3D}
 		f %FadeOutStart{0xCDCC4C3F}
-		f %Intensity{0x0050C347}
+		f %Intensity{0x00002041}
 		ColorGamma %LightColor{u1{255,255,255,255}}
 		s %LightUnit{"plLightUnit::Lumen"}
 		f %MinShadowRange{0x0000F041}
@@ -618,25 +556,7 @@ o
 }
 o
 {
-	Uuid %id{u4{18096612296587978288,6449934965513159559}}
-	s %t{"plSceneDocumentRoot"}
-	u3 %v{2}
-	s %n{"ObjectTree"}
-	p
-	{
-		VarArray %Children
-		{
-			Uuid{u4{8257773089240308387,4722672200837538469}}
-			Uuid{u4{15628317284442516612,4804267580480477271}}
-			Uuid{u4{8941032325713740990,5024201859477955617}}
-			Uuid{u4{10031141591010694578,5316437110114223185}}
-		}
-		Uuid %Settings{u4{10752057520391972004,4986452362568572683}}
-	}
-}
-o
-{
-	Uuid %id{u4{16661017674760691485,10007570172361230198}}
+	Uuid %id{u4{8008823934504162074,9276593904772558694}}
 	s %t{"plMeshComponent"}
 	u3 %v{3}
 	p
@@ -652,7 +572,7 @@ o
 }
 o
 {
-	Uuid %id{u4{6572108329460028485,10118573590431721929}}
+	Uuid %id{u4{16366658662913050690,9387597322843050425}}
 	s %t{"plMeshComponent"}
 	u3 %v{3}
 	p
@@ -668,7 +588,7 @@ o
 }
 o
 {
-	Uuid %id{u4{12641657430706302780,10266296035887018188}}
+	Uuid %id{u4{3989463690449773369,9535319768298346684}}
 	s %t{"plJoltDynamicActorComponent"}
 	u3 %v{3}
 	p
@@ -691,7 +611,7 @@ o
 }
 o
 {
-	Uuid %id{u4{2552748085405639780,10377299453957509919}}
+	Uuid %id{u4{12347298418858661985,9646323186368838415}}
 	s %t{"plJoltDynamicActorComponent"}
 	u3 %v{3}
 	p
@@ -714,7 +634,7 @@ o
 }
 o
 {
-	Uuid %id{u4{18373883156788045598,10423334463023194378}}
+	Uuid %id{u4{9721689416531516187,9692358195434522874}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -723,9 +643,9 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{16661017674760691485,10007570172361230198}}
-			Uuid{u4{12641657430706302780,10266296035887018188}}
-			Uuid{u4{10738248879687085996,4888841997144155252}}
+			Uuid{u4{8008823934504162074,9276593904772558694}}
+			Uuid{u4{3989463690449773369,9535319768298346684}}
+			Uuid{u4{2086055139430556585,4157865729555483748}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0xEC8F6BBE,0x5BE7E93E,0x5A563C40}}
@@ -742,7 +662,7 @@ o
 }
 o
 {
-	Uuid %id{u4{8284973811487382598,10534337881093686109}}
+	Uuid %id{u4{18079524144940404803,9803361613505014605}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -751,9 +671,9 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{6572108329460028485,10118573590431721929}}
-			Uuid{u4{2552748085405639780,10377299453957509919}}
-			Uuid{u4{17666988474806758798,5081610691545775088}}
+			Uuid{u4{16366658662913050690,9387597322843050425}}
+			Uuid{u4{12347298418858661985,9646323186368838415}}
+			Uuid{u4{9014794734550229387,4350634423957103584}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0x87EF46BF,0x16FE173F,0xF8FF3F3F}}
@@ -770,7 +690,7 @@ o
 }
 o
 {
-	Uuid %id{u4{17023960144019840459,15661636237529939870}}
+	Uuid %id{u4{8371766403763311048,14930659969941268366}}
 	s %t{"plMeshComponent"}
 	u3 %v{3}
 	p
@@ -786,7 +706,7 @@ o
 }
 o
 {
-	Uuid %id{u4{2438358952964738788,15809144009579056790}}
+	Uuid %id{u4{12232909286417760993,15078167741990385286}}
 	s %t{"plMeshComponent"}
 	u3 %v{3}
 	p
@@ -802,7 +722,7 @@ o
 }
 o
 {
-	Uuid %id{u4{16865742782619901699,16067869873104844780}}
+	Uuid %id{u4{8213549042363372288,15336893605516173276}}
 	s %t{"plJoltDynamicActorComponent"}
 	u3 %v{3}
 	p
@@ -825,7 +745,7 @@ o
 }
 o
 {
-	Uuid %id{u4{290081552337642956,16077400528191904050}}
+	Uuid %id{u4{10084631885790665161,15346424260603232546}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -834,7 +754,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{17023960144019840459,15661636237529939870}}
+			Uuid{u4{8371766403763311048,14930659969941268366}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0xEC8F6BBE,0x5BE7E93E,0x55CCAE40}}
@@ -851,7 +771,7 @@ o
 }
 o
 {
-	Uuid %id{u4{4151224434992092901,16224908300241020970}}
+	Uuid %id{u4{13945774768445115106,15493932032652349466}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -860,9 +780,9 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{2438358952964738788,15809144009579056790}}
-			Uuid{u4{16865742782619901699,16067869873104844780}}
-			Uuid{u4{3255264728565060481,4690918396111258786}}
+			Uuid{u4{12232909286417760993,15078167741990385286}}
+			Uuid{u4{8213549042363372288,15336893605516173276}}
+			Uuid{u4{13049815062018082686,3959942128522587282}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0x74301F3F,0xD4A25A3F,0x0000403F}}
@@ -907,6 +827,23 @@ o
 }
 o
 {
+	Uuid %id{u4{5029820202441089334,225222788418309325}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBoxManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{2189974221573536380,234044946219702461}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -918,6 +855,23 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
 		s %Name{"plOnJoltContact::ImpactReactions"}
 		s %Type{"plUInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{11538464635628493600,530491051274225601}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDirectionVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -1149,6 +1103,23 @@ o
 }
 o
 {
+	Uuid %id{u4{12223204493048157076,3316158501449178400}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Bitflags|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plBitflagsBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualizerAnchor"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{4166896946117797251,3528888323670374316}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -1166,6 +1137,23 @@ o
 }
 o
 {
+	Uuid %id{u4{12485413893421258756,3989414361314950576}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBoxVisualizerAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{3476504569682976126,4142094656406938069}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -1177,6 +1165,23 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
 		s %Name{"plOnJoltContact::SlideReactions"}
 		s %Type{"plUInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{9173583534334495496,4413498156702784611}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAbstractObjectNode"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -1271,6 +1276,23 @@ o
 }
 o
 {
+	Uuid %id{u4{8351431977533639674,5063311031373884206}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{5466979977915011090,5066853109628745746}}
 	s %t{"plScriptableFunctionAttribute"}
 	u3 %v{1}
@@ -1278,6 +1300,23 @@ o
 	{
 		VarArray %ArgNames{}
 		VarArray %ArgTypes{}
+	}
+}
+o
+{
+	Uuid %id{u4{974555555213735133,5204571497945009174}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plTransformManipulatorAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -1364,6 +1403,23 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
 		s %Name{"Density"}
 		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{2490466214221766975,5839995135696447901}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plColorAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -1464,6 +1520,40 @@ o
 	p
 	{
 		f %Value{0x0000C842}
+	}
+}
+o
+{
+	Uuid %id{u4{1044895776969024829,7120721283990820986}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSphereManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{3294892078126623227,7172327487756919129}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plNonUniformBoxManipulatorAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -1586,6 +1676,23 @@ o
 	{
 		s %Flags{""}
 		s %Type{""}
+	}
+}
+o
+{
+	Uuid %id{u4{13593399947534819651,8810410798093967671}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -1916,6 +2023,23 @@ o
 }
 o
 {
+	Uuid %id{u4{14209585135339028478,11308263336862562356}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plPropertyAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{2350106596034883728,11532140854007368447}}
 	s %t{"plDynamicEnumAttribute"}
 	u3 %v{1}
@@ -1998,6 +2122,40 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plReflectionProbeMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13985915862957499096,13667540031100479129}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCameraVisualizerAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17778042581324502634,13790417346762092445}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plSphereVisualizerAttribute"}
 		u3 %TypeVersion{1}
 	}
 }
@@ -2163,6 +2321,23 @@ o
 }
 o
 {
+	Uuid %id{u4{6853598190348858983,16453551367257532047}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCategoryAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{15902986225652390530,16461629939562391074}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -2289,6 +2464,23 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{698364993276436088,17804542439804637414}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBasisAxis"}
 		u3 %TypeVersion{1}
 	}
 }

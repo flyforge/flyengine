@@ -8,7 +8,6 @@ SHADING_QUALITY = SHADING_QUALITY_NORMAL
 [COMPUTESHADER]
 
 #include <Shaders/Common/Utils.h>
-#include <Shaders/Common/Lighting.h>
 #include <Shaders/Common/Tonemapping.h>
 
 #include "TAAConstants.h"
@@ -18,6 +17,7 @@ Texture2D InputTexture;
 Texture2D VelocityTexture;
 Texture2D DepthHistoryTexture;
 Texture2D PreviousVelocityTexture;
+Texture2DArray SceneDepth;
 RWTexture2D<float4> OutputTexture;
 
 // Neighborhood load optimization:
@@ -31,6 +31,46 @@ static const uint TILE_SIZE = POSTPROCESS_BLOCKSIZE    + TILE_BORDER * 2;
 
 groupshared float3 tile_color[TILE_SIZE*TILE_SIZE];
 groupshared float tile_depth[TILE_SIZE*TILE_SIZE];
+
+float SampleSceneDepth(float2 screenPosition)
+{
+  float depthFromZBuffer = SceneDepth.SampleLevel(PointClampSampler, float3(screenPosition.xy * ViewportSize.zw, s_ActiveCameraEyeIndex), 0.0f).r;
+  return LinearizeZBufferDepth(depthFromZBuffer);
+}
+
+float GetDepth(uint2 position)
+{
+  position = clamp(position, uint2(0, 0), uint2(ViewportSize.xy) - uint2(1, 1));
+  return SceneDepth.SampleLevel(PointClampSampler, float3(position.xy * ViewportSize.zw, s_ActiveCameraEyeIndex), 0.0f).r;
+}
+
+float GetDepth(float2 uv)
+{
+  // effects like screen space shadows, can get artefacts if a point sampler is used
+  return SceneDepth.SampleLevel(LinearClampSampler, float3(uv * ViewportSize.zw, s_ActiveCameraEyeIndex), 0.0f).r;
+}
+
+float GetLinearDepth(float z, float near, float far)
+{
+  float z_b = z;
+  float z_n = 2.0f * z_b - 1.0f;
+  return 2.0f * far * near / (near + far - z_n * (near - far));
+}
+
+float GetLinearDepth(float z)
+{
+  return GetLinearDepth(z, ClipPlanes.x, ClipPlanes.y);
+}
+
+float GetLinearDepth(uint2 pos)
+{
+  return GetLinearDepth(GetDepth(pos));
+}
+
+float GetLinearDepth(float2 uv)
+{
+  return GetLinearDepth(GetDepth(uv));
+}
 
 // 2D array index to flattened 1D array index
 inline uint flatten2D(uint2 coord, uint2 dim)

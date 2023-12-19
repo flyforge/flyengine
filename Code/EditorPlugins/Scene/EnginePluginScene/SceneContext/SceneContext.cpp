@@ -936,6 +936,20 @@ void plSceneContext::UpdateDocumentContext()
 
 plGameObjectHandle plSceneContext::ResolveStringToGameObjectHandle(const void* pString, plComponentHandle hThis, plStringView sProperty) const
 {
+  const char* szTargetGuid = reinterpret_cast<const char*>(pString);
+
+  if (hThis.IsInvalidated() && sProperty.IsEmpty())
+  {
+    // This code path is used by plPrefabReferenceComponent::SerializeComponent() to check whether an arbitrary string may
+    // represent a game object reference. References will always be stringyfied GUIDs.
+
+    if (!plConversionUtils::IsStringUuid(szTargetGuid))
+      return plGameObjectHandle();
+
+    // convert string to GUID and check if references a known object
+    return m_Context.m_GameObjectMap.GetHandle(plConversionUtils::ConvertStringToUuid(szTargetGuid));
+  }
+
   // Test if the component is a direct part of this scene or one of its layers.
   if (m_Context.m_ComponentMap.GetGuid(hThis).IsValid())
   {

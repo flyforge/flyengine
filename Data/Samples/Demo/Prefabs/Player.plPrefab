@@ -2,7 +2,7 @@ HeaderV2
 {
 o
 {
-	Uuid %id{u4{9568100928140647423,287431255237350083}}
+	Uuid %id{u4{15820993975826170137,1308885393202946031}}
 	s %t{"plExposedParametersAttribute"}
 	u3 %v{1}
 	p
@@ -12,53 +12,7 @@ o
 }
 o
 {
-	Uuid %id{u4{5217645760467530089,740916499361678004}}
-	s %t{"plExposedParameter"}
-	u3 %v{2}
-	p
-	{
-		VarArray %Attributes
-		{
-			Uuid{u4{9568100928140647423,287431255237350083}}
-		}
-		b %DefaultValue{0}
-		s %Name{"Invincible"}
-		s %Type{"plVariant"}
-	}
-}
-o
-{
-	Uuid %id{u4{6590470116425382476,2685973930379754625}}
-	s %t{"plExposedParameter"}
-	u3 %v{2}
-	p
-	{
-		VarArray %Attributes
-		{
-			Uuid{u4{7003111624050277653,7519339875013479755}}
-		}
-		b %DefaultValue{0}
-		s %Name{"GiveAllWeapons"}
-		s %Type{"plVariant"}
-	}
-}
-o
-{
-	Uuid %id{u4{14146522745554303380,2902865256510917925}}
-	s %t{"plExposedParameters"}
-	u3 %v{3}
-	p
-	{
-		VarArray %Parameters
-		{
-			Uuid{u4{6590470116425382476,2685973930379754625}}
-			Uuid{u4{5217645760467530089,740916499361678004}}
-		}
-	}
-}
-o
-{
-	Uuid %id{u4{8325318639183543703,4757176779305952111}}
+	Uuid %id{u4{9228189953563760006,4936796784232562153}}
 	s %t{"plAssetDocumentInfo"}
 	u3 %v{2}
 	s %n{"Header"}
@@ -66,11 +20,11 @@ o
 	{
 		s %AssetType{"Prefab"}
 		VarArray %Dependencies{}
-		Uuid %DocumentID{u4{8325318639183543703,4757176779305952111}}
-		u4 %Hash{4077527398025606066}
+		Uuid %DocumentID{u4{9228189953563760006,4936796784232562153}}
+		u4 %Hash{1097398240771760}
 		VarArray %MetaInfo
 		{
-			Uuid{u4{14146522745554303380,2902865256510917925}}
+			Uuid{u4{14119466465805750602,6927521740019834053}}
 		}
 		VarArray %Outputs{}
 		VarArray %References
@@ -87,7 +41,53 @@ o
 }
 o
 {
-	Uuid %id{u4{7003111624050277653,7519339875013479755}}
+	Uuid %id{u4{14119466465805750602,6927521740019834053}}
+	s %t{"plExposedParameters"}
+	u3 %v{3}
+	p
+	{
+		VarArray %Parameters
+		{
+			Uuid{u4{13995951560408483792,8423938203656387265}}
+			Uuid{u4{8259613702505949331,13340299995270073886}}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{13995951560408483792,8423938203656387265}}
+	s %t{"plExposedParameter"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{13769320738349104845,16339395016297527976}}
+		}
+		b %DefaultValue{0}
+		s %Name{"GiveAllWeapons"}
+		s %Type{"plVariant"}
+	}
+}
+o
+{
+	Uuid %id{u4{8259613702505949331,13340299995270073886}}
+	s %t{"plExposedParameter"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{15820993975826170137,1308885393202946031}}
+		}
+		b %DefaultValue{0}
+		s %Name{"Invincible"}
+		s %Type{"plVariant"}
+	}
+}
+o
+{
+	Uuid %id{u4{13769320738349104845,16339395016297527976}}
 	s %t{"plExposedParametersAttribute"}
 	u3 %v{1}
 	p
@@ -100,13 +100,137 @@ Objects
 {
 o
 {
-	Uuid %id{u4{6640024761792138632,1016865748585375154}}
+	Uuid %id{u4{6525310630583940728,1900368377036075769}}
+	s %t{"plInputComponent"}
+	u3 %v{3}
+	p
+	{
+		b %Active{1}
+		b %ForwardToBlackboard{0}
+		s %Granularity{"plInputMessageGranularity::PressReleaseAndDown"}
+		s %InputSet{"Player"}
+	}
+}
+o
+{
+	Uuid %id{u4{5058366602387785114,1976907581413339665}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children
+		{
+			Uuid{u4{1736430358897929080,2228362229183966669}}
+			Uuid{u4{11810431783797017754,5646998894047779178}}
+		}
+		VarArray %Components
+		{
+			Uuid{u4{9261414588396777625,5328241757062367156}}
+			Uuid{u4{6525310630583940728,1900368377036075769}}
+			Uuid{u4{2535853692152643201,5525186262320500452}}
+			Uuid{u4{15180513140591915920,5319531636857943441}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0,0,0}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{"Player"}
+		VarArray %Tags{}
+	}
+}
+o
+{
+	Uuid %id{u4{1736430358897929080,2228362229183966669}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children
+		{
+			Uuid{u4{11454087059491100884,15168186575959080853}}
+			Uuid{u4{16597011770051919253,5600038595323058330}}
+			Uuid{u4{18366085732427386535,5001943511178806948}}
+			Uuid{u4{7792898853118359768,15698027502422424175}}
+		}
+		VarArray %Components
+		{
+			Uuid{u4{18086803490529690843,14617382883994016448}}
+			Uuid{u4{3046139143218631502,10245626270428870510}}
+			Uuid{u4{10970041544651808702,4981790293741216997}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0,0,0xCDCCCC3F}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{"Camera"}
+		VarArray %Tags{}
+	}
+}
+o
+{
+	Uuid %id{u4{6024064997963770230,4819991916902442883}}
+	s %t{"plExposedSceneProperty"}
+	u3 %v{1}
+	p
+	{
+		s %Name{"GiveAllWeapons"}
+		Uuid %Object{u4{2535853692152643201,5525186262320500452}}
+		s %PropertyPath{"Parameters[GiveAllWeapons]"}
+	}
+}
+o
+{
+	Uuid %id{u4{1791610869057046690,4846329664746138697}}
+	s %t{"plJoltShapeSphereComponent"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		f %Radius{0xCDCCCC3D}
+	}
+}
+o
+{
+	Uuid %id{u4{3802248894980228521,4981365399193180613}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{15479299202782937764,5170910828916254988}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0,0,0}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{"Pistol"}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+			s{"AutoColMesh"}
+		}
+	}
+}
+o
+{
+	Uuid %id{u4{10970041544651808702,4981790293741216997}}
 	s %t{"plCameraComponent"}
 	u3 %v{11}
 	p
 	{
 		b %Active{1}
-		f %Aperture{0x00008041}
+		f %Aperture{0x0000803F}
 		s %CameraRenderPipeline{""}
 		f %Dimensions{0x00002041}
 		f %EV100{0}
@@ -128,26 +252,13 @@ o
 		Vec2 %RenderTargetOffset{f{0,0}}
 		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
 		b %ShowStats{0}
-		Time %ShutterTime{d{0x7B14AE47E17A743F}}
+		Time %ShutterTime{d{0x000000000000F03F}}
 		s %UsageHint{"plCameraUsageHint::MainView"}
 	}
 }
 o
 {
-	Uuid %id{u4{5622439316203724425,1720748372109465727}}
-	s %t{"plInputComponent"}
-	u3 %v{3}
-	p
-	{
-		b %Active{1}
-		b %ForwardToBlackboard{0}
-		s %Granularity{"plInputMessageGranularity::PressReleaseAndDown"}
-		s %InputSet{"Player"}
-	}
-}
-o
-{
-	Uuid %id{u4{4155495288007568811,1797287576486729623}}
+	Uuid %id{u4{18366085732427386535,5001943511178806948}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -155,122 +266,11 @@ o
 		b %Active{1}
 		VarArray %Children
 		{
-			Uuid{u4{833559044517712777,2048742224257356627}}
-			Uuid{u4{10907560469416801451,5467378889121169136}}
+			Uuid{u4{13873037803733024381,5704922451447117928}}
 		}
 		VarArray %Components
 		{
-			Uuid{u4{8358543274016561322,5148621752135757114}}
-			Uuid{u4{5622439316203724425,1720748372109465727}}
-			Uuid{u4{1632982377772426898,5345566257393890410}}
-			Uuid{u4{14277641826211699617,5139911631931333399}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0,0}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{"Player"}
-		VarArray %Tags{}
-	}
-}
-o
-{
-	Uuid %id{u4{833559044517712777,2048742224257356627}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children
-		{
-			Uuid{u4{10551215745110884581,14988566571032470811}}
-			Uuid{u4{15694140455671702950,5420418590396448288}}
-			Uuid{u4{17463214418047170232,4822323506252196906}}
-			Uuid{u4{6890027538738143465,15518407497495814133}}
-		}
-		VarArray %Components
-		{
-			Uuid{u4{17183932176149474540,14437762879067406406}}
-			Uuid{u4{6640024761792138632,1016865748585375154}}
-			Uuid{u4{2143267828838415199,10066006265502260468}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0,0xCDCCCC3F}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{"Camera"}
-		VarArray %Tags{}
-	}
-}
-o
-{
-	Uuid %id{u4{5121193683583553927,4640371911975832841}}
-	s %t{"plExposedSceneProperty"}
-	u3 %v{1}
-	p
-	{
-		s %Name{"GiveAllWeapons"}
-		Uuid %Object{u4{1632982377772426898,5345566257393890410}}
-		s %PropertyPath{"Parameters[GiveAllWeapons]"}
-	}
-}
-o
-{
-	Uuid %id{u4{888739554676830387,4666709659819528655}}
-	s %t{"plJoltShapeSphereComponent"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		f %Radius{0xCDCCCC3D}
-	}
-}
-o
-{
-	Uuid %id{u4{2899377580600012218,4801745394266570571}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children{}
-		VarArray %Components
-		{
-			Uuid{u4{14576427888402721461,4991290823989644946}}
-		}
-		s %GlobalKey{""}
-		Vec3 %LocalPosition{f{0,0,0}}
-		Quat %LocalRotation{f{0,0,0,0x0000803F}}
-		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
-		f %LocalUniformScaling{0x0000803F}
-		s %Mode{"plObjectMode::Automatic"}
-		s %Name{"Pistol"}
-		VarArray %Tags
-		{
-			s{"CastShadow"}
-			s{"AutoColMesh"}
-		}
-	}
-}
-o
-{
-	Uuid %id{u4{17463214418047170232,4822323506252196906}}
-	s %t{"plGameObject"}
-	u3 %v{1}
-	p
-	{
-		b %Active{1}
-		VarArray %Children
-		{
-			Uuid{u4{12970166489352808078,5525302446520507886}}
-		}
-		VarArray %Components
-		{
-			Uuid{u4{8451598364577091999,5079810986549089868}}
+			Uuid{u4{9354469678957308302,5259430991475699910}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0,0,0}}
@@ -288,7 +288,7 @@ o
 }
 o
 {
-	Uuid %id{u4{14576427888402721461,4991290823989644946}}
+	Uuid %id{u4{15479299202782937764,5170910828916254988}}
 	s %t{"plPrefabReferenceComponent"}
 	u3 %v{4}
 	p
@@ -300,7 +300,7 @@ o
 }
 o
 {
-	Uuid %id{u4{555272998002336904,5067861789267277158}}
+	Uuid %id{u4{1458144312382553207,5247481794193887200}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -309,7 +309,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{685292888052728455,5563071097947291562}}
+			Uuid{u4{1588164202432944758,5742691102873901604}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0,0,0}}
@@ -327,13 +327,13 @@ o
 }
 o
 {
-	Uuid %id{u4{8451598364577091999,5079810986549089868}}
+	Uuid %id{u4{9354469678957308302,5259430991475699910}}
 	s %t{"plJoltGrabObjectComponent"}
 	u3 %v{1}
 	p
 	{
 		b %Active{1}
-		s %AttachTo{"{ 01739dee-d14d-4cad-8ea6-8c03b449ffb3 }"}
+		s %AttachTo{"{ 5da7f868-f4be-4f2b-7d7e-124761ee86c0 }"}
 		f %BreakDistance{0x0000003F}
 		u1 %CollisionLayer{0}
 		f %GrabAnyObjectWithSize{0x9A99993F}
@@ -344,7 +344,7 @@ o
 }
 o
 {
-	Uuid %id{u4{14277641826211699617,5139911631931333399}}
+	Uuid %id{u4{15180513140591915920,5319531636857943441}}
 	s %t{"plBlackboardComponent"}
 	u3 %v{2}
 	p
@@ -359,7 +359,7 @@ o
 }
 o
 {
-	Uuid %id{u4{8358543274016561322,5148621752135757114}}
+	Uuid %id{u4{9261414588396777625,5328241757062367156}}
 	s %t{"plJoltDefaultCharacterComponent"}
 	u3 %v{1}
 	p
@@ -372,7 +372,7 @@ o
 		s %DebugFlags{""}
 		s %FallbackWalkSurface{"{ 0a105955-e069-4523-80ce-7b9867bde687 }"}
 		f %FootRadius{0x9A99193E}
-		s %HeadObject{"{ c1341353-9832-1c6e-89d3-cadb8865910b }"}
+		s %HeadObject{"{ 1d686dcd-bba4-1eec-78ab-501f360a1918 }"}
 		f %JumpImpulse{0x0000C040}
 		f %Mass{0x00004842}
 		Angle %MaxClimbingSlope{f{0xC4B8323F}}
@@ -393,7 +393,7 @@ o
 }
 o
 {
-	Uuid %id{u4{16105979414835921050,5213672510060979649}}
+	Uuid %id{u4{17008850729216137353,5393292514987589691}}
 	s %t{"plAnimatedMeshComponent"}
 	u3 %v{13}
 	p
@@ -406,7 +406,7 @@ o
 }
 o
 {
-	Uuid %id{u4{1632982377772426898,5345566257393890410}}
+	Uuid %id{u4{2535853692152643201,5525186262320500452}}
 	s %t{"plTypeScriptComponent"}
 	u3 %v{4}
 	p
@@ -420,21 +420,21 @@ o
 }
 o
 {
-	Uuid %id{u4{16776872544333506196,5371494594969974096}}
+	Uuid %id{u4{17679743858713722499,5551114599896584138}}
 	s %t{"plPrefabDocumentSettings"}
 	u3 %v{1}
 	p
 	{
 		VarArray %ExposedProperties
 		{
-			Uuid{u4{5121193683583553927,4640371911975832841}}
-			Uuid{u4{1610230968024984728,5447546008841232887}}
+			Uuid{u4{6024064997963770230,4819991916902442883}}
+			Uuid{u4{2513102282405201031,5627166013767842929}}
 		}
 	}
 }
 o
 {
-	Uuid %id{u4{15694140455671702950,5420418590396448288}}
+	Uuid %id{u4{16597011770051919253,5600038595323058330}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -443,7 +443,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{7950382221197526173,5542071289512806489}}
+			Uuid{u4{8853253535577742476,5721691294439416531}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0x84CD9E3E,0x9AF20EBE,0x582DF0BD}}
@@ -461,19 +461,19 @@ o
 }
 o
 {
-	Uuid %id{u4{1610230968024984728,5447546008841232887}}
+	Uuid %id{u4{2513102282405201031,5627166013767842929}}
 	s %t{"plExposedSceneProperty"}
 	u3 %v{1}
 	p
 	{
 		s %Name{"Invincible"}
-		Uuid %Object{u4{1632982377772426898,5345566257393890410}}
+		Uuid %Object{u4{2535853692152643201,5525186262320500452}}
 		s %PropertyPath{"Parameters[Invincible]"}
 	}
 }
 o
 {
-	Uuid %id{u4{10907560469416801451,5467378889121169136}}
+	Uuid %id{u4{11810431783797017754,5646998894047779178}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -482,8 +482,8 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{16105979414835921050,5213672510060979649}}
-			Uuid{u4{1746141424200519828,5640401124028596311}}
+			Uuid{u4{17008850729216137353,5393292514987589691}}
+			Uuid{u4{2649012738580736131,5820021128955206353}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0,0,0}}
@@ -502,7 +502,7 @@ o
 }
 o
 {
-	Uuid %id{u4{12970166489352808078,5525302446520507886}}
+	Uuid %id{u4{13873037803733024381,5704922451447117928}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -511,8 +511,8 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{888739554676830387,4666709659819528655}}
-			Uuid{u4{14533035257435161515,5758214449907519538}}
+			Uuid{u4{1791610869057046690,4846329664746138697}}
+			Uuid{u4{15435906571815377818,5937834454834129580}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0x0000803F,0,0}}
@@ -530,7 +530,7 @@ o
 }
 o
 {
-	Uuid %id{u4{7950382221197526173,5542071289512806489}}
+	Uuid %id{u4{8853253535577742476,5721691294439416531}}
 	s %t{"plSpotLightComponent"}
 	u3 %v{2}
 	p
@@ -556,7 +556,7 @@ o
 }
 o
 {
-	Uuid %id{u4{685292888052728455,5563071097947291562}}
+	Uuid %id{u4{1588164202432944758,5742691102873901604}}
 	s %t{"plPrefabReferenceComponent"}
 	u3 %v{4}
 	p
@@ -568,7 +568,7 @@ o
 }
 o
 {
-	Uuid %id{u4{1746141424200519828,5640401124028596311}}
+	Uuid %id{u4{2649012738580736131,5820021128955206353}}
 	s %t{"plAnimationControllerComponent"}
 	u3 %v{2}
 	p
@@ -581,7 +581,7 @@ o
 }
 o
 {
-	Uuid %id{u4{14533035257435161515,5758214449907519538}}
+	Uuid %id{u4{15435906571815377818,5937834454834129580}}
 	s %t{"plJoltDynamicActorComponent"}
 	u3 %v{3}
 	p
@@ -612,14 +612,14 @@ o
 	{
 		VarArray %Children
 		{
-			Uuid{u4{4155495288007568811,1797287576486729623}}
+			Uuid{u4{5058366602387785114,1976907581413339665}}
 		}
-		Uuid %Settings{u4{16776872544333506196,5371494594969974096}}
+		Uuid %Settings{u4{17679743858713722499,5551114599896584138}}
 	}
 }
 o
 {
-	Uuid %id{u4{2143267828838415199,10066006265502260468}}
+	Uuid %id{u4{3046139143218631502,10245626270428870510}}
 	s %t{"plRcMarkPoiVisibleComponent"}
 	u3 %v{1}
 	p
@@ -631,18 +631,18 @@ o
 }
 o
 {
-	Uuid %id{u4{17183932176149474540,14437762879067406406}}
+	Uuid %id{u4{18086803490529690843,14617382883994016448}}
 	s %t{"plHeadBoneComponent"}
 	u3 %v{1}
 	p
 	{
 		b %Active{1}
-		Angle %VerticalRotation{f{0xC2B8B23F}}
+		Angle %VerticalRotation{f{0x5564B33F}}
 	}
 }
 o
 {
-	Uuid %id{u4{10551215745110884581,14988566571032470811}}
+	Uuid %id{u4{11454087059491100884,15168186575959080853}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -650,8 +650,8 @@ o
 		b %Active{1}
 		VarArray %Children
 		{
-			Uuid{u4{2899377580600012218,4801745394266570571}}
-			Uuid{u4{555272998002336904,5067861789267277158}}
+			Uuid{u4{3802248894980228521,4981365399193180613}}
+			Uuid{u4{1458144312382553207,5247481794193887200}}
 		}
 		VarArray %Components{}
 		s %GlobalKey{""}
@@ -666,7 +666,7 @@ o
 }
 o
 {
-	Uuid %id{u4{15107756907074889972,15087487406447511226}}
+	Uuid %id{u4{16010628221455106275,15267107411374121268}}
 	s %t{"plMarkerComponent"}
 	u3 %v{1}
 	p
@@ -678,7 +678,7 @@ o
 }
 o
 {
-	Uuid %id{u4{6890027538738143465,15518407497495814133}}
+	Uuid %id{u4{7792898853118359768,15698027502422424175}}
 	s %t{"plGameObject"}
 	u3 %v{1}
 	p
@@ -687,7 +687,7 @@ o
 		VarArray %Children{}
 		VarArray %Components
 		{
-			Uuid{u4{15107756907074889972,15087487406447511226}}
+			Uuid{u4{16010628221455106275,15267107411374121268}}
 		}
 		s %GlobalKey{""}
 		Vec3 %LocalPosition{f{0,0,0xCDCC4CBE}}

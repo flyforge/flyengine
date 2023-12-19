@@ -286,6 +286,18 @@ PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipeline
     res |= vk::PipelineStageFlagBits::eFragmentShader;
   if (flags & vk::ShaderStageFlagBits::eCompute)
     res |= vk::PipelineStageFlagBits::eComputeShader;
+  if(flags & vk::ShaderStageFlagBits::eTaskEXT)
+    res |= vk::PipelineStageFlagBits::eTaskShaderEXT;
+  if(flags & vk::ShaderStageFlagBits::eMeshEXT)
+    res |= vk::PipelineStageFlagBits::eMeshShaderEXT;
+  if(flags & vk::ShaderStageFlagBits::eRaygenKHR ||
+       flags & vk::ShaderStageFlagBits::eAnyHitKHR ||
+       flags & vk::ShaderStageFlagBits::eClosestHitKHR ||
+       flags & vk::ShaderStageFlagBits::eMissKHR ||
+       flags & vk::ShaderStageFlagBits::eIntersectionKHR)
+  {
+    res |= vk::PipelineStageFlagBits::eRayTracingShaderKHR;
+  }
 
   return res;
 }

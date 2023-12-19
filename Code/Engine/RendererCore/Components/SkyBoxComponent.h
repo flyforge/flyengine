@@ -58,7 +58,7 @@ private:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
   void UpdateMaterials();
 
-  float m_fExposureBias = 64000.0f;
+  float m_fExposureBias = 1.0f;
   float m_fVirtualDistance = 1000.0f;
   bool m_bInverseTonemap = false;
   bool m_bUseFog = true;

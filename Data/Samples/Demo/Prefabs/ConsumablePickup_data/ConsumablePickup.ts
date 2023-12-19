@@ -35,9 +35,6 @@ export class ConsumablePickup extends pl.TypescriptComponent {
             if (hm.return_consumed == false)
                 return;
 
-            let sound = this.GetOwner().TryGetComponentOfBaseType(pl.FmodEventComponent);
-            sound.StartOneShot();
-
             let del = new pl.MsgDeleteGameObject();
             this.GetOwner().PostMessage(del, 0.1);
         }

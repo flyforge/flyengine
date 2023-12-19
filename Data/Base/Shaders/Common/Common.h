@@ -348,14 +348,24 @@ float GetLuminance(float4 color)
     return max(dot(color.rgb, float3(0.299f, 0.587f, 0.114f)), 0.0001f);
 }
 
+float SrgbToLinear(float color)
+{
+  return (color < 0.04045) ? (color / 12.92) : pow(color / 1.055 + 0.0521327, 2.4);
+}
+
 float3 SrgbToLinear(float3 color)
 {
-    return (color < 0.04045) ? (color / 12.92) : pow(abs(color) / 1.055 + 0.0521327, 2.4);
+  return float3(SrgbToLinear(color.x), SrgbToLinear(color.y), SrgbToLinear(color.z));
+}
+
+float LinearToSrgb(float color)
+{
+  return (color < 0.0031308) ? (color * 12.92) : (1.055 * pow(color, 1.0 / 2.4) - 0.055);
 }
 
 float3 LinearToSrgb(float3 color)
 {
-    return (color < 0.0031308) ? (color * 12.92) : (1.055 * pow(abs(color), 1.0 / 2.4) - 0.055);
+  return float3(LinearToSrgb(color.x), LinearToSrgb(color.y), LinearToSrgb(color.z));
 }
 
 float3 DecodeNormalTexture(float4 normalTex, in float intensity = 1.0f)

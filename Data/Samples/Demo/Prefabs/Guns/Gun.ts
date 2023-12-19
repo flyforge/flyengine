@@ -36,7 +36,6 @@ export abstract class Gun extends pl.TickedTypescriptComponent {
         super()
     }
 
-    shootSoundComponent: pl.FmodEventComponent = null;
     muzzleFlashComponent: pl.ParticleComponent = null;
 
     static RegisterMessageHandlers() {
@@ -51,11 +50,6 @@ export abstract class Gun extends pl.TickedTypescriptComponent {
 
     OnSimulationStarted(): void {
         let owner = this.GetOwner();
-
-        let node = owner.FindChildByName("ShootSound", true);
-        if (node != null) {
-            this.shootSoundComponent = node.TryGetComponentOfBaseType(pl.FmodEventComponent);
-        }
 
         node = owner.FindChildByName("Muzzleflash", true);
         if (node != null) {

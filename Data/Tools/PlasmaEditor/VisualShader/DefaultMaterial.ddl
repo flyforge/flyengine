@@ -1,7 +1,7 @@
 Node %MaterialOutput
 {
   string %Category { "Output" }
-  unsigned_int8 %Color { 20, 20, 20 }
+  unsigned_int8 %Color { 145, 50, 168 }
   string %NodeType { "Main" }
   string %CodePermutations { "
 BLEND_MODE
@@ -53,11 +53,11 @@ GAMEOBJECT_VELOCITY=TRUE
 
 #endif
 
-#if INPUT_PIN_10_CONNECTED
+#if INPUT_PIN_19_CONNECTED
   #define USE_OBJECT_POSITION_OFFSET
 #endif
 
-#if INPUT_PIN_11_CONNECTED
+#if INPUT_PIN_20_CONNECTED
   #define USE_WORLD_POSITION_OFFSET
 #endif
 
@@ -80,14 +80,14 @@ VS_OUT main(VS_IN Input)
 #if defined(USE_OBJECT_POSITION_OFFSET)
 float3 GetObjectPositionOffset(plPerInstanceData data)
 {
-  return ToFloat3($in10);
+  return ToFloat3($in19);
 }
 #endif
 
 #if defined(USE_WORLD_POSITION_OFFSET)
 float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 {
-  return ToFloat3($in11);
+  return ToFloat3($in20);
 }
 #endif
 
@@ -143,6 +143,19 @@ float MaskThreshold @Default($prop0);
 
 #if INPUT_PIN_9_CONNECTED
   #define USE_MATERIAL_SUBSURFACE_COLOR
+  #define USE_MATERIAL_SUBSURFACE_PARAMS
+#endif
+
+#if INPUT_PIN_12_CONNECTED
+  #define USE_MATERIAL_SPECULAR_CLEARCOAT
+#endif
+
+#if INPUT_PIN_15_CONNECTED
+  #define USE_MATERIAL_SPECULAR_ANISOTROPIC
+#endif
+
+#if INPUT_PIN_17_CONNECTED
+  #define USE_MATERIAL_SPECULAR_SHEEN
 #endif
 " }
 
@@ -223,8 +236,38 @@ float3 GetSubsurfaceColor()
 {
   return ToColor3($in9);
 }
+
+void GetSubsurfaceParams(out float scatterPower, out float shadowStrength)
+{
+    scatterPower = ToFloat1($in10);
+    shadowStrength = ToFloat1($in11);
+}
 #endif
 
+#if defined USE_MATERIAL_SPECULAR_CLEARCOAT
+void GetSpecularClearCoatParams(out float clearcoat, out float clearcoatRoughness, out float3 normal)
+{
+     clearcoat = ToFloat1($in12);
+     clearcoatRoughness = ToFloat1($in13);
+     normal = ToFloat3($in14);
+}
+#endif
+
+#if defined USE_MATERIAL_SPECULAR_ANISOTROPIC
+void GetSpecularAnisotopicParams(out float anisotropic, out float rotation)
+{
+  anisotropic = ToFloat1($in15);
+  rotation = ToFloat1($in16);
+}
+#endif
+
+#if defined USE_MATERIAL_SPECULAR_SHEEN
+void GetSpecularSheenParams(out float sheen, out float tintFactor)
+{
+  sheen = ToFloat1($in17);
+  tintFactor = ToFloat1($in18);
+}
+#endif
 " }
 
   Property %MaskThreshold
@@ -331,6 +374,87 @@ float3 GetSubsurfaceColor()
   }
 
   // Pin 10
+  InputPin %SubsurfaceScatter
+  {
+    string %Type { "float" }
+    unsigned_int8 %Color { 75, 161, 204 }
+    bool %Expose { true }
+    string %DefaultValue { "0" }
+  }
+
+  // Pin 11
+  InputPin %SubsurfaceStrength
+  {
+    string %Type { "float" }
+    unsigned_int8 %Color { 75, 161, 204 }
+    bool %Expose { true }
+    string %DefaultValue { "0" }
+  }
+
+  // Pin 12
+  InputPin %ClearcoatInfluence
+  {
+    string %Type { "float" }
+    unsigned_int8 %Color { 75, 161, 204 }
+    bool %Expose { true }
+    string %DefaultValue { "0" }
+  }
+
+  // Pin 13
+  InputPin %ClearcoatRoughness
+  {
+    string %Type { "float" }
+    unsigned_int8 %Color { 75, 161, 204 }
+    bool %Expose { true }
+    string %DefaultValue { "0" }
+  }
+
+  // Pin 14
+  InputPin %ClearcoatNormal
+  {
+    string %Type { "float3" }
+    unsigned_int8 %Color { 90, 153, 70 }
+    bool %Expose { true }
+    string %DefaultValue { "float3(0, 0, 1)" }
+  }
+
+  // Pin 15
+  InputPin %Anisotropic
+  {
+    string %Type { "float" }
+    unsigned_int8 %Color { 75, 161, 204 }
+    bool %Expose { true }
+    string %DefaultValue { "0" }
+  }
+
+  // Pin 16
+  InputPin %AnisotropicRotation
+  {
+    string %Type { "float" }
+    unsigned_int8 %Color { 75, 161, 204 }
+    bool %Expose { true }
+    string %DefaultValue { "0" }
+  }
+
+  // Pin 17
+  InputPin %Sheen
+  {
+    string %Type { "float" }
+    unsigned_int8 %Color { 75, 161, 204 }
+    bool %Expose { true }
+    string %DefaultValue { "0" }
+  }
+
+  // Pin 18
+  InputPin %SheenTint
+  {
+    string %Type { "float" }
+    unsigned_int8 %Color { 75, 161, 204 }
+    bool %Expose { true }
+    string %DefaultValue { "0" }
+  }
+
+  // Pin 19
   InputPin %LocalPosOffset
   {
     string %Type { "float3" }
@@ -338,7 +462,7 @@ float3 GetSubsurfaceColor()
     string %DefaultValue { "0" }
   }
 
-  // Pin 11
+  // Pin 20
   InputPin %GlobalPosOffset
   {
     string %Type { "float3" }

@@ -11,12 +11,13 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{332678910050156717,5413383538482065259}}
-		u4 %Hash{9116222162149798637}
+		u4 %Hash{1444960151781872748}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
 		{
 			s{"{ 700252a3-0f42-4bdf-9a4e-acb2ea759784 }"}
+			s{"{ cc51be30-5b78-445c-a9b5-779066b074f2 }"}
 		}
 	}
 }
@@ -181,6 +182,45 @@ o
 }
 o
 {
+	Uuid %id{u4{9686721757730025405,4655548584201335704}}
+	s %t{"plMeshComponent"}
+	u3 %v{3}
+	p
+	{
+		b %Active{1}
+		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		VarArray %Materials{}
+		s %Mesh{"{ cc51be30-5b78-445c-a9b5-779066b074f2 }"}
+	}
+}
+o
+{
+	Uuid %id{u4{14495601539088426635,4696663693863513945}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{17597194562545052321,5563485521914343145}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0x712929C1,0xF4CF6941,0xC29B1D40}}
+		Quat %LocalRotation{f{0xA77B933D,0x329B553E,0x68F5A2BE,0x2B056C3F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{""}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
+	}
+}
+o
+{
 	Uuid %id{u4{13937761163919513163,4922126407697239775}}
 	s %t{"plGameObject"}
 	u3 %v{1}
@@ -224,6 +264,32 @@ o
 	p
 	{
 		Uuid %Layer{u4{8672594738656354696,5440612601872123087}}
+	}
+}
+o
+{
+	Uuid %id{u4{17140975285513057411,5010832078033898783}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{9686721757730025405,4655548584201335704}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0x84C89B41,0xF5A857C1,0xDAC7753C}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{""}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
 	}
 }
 o
@@ -286,6 +352,37 @@ o
 			s{"CastShadow"}
 			s{"AutoColMesh"}
 		}
+	}
+}
+o
+{
+	Uuid %id{u4{17597194562545052321,5563485521914343145}}
+	s %t{"plCameraComponent"}
+	u3 %v{11}
+	p
+	{
+		b %Active{1}
+		f %Aperture{0x0000803F}
+		s %CameraRenderPipeline{""}
+		f %Dimensions{0x00002041}
+		f %EV100{0}
+		i1 %EditorShortcut{-1}
+		VarArray %ExcludeTags{}
+		f %ExposureCompensation{0}
+		f %FOV{0x00007042}
+		f %FarPlane{0x00007A44}
+		f %FinalExposure{0}
+		f %FocusDistance{0xCDCC4C3E}
+		f %ISO{0x0000C842}
+		VarArray %IncludeTags{}
+		s %Mode{"plCameraMode::PerspectiveFixedFovY"}
+		f %NearPlane{0x0000803E}
+		s %RenderTarget{""}
+		Vec2 %RenderTargetOffset{f{0,0}}
+		Vec2 %RenderTargetSize{f{0x0000803F,0x0000803F}}
+		b %ShowStats{0}
+		Time %ShutterTime{d{0x000000000000F03F}}
+		s %UsageHint{"plCameraUsageHint::Thumbnail"}
 	}
 }
 o
@@ -361,6 +458,8 @@ o
 			Uuid{u4{2594532845610000908,12367216233251766948}}
 			Uuid{u4{8716561783801895321,18076653464259914614}}
 			Uuid{u4{13937761163919513163,4922126407697239775}}
+			Uuid{u4{17140975285513057411,5010832078033898783}}
+			Uuid{u4{14495601539088426635,4696663693863513945}}
 		}
 		Uuid %Settings{u4{6640616717976673943,5615868403042510966}}
 	}
@@ -958,6 +1057,40 @@ Types
 {
 o
 {
+	Uuid %id{u4{11538464635628493600,530491051274225601}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDirectionVisualizerAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15858200799249084397,1020464219854223548}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBitflagsBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{13296724171558214320,2570799467382762168}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -992,6 +1125,40 @@ o
 }
 o
 {
+	Uuid %id{u4{12223204493048157076,3316158501449178400}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Bitflags|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plBitflagsBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualizerAnchor"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4166896946117797251,3528888323670374316}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCameraUsageHint"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{14867845028209231418,4878322625704272906}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -1004,6 +1171,23 @@ o
 		s %PluginName{"plasmaEditorPluginScene"}
 		VarArray %Properties{}
 		s %TypeName{"plSceneLayer"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{2490466214221766975,5839995135696447901}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plColorAttribute"}
 		u3 %TypeVersion{1}
 	}
 }
@@ -1022,6 +1206,57 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plObjectMode"}
 		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10411385167834517523,6666974454840060292}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plComponent"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plRenderComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{13593399947534819651,8810410798093967671}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualizerAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{16327902051560403381,9549694019668826253}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plMeshComponentBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshComponent"}
+		u3 %TypeVersion{3}
 	}
 }
 o
@@ -1077,6 +1312,23 @@ o
 }
 o
 {
+	Uuid %id{u4{14209585135339028478,11308263336862562356}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plPropertyAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{10799938453523757431,11702988725276979427}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -1094,6 +1346,23 @@ o
 }
 o
 {
+	Uuid %id{u4{12702173672668551041,11899314833995959136}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plRenderComponent"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshComponentBase"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
 	Uuid %id{u4{16085895549361732668,11939781624839840846}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -1107,6 +1376,40 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plPrefabReferenceComponent"}
 		u3 %TypeVersion{4}
+	}
+}
+o
+{
+	Uuid %id{u4{13985915862957499096,13667540031100479129}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCameraVisualizerAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{11329410779208269671,15214768068935402424}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plComponent"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCameraComponent"}
+		u3 %TypeVersion{11}
 	}
 }
 o
@@ -1145,6 +1448,40 @@ o
 }
 o
 {
+	Uuid %id{u4{6853598190348858983,16453551367257532047}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plPropertyAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCategoryAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15902986225652390530,16461629939562391074}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plCameraMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{13033624727069548121,17368468367984449402}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -1157,6 +1494,23 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{698364993276436088,17804542439804637414}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBasisAxis"}
 		u3 %TypeVersion{1}
 	}
 }
