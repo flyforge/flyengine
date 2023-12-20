@@ -11,7 +11,7 @@ o
 		s %AssetType{"RenderPipeline"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{5189305147899033520,5264929536831011917}}
-		u4 %Hash{15637228566310044893}
+		u4 %Hash{6667327309409082993}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -273,6 +273,19 @@ o
 }
 o
 {
+	Uuid %id{u4{4661061263434333111,4755073231202206872}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{2628546507904083100,5082978389786961122}}
+		s %Connection::SourcePin{"Output"}
+		Uuid %Connection::Target{u4{12317601883084166041,5014992983904957105}}
+		s %Connection::TargetPin{"Input"}
+	}
+}
+o
+{
 	Uuid %id{u4{11258364858802561174,4759568175722593540}}
 	s %t{"DocumentNodeManager_DefaultConnection"}
 	u3 %v{1}
@@ -496,6 +509,36 @@ o
 		s %Connection::SourcePin{"Output"}
 		Uuid %Connection::Target{u4{9903127900685275008,5190012807922781911}}
 		s %Connection::TargetPin{"Color"}
+	}
+}
+o
+{
+	Uuid %id{u4{12317601883084166041,5014992983904957105}}
+	s %t{"plBloomPass"}
+	u3 %v{2}
+	p
+	{
+		b %Active{1}
+		f %BloomThreshold{0x0000803F}
+		Uuid %Input{u4{9284826269311030115,17577741646003822158}}
+		f %Intensity{0x9A99993E}
+		u3 %MipCount{6}
+		s %Name{""}
+		Vec2 %Node::Pos{f{0x515B8BC3,0x5BD708C3}}
+		Uuid %Output{u4{14079509194081215147,7234081785283556396}}
+	}
+}
+o
+{
+	Uuid %id{u4{15138991471894723762,5036268164676027579}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{12317601883084166041,5014992983904957105}}
+		s %Connection::SourcePin{"Output"}
+		Uuid %Connection::Target{u4{15559845127975843258,5607102495819079601}}
+		s %Connection::TargetPin{"Input"}
 	}
 }
 o
@@ -991,19 +1034,6 @@ o
 }
 o
 {
-	Uuid %id{u4{10576761256445137304,5599707902775592738}}
-	s %t{"DocumentNodeManager_DefaultConnection"}
-	u3 %v{1}
-	p
-	{
-		Uuid %Connection::Source{u4{2628546507904083100,5082978389786961122}}
-		s %Connection::SourcePin{"Output"}
-		Uuid %Connection::Target{u4{15559845127975843258,5607102495819079601}}
-		s %Connection::TargetPin{"Input"}
-	}
-}
-o
-{
 	Uuid %id{u4{15559845127975843258,5607102495819079601}}
 	s %t{"plTonemapPass"}
 	u3 %v{2}
@@ -1254,7 +1284,9 @@ o
 			Uuid{u4{15632003455817634458,4973406120264790443}}
 			Uuid{u4{14739724847903551148,4629750639138916122}}
 			Uuid{u4{770590530753266847,5012666429050904933}}
-			Uuid{u4{10576761256445137304,5599707902775592738}}
+			Uuid{u4{12317601883084166041,5014992983904957105}}
+			Uuid{u4{4661061263434333111,4755073231202206872}}
+			Uuid{u4{15138991471894723762,5036268164676027579}}
 		}
 	}
 }
@@ -1297,6 +1329,13 @@ o
 {
 	Uuid %id{u4{4522328939430757619,7086437372150148330}}
 	s %t{"plRenderPipelineNodeInputPin"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{14079509194081215147,7234081785283556396}}
+	s %t{"plRenderPipelineNodeOutputPin"}
 	u3 %v{1}
 	p{}
 }
@@ -1496,6 +1535,13 @@ o
 {
 	Uuid %id{u4{10470137269935437587,16882808297267918963}}
 	s %t{"plRenderPipelineNodePassThrougPin"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{9284826269311030115,17577741646003822158}}
+	s %t{"plRenderPipelineNodeInputPin"}
 	u3 %v{1}
 	p{}
 }
@@ -1940,6 +1986,23 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plDepthOnlyPass"}
 		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{18320106095355768863,8472601830573400596}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plRenderPipelinePass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBloomPass"}
+		u3 %TypeVersion{2}
 	}
 }
 o
