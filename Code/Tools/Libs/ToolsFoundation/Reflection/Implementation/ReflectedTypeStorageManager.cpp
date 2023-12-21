@@ -349,12 +349,12 @@ void plReflectedTypeStorageManager::TypeEventHandler(const plPhantomRttiManagerE
       ReflectedTypeStorageMapping* pMapping = s_ReflectedTypeToStorageMapping[e.m_pChangedType];
       PLASMA_ASSERT_DEV(pMapping != nullptr, "A type was updated but no mapping exists for it!");
 
-      if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "ezEnumBase")
+      if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "plEnumBase")
       {
         // PLASMA_ASSERT_DEV(false, "Updating enums not implemented yet!");
         break;
       }
-      else if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "ezBitflagsBase")
+      else if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "plBitflagsBase")
       {
         PLASMA_ASSERT_DEV(false, "Updating bitflags not implemented yet!");
       }

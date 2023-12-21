@@ -5,6 +5,7 @@
 plString64 plOSFile::s_sApplicationPath;
 plString64 plOSFile::s_sUserDataPath;
 plString64 plOSFile::s_sTempDataPath;
+plString64 plOSFile::s_sUserDocumentsPath;
 plAtomicInteger32 plOSFile::s_iFileCounter;
 plOSFile::Event plOSFile::s_FileEvents;
 

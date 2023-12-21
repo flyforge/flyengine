@@ -8,6 +8,7 @@
 #include <Foundation/IO/OpenDdlWriter.h>
 #include <GuiFoundation/UIServices/DynamicStringEnum.h>
 #include <GuiFoundation/UIServices/QtProgressbar.h>
+#include <QFileDialog>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
 PLASMA_IMPLEMENT_SINGLETON(plQtEditorApp);
@@ -55,16 +56,6 @@ void plQtEditorApp::SlotTimedUpdate()
   Q_EMIT IdleEvent();
 
   RestartEngineProcessIfPluginsChanged(false);
-
-  if (m_bWroteCrashIndicatorFile)
-  {
-    m_bWroteCrashIndicatorFile = false;
-    QTimer::singleShot(2000, []() {
-        plStringBuilder sTemp = plOSFile::GetTempDataFolder("PlasmaEditor");
-        sTemp.AppendPath("PlasmaEditorCrashIndicator");
-        plOSFile::DeleteFile(sTemp).IgnoreResult();
-      });
-  }
 
   m_pTimer->start(1);
 }
@@ -254,6 +245,160 @@ plResult plQtEditorApp::AddBundlesInOrder(plDynamicArray<plApplicationPluginConf
   }
 
   return PLASMA_SUCCESS;
+}
+
+plStatus plQtEditorApp::MakeRemoteProjectLocal(plStringBuilder& inout_sFilePath)
+{
+  // already a local project?
+  if (inout_sFilePath.EndsWith_NoCase("plProject"))
+    return plStatus(PLASMA_SUCCESS);
+
+  PLASMA_LOG_BLOCK("Open Remote Project", inout_sFilePath.GetData());
+
+  plProgressRange progress("Downloading Project", 4, false);
+  progress.SetStepWeighting(0, 0.1f);
+  progress.SetStepWeighting(1, 0.2f);
+  progress.SetStepWeighting(2, 0.7f);
+  progress.SetStepWeighting(3, 0.9f);
+
+  progress.BeginNextStep("Checking for Local Copy");
+
+  plStringBuilder sRedirFile = plApplicationServices::GetSingleton()->GetProjectPreferencesFolder(inout_sFilePath);
+  sRedirFile.AppendPath("LocalCheckout.txt");
+
+  // read redirection file, if available
+  {
+    plOSFile file;
+    if (file.Open(sRedirFile, plFileOpenMode::Read).Succeeded())
+    {
+      plDataBuffer content;
+      file.ReadAll(content);
+
+      const plStringView sContent((const char*)content.GetData(), content.GetCount());
+
+      if (sContent.EndsWith_NoCase("plProject") && plOSFile::ExistsFile(sContent))
+      {
+        inout_sFilePath = sContent;
+        return plStatus(PLASMA_SUCCESS);
+      }
+    }
+  }
+
+  plString sName;
+  plString sType;
+  plString sUrl;
+  plString sProjectFile;
+
+  progress.BeginNextStep("Validating Remote");
+
+  // read the info about the remote project from the OpenDDL config file
+  {
+    plOSFile file;
+    if (file.Open(inout_sFilePath, plFileOpenMode::Read).Failed())
+    {
+      return plStatus(plFmt("Remote project file '{}' doesn't exist.", inout_sFilePath));
+    }
+
+    plDataBuffer content;
+    file.ReadAll(content);
+
+    plMemoryStreamContainerWrapperStorage<plDataBuffer> storage(&content);
+    plMemoryStreamReader reader(&storage);
+
+    plOpenDdlReader ddl;
+    if (ddl.ParseDocument(reader).Failed())
+    {
+      return plStatus("Error in remote project DDL config file");
+    }
+
+    if (auto pRoot = ddl.GetRootElement())
+    {
+      if (auto pProject = pRoot->FindChildOfType("RemoteProject"))
+      {
+        if (auto pName = pProject->FindChildOfType(plOpenDdlPrimitiveType::String, "Name"))
+        {
+          sName = pName->GetPrimitivesString()[0];
+        }
+        if (auto pType = pProject->FindChildOfType(plOpenDdlPrimitiveType::String, "Type"))
+        {
+          sType = pType->GetPrimitivesString()[0];
+        }
+        if (auto pUrl = pProject->FindChildOfType(plOpenDdlPrimitiveType::String, "Url"))
+        {
+          sUrl = pUrl->GetPrimitivesString()[0];
+        }
+        if (auto pProjectFile = pProject->FindChildOfType(plOpenDdlPrimitiveType::String, "ProjectFile"))
+        {
+          sProjectFile = pProjectFile->GetPrimitivesString()[0];
+        }
+      }
+    }
+  }
+
+  if (sType.IsEmpty() || sName.IsEmpty())
+  {
+    return plStatus(plFmt("Remote project '{}' DDL configuration is invalid.", inout_sFilePath));
+  }
+
+  plQtUiServices::GetSingleton()->MessageBoxInformation("This is a 'remote' project, meaning the data is not yet available on your machine.\n\nPlease select a folder where the project should be downloaded to.");
+
+  static QString sPreviousFolder = plOSFile::GetUserDocumentsFolder().GetData();
+
+  QString sSelectedDir = QFileDialog::getExistingDirectory(QApplication::activeWindow(), QLatin1String("Choose Folder"), sPreviousFolder, QFileDialog::Option::ShowDirsOnly | QFileDialog::Option::DontResolveSymlinks);
+
+  if (sSelectedDir.isEmpty())
+  {
+    return plStatus("");
+  }
+
+  sPreviousFolder = sSelectedDir;
+  plStringBuilder sTargetDir = sSelectedDir.toUtf8().data();
+
+
+
+  progress.BeginNextStep("Pulling Project");
+  // if it is a git repository, clone it
+  if (sType == "git" && !sUrl.IsEmpty())
+  {
+    QStringList args;
+    args << "clone";
+    args << plToQString(sUrl);
+    args << plToQString(sName);
+
+    QProcess proc;
+    proc.setWorkingDirectory(sTargetDir.GetData());
+    proc.start("git.exe", args);
+
+    if (!proc.waitForStarted())
+    {
+      return plStatus(plFmt("Running 'git' to download the remote project failed."));
+    }
+
+    proc.waitForFinished(60 * 1000);
+
+    if (proc.exitStatus() != QProcess::ExitStatus::NormalExit)
+    {
+      return plStatus(plFmt("Failed to git clone the remote project '{}' from '{}'", sName, sUrl));
+    }
+
+    plLog::Success("Cloned remote project '{}' from '{}' to '{}'", sName, sUrl, sTargetDir);
+
+    inout_sFilePath.Format("{}/{}/{}", sTargetDir, sName, sProjectFile);
+
+    progress.BeginNextStep("Writing Files");
+    // write redirection file
+    {
+      plOSFile file;
+      if (file.Open(sRedirFile, plFileOpenMode::Write).Succeeded())
+      {
+        file.Write(inout_sFilePath.GetData(), inout_sFilePath.GetElementCount()).AssertSuccess();
+      }
+    }
+
+    return plStatus(PLASMA_SUCCESS);
+  }
+
+  return plStatus(plFmt("Unknown remote project type '{}' or invalid URL '{}'", sType, sUrl));
 }
 
 bool plQtEditorApp::ExistsPluginSelectionStateDDL(const char* szProjectDir /*= ":project"*/)

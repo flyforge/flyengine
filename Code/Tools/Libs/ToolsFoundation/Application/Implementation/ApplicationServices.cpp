@@ -43,9 +43,18 @@ plString plApplicationServices::GetApplicationPreferencesFolder() const
 
 plString plApplicationServices::GetProjectPreferencesFolder() const
 {
+  return GetProjectPreferencesFolder(plToolsProject::GetSingleton()->GetProjectDirectory());
+}
+
+plString plApplicationServices::GetProjectPreferencesFolder(plStringView sProjectFilePath) const
+{
   plStringBuilder path = GetApplicationUserDataFolder();
 
-  plStringBuilder ProjectName = plToolsProject::GetSingleton()->GetProjectDirectory();
+  sProjectFilePath.TrimWordEnd("plProject");
+  sProjectFilePath.TrimWordEnd("plRemoteProject");
+  sProjectFilePath.Trim("/\\");
+
+  plStringBuilder ProjectName = sProjectFilePath;
 
   plStringBuilder ProjectPath = ProjectName;
   ProjectPath.PathParentDirectory();

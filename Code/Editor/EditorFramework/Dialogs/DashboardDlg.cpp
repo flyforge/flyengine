@@ -115,7 +115,9 @@ void plQtDashboardDlg::FillSampleProjectsList()
   for (const plString& path : samples)
   {
     tmp = path;
-    tmp.TrimWordEnd("/plProject");
+    const bool bIsLocal = tmp.TrimWordEnd("/plProject");
+    const bool bIsRemote = tmp.TrimWordEnd("/plRemoteProject");
+
 
     QIcon projectIcon;
 
@@ -160,13 +162,24 @@ void plQtDashboardDlg::FindSampleProjects(plDynamicArray<plString>& out_Projects
     if (plOSFile::ExistsFile(path))
     {
       out_Projects.PushBack(path);
-
       // no need to go deeper
       fsIt.SkipFolder();
     }
     else
     {
-      fsIt.Next();
+      fsIt.GetStats().GetFullPath(path);
+      path.AppendPath("plRemoteProject");
+
+      if (plOSFile::ExistsFile(path))
+      {
+        out_Projects.PushBack(path);
+      // no need to go deeper
+        fsIt.SkipFolder();
+      }
+      else
+      {
+        fsIt.Next();
+      }
     }
   }
 }

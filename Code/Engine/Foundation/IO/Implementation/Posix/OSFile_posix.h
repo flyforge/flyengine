@@ -459,6 +459,28 @@ plString plOSFile::GetTempDataFolder(plStringView sSubFolder)
   return s;
 }
 
+plString plOSFile::GetUserDocumentsFolder(plStringView sSubFolder)
+{
+  if (s_sUserDocumentsPath.IsEmpty())
+  {
+#  if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+    android_app* app = plAndroidUtils::GetAndroidApp();
+    // s_sUserDataPath = app->activity->internalDataPath;
+    PLASMA_ASSERT_NOT_IMPLEMENTED;
+#  else
+    s_sUserDataPath = getenv("HOME");
+
+    if (s_sUserDataPath.IsEmpty())
+      s_sUserDataPath = getpwuid(getuid())->pw_dir;
+#  endif
+  }
+
+  ezStringBuilder s = s_sUserDocumentsPath;
+  s.AppendPath(sSubFolder);
+  s.MakeCleanPath();
+  return s;
+}
+
 const plString plOSFile::GetCurrentWorkingDirectory()
 {
   char tmp[PATH_MAX];

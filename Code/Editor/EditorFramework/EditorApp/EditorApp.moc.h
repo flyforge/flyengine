@@ -169,7 +169,15 @@ public:
   plDocument* OpenDocument(const char* szDocument, plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext = nullptr);
   plDocument* CreateDocument(const char* szDocument, plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext = nullptr);
 
-  plResult CreateOrOpenProject(bool bCreate, const char* szFile);
+  plResult CreateOrOpenProject(bool bCreate, plStringView sFile);
+
+  /// \brief If this project is remote, ie coming from another repository that is not checked-out by default, make sure it exists locally on disk.
+  ///
+  /// Adjusts inout_sFilePath from pointing to an plRemoteProject file to a plProject file, if necessary.
+  /// If the project is already local, it always succeeds.
+  /// If checking out fails or is user canceled, the function returns failure.
+  plStatus MakeRemoteProjectLocal(plStringBuilder& inout_sFilePath);
+
 
   bool ExistsPluginSelectionStateDDL(const char* szProjectDir = ":project");
   void WritePluginSelectionStateDDL(const char* szProjectDir = ":project");

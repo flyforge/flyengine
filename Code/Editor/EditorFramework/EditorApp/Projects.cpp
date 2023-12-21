@@ -50,13 +50,28 @@ void plQtEditorApp::SlotQueuedOpenProject(QString sProject)
   CreateOrOpenProject(false, sProject.toUtf8().data()).IgnoreResult();
 }
 
-plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, const char* szFile)
+plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, plStringView sFile0)
 {
+  plStringBuilder sFile = sFile0;
+  if (!bCreate)
+  {
+    const plStatus status = MakeRemoteProjectLocal(sFile);
+    if (status.Failed())
+    {
+      // if the message is empty, the user decided not to continue, so don't show an error message in this case
+      if (!status.m_sMessage.IsEmpty())
+      {
+        plQtUiServices::GetSingleton()->MessageBoxStatus(status, "Opening remote project failed.");
+      }
+
+      return PLASMA_FAILURE;
+    }
+  }
   // check that we don't attempt to open a project from a different repository, due to code changes this often doesn't work too well
   if (!IsInHeadlessMode())
   {
     plStringBuilder sdkDirFromProject;
-    if (plFileSystem::FindFolderWithSubPath(sdkDirFromProject, szFile, "Data/Base", "ezSdkRoot.txt").Succeeded())
+    if (plFileSystem::FindFolderWithSubPath(sdkDirFromProject, sFile, "Data/Base", "plSdkRoot.txt").Succeeded())
     {
       sdkDirFromProject.MakeCleanPath();
       sdkDirFromProject.TrimWordEnd("/");
@@ -66,7 +81,7 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, const char* szFile)
 
       if (sdkDirFromProject != sdkDir)
       {
-        if (plQtUiServices::MessageBoxQuestion(plFmt("You are attempting to open a project that's located in a different SDK directory.\n\nSDK location: '{}'\nProject path: '{}'\n\nThis may make problems.\n\nContinue anyway?", sdkDir, szFile), QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No, QMessageBox::StandardButton::No) != QMessageBox::StandardButton::Yes)
+        if (plQtUiServices::MessageBoxQuestion(plFmt("You are attempting to open a project that's located in a different SDK directory.\n\nSDK location: '{}'\nProject path: '{}'\n\nThis may make problems.\n\nContinue anyway?", sdkDir, sFile), QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No, QMessageBox::StandardButton::No) != QMessageBox::StandardButton::Yes)
         {
           return PLASMA_FAILURE;
         }
@@ -80,7 +95,7 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, const char* szFile)
 
   CloseSplashScreen();
 
-  plStringBuilder sProjectFile = szFile;
+  plStringBuilder sProjectFile = sFile;
   sProjectFile.MakeCleanPath();
 
   if (bCreate == false && !sProjectFile.EndsWith_NoCase("/plProject"))

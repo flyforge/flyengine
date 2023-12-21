@@ -58,3 +58,8 @@ PLASMA_ALWAYS_INLINE plColorGammaUB qtToPlColor(const QColor& c)
 {
   return plColorGammaUB(c.red(), c.green(), c.blue(), c.alpha());
 }
+
+PLASMA_ALWAYS_INLINE QString plToQString(plStringView sString)
+{
+  return QString::fromUtf8(sString.GetStartPointer(), sString.GetElementCount());
+}

@@ -25,6 +25,8 @@ public:
   /// \brief The writable location where preferences for the current plToolsProject should be stored (user specific settings)
   plString GetProjectPreferencesFolder() const;
 
+  plString GetProjectPreferencesFolder(plStringView sProjectFilePath) const;
+
   /// \brief The writable location where preferences for the given plDocument should be stored (user specific settings)
   plString GetDocumentPreferencesFolder(const plDocument* pDocument) const;
 

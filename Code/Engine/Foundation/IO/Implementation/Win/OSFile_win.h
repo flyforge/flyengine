@@ -654,6 +654,32 @@ plString plOSFile::GetTempDataFolder(plStringView sSubFolder /*= nullptr*/)
   return s;
 }
 
+plString plOSFile::GetUserDocumentsFolder(plStringView sSubFolder /*= {}*/)
+{
+  if (s_sUserDocumentsPath.IsEmpty())
+  {
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+    PLASMA_ASSERT_NOT_IMPLEMENTED;
+#else
+    wchar_t* pPath = nullptr;
+    if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_PublicDocuments, KF_FLAG_DEFAULT, nullptr, &pPath)))
+    {
+      s_sUserDocumentsPath = plStringWChar(pPath);
+    }
+
+    if (pPath != nullptr)
+    {
+      CoTaskMemFree(pPath);
+    }
+#endif
+  }
+
+  plStringBuilder s = s_sUserDocumentsPath;
+  s.AppendPath(sSubFolder);
+  s.MakeCleanPath();
+  return s;
+}
+
 const plString plOSFile::GetCurrentWorkingDirectory()
 {
   const plUInt32 uiRequiredLength = GetCurrentDirectoryW(0, nullptr);
