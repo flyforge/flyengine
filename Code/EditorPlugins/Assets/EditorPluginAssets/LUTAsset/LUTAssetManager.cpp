@@ -23,6 +23,7 @@ plLUTAssetDocumentManager::plLUTAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "LUT";
   m_DocTypeDesc.m_sFileExtension = "plLUTAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/LUT.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plLUTAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_sResourceFileExtension = "plLUT";

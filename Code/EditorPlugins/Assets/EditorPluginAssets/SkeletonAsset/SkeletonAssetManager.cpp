@@ -13,6 +13,7 @@ plSkeletonAssetDocumentManager::plSkeletonAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Skeleton";
   m_DocTypeDesc.m_sFileExtension = "plSkeletonAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Skeleton.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Animation";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plSkeletonAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Mesh_Skeleton");

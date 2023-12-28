@@ -52,7 +52,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plProjectileComponent, 4, plComponentMode::Dynamic)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
-    new plColorAttribute(plColorScheme::Gameplay),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.4f, plColor::OrangeRed),
   }
   PLASMA_END_ATTRIBUTES;

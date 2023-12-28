@@ -21,7 +21,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJointOverrideComponent, 1, plComponentMode::Dynami
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
-    new plColorAttribute(plColorScheme::Animation),
   }
   PLASMA_END_ATTRIBUTES;
 

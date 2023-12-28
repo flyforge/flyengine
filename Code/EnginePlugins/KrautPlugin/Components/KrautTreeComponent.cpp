@@ -35,8 +35,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plKrautTreeComponent, 3, plComponentMode::Static)
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Terrain"),
-    new plColorAttribute(plColorScheme::Rendering),
+    new plCategoryAttribute("Rendering"),
   }
   PLASMA_END_ATTRIBUTES;
 }

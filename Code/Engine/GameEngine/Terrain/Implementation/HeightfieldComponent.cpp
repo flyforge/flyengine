@@ -33,8 +33,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plHeightfieldComponent, 2, plComponentMode::Static)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Terrain"),
-    new plColorAttribute(plColorScheme::Rendering),
+    new plCategoryAttribute("Rendering"),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS

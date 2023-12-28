@@ -56,7 +56,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plDecalComponent, 8, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
-    new plColorAttribute(plColorScheme::Effects),
     new plDirectionVisualizerAttribute("ProjectionAxis", 0.5f, plColorScheme::LightUI(plColorScheme::Blue)),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxVisualizerAttribute("Extents"),

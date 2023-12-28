@@ -12,7 +12,6 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plNpcComponent, 1)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("AI/Experimental"),
-    new plColorAttribute(plColorScheme::Ai),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Alpha),
   }
   PLASMA_END_ATTRIBUTES;

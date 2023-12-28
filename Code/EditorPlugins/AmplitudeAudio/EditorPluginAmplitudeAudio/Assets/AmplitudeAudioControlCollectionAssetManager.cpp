@@ -14,6 +14,7 @@ plAmplitudeAudioControlCollectionAssetDocumentManager::plAmplitudeAudioControlCo
   m_DocTypeDesc.m_sDocumentTypeName = "Audio Control Collection";
   m_DocTypeDesc.m_sFileExtension = "plAudioControlCollectionAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Audio_Control_Collection.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Audio";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plAmplitudeAudioControlCollectionAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_AmplitudeAudio_Audio_Control_Collection");

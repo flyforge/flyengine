@@ -10,7 +10,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAlwaysVisibleComponent, 1, plComponentMode::Static
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
-    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
 }

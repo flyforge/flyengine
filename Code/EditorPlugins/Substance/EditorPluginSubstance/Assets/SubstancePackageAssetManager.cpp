@@ -16,7 +16,7 @@ plSubstancePackageAssetDocumentManager::plSubstancePackageAssetDocumentManager()
     m_PackageTypeDesc.m_sDocumentTypeName = "Substance Package";
     m_PackageTypeDesc.m_sFileExtension = "plSubstancePackageAsset";
     m_PackageTypeDesc.m_sIcon = ":/AssetIcons/SubstanceDesigner.svg";
-    m_TextureTypeDesc.m_IconColorGroup = plColorScheme::ColorGroup::Rendering;
+    m_TextureTypeDesc.m_sAssetCategory = "Rendering";
     m_PackageTypeDesc.m_pDocumentType = plGetStaticRTTI<plSubstancePackageAssetDocument>();
     m_PackageTypeDesc.m_pManager = this;
     m_PackageTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Substance_Package");
@@ -32,7 +32,7 @@ plSubstancePackageAssetDocumentManager::plSubstancePackageAssetDocumentManager()
     m_TextureTypeDesc.m_sDocumentTypeName = "Substance Texture";
     m_TextureTypeDesc.m_sFileExtension = "plSubstanceTextureAsset";
     m_TextureTypeDesc.m_sIcon = ":/AssetIcons/SubstanceDesigner.svg";
-    m_TextureTypeDesc.m_IconColorGroup = plColorScheme::ColorGroup::Rendering;
+    m_TextureTypeDesc.m_sAssetCategory = "Rendering";
     m_TextureTypeDesc.m_pManager = this;
     m_TextureTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Texture_2D");
 

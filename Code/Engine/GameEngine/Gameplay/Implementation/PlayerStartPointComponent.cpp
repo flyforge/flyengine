@@ -20,7 +20,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plPlayerStartPointComponent, 2, plComponentMode::Sta
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
-    new plColorAttribute(plColorScheme::Gameplay),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColor::DarkSlateBlue),
   }
   PLASMA_END_ATTRIBUTES;

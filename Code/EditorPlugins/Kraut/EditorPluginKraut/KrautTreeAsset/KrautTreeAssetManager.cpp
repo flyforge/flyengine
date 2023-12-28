@@ -13,6 +13,7 @@ plKrautTreeAssetDocumentManager::plKrautTreeAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Kraut Tree";
   m_DocTypeDesc.m_sFileExtension = "plKrautTreeAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Kraut_Tree.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plKrautTreeAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Kraut_Tree");

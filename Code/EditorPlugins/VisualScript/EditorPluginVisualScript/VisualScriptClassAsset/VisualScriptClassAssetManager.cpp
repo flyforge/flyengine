@@ -14,7 +14,7 @@ plVisualScriptClassAssetManager::plVisualScriptClassAssetManager()
   m_DocTypeDesc.m_sDocumentTypeName = "VisualScriptClass";
   m_DocTypeDesc.m_sFileExtension = "plVisualScriptClassAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/VisualScript.svg";
-  //m_DocTypeDesc.m_sAssetCategory = "Scripting";
+  m_DocTypeDesc.m_sAssetCategory = "Scripting";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plVisualScriptClassAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_ScriptClass");

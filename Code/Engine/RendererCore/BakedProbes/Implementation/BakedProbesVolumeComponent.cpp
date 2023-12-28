@@ -21,8 +21,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plBakedProbesVolumeComponent, 1, plComponentMode::St
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
-    new plCategoryAttribute("Rendering/Baking"),
-    new plColorAttribute(plColorScheme::Lighting),
+    new plCategoryAttribute("Lighting/Baking"),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColor::OrangeRed),
   }

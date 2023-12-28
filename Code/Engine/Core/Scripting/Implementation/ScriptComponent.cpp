@@ -18,7 +18,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plScriptComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Scripting"),
-    new plColorAttribute(plColorScheme::Scripting),
   }
   PLASMA_END_ATTRIBUTES;
 }

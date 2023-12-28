@@ -9,8 +9,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plAudioSystemComponent, 1)
 {
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Sound"),
-    new plColorAttribute(plColorScheme::Sound),
+    new plCategoryAttribute("Audio"),
   }
   PLASMA_END_ATTRIBUTES;
 }

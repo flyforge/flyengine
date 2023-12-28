@@ -18,6 +18,7 @@ plImageDataAssetDocumentManager::plImageDataAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Image Data";
   m_DocTypeDesc.m_sFileExtension = "plImageDataAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/ImageData.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Utilities";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plImageDataAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_sResourceFileExtension = "plImageData";

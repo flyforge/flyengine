@@ -16,8 +16,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plHeadBoneComponent, 1, plComponentMode::Dynamic)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Transform"),
-    new plColorAttribute(plColorScheme::Gameplay),
+    new plCategoryAttribute("Gameplay"),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_FUNCTIONS

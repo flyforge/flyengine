@@ -196,8 +196,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plBakedProbesComponent, 1, plComponentMode::Static)
   PLASMA_END_FUNCTIONS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering/Baking"),
-    new plColorAttribute(plColorScheme::Lighting),
+    new plCategoryAttribute("Lighting/Baking"),
     new plLongOpAttribute("plLongOpProxy_BakeScene"),
     new plTransformManipulatorAttribute("TestPosition"),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),

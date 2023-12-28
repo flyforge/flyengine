@@ -332,7 +332,7 @@ QVariant plQtAssetBrowserModel::data(const QModelIndex& index, int role) const
       }
       else
       {
-        return plQtUiServices::GetCachedIconResource(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_sIcon, plColorScheme::GetGroupColor(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_IconColorGroup, 2));
+        return plQtUiServices::GetCachedIconResource(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_sIcon, plColorScheme::GetCategoryColor(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_sAssetCategory, plColorScheme::CategoryColorUsage::OverlayIcon));
       }
     }
     break;
@@ -358,7 +358,7 @@ QVariant plQtAssetBrowserModel::data(const QModelIndex& index, int role) const
     {
       if (pSubAsset->m_bIsDir)
         return QPixmap();
-      return plQtUiServices::GetCachedIconResource(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_sIcon, plColorScheme::GetGroupColor(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_IconColorGroup, 2));
+      return plQtUiServices::GetCachedIconResource(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_sIcon, plColorScheme::GetCategoryColor(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_sAssetCategory, plColorScheme::CategoryColorUsage::OverlayIcon));
     }
     case UserRoles::TransformState:
       return (int)pSubAsset->m_pAssetInfo->m_TransformState;

@@ -28,6 +28,7 @@ plDecalAssetDocumentManager::plDecalAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Decal";
   m_DocTypeDesc.m_sFileExtension = "plDecalAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Decal.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Effects";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plDecalAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Decal");

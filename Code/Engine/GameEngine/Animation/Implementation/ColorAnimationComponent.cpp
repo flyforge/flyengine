@@ -21,7 +21,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plColorAnimationComponent, 2, plComponentMode::Stati
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
-    new plColorAttribute(plColorScheme::Animation),
   }
   PLASMA_END_ATTRIBUTES;
 }

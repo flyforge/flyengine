@@ -179,7 +179,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plCameraComponent, 11, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
-    new plColorAttribute(plColorScheme::Rendering),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 1.0f, plColor::DarkSlateBlue),
     new plCameraVisualizerAttribute("Mode", "FOV", "Dimensions", "NearPlane", "FarPlane"),
   }

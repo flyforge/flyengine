@@ -32,6 +32,7 @@ plTypeScriptAssetDocumentManager::plTypeScriptAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "TypeScript";
   m_DocTypeDesc.m_sFileExtension = "plTypeScriptAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/TypeScript.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Scripting";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plTypeScriptAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
 

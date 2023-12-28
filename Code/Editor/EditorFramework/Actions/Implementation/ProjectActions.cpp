@@ -250,7 +250,7 @@ void plRecentDocumentsMenuAction::GetEntries(plHybridArray<plDynamicMenuAction::
       continue;
 
     item.m_UserValue = file.m_File;
-    item.m_Icon = plQtUiServices::GetCachedIconResource(pTypeDesc->m_sIcon);
+    item.m_Icon = plQtUiServices::GetCachedIconResource(pTypeDesc->m_sIcon, plColorScheme::GetCategoryColor(pTypeDesc->m_sAssetCategory, plColorScheme::CategoryColorUsage::MenuEntryIcon));
 
     if (plToolsProject::IsProjectOpen())
     {

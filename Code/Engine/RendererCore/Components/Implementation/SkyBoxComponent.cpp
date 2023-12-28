@@ -22,7 +22,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSkyBoxComponent, 4, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Sky"),
-    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS

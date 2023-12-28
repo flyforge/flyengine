@@ -8,7 +8,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plRenderComponent, 1)
 {
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plColorAttribute(plColorScheme::Rendering),
+    new plCategoryAttribute("Rendering"),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS

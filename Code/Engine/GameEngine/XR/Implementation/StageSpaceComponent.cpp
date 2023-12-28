@@ -17,7 +17,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plStageSpaceComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("XR"),
-    new plColorAttribute(plColorScheme::XR),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
   }
   PLASMA_END_ATTRIBUTES;

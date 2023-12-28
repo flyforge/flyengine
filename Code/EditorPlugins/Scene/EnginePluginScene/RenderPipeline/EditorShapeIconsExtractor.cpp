@@ -171,27 +171,20 @@ void PlasmaEditorShapeIconsExtractor::FillShapeIconInfo()
   plStringBuilder sPath;
 
   plRTTI::ForEachDerivedType<plComponent>(
-    [&](const plRTTI* pRtti) {
-      sPath.Set("Editor/ShapeIcons/", pRtti->GetTypeName(), ".dds");
+  [&](const plRTTI* pRtti) {
+    sPath.Set("Editor/ShapeIcons/", pRtti->GetTypeName(), ".dds");
 
-      if (plFileSystem::ExistsFile(sPath))
+    if (plFileSystem::ExistsFile(sPath))
+    {
+      auto& shapeIconInfo = m_ShapeIconInfos[pRtti];
+      shapeIconInfo.m_hTexture = plResourceManager::LoadResource<plTexture2DResource>(sPath);
+      shapeIconInfo.m_pColorProperty = FindColorProperty(pRtti);
+      shapeIconInfo.m_pColorGammaProperty = FindColorGammaProperty(pRtti);
+
+      if (auto pCatAttribute = pRtti->GetAttributeByType<plCategoryAttribute>())
       {
-        auto& shapeIconInfo = m_ShapeIconInfos[pRtti];
-        shapeIconInfo.m_hTexture = plResourceManager::LoadResource<plTexture2DResource>(sPath);
-        shapeIconInfo.m_pColorProperty = FindColorProperty(pRtti);
-        shapeIconInfo.m_pColorGammaProperty = FindColorGammaProperty(pRtti);
-
-        if (auto pColorAttribute = pRtti->GetAttributeByType<plColorAttribute>())
-        {
-          plColor col = pColorAttribute->GetColor();
-
-          if (pColorAttribute->m_iColorGroup != -1)
-          {
-            col = plColorScheme::GetGroupColor((plColorScheme::ColorGroup)pColorAttribute->m_iColorGroup, 2, 2);
-          }
-
-          shapeIconInfo.m_FallbackColor = col;
-        }
+        shapeIconInfo.m_FallbackColor = plColorScheme::GetCategoryColor(pCatAttribute->GetCategory(), plColorScheme::CategoryColorUsage::ViewportIcon);
       }
-    });
+    }
+  });
 }

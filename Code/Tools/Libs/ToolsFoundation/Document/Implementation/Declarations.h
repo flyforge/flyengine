@@ -38,7 +38,7 @@ struct PLASMA_TOOLSFOUNDATION_DLL plDocumentTypeDescriptor
   plString m_sIcon;
   const plRTTI* m_pDocumentType = nullptr;
   plDocumentManager* m_pManager = nullptr;
-  plColorScheme::ColorGroup m_IconColorGroup = plColorScheme::ColorGroup::None;
+  plStringView m_sAssetCategory; // passed to plColorScheme::GetCategoryColor() with CategoryColorUsage::AssetMenuIcon
 
   /// This list is used to decide which asset types can be picked from the asset browser for a property.
   /// The strings are arbitrary and don't need to be registered anywhere else.

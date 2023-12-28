@@ -25,7 +25,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plMarkerComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"),
-    new plColorAttribute(plColorScheme::Logic),
     new plSphereVisualizerAttribute("Radius", plColor::LightSkyBlue),
   }
   PLASMA_END_ATTRIBUTES;

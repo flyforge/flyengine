@@ -61,7 +61,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltRopeComponent, 2, plComponentMode::Dynamic)
     PLASMA_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Physics/Jolt/Animation"),
-    new plColorAttribute(plColorScheme::Physics),
     }
     PLASMA_END_ATTRIBUTES;
   }

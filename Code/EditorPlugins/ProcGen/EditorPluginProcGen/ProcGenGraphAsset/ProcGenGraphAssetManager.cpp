@@ -15,6 +15,7 @@ plProcGenGraphAssetDocumentManager::plProcGenGraphAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "ProcGen Graph";
   m_DocTypeDesc.m_sFileExtension = "plProcGenGraphAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/ProcGen_Graph.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Construction";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plProcGenGraphAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_ProcGen_Graph");

@@ -59,7 +59,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRaycastComponent, 3, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"),
-    new plColorAttribute(plColorScheme::Logic),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColor::YellowGreen),
   }
   PLASMA_END_ATTRIBUTES;

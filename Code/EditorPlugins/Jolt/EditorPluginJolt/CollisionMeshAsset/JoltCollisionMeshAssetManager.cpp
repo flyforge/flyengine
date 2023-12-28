@@ -13,6 +13,7 @@ plJoltCollisionMeshAssetDocumentManager::plJoltCollisionMeshAssetDocumentManager
   m_DocTypeDesc.m_sDocumentTypeName = "Jolt_Colmesh_Triangle";
   m_DocTypeDesc.m_sFileExtension = "plJoltCollisionMeshAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Jolt_Collision_Mesh.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Physics";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plJoltCollisionMeshAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Jolt_Colmesh_Triangle");
@@ -23,6 +24,7 @@ plJoltCollisionMeshAssetDocumentManager::plJoltCollisionMeshAssetDocumentManager
   m_DocTypeDesc2.m_sDocumentTypeName = "Jolt_Colmesh_Convex";
   m_DocTypeDesc2.m_sFileExtension = "plJoltConvexCollisionMeshAsset";
   m_DocTypeDesc2.m_sIcon = ":/AssetIcons/Jolt_Collision_Mesh_Convex.svg";
+  m_DocTypeDesc2.m_sAssetCategory = "Physics";
   m_DocTypeDesc2.m_pDocumentType = plGetStaticRTTI<plJoltCollisionMeshAssetDocument>();
   m_DocTypeDesc2.m_pManager = this;
   m_DocTypeDesc2.m_CompatibleTypes.PushBack("CompatibleAsset_Jolt_Colmesh_Triangle"); // convex meshes can also be used as triangle meshes (concave)

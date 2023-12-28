@@ -274,12 +274,9 @@ void plGameObjectDocument::DetermineNodeName(const plDocumentObject* pObject, co
 
       plColor color = plColor::ZeroColor();
 
-      if (auto pInDev = pChild->GetTypeAccessor().GetType()->GetAttributeByType<plColorAttribute>())
+      if (auto pCatAttr = pChild->GetTypeAccessor().GetType()->GetAttributeByType<plCategoryAttribute>())
       {
-        if (pInDev->m_iColorGroup != -1)
-          color = plColorScheme::GetGroupColor((plColorScheme::ColorGroup)pInDev->m_iColorGroup, 2);
-        else
-          color = pInDev->GetColor();
+        color = plColorScheme::GetCategoryColor(pCatAttr->GetCategory(), plColorScheme::CategoryColorUsage::SceneTreeIcon);
       }
 
       plStringBuilder sIconName;

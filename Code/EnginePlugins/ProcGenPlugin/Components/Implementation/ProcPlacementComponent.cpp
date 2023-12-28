@@ -597,8 +597,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plProcPlacementComponent, 1, plComponentMode::Static
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Procedural Generation"),
-    new plColorAttribute(plColorScheme::Construction),
+    new plCategoryAttribute("Construction/PCG"),
   }
   PLASMA_END_ATTRIBUTES;
 }

@@ -24,7 +24,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plOccluderComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
-    new plColorAttribute(plColorScheme::Rendering),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColorScheme::LightUI(plColorScheme::Blue)),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
   }

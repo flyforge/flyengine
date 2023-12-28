@@ -26,7 +26,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plTimedDeathComponent, 2, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
-    new plColorAttribute(plColorScheme::Gameplay),
   }
   PLASMA_END_ATTRIBUTES;
 }

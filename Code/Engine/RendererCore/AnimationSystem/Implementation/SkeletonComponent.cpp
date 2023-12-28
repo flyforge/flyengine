@@ -34,7 +34,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSkeletonComponent, 5, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
-    new plColorAttribute(plColorScheme::Animation),
   }
   PLASMA_END_ATTRIBUTES;
 }

@@ -35,7 +35,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plProcVolumeComponent, 1)
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plColorAttribute(plColorScheme::Construction),
+    new plCategoryAttribute("Construction/PCG"),
   }
   PLASMA_END_ATTRIBUTES;
 }

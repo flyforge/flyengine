@@ -1119,9 +1119,3 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 //////////////////////////////////////////////////////////////////////////
 
 PLASMA_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_PropertyAttributes);
-
-plColorAttribute::plColorAttribute(plInt32 iColorGroup)
-  : m_iColorGroup(iColorGroup)
-{
-  m_Color = plColorScheme::GetGroupColor((plColorScheme::ColorGroup)iColorGroup);
-}

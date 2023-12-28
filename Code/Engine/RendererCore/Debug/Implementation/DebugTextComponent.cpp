@@ -28,7 +28,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plDebugTextComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Debug"),
-    new plColorAttribute(plColorScheme::Utilities),
   }
   PLASMA_END_ATTRIBUTES;
 }

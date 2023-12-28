@@ -26,7 +26,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAnimationControllerComponent, 2, plComponentMode::
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
-    new plColorAttribute(plColorScheme::Animation),
   }
   PLASMA_END_ATTRIBUTES;
 }

@@ -214,10 +214,11 @@ void plQtAddSubElementButton::onMenuAboutToShow()
 
       if (pColA)
       {
-        if (pColA->m_iColorGroup != -1)
-          iconColor = plColorScheme::GetGroupColor((plColorScheme::ColorGroup)pColA->m_iColorGroup, 2);
-        else
-          iconColor = pColA->GetColor();
+        iconColor = pColA->GetColor();
+      }
+      else if (pCatA && iconColor == plColor::ZeroColor())
+      {
+        iconColor = plColorScheme::GetCategoryColor(pCatA->GetCategory(), plColorScheme::CategoryColorUsage::MenuEntryIcon);
       }
 
       const QIcon actionIcon = plQtUiServices::GetCachedIconResource(sIconName.GetData(), iconColor);

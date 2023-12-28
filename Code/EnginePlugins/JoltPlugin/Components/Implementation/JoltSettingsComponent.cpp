@@ -20,7 +20,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltSettingsComponent, 1, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Misc"),
-    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
 }

@@ -33,7 +33,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plGrabbableItemComponent, 1, plComponentMode::Static
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
-    new plColorAttribute(plColorScheme::Gameplay),
   }
   PLASMA_END_ATTRIBUTES;
 }

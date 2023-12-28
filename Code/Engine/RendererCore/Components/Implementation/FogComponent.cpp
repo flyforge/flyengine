@@ -30,7 +30,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plFogComponent, 2, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
-    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
 }

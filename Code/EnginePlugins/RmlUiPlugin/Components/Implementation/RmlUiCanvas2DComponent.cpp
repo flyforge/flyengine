@@ -33,8 +33,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRmlUiCanvas2DComponent, 2, plComponentMode::Static
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Gui/RmlUi"),
-    new plColorAttribute(plColorScheme::UI),
+    new plCategoryAttribute("UI/RmlUi"),
   }
   PLASMA_END_ATTRIBUTES;
 }

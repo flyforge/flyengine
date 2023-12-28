@@ -35,8 +35,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAudioAnimationComponent, kVersion_AudioAnimationCo
 {
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Sound"),
-    new plColorAttribute(plColorScheme::Sound),
+    new plCategoryAttribute("Audio"),
   }
   PLASMA_END_ATTRIBUTES;
 

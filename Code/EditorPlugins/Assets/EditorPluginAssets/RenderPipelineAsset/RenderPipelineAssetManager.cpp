@@ -14,6 +14,7 @@ plRenderPipelineAssetManager::plRenderPipelineAssetManager()
   m_DocTypeDesc.m_sDocumentTypeName = "RenderPipeline";
   m_DocTypeDesc.m_sFileExtension = "plRenderPipelineAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/RenderPipeline.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plRenderPipelineAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_RenderPipeline");

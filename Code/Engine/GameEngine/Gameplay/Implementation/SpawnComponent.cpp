@@ -26,7 +26,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSpawnComponent, 3, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
-    new plColorAttribute(plColorScheme::Gameplay),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColorScheme::LightUI(plColorScheme::Lime)),
     new plConeVisualizerAttribute(plBasisAxis::PositiveX, "Deviation", 0.5f, nullptr, plColorScheme::LightUI(plColorScheme::Lime)),
     new plConeAngleManipulatorAttribute("Deviation", 0.5f),

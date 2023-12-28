@@ -14,8 +14,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plCollectionComponent, 1, plComponentMode::Static)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("General"),
-    new plColorAttribute(plColorScheme::Utilities),
+    new plCategoryAttribute("Utilities"),
   }
   PLASMA_END_ATTRIBUTES;
 }

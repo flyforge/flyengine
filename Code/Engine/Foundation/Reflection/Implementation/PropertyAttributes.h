@@ -102,10 +102,6 @@ public:
   {
   }
 
-  plColorAttribute(plInt32 iColorGroup);
-
-  plInt32 m_iColorGroup = -1;
-
   const plColor& GetColor() const { return m_Color; }
 
 private:

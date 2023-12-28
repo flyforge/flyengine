@@ -13,6 +13,7 @@ plRmlUiAssetDocumentManager::plRmlUiAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "RmlUi";
   m_DocTypeDesc.m_sFileExtension = "plRmlUiAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/RmlUi.svg";
+  m_DocTypeDesc.m_sAssetCategory = "UI";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plRmlUiAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Rml_UI");

@@ -25,7 +25,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plFakeRopeComponent, 3, plComponentMode::Static)
     PLASMA_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Effects/Ropes"),
-      new plColorAttribute(plColorScheme::Effects),
     }
     PLASMA_END_ATTRIBUTES;
   }

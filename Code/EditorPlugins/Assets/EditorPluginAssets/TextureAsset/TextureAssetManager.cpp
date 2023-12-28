@@ -37,7 +37,7 @@ plTextureAssetDocumentManager::plTextureAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Texture 2D";
   m_DocTypeDesc.m_sFileExtension = "plTextureAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Texture_2D.svg";
-  //m_DocTypeDesc.m_sAssetCategory = "Rendering";
+  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plTextureAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_sResourceFileExtension = "plTexture2D";
@@ -47,7 +47,7 @@ plTextureAssetDocumentManager::plTextureAssetDocumentManager()
   m_DocTypeDesc2.m_sDocumentTypeName = "Render Target";
   m_DocTypeDesc2.m_sFileExtension = "plRenderTargetAsset";
   m_DocTypeDesc2.m_sIcon = ":/AssetIcons/Render_Target.svg";
-  //m_DocTypeDesc2.m_sAssetCategory = "Rendering";
+  m_DocTypeDesc2.m_sAssetCategory = "Rendering";
   m_DocTypeDesc2.m_pDocumentType = plGetStaticRTTI<plTextureAssetDocument>();
   m_DocTypeDesc2.m_pManager = this;
   m_DocTypeDesc2.m_sResourceFileExtension = "plRenderTarget";

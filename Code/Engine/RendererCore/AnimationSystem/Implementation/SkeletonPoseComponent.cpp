@@ -27,7 +27,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSkeletonPoseComponent, 4, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
-    new plColorAttribute(plColorScheme::Animation),
     new plBoneManipulatorAttribute("Bones", "EditBones"),
   }
   PLASMA_END_ATTRIBUTES;

@@ -21,7 +21,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJointAttachmentComponent, 1, plComponentMode::Dyna
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
-    new plColorAttribute(plColorScheme::Animation),
   }
   PLASMA_END_ATTRIBUTES;
 

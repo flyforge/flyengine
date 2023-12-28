@@ -27,7 +27,7 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plMeshInstanceData, plNoBase, 1, plRTTIDefaul
 
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plColorAttribute(plColorScheme::Rendering),
+    new plCategoryAttribute("Rendering"),
     new plTransformManipulatorAttribute("LocalPosition", "LocalRotation", "LocalScaling"),
   }
   PLASMA_END_ATTRIBUTES;

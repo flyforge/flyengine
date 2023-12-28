@@ -21,6 +21,7 @@ plSceneDocumentManager::plSceneDocumentManager()
     docTypeDesc.m_sDocumentTypeName = "Scene";
     docTypeDesc.m_sFileExtension = "plScene";
     docTypeDesc.m_sIcon = ":/AssetIcons/Scene.svg";
+    docTypeDesc.m_sAssetCategory = "Construction";
     docTypeDesc.m_pDocumentType = plGetStaticRTTI<plScene2Document>();
     docTypeDesc.m_pManager = this;
     docTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Scene");
@@ -36,6 +37,7 @@ plSceneDocumentManager::plSceneDocumentManager()
     docTypeDesc.m_sDocumentTypeName = "Prefab";
     docTypeDesc.m_sFileExtension = "plPrefab";
     docTypeDesc.m_sIcon = ":/AssetIcons/Prefab.svg";
+    docTypeDesc.m_sAssetCategory = "Construction";
     docTypeDesc.m_pDocumentType = plGetStaticRTTI<plSceneDocument>();
     docTypeDesc.m_pManager = this;
     docTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Prefab");
@@ -50,6 +52,7 @@ plSceneDocumentManager::plSceneDocumentManager()
     docTypeDesc.m_sDocumentTypeName = "Layer";
     docTypeDesc.m_sFileExtension = "plSceneLayer";
     docTypeDesc.m_sIcon = ":/AssetIcons/Layer.svg";
+    docTypeDesc.m_sAssetCategory = "Construction";
     docTypeDesc.m_pDocumentType = plGetStaticRTTI<plLayerDocument>();
     docTypeDesc.m_pManager = this;
     docTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Scene_Layer");

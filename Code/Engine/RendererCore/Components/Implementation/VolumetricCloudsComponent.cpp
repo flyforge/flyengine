@@ -17,7 +17,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plVolumetricCloudsComponent, 1, plComponentMode::Sta
   {
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Alpha),
     new plCategoryAttribute("Effects/Sky"),
-    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS

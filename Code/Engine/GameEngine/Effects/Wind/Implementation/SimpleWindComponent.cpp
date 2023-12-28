@@ -18,7 +18,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plSimpleWindComponent, 2, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Wind"),
-    new plColorAttribute(plColorScheme::Effects),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColor::DodgerBlue),
   }
   PLASMA_END_ATTRIBUTES;

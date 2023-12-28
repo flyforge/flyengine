@@ -30,8 +30,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAnimatedMeshComponent, 13, plComponentMode::Dynami
 
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Animation"),
-    new plColorAttribute(plColorScheme::Rendering),
+    new plCategoryAttribute("Rendering/Mesh"),
   }
   PLASMA_END_ATTRIBUTES;
 

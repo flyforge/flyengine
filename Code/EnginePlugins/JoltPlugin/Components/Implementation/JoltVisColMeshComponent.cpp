@@ -24,7 +24,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltVisColMeshComponent, 1, plComponentMode::Stati
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Misc"),
-    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
 }

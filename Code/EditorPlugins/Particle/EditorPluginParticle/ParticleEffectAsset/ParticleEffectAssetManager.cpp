@@ -13,6 +13,7 @@ plParticleEffectAssetDocumentManager::plParticleEffectAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Particle Effect";
   m_DocTypeDesc.m_sFileExtension = "plParticleEffectAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Particle_Effect.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Effects";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plParticleEffectAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Particle_Effect");

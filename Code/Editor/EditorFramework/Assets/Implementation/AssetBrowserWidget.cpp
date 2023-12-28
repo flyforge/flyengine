@@ -291,7 +291,7 @@ void plQtAssetBrowserWidget::UpdateAssetTypes()
 
     for (const auto& it : assetTypes)
     {
-      QListWidgetItem* pItem = new QListWidgetItem(plQtUiServices::GetCachedIconResource(it.Value()->m_sIcon, plColorScheme::GetGroupColor(it.Value()->m_IconColorGroup, 2)), QString::fromUtf8(it.Key(), it.Key().GetElementCount()));
+      QListWidgetItem* pItem = new QListWidgetItem(plQtUiServices::GetCachedIconResource(it.Value()->m_sIcon, plColorScheme::GetCategoryColor(it.Value()->m_sAssetCategory, plColorScheme::CategoryColorUsage::AssetMenuIcon)), QString::fromUtf8(it.Key(), it.Key().GetElementCount()));
       pItem->setFlags(Qt::ItemFlag::ItemIsEnabled | Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsUserCheckable);
       pItem->setCheckState(Qt::CheckState::Unchecked);
       pItem->setData(Qt::UserRole, QLatin1String(it.Value()->m_sDocumentTypeName));
@@ -310,7 +310,7 @@ void plQtAssetBrowserWidget::UpdateAssetTypes()
 
     for (const auto& it : assetTypes)
     {
-      TypeFilter->addItem(plQtUiServices::GetCachedIconResource(it.Value()->m_sIcon, plColorScheme::GetGroupColor(it.Value()->m_IconColorGroup, 2)), QString::fromUtf8(it.Key(), it.Key().GetElementCount()));
+      TypeFilter->addItem(plQtUiServices::GetCachedIconResource(it.Value()->m_sIcon, plColorScheme::GetCategoryColor(it.Value()->m_sAssetCategory, plColorScheme::CategoryColorUsage::AssetMenuIcon)), QString::fromUtf8(it.Key(), it.Key().GetElementCount()));
       TypeFilter->setItemData(TypeFilter->count() - 1, QString::fromUtf8(it.Value()->m_sDocumentTypeName, it.Value()->m_sDocumentTypeName.GetElementCount()), Qt::UserRole);
     }
   }
@@ -412,7 +412,7 @@ void plQtAssetBrowserWidget::AddAssetCreatorMenu(QMenu* pMenu, bool useSelectedA
       continue;
 
     QAction* pAction = pSubMenu->addAction(plTranslate(desc->m_sDocumentTypeName));
-    pAction->setIcon(plQtUiServices::GetSingleton()->GetCachedIconResource(desc->m_sIcon, plColorScheme::GetGroupColor(desc->m_IconColorGroup, 2)));
+    pAction->setIcon(plQtUiServices::GetSingleton()->GetCachedIconResource(desc->m_sIcon, plColorScheme::GetCategoryColor(desc->m_sAssetCategory, plColorScheme::CategoryColorUsage::MenuEntryIcon)));
     pAction->setProperty("AssetType", desc->m_sDocumentTypeName.GetData());
     pAction->setProperty("AssetManager", QVariant::fromValue<void*>(desc->m_pManager));
     pAction->setProperty("Extension", desc->m_sFileExtension.GetData());

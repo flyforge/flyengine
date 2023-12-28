@@ -40,7 +40,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plInputComponent, 3, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Input"),
-    new plColorAttribute(plColorScheme::Input),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGESENDERS

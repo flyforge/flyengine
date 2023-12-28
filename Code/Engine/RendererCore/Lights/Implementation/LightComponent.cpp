@@ -42,8 +42,7 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 7)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering/Lighting"),
-    new plColorAttribute(plColorScheme::Lighting),
+    new plCategoryAttribute("Lighting"),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS

@@ -35,7 +35,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltBoneColliderComponent, 1, plComponentMode::Dyn
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Animation"),
-    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
 }

@@ -13,7 +13,6 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltShapeComponent, 1)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Shapes"),
-    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
 }

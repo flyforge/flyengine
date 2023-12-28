@@ -21,6 +21,7 @@ plMaterialAssetDocumentManager::plMaterialAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Material";
   m_DocTypeDesc.m_sFileExtension = "plMaterialAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Material.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plMaterialAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Material");

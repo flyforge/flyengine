@@ -19,6 +19,7 @@ plMeshAssetDocumentManager::plMeshAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Mesh";
   m_DocTypeDesc.m_sFileExtension = "plMeshAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Mesh.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plMeshAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Mesh_Static");

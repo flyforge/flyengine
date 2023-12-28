@@ -30,7 +30,6 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plWindVolumeComponent, 2)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Wind"),
-    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
 }

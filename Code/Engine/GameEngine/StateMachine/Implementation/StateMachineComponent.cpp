@@ -269,7 +269,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plStateMachineComponent, 2, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"),
-    new plColorAttribute(plColorScheme::Logic),
   }
   PLASMA_END_ATTRIBUTES;
 }

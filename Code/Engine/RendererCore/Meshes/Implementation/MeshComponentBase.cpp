@@ -80,7 +80,6 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plMeshComponentBase, 2)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
-    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS

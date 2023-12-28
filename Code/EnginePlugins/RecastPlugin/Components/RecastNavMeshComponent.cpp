@@ -22,7 +22,6 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plRcComponent, 1)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("AI/Recast"),
-    new plColorAttribute(plColorScheme::Ai),
   }
   PLASMA_END_ATTRIBUTES;
 }

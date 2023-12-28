@@ -41,8 +41,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plGreyBoxComponent, 5, plComponentMode::Static)
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("General"),
-    new plColorAttribute(plColorScheme::Construction),
+    new plCategoryAttribute("Construction"),
     new plNonUniformBoxManipulatorAttribute("SizeNegX", "SizePosX", "SizeNegY", "SizePosY", "SizeNegZ", "SizePosZ"),
   }
   PLASMA_END_ATTRIBUTES;

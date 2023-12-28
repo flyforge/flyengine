@@ -37,7 +37,7 @@ PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plReflectionProbeComponentBase, 2, plRTTINoA
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plTransformManipulatorAttribute("CaptureOffset"),
-    new plColorAttribute(plColorScheme::Rendering),
+    new plCategoryAttribute("Lighting/Probes"),
   }
   PLASMA_END_ATTRIBUTES;
 }

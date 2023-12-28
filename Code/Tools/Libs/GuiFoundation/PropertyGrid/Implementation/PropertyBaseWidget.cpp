@@ -1643,6 +1643,24 @@ void plQtPropertyTypeContainerWidget::UpdateElement(plUInt32 index)
       elem.m_pSubGroup->SetTitle(sTitle);
     }
 
+    plColor borderIconColor = plColor::ZeroColor();
+
+    if (const plColorAttribute* pColorAttrib = pCommonType->GetAttributeByType<plColorAttribute>())
+    {
+      borderIconColor = pColorAttrib->GetColor();
+      elem.m_pSubGroup->SetFillColor(plToQtColor(pColorAttrib->GetColor()));
+    }
+    else if (const plCategoryAttribute* pCatAttrib = pCommonType->GetAttributeByType<plCategoryAttribute>())
+    {
+      borderIconColor = plColorScheme::GetCategoryColor(pCatAttrib->GetCategory(), plColorScheme::CategoryColorUsage::BorderIconColor);
+      elem.m_pSubGroup->SetFillColor(plToQtColor(plColorScheme::GetCategoryColor(pCatAttrib->GetCategory(), plColorScheme::CategoryColorUsage::BorderColor)));
+    }
+    else
+    {
+      const QPalette& pal = palette();
+      elem.m_pSubGroup->SetFillColor(pal.mid().color());
+    }
+
     // Icon
     {
       plStringBuilder sIconName;
@@ -1650,17 +1668,6 @@ void plQtPropertyTypeContainerWidget::UpdateElement(plUInt32 index)
       elem.m_pSubGroup->SetIcon(plQtUiServices::GetCachedIconResource(sIconName.GetData()));
     }
 
-
-    const plColorAttribute* pColorAttrib = pCommonType->GetAttributeByType<plColorAttribute>();
-    if(pColorAttrib)
-    {
-      elem.m_pSubGroup->SetFillColor(plToQtColor(pColorAttrib->GetColor()).darker(200));
-    }
-    else
-    {
-      const QPalette& pal = palette();
-      elem.m_pSubGroup->SetFillColor(pal.alternateBase().color());
-    }
 
     // help URL
     {

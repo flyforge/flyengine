@@ -26,7 +26,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plTriggerDelayModifierComponent, 1 /* version */, pl
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay/Logic"), // Component menu group
-    new plColorAttribute(plColorScheme::Logic),
   }
   PLASMA_END_ATTRIBUTES;
 }

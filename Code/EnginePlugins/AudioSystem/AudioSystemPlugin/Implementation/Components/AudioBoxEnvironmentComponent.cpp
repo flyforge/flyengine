@@ -16,7 +16,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAudioBoxEnvironmentComponent, kVersion_AudioBoxEnv
     new plBoxManipulatorAttribute("HalfExtends", 1.0f, true),
     new plBoxVisualizerAttribute("HalfExtends", 1.0f, plColor::White, "Color"),
     new plSphereVisualizerAttribute("MaxDistance", plColor::White, "Color"),
-    new plColorAttribute(plColorScheme::Sound),
   }
   PLASMA_END_ATTRIBUTES;
 

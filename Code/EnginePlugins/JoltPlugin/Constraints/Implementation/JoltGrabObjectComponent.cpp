@@ -42,7 +42,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltGrabObjectComponent, 1, plComponentMode::Stati
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Constraints"),
-    new plColorAttribute(plColorScheme::Physics),
   }
   PLASMA_END_ATTRIBUTES;
 }

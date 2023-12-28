@@ -14,6 +14,7 @@ plCollectionAssetDocumentManager::plCollectionAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Collection";
   m_DocTypeDesc.m_sFileExtension = "plCollectionAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Collection.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Utilities";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plCollectionAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_AssetCollection");

@@ -36,7 +36,6 @@ PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plSensorComponent, 1)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("AI/Sensors"),
-    new plColorAttribute(plColorScheme::Ai),
   }
   PLASMA_END_ATTRIBUTES;
 }

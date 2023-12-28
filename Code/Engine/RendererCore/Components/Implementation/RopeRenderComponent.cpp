@@ -40,7 +40,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRopeRenderComponent, 2, plComponentMode::Static)
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Ropes"),
-    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
 }

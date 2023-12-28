@@ -33,7 +33,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAtmosphericScatteringComponent, 1, plComponentMode
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Sky"),
-    new plColorAttribute(plColorScheme::Effects),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS

@@ -24,8 +24,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plAmbientLightComponent, 2, plComponentMode::Static)
   PLASMA_END_MESSAGEHANDLERS;
   PLASMA_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering/Lighting"),
-    new plColorAttribute(plColorScheme::Lighting),
+    new plCategoryAttribute("Lighting"),
   }
   PLASMA_END_ATTRIBUTES;
 }

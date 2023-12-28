@@ -14,6 +14,7 @@ plBlackboardTemplateAssetDocumentManager::plBlackboardTemplateAssetDocumentManag
   m_DocTypeDesc.m_sDocumentTypeName = "BlackboardTemplate";
   m_DocTypeDesc.m_sFileExtension = "plBlackboardTemplateAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/BlackboardTemplate.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Logic";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plBlackboardTemplateAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_BlackboardTemplate");

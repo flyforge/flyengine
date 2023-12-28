@@ -18,7 +18,6 @@ PLASMA_BEGIN_COMPONENT_TYPE(plRenderTargetActivatorComponent, 1, plComponentMode
   PLASMA_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
-    new plColorAttribute(plColorScheme::Rendering),
   }
   PLASMA_END_ATTRIBUTES;
   PLASMA_BEGIN_MESSAGEHANDLERS
