@@ -58,7 +58,7 @@ void plJoltHingeConstraintComponent::SerializeComponent(plWorldWriter& inout_str
 void plJoltHingeConstraintComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 
@@ -183,7 +183,8 @@ void plJoltHingeConstraintComponent::ApplySettings()
 
       const float strength = (m_fDriveStrength == 0) ? FLT_MAX : m_fDriveStrength;
 
-      pConstraint->GetMotorSettings().mFrequency = 20.0f;
+      pConstraint->GetMotorSettings().mSpringSettings.mMode = JPH::ESpringMode::FrequencyAndDamping;
+      pConstraint->GetMotorSettings().mSpringSettings.mFrequency = 20.0f;
       pConstraint->GetMotorSettings().SetForceLimit(strength);
       pConstraint->GetMotorSettings().SetTorqueLimit(strength);
     }

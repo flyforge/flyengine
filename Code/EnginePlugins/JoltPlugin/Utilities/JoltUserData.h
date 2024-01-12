@@ -20,7 +20,7 @@ public:
   PLASMA_DECLARE_POD_TYPE();
 
   plJoltUserData() = default;
-  ~plJoltUserData() { Invalidate(); }
+  ~plJoltUserData() = default;
 
   PLASMA_ALWAYS_INLINE void Init(plJoltDynamicActorComponent* pObject)
   {
@@ -142,13 +142,13 @@ public:
     return nullptr;
   }
 
-  //PLASMA_FORCE_INLINE static plJoltShapeComponent* GetShapeComponent(const void* pUserData)
+  // PLASMA_FORCE_INLINE static plJoltShapeComponent* GetShapeComponent(const void* pUserData)
   //{
-  //  const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
-  //  if (pJoltUserData != nullptr && pJoltUserData->m_Type == Type::ShapeComponent)
-  //  {
-  //    return static_cast<plJoltShapeComponent*>(pJoltUserData->m_pObject);
-  //  }
+  //   const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
+  //   if (pJoltUserData != nullptr && pJoltUserData->m_Type == Type::ShapeComponent)
+  //   {
+  //     return static_cast<plJoltShapeComponent*>(pJoltUserData->m_pObject);
+  //   }
 
   //  return nullptr;
   //}

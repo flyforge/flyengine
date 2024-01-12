@@ -13,6 +13,12 @@ namespace JPH
   class BodyCreationSettings;
 } // namespace JPH
 
+/// \brief Base class for all Jolt actors.
+///
+/// An actor is an object that participates in the physical simulation.
+/// It is often also called a (rigid) body.
+/// An actor is made out of one or multiple shapes that define its geometry.
+/// Different types of actors differ in how they participate in the simulation.
 class PLASMA_JOLTPLUGIN_DLL plJoltActorComponent : public plComponent
 {
   PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltActorComponent, plComponent);
@@ -24,6 +30,7 @@ public:
   virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
   virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
+protected:
   virtual void OnSimulationStarted() override;
   virtual void OnDeactivated() override;
 
@@ -34,9 +41,11 @@ public:
   plJoltActorComponent();
   ~plJoltActorComponent();
 
-  plUInt8 m_uiCollisionLayer = 0;     // [ property ]
-
-  const plJoltUserData* GetUserData() const;
+  /// \brief The collision layer determines with which other actors this actor collides.
+  ///
+  /// Which collision layers collide with each other is configured through the plCollisionFilterConfig.
+  /// \see plJoltCollisionFiltering::GetCollisionFilterConfig()
+  plUInt8 m_uiCollisionLayer = 0; // [ property ]
 
   /// \brief Sets the object filter ID to use. This can only be set right after creation, before the component gets activated.
   void SetInitialObjectFilterID(plUInt32 uiObjectFilterID);
@@ -45,6 +54,8 @@ public:
   plUInt32 GetObjectFilterID() const { return m_uiObjectFilterID; }
 
 protected:
+  const plJoltUserData* GetUserData() const;
+
   void ExtractSubShapeGeometry(const plGameObject* pObject, plMsgExtractGeometry& msg) const;
 
   static void GatherShapes(plDynamicArray<plJoltSubShape>& shapes, plGameObject* pObject, const plTransform& rootTransform, float fDensity, const plJoltMaterial* pMaterial);

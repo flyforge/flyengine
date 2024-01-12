@@ -13,7 +13,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltVisColMeshComponent, 1, plComponentMode::Stati
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Triangle;CompatibleAsset_Jolt_Colmesh_Convex")),
+    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Triangle;CompatibleAsset_Jolt_Colmesh_Convex", plDependencyFlags::Package)),
   }
   PLASMA_END_PROPERTIES;
   PLASMA_BEGIN_MESSAGEHANDLERS
@@ -46,7 +46,7 @@ void plJoltVisColMeshComponent::SerializeComponent(plWorldWriter& inout_stream) 
 void plJoltVisColMeshComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 
@@ -266,4 +266,3 @@ void plJoltVisColMeshComponentManager::ResourceEventHandler(const plResourceEven
 
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltVisColMeshComponent);
-

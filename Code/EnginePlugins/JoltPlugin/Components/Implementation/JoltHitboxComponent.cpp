@@ -4,7 +4,7 @@
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <JoltPlugin/Actors/JoltDynamicActorComponent.h>
 #include <JoltPlugin/Actors/JoltQueryShapeActorComponent.h>
-#include <JoltPlugin/Components/JoltBoneColliderComponent.h>
+#include <JoltPlugin/Components/JoltHitboxComponent.h>
 #include <JoltPlugin/Shapes/JoltShapeBoxComponent.h>
 #include <JoltPlugin/Shapes/JoltShapeCapsuleComponent.h>
 #include <JoltPlugin/Shapes/JoltShapeSphereComponent.h>
@@ -13,7 +13,7 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltBoneColliderComponent, 1, plComponentMode::Dynamic)
+PLASMA_BEGIN_COMPONENT_TYPE(plJoltHitboxComponent, 2, plComponentMode::Dynamic)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -41,10 +41,10 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltBoneColliderComponent, 1, plComponentMode::Dyn
 PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plJoltBoneColliderComponent::plJoltBoneColliderComponent() = default;
-plJoltBoneColliderComponent::~plJoltBoneColliderComponent() = default;
+plJoltHitboxComponent::plJoltHitboxComponent() = default;
+plJoltHitboxComponent::~plJoltHitboxComponent() = default;
 
-void plJoltBoneColliderComponent::SerializeComponent(plWorldWriter& inout_stream) const
+void plJoltHitboxComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
   SUPER::SerializeComponent(inout_stream);
   auto& s = inout_stream.GetStream();
@@ -53,24 +53,24 @@ void plJoltBoneColliderComponent::SerializeComponent(plWorldWriter& inout_stream
   s << m_UpdateThreshold;
 }
 
-void plJoltBoneColliderComponent::DeserializeComponent(plWorldReader& inout_stream)
+void plJoltHitboxComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
   auto& s = inout_stream.GetStream();
 
   s >> m_bQueryShapeOnly;
   s >> m_UpdateThreshold;
 }
 
-void plJoltBoneColliderComponent::OnSimulationStarted()
+void plJoltHitboxComponent::OnSimulationStarted()
 {
   SUPER::OnSimulationStarted();
 
   RecreatePhysicsShapes();
 }
 
-void plJoltBoneColliderComponent::OnDeactivated()
+void plJoltHitboxComponent::OnDeactivated()
 {
   if (m_uiObjectFilterID != plInvalidIndex)
   {
@@ -83,7 +83,7 @@ void plJoltBoneColliderComponent::OnDeactivated()
   SUPER::OnDeactivated();
 }
 
-void plJoltBoneColliderComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& ref_msg)
+void plJoltHitboxComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& ref_msg)
 {
   if (m_UpdateThreshold.IsPositive())
   {
@@ -115,7 +115,7 @@ void plJoltBoneColliderComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdat
   }
 }
 
-void plJoltBoneColliderComponent::RecreatePhysicsShapes()
+void plJoltHitboxComponent::RecreatePhysicsShapes()
 {
   plMsgQueryAnimationSkeleton msg;
   GetOwner()->SendMessage(msg);
@@ -126,10 +126,10 @@ void plJoltBoneColliderComponent::RecreatePhysicsShapes()
   DestroyPhysicsShapes();
   CreatePhysicsShapes(msg.m_hSkeleton);
 
-  m_LastUpdate.SetZero();
+  m_LastUpdate = plTime::Zero();
 }
 
-void plJoltBoneColliderComponent::CreatePhysicsShapes(const plSkeletonResourceHandle& hSkeleton)
+void plJoltHitboxComponent::CreatePhysicsShapes(const plSkeletonResourceHandle& hSkeleton)
 {
   plResourceLock<plSkeletonResource> pSkeleton(hSkeleton, plResourceAcquireMode::BlockTillLoaded);
 
@@ -197,14 +197,11 @@ void plJoltBoneColliderComponent::CreatePhysicsShapes(const plSkeletonResourceHa
     shape.m_qOffsetRot = qFinalBoneRot * geo.m_Transform.m_qRotation;
 
 
-    plJoltShapeComponent* pShape = nullptr;
-
     if (geo.m_Type == plSkeletonJointGeometryType::Sphere)
     {
       plJoltShapeSphereComponent* pShapeComp = nullptr;
       plJoltShapeSphereComponent::CreateComponent(pGO, pShapeComp);
       pShapeComp->SetRadius(geo.m_Transform.m_vScale.z);
-      pShape = pShapeComp;
     }
     else if (geo.m_Type == plSkeletonJointGeometryType::Box)
     {
@@ -219,7 +216,6 @@ void plJoltBoneColliderComponent::CreatePhysicsShapes(const plSkeletonResourceHa
       plJoltShapeBoxComponent* pShapeComp = nullptr;
       plJoltShapeBoxComponent::CreateComponent(pGO, pShapeComp);
       pShapeComp->SetHalfExtents(ext * 0.5f);
-      pShape = pShapeComp;
     }
     else if (geo.m_Type == plSkeletonJointGeometryType::Capsule)
     {
@@ -232,7 +228,6 @@ void plJoltBoneColliderComponent::CreatePhysicsShapes(const plSkeletonResourceHa
       plJoltShapeCapsuleComponent::CreateComponent(pGO, pShapeComp);
       pShapeComp->SetRadius(geo.m_Transform.m_vScale.z);
       pShapeComp->SetHeight(geo.m_Transform.m_vScale.x);
-      pShape = pShapeComp;
     }
     else
     {
@@ -241,7 +236,7 @@ void plJoltBoneColliderComponent::CreatePhysicsShapes(const plSkeletonResourceHa
   }
 }
 
-void plJoltBoneColliderComponent::DestroyPhysicsShapes()
+void plJoltHitboxComponent::DestroyPhysicsShapes()
 {
   for (auto& shape : m_Shapes)
   {
@@ -251,6 +246,4 @@ void plJoltBoneColliderComponent::DestroyPhysicsShapes()
   m_Shapes.Clear();
 }
 
-
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltBoneColliderComponent);
-

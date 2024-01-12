@@ -61,6 +61,12 @@ struct plPhysicsOverlapResultArray
   plHybridArray<plPhysicsOverlapResult, 16> m_Results;
 };
 
+struct plPhysicsTriangle
+{
+  plVec3 m_Vertices[3];
+  const plSurfaceResource* m_pSurface = nullptr;
+};
+
 /// \brief Flags for selecting which types of physics shapes should be included in things like overlap queries and raycasts.
 ///
 /// This is mainly for optimization purposes. It is up to the physics integration to support some or all of these flags.
@@ -73,7 +79,8 @@ PLASMA_DECLARE_FLAGS_WITH_DEFAULT(plUInt32, plPhysicsShapeType, 0xFFFFFFFF,
   Trigger,   ///< Trigger shapes
   Character, ///< Shapes associated with character controllers.
   Ragdoll,   ///< All shapes belonging to ragdolls.
-  Rope       ///< All shapes belonging to ropes.
+  Rope,      ///< All shapes belonging to ropes.
+  Cloth      ///< Soft-body shapes. Mainly for decorative purposes.
 );
 
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plPhysicsShapeType);
@@ -112,6 +119,11 @@ protected:
   }
 
 public:
+  /// \brief Searches for a collision layer with the given name and returns its index.
+  ///
+  /// Returns plInvalidIndex if no such collision layer exists.
+  virtual plUInt32 GetCollisionLayerByName(plStringView sName) const = 0;
+
   virtual bool Raycast(plPhysicsCastResult& out_result, const plVec3& vStart, const plVec3& vDir, float fDistance, const plPhysicsQueryParameters& params, plPhysicsHitCollection collection = plPhysicsHitCollection::Closest) const = 0;
 
   virtual bool RaycastAll(plPhysicsCastResultArray& out_results, const plVec3& vStart, const plVec3& vDir, float fDistance, const plPhysicsQueryParameters& params) const = 0;
@@ -129,6 +141,8 @@ public:
   virtual void QueryShapesInSphere(plPhysicsOverlapResultArray& out_results, float fSphereRadius, const plVec3& vPosition, const plPhysicsQueryParameters& params) const = 0;
 
   virtual plVec3 GetGravity() const = 0;
+
+  virtual void QueryGeometryInBox(const plPhysicsQueryParameters& params, plBoundingBox box, plDynamicArray<plPhysicsTriangle>& out_triangles) const = 0;
 
   //////////////////////////////////////////////////////////////////////////
   // ABSTRACTION HELPERS

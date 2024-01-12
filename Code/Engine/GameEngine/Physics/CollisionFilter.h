@@ -28,7 +28,7 @@ public:
   plUInt32 GetNamedGroupIndex(plUInt32 uiGroup) const;
 
   /// \brief Returns -1 if no group with the given name exists.
-  plInt32 GetFilterGroupByName(const char* szName) const;
+  plInt32 GetFilterGroupByName(plStringView sName) const;
 
   /// \brief Searches for a group without a name and returns the index or -1 if none found.
   plInt32 FindUnnamedGroup() const;

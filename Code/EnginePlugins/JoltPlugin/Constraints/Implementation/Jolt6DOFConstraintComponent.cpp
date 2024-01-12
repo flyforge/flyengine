@@ -27,12 +27,12 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJolt6DOFConstraintComponent, 1, plComponentMode::S
     PLASMA_ACCESSOR_PROPERTY("LinearDamping", GetLinearDamping, SetLinearDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_BITFLAGS_ACCESSOR_PROPERTY("FreeAngularAxis", plJoltAxis, GetFreeAngularAxis, SetFreeAngularAxis),
     PLASMA_ENUM_ACCESSOR_PROPERTY("SwingLimitMode", plJoltConstraintLimitMode, GetSwingLimitMode, SetSwingLimitMode),
-    PLASMA_ACCESSOR_PROPERTY("SwingLimit", GetSwingLimit, SetSwingLimit)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(175))),
+    PLASMA_ACCESSOR_PROPERTY("SwingLimit", GetSwingLimit, SetSwingLimit)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(175))),
     PLASMA_ACCESSOR_PROPERTY("SwingStiffness", GetSwingStiffness, SetSwingStiffness)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_ACCESSOR_PROPERTY("SwingDamping", GetSwingDamping, SetSwingDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_ENUM_ACCESSOR_PROPERTY("TwistLimitMode", plJoltConstraintLimitMode, GetTwistLimitMode, SetTwistLimitMode),
-    PLASMA_ACCESSOR_PROPERTY("LowerTwistLimit", GetLowerTwistLimit, SetLowerTwistLimit)->AddAttributes(new plClampValueAttribute(-plAngle::Degree(175), plAngle::Degree(175))),
-    PLASMA_ACCESSOR_PROPERTY("UpperTwistLimit", GetUpperTwistLimit, SetUpperTwistLimit)->AddAttributes(new plClampValueAttribute(-plAngle::Degree(175), plAngle::Degree(175))),
+    PLASMA_ACCESSOR_PROPERTY("LowerTwistLimit", GetLowerTwistLimit, SetLowerTwistLimit)->AddAttributes(new plClampValueAttribute(-plAngle::MakeFromDegree(175), plAngle::MakeFromDegree(175))),
+    PLASMA_ACCESSOR_PROPERTY("UpperTwistLimit", GetUpperTwistLimit, SetUpperTwistLimit)->AddAttributes(new plClampValueAttribute(-plAngle::MakeFromDegree(175), plAngle::MakeFromDegree(175))),
     PLASMA_ACCESSOR_PROPERTY("TwistStiffness", GetTwistStiffness, SetTwistStiffness)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_ACCESSOR_PROPERTY("TwistDamping", GetTwistDamping, SetTwistDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
   }
@@ -214,7 +214,7 @@ void plJolt6DOFConstraintComponent::ApplySettings()
 
   //  if (freeAxis.IsAnySet(plJoltAxis::Y | plJoltAxis::Z))
   //  {
-  //    const float fSwingLimit = plMath::Max(plAngle::Degree(0.5f).GetRadian(), m_SwingLimit.GetRadian());
+  //    const float fSwingLimit = plMath::Max(plAngle::MakeFromDegree(0.5f).GetRadian(), m_SwingLimit.GetRadian());
 
   //    PxJointLimitCone l(fSwingLimit, fSwingLimit);
 
@@ -260,10 +260,10 @@ void plJolt6DOFConstraintComponent::ApplySettings()
   //      plMath::Swap(l.lower, l.upper);
   //    }
 
-  //    if (plMath::IsEqual(l.lower, l.upper, plAngle::Degree(0.5f).GetRadian()))
+  //    if (plMath::IsEqual(l.lower, l.upper, plAngle::MakeFromDegree(0.5f).GetRadian()))
   //    {
-  //      l.lower -= plAngle::Degree(0.5f).GetRadian();
-  //      l.upper += plAngle::Degree(0.5f).GetRadian();
+  //      l.lower -= plAngle::MakeFromDegree(0.5f).GetRadian();
+  //      l.upper += plAngle::MakeFromDegree(0.5f).GetRadian();
   //    }
 
   //    if (m_TwistLimitMode == plJoltConstraintLimitMode::SoftLimit)

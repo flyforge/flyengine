@@ -116,9 +116,9 @@ protected:
   float m_fLinearStiffness = 0.0f;
   float m_fLinearDamping = 0.0f;
 
-  plVec2 m_vLinearRangeX = plVec2::ZeroVector();
-  plVec2 m_vLinearRangeY = plVec2::ZeroVector();
-  plVec2 m_vLinearRangeZ = plVec2::ZeroVector();
+  plVec2 m_vLinearRangeX = plVec2::MakeZero();
+  plVec2 m_vLinearRangeY = plVec2::MakeZero();
+  plVec2 m_vLinearRangeZ = plVec2::MakeZero();
 
   plBitflags<plJoltAxis> m_FreeAngularAxis;
 

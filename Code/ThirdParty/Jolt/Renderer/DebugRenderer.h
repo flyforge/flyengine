@@ -8,6 +8,11 @@
 	#error This file should only be included when JPH_DEBUG_RENDERER is defined
 #endif // !JPH_DEBUG_RENDERER
 
+#ifndef JPH_DEBUG_RENDERER_EXPORT
+	// By default export the debug renderer
+	#define JPH_DEBUG_RENDERER_EXPORT JPH_EXPORT
+#endif // !JPH_DEBUG_RENDERER_EXPORT
+
 #include <Jolt/Core/Color.h>
 #include <Jolt/Core/Reference.h>
 #include <Jolt/Core/HashCombine.h>
@@ -21,7 +26,7 @@ JPH_NAMESPACE_BEGIN
 class OrientedBox;
 
 /// Simple triangle renderer for debugging purposes.
-class DebugRenderer
+class JPH_DEBUG_RENDERER_EXPORT DebugRenderer
 {
 public:
 	JPH_OVERRIDE_NEW_DELETE
@@ -75,8 +80,8 @@ public:
 		Wireframe,						///< Draw as wireframe
 	};
 
-	/// Draw a single back face culled triangle without any shadows
-	virtual void						DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor) = 0;
+	/// Draw a single back face culled triangle
+	virtual void						DrawTriangle(RVec3Arg inV1, RVec3Arg inV2, RVec3Arg inV3, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::Off) = 0;
 
 	/// Draw a box
 	void								DrawBox(const AABox &inBox, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
@@ -86,7 +91,7 @@ public:
 	void								DrawSphere(RVec3Arg inCenter, float inRadius, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
 	void								DrawUnitSphere(RMat44Arg inMatrix, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
 
-	/// Draw a capsule with one half sphere at (0, -inHalfHeightOfCylinder, 0) and the other half sphere at (0, inHalfHeightOfCylinder, 0) and radius inRadius. 
+	/// Draw a capsule with one half sphere at (0, -inHalfHeightOfCylinder, 0) and the other half sphere at (0, inHalfHeightOfCylinder, 0) and radius inRadius.
 	/// The capsule will be transformed by inMatrix.
 	void								DrawCapsule(RMat44Arg inMatrix, float inHalfHeightOfCylinder, float inRadius, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
 
@@ -94,8 +99,8 @@ public:
 	/// The cylinder will be transformed by inMatrix
 	void								DrawCylinder(RMat44Arg inMatrix, float inHalfHeight, float inRadius, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
 
-	/// Draw a bottomless cone. 
-	/// @param inTop Top of cone, center of base is at inTop + inAxis. 
+	/// Draw a bottomless cone.
+	/// @param inTop Top of cone, center of base is at inTop + inAxis.
 	/// @param inAxis Height and direction of cone
 	/// @param inPerpendicular Perpendicular vector to inAxis.
 	/// @param inHalfAngle Specifies the cone angle in radians (angle measured between inAxis and cone surface).
@@ -105,7 +110,7 @@ public:
 	/// @param inDrawMode determines if we draw the geometry solid or in wireframe.
 	void								DrawOpenCone(RVec3Arg inTop, Vec3Arg inAxis, Vec3Arg inPerpendicular, float inHalfAngle, float inLength, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
 
-	/// Draws rotation limits as used by the SwingTwistConstraintPart.
+	/// Draws cone rotation limits as used by the SwingTwistConstraintPart.
 	/// @param inMatrix Matrix that transforms from constraint space to world space
 	/// @param inSwingYHalfAngle See SwingTwistConstraintPart
 	/// @param inSwingZHalfAngle See SwingTwistConstraintPart
@@ -113,13 +118,25 @@ public:
 	/// @param inColor Color to use for drawing the cone.
 	/// @param inCastShadow determins if this geometry should cast a shadow or not.
 	/// @param inDrawMode determines if we draw the geometry solid or in wireframe.
-	void								DrawSwingLimits(RMat44Arg inMatrix, float inSwingYHalfAngle, float inSwingZHalfAngle, float inEdgeLength, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
+	void								DrawSwingConeLimits(RMat44Arg inMatrix, float inSwingYHalfAngle, float inSwingZHalfAngle, float inEdgeLength, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
 
-	/// Draw a pie (part of a circle). 
+	/// Draws rotation limits as used by the SwingTwistConstraintPart.
+	/// @param inMatrix Matrix that transforms from constraint space to world space
+	/// @param inMinSwingYAngle See SwingTwistConstraintPart
+	/// @param inMaxSwingYAngle See SwingTwistConstraintPart
+	/// @param inMinSwingZAngle See SwingTwistConstraintPart
+	/// @param inMaxSwingZAngle See SwingTwistConstraintPart
+	/// @param inEdgeLength Size of the edge of the cone shape
+	/// @param inColor Color to use for drawing the cone.
+	/// @param inCastShadow determins if this geometry should cast a shadow or not.
+	/// @param inDrawMode determines if we draw the geometry solid or in wireframe.
+	void								DrawSwingPyramidLimits(RMat44Arg inMatrix, float inMinSwingYAngle, float inMaxSwingYAngle, float inMinSwingZAngle, float inMaxSwingZAngle, float inEdgeLength, ColorArg inColor, ECastShadow inCastShadow = ECastShadow::On, EDrawMode inDrawMode = EDrawMode::Solid);
+
+	/// Draw a pie (part of a circle).
 	/// @param inCenter The center of the circle.
 	/// @param inRadius Radius of the circle.
 	/// @param inNormal The plane normal in which the pie resides.
-	/// @param inAxis The axis that defines an angle of 0 radians. 
+	/// @param inAxis The axis that defines an angle of 0 radians.
 	/// @param inMinAngle The pie will be drawn between [inMinAngle, inMaxAngle] (in radians).
 	/// @param inMaxAngle The pie will be drawn between [inMinAngle, inMaxAngle] (in radians).
 	/// @param inColor Color to use for drawing the pie.
@@ -141,7 +158,7 @@ public:
 	};
 
 	/// A single triangle
-	class Triangle
+	class JPH_DEBUG_RENDERER_EXPORT Triangle
 	{
 	public:
 										Triangle() = default;
@@ -188,13 +205,13 @@ public:
 	/// Create a batch of triangles that can be drawn efficiently
 	virtual Batch						CreateTriangleBatch(const Triangle *inTriangles, int inTriangleCount) = 0;
 	virtual Batch						CreateTriangleBatch(const Vertex *inVertices, int inVertexCount, const uint32 *inIndices, int inIndexCount) = 0;
-	Batch								CreateTriangleBatch(const Array<Triangle> &inTriangles) { return CreateTriangleBatch(inTriangles.empty()? nullptr : &inTriangles[0], (int)inTriangles.size()); }
-	Batch								CreateTriangleBatch(const Array<Vertex> &inVertices, const Array<uint32> &inIndices) { return CreateTriangleBatch(inVertices.empty()? nullptr : &inVertices[0], (int)inVertices.size(), inIndices.empty()? nullptr : &inIndices[0], (int)inIndices.size()); }
+	Batch								CreateTriangleBatch(const Array<Triangle> &inTriangles) { return CreateTriangleBatch(inTriangles.empty()? nullptr : &inTriangles[0], int(inTriangles.size())); }
+	Batch								CreateTriangleBatch(const Array<Vertex> &inVertices, const Array<uint32> &inIndices) { return CreateTriangleBatch(inVertices.empty()? nullptr : &inVertices[0], int(inVertices.size()), inIndices.empty()? nullptr : &inIndices[0], int(inIndices.size())); }
 	Batch								CreateTriangleBatch(const VertexList &inVertices, const IndexedTriangleNoMaterialList &inTriangles);
 
 	/// Create a primitive for a convex shape using its support function
 	using SupportFunction = function<Vec3 (Vec3Arg inDirection)>;
-	Batch								CreateTriangleBatchForConvex(SupportFunction inGetSupport, int inLevel, AABox *outBounds = nullptr); 
+	Batch								CreateTriangleBatchForConvex(SupportFunction inGetSupport, int inLevel, AABox *outBounds = nullptr);
 	GeometryRef							CreateTriangleGeometryForConvex(SupportFunction inGetSupport);
 
 	/// Determines which polygons are culled
@@ -235,6 +252,9 @@ private:
 	void								Create8thSphereRecursive(Array<uint32> &ioIndices, Array<Vertex> &ioVertices, Vec3Arg inDir1, uint32 &ioIdx1, Vec3Arg inDir2, uint32 &ioIdx2, Vec3Arg inDir3, uint32 &ioIdx3, const Float2 &inUV, SupportFunction inGetSupport, int inLevel);
 	void								Create8thSphere(Array<uint32> &ioIndices, Array<Vertex> &ioVertices, Vec3Arg inDir1, Vec3Arg inDir2, Vec3Arg inDir3, const Float2 &inUV, SupportFunction inGetSupport, int inLevel);
 
+	/// Helper function for DrawSwingConeLimits and DrawSwingPyramidLimits
+	Geometry *							CreateSwingLimitGeometry(int inNumSegments, const Vec3 *inVertices);
+
 	// Predefined shapes
 	GeometryRef							mBox;
 	GeometryRef							mSphere;
@@ -244,18 +264,43 @@ private:
 	GeometryRef							mOpenCone;
 	GeometryRef							mCylinder;
 
-	struct SwingLimits
+	struct SwingConeLimits
 	{
-		bool							operator == (const SwingLimits &inRHS) const	{ return mSwingYHalfAngle == inRHS.mSwingYHalfAngle && mSwingZHalfAngle == inRHS.mSwingZHalfAngle; }
+		bool							operator == (const SwingConeLimits &inRHS) const
+		{
+			return mSwingYHalfAngle == inRHS.mSwingYHalfAngle
+				&& mSwingZHalfAngle == inRHS.mSwingZHalfAngle;
+		}
 
 		float							mSwingYHalfAngle;
 		float							mSwingZHalfAngle;
 	};
 
-	JPH_MAKE_HASH_STRUCT(SwingLimits, SwingLimitsHasher, t.mSwingYHalfAngle, t.mSwingZHalfAngle)
+	JPH_MAKE_HASH_STRUCT(SwingConeLimits, SwingConeLimitsHasher, t.mSwingYHalfAngle, t.mSwingZHalfAngle)
 
-	using SwingBatches = UnorderedMap<SwingLimits, GeometryRef, SwingLimitsHasher>;
-	SwingBatches						mSwingLimits;
+	using SwingConeBatches = UnorderedMap<SwingConeLimits, GeometryRef, SwingConeLimitsHasher>;
+	SwingConeBatches					mSwingConeLimits;
+
+	struct SwingPyramidLimits
+	{
+		bool							operator == (const SwingPyramidLimits &inRHS) const
+		{
+			return mMinSwingYAngle == inRHS.mMinSwingYAngle
+				&& mMaxSwingYAngle == inRHS.mMaxSwingYAngle
+				&& mMinSwingZAngle == inRHS.mMinSwingZAngle
+				&& mMaxSwingZAngle == inRHS.mMaxSwingZAngle;
+		}
+
+		float							mMinSwingYAngle;
+		float							mMaxSwingYAngle;
+		float							mMinSwingZAngle;
+		float							mMaxSwingZAngle;
+	};
+
+	JPH_MAKE_HASH_STRUCT(SwingPyramidLimits, SwingPyramidLimitsHasher, t.mMinSwingYAngle, t.mMaxSwingYAngle, t.mMinSwingZAngle, t.mMaxSwingZAngle)
+
+	using SwingPyramidBatches = UnorderedMap<SwingPyramidLimits, GeometryRef, SwingPyramidLimitsHasher>;
+	SwingPyramidBatches					mSwingPyramidLimits;
 
 	using PieBatces = UnorderedMap<float, GeometryRef>;
 	PieBatces							mPieLimits;

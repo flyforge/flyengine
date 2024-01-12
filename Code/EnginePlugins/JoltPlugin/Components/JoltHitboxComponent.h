@@ -9,11 +9,19 @@ struct plMsgAnimationPoseUpdated;
 
 using plSkeletonResourceHandle = plTypedResourceHandle<class plSkeletonResource>;
 
-using plJoltBoneColliderComponentManager = plComponentManager<class plJoltBoneColliderComponent, plBlockStorageType::Compact>;
+using plJoltHitboxComponentManager = plComponentManager<class plJoltHitboxComponent, plBlockStorageType::Compact>;
 
-class PLASMA_JOLTPLUGIN_DLL plJoltBoneColliderComponent : public plComponent
+/// \brief Adds physics shapes to an animated character for hit detection.
+///
+/// Attach this component to an animated mesh, to give it a physical representation.
+/// The shapes for each bone are defined through the skeleton.
+///
+/// Typically these shapes are "query shapes" only, meaning they don't participate in the physical simulation,
+/// so they won't push other objects aside.
+/// They can only be detected through raycasts and scene queries (assuming those queries have the plPhysicsShapeType::Query flag set).
+class PLASMA_JOLTPLUGIN_DLL plJoltHitboxComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltBoneColliderComponent, plComponent, plJoltBoneColliderComponentManager);
+  PLASMA_DECLARE_COMPONENT_TYPE(plJoltHitboxComponent, plComponent, plJoltHitboxComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -27,17 +35,22 @@ protected:
   virtual void OnDeactivated() override;
 
   //////////////////////////////////////////////////////////////////////////
-  // plJoltBoneColliderComponent
+  // plJoltHitboxComponent
 
 public:
-  plJoltBoneColliderComponent();
-  ~plJoltBoneColliderComponent();
+  plJoltHitboxComponent();
+  ~plJoltHitboxComponent();
 
+  /// \brief The same object filter ID is assigned to all hit shapes.
   plUInt32 GetObjectFilterID() const { return m_uiObjectFilterID; } // [ scriptable ]
 
+  /// \brief If true, shapes can only be detected with raycasts and scene queries. If false, they will be kinematic objects in the simulation and push other rigid bodies aside.
   bool m_bQueryShapeOnly = true; // [ property ]
-  plTime m_UpdateThreshold;      // [ property ]
 
+  /// \brief At which interval to update the hitbox transforms. Set to zero for full updates every frame.
+  plTime m_UpdateThreshold; // [ property ]
+
+  /// \brief Updates the shape transforms to conform with the new pose, but only if the update threshold was exceeded.
   void OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& ref_msg); // [ msg handler ]
 
   /// \brief Destroys the current shape objects and creates new ones.

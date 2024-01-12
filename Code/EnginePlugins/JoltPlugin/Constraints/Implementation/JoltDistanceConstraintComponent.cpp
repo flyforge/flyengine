@@ -61,8 +61,7 @@ void plJoltDistanceConstraintComponent::ApplySettings()
 
   JPH::DistanceConstraint* pConstraint = static_cast<JPH::DistanceConstraint*>(m_pConstraint);
 
-  pConstraint->SetFrequency(m_fFrequency);
-  pConstraint->SetDamping(m_fDamping);
+  pConstraint->SetLimitsSpringSettings(JPH::SpringSettings(JPH::ESpringMode::FrequencyAndDamping, m_fFrequency, m_fDamping));
 
   const float fMin = plMath::Max(0.0f, m_fMinDistance);
   const float fMax = plMath::Max(fMin, m_fMaxDistance);
@@ -107,7 +106,7 @@ void plJoltDistanceConstraintComponent::SerializeComponent(plWorldWriter& inout_
 void plJoltDistanceConstraintComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 
@@ -129,8 +128,9 @@ void plJoltDistanceConstraintComponent::CreateContstraintType(JPH::Body* pBody0,
   opt.mSpace = JPH::EConstraintSpace::LocalToBodyCOM;
   opt.mPoint1 = inv1 * plJoltConversionUtils::ToVec3(m_LocalFrameA.m_vPosition);
   opt.mPoint2 = inv2 * plJoltConversionUtils::ToVec3(m_LocalFrameB.m_vPosition);
-  opt.mDamping = m_fDamping;
-  opt.mFrequency = m_fFrequency;
+  opt.mLimitsSpringSettings.mMode = JPH::ESpringMode::FrequencyAndDamping;
+  opt.mLimitsSpringSettings.mFrequency = m_fFrequency;
+  opt.mLimitsSpringSettings.mDamping = m_fDamping;
 
   m_pConstraint = opt.Create(*pBody0, *pBody1);
 }

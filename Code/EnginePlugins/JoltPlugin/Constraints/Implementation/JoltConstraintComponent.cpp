@@ -11,7 +11,7 @@
 #include <JoltPlugin/Utilities/JoltConversionUtils.h>
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltConstraintComponent, 1)
+PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltConstraintComponent, 2)
 {
   PLASMA_BEGIN_PROPERTIES
   {
@@ -93,7 +93,6 @@ void plJoltConstraintComponent::BreakConstraint()
 
     if (iBodies > 0)
     {
-      plLog::Info("Waking up {} bodies", iBodies);
       pModule->GetJoltSystem()->GetBodyInterface().ActivateBodies(bodies, iBodies);
     }
   }
@@ -198,8 +197,6 @@ void plJoltConstraintComponent::SerializeComponent(plWorldWriter& inout_stream) 
 
   auto& s = inout_stream.GetStream();
 
-  // s << m_fBreakForce;
-  // s << m_fBreakTorque;
   s << m_bPairCollision;
 
   inout_stream.WriteGameObjectHandle(m_hActorA);
@@ -209,6 +206,9 @@ void plJoltConstraintComponent::SerializeComponent(plWorldWriter& inout_stream) 
   s << m_LocalFrameB;
 
   inout_stream.WriteGameObjectHandle(m_hActorBAnchor);
+
+  s << m_fBreakForce;
+  s << m_fBreakTorque;
 }
 
 void plJoltConstraintComponent::DeserializeComponent(plWorldReader& inout_stream)
@@ -216,11 +216,8 @@ void plJoltConstraintComponent::DeserializeComponent(plWorldReader& inout_stream
   SUPER::DeserializeComponent(inout_stream);
   const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
-
   auto& s = inout_stream.GetStream();
 
-  // s >> m_fBreakForce;
-  // s >> m_fBreakTorque;
   s >> m_bPairCollision;
 
   m_hActorA = inout_stream.ReadGameObjectHandle();
@@ -230,6 +227,12 @@ void plJoltConstraintComponent::DeserializeComponent(plWorldReader& inout_stream
   s >> m_LocalFrameB;
 
   m_hActorBAnchor = inout_stream.ReadGameObjectHandle();
+
+  if (uiVersion >= 2)
+  {
+    s >> m_fBreakForce;
+    s >> m_fBreakTorque;
+  }
 }
 
 void plJoltConstraintComponent::SetParentActorReference(const char* szReference)
@@ -311,7 +314,7 @@ void plJoltConstraintComponent::ApplySettings()
   }
 }
 
-void plJoltConstraintComponent::OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& msg)
+void plJoltConstraintComponent::OnJoltMsgDisconnectConstraints(plJoltMsgDisconnectConstraints& ref_msg)
 {
   BreakConstraint();
 }
@@ -362,6 +365,7 @@ plResult plJoltConstraintComponent::FindParentBody(plUInt32& out_uiJoltBodyID, p
     }
     else
     {
+      PLASMA_ASSERT_DEBUG(pObject != nullptr, "pRbComp and pObject should always be valid together");
       if (GetUserFlag(0) == true)
       {
         plTransform globalFrame = m_LocalFrameA;

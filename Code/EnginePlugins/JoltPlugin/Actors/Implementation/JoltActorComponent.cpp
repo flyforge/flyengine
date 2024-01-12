@@ -56,7 +56,7 @@ void plJoltActorComponent::SerializeComponent(plWorldWriter& inout_stream) const
 void plJoltActorComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 
@@ -87,7 +87,11 @@ void plJoltActorComponent::OnDeactivated()
     auto* pSystem = pModule->GetJoltSystem();
     auto* pBodies = &pSystem->GetBodyInterface();
 
-    pBodies->RemoveBody(bodyId);
+    if (pBodies->IsAdded(bodyId))
+    {
+      pBodies->RemoveBody(bodyId);
+    }
+
     pBodies->DestroyBody(bodyId);
     m_uiJoltBodyID = JPH::BodyID::cInvalidBodyID;
   }

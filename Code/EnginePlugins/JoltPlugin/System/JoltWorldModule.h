@@ -8,11 +8,13 @@
 #include <JoltPlugin/JoltPluginDLL.h>
 #include <JoltPlugin/System/JoltCollisionFiltering.h>
 #include <JoltPlugin/Utilities/JoltUserData.h>
+#include <RendererCore/Meshes/DynamicMeshBufferResource.h>
 
 class plJoltCharacterControllerComponent;
 class plJoltContactListener;
 class plJoltRagdollComponent;
 class plJoltRopeComponent;
+class plView;
 
 namespace JPH
 {
@@ -51,6 +53,9 @@ public:
 
   //////////////////////////////////////////////////////////////////////////
   // plPhysicsWorldModuleInterface
+  //
+
+  virtual plUInt32 GetCollisionLayerByName(plStringView sName) const override;
 
   virtual bool Raycast(plPhysicsCastResult& out_result, const plVec3& vStart, const plVec3& vDir, float fDistance, const plPhysicsQueryParameters& params, plPhysicsHitCollection collection = plPhysicsHitCollection::Closest) const override;
 
@@ -68,6 +73,8 @@ public:
 
   virtual void QueryShapesInSphere(plPhysicsOverlapResultArray& out_results, float fSphereRadius, const plVec3& vPosition, const plPhysicsQueryParameters& params) const override;
 
+  virtual void QueryGeometryInBox(const plPhysicsQueryParameters& params, plBoundingBox box, plDynamicArray<plPhysicsTriangle>& out_triangles) const override;
+
   virtual void AddStaticCollisionBox(plGameObject* pObject, plVec3 vBoxSize) override;
 
   virtual void AddFixedJointComponent(plGameObject* pOwner, const plPhysicsWorldModuleInterface::FixedJointConfig& cfg) override;
@@ -79,7 +86,14 @@ public:
   const plMap<plJoltRopeComponent*, plInt32>& GetActiveRopes() const { return m_ActiveRopes; }
   plArrayPtr<plJoltRagdollComponent*> GetRagdollsPutToSleep() { return m_RagdollsPutToSleep.GetArrayPtr(); }
 
-  void QueueBodyToAdd(JPH::Body* pBody, bool bAwake);
+  /// \brief Returns a uint32 that can be queried for completion with IsBodyStillQueuedToAdd().
+  plUInt32 QueueBodyToAdd(JPH::Body* pBody, bool bAwake);
+
+  /// \brief Checks whether the last QueueBodyToAdd() has been processed already, or not.
+  ///
+  /// Bodies that aren't added to Jolt yet, may not get locked (they are not in the broadphase).
+  /// If this is still the case, skip operations that wouldn't have an effect anyway.
+  bool IsBodyStillQueuedToAdd(plUInt32 uiBodiesAddCounter) const { return uiBodiesAddCounter == m_uiBodiesAddCounter; }
 
   JPH::GroupFilter* GetGroupFilter() const { return m_pGroupFilter; }
   JPH::GroupFilter* GetGroupFilterIgnoreSame() const { return m_pGroupFilterIgnoreSame; }
@@ -99,6 +113,7 @@ public:
 
   plSet<plComponentHandle> m_BreakableConstraints;
 
+
 private:
   bool SweepTest(plPhysicsCastResult& out_Result, const JPH::Shape& shape, const JPH::Mat44& transform, const plVec3& vDir, float fDistance, const plPhysicsQueryParameters& params, plPhysicsHitCollection collection) const;
   bool OverlapTest(const JPH::Shape& shape, const JPH::Mat44& transform, const plPhysicsQueryParameters& params) const;
@@ -116,6 +131,46 @@ private:
   void UpdateConstraints();
 
   plTime CalculateUpdateSteps();
+
+  void DebugDrawGeometry();
+  void DebugDrawGeometry(const plVec3& vCenter, float fRadius, plPhysicsShapeType::Enum shapeType, const plTag& tag);
+
+  struct DebugGeo
+  {
+    plGameObjectHandle m_hObject;
+    plUInt32 m_uiLastSeenCounter = 0;
+    bool m_bMutableGeometry = false;
+  };
+
+  struct DebugGeoShape
+  {
+    plDynamicMeshBufferResourceHandle m_hMesh;
+    plBoundingBox m_Bounds;
+    plUInt32 m_uiLastSeenCounter = 0;
+  };
+
+  struct DebugBodyShapeKey
+  {
+    plUInt32 m_uiBodyID;
+    const void* m_pShapePtr;
+
+    bool operator<(const DebugBodyShapeKey& rhs) const
+    {
+      if (m_uiBodyID == rhs.m_uiBodyID)
+        return m_pShapePtr < rhs.m_pShapePtr;
+
+      return m_uiBodyID < rhs.m_uiBodyID;
+    }
+
+    bool operator==(const DebugBodyShapeKey& rhs) const
+    {
+      return (m_uiBodyID == rhs.m_uiBodyID) && (m_pShapePtr == rhs.m_pShapePtr);
+    }
+  };
+
+  plUInt32 m_uiDebugGeoLastSeenCounter = 0;
+  plMap<DebugBodyShapeKey, DebugGeo> m_DebugDrawComponents;
+  plMap<const void*, DebugGeoShape> m_DebugDrawShapeGeo;
 
   plUInt32 m_uiNextObjectFilterID = 1;
   plDynamicArray<plUInt32> m_FreeObjectFilterIDs;
@@ -146,11 +201,11 @@ private:
   plMap<plJoltRopeComponent*, plInt32> m_ActiveRopes;
   plDynamicArray<plJoltRagdollComponent*> m_RagdollsPutToSleep;
 
-
   JPH::GroupFilter* m_pGroupFilter = nullptr;
   JPH::GroupFilter* m_pGroupFilterIgnoreSame = nullptr;
 
   plUInt32 m_uiBodiesAddedSinceOptimize = 100;
+  plUInt32 m_uiBodiesAddCounter = 1; // increased every time bodies get added, can be used to check whether a queued body is still queued
   plDeque<plUInt32> m_BodiesToAdd;
   plDeque<plUInt32> m_BodiesToAddAndActivate;
 

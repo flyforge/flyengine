@@ -28,6 +28,7 @@
 	<file>plJoltRagdollComponent.svg</file>
 	<file>plJoltSwingTwistConstraintComponent.svg</file>
 	<file>plJoltConeConstraintComponent.svg</file>
+    <file>plJoltClothSheetComponent.svg</file>
   </qresource>
 </RCC>
 

@@ -42,10 +42,10 @@ namespace plJoltCollisionFiltering
     switch (broadphase)
     {
       case plJoltBroadphaseLayer::Static:
-        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope);
+        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Cloth);
 
       case plJoltBroadphaseLayer::Dynamic:
-        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Trigger) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope);
+        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Trigger) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Cloth);
 
       case plJoltBroadphaseLayer::Query:
         // query shapes never interact with anything in the simulation
@@ -57,15 +57,18 @@ namespace plJoltCollisionFiltering
         return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character);
 
       case plJoltBroadphaseLayer::Character:
-        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Trigger) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character);
+        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Trigger) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Cloth);
 
       case plJoltBroadphaseLayer::Ragdoll:
-        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope);
+        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Cloth);
 
       case plJoltBroadphaseLayer::Rope:
         return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope);
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      case plJoltBroadphaseLayer::Cloth:
+        return PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Static) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Dynamic) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character) | PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll);
+
+        PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
     }
 
     return 0;
@@ -109,6 +112,9 @@ const char* plJoltObjectToBroadphaseLayer::GetBroadPhaseLayerName(JPH::BroadPhas
     case Rope:
       return "Rope";
 
+    case Cloth:
+      return "Cloth";
+
       PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 }
@@ -122,6 +128,7 @@ static_assert(plPhysicsShapeType::Trigger == PLASMA_BIT((plUInt32)plJoltBroadpha
 static_assert(plPhysicsShapeType::Character == PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Character));
 static_assert(plPhysicsShapeType::Ragdoll == PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Ragdoll));
 static_assert(plPhysicsShapeType::Rope == PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Rope));
+static_assert(plPhysicsShapeType::Cloth == PLASMA_BIT((plUInt32)plJoltBroadphaseLayer::Cloth));
 static_assert(plPhysicsShapeType::Count == (plUInt32)plJoltBroadphaseLayer::ENUM_COUNT);
 
 bool plJoltObjectLayerFilter::ShouldCollide(JPH::ObjectLayer inLayer) const
@@ -131,7 +138,7 @@ bool plJoltObjectLayerFilter::ShouldCollide(JPH::ObjectLayer inLayer) const
 
 bool plJoltObjectVsBroadPhaseLayerFilter::ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const
 {
-  const plUInt32 uiMask1 = PLASMA_BIT(inLayer1 >> 8);
+  const plUInt32 uiMask1 = static_cast<plUInt32>(PLASMA_BIT(inLayer1 >> 8));
   const plUInt32 uiMask2 = plJoltCollisionFiltering::GetBroadphaseCollisionMask(static_cast<plJoltBroadphaseLayer>((plUInt8)inLayer2));
 
   return (uiMask1 & uiMask2) != 0;
@@ -144,4 +151,3 @@ bool plJoltObjectLayerPairFilter::ShouldCollide(JPH::ObjectLayer inObject1, JPH:
 
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltCollisionFiltering);
-

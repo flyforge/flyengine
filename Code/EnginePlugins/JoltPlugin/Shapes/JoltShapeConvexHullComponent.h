@@ -5,6 +5,10 @@
 
 using plJoltShapeConvexHullComponentManager = plComponentManager<class plJoltShapeConvexHullComponent, plBlockStorageType::FreeList>;
 
+/// \brief Adds a Jolt convex hull shape to a Jolt actor.
+///
+/// A convex hull is a simple convex shape. It can be used for simulating dynamic rigid bodies.
+/// Often the convex hull of a complex mesh is used to approximate the mesh and make it possible to use it as a dynamic actor.
 class PLASMA_JOLTPLUGIN_DLL plJoltShapeConvexHullComponent : public plJoltShapeComponent
 {
   PLASMA_DECLARE_COMPONENT_TYPE(plJoltShapeConvexHullComponent, plJoltShapeComponent, plJoltShapeConvexHullComponentManager);
@@ -15,7 +19,6 @@ class PLASMA_JOLTPLUGIN_DLL plJoltShapeConvexHullComponent : public plJoltShapeC
 public:
   virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
   virtual void DeserializeComponent(plWorldReader& inout_stream) override;
-
 
   //////////////////////////////////////////////////////////////////////////
   // plJoltShapeComponent

@@ -74,15 +74,15 @@ plUInt32 plCollisionFilterConfig::GetNamedGroupIndex(plUInt32 uiGroup) const
   return -1;
 }
 
-plInt32 plCollisionFilterConfig::GetFilterGroupByName(const char* szName) const
+plInt32 plCollisionFilterConfig::GetFilterGroupByName(plStringView sName) const
 {
   for (plUInt32 i = 0; i < 32; ++i)
   {
-    if (plStringUtils::IsEqual_NoCase(m_GroupNames[i], szName))
+    if (sName.IsEqual_NoCase(m_GroupNames[i]))
       return i;
   }
 
-  return -1;
+  return plInvalidIndex;
 }
 
 plInt32 plCollisionFilterConfig::FindUnnamedGroup() const

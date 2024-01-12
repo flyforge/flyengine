@@ -549,7 +549,7 @@ void plJoltContactEvents::OnContact_SlideReaction(const JPH::Body& body0, const 
     vAvgNormal.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
 
     // an object is only 'sliding' if it moves at roughly 90 degree along another object
-    constexpr float slideAngle = 0.17f; // plMath ::Cos(plAngle::Degree(80));
+    constexpr float slideAngle = 0.17f; // plMath ::Cos(plAngle::MakeFromDegree(80));
 
     if (plMath::Abs(vAvgNormal.Dot(vRelativeVelocityDir)) < slideAngle)
     {

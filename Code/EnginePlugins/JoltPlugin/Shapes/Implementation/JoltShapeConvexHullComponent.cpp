@@ -15,7 +15,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(plJoltShapeConvexHullComponent, 1, plComponentMode::
 {
   PLASMA_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Convex")),
+    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Convex", plDependencyFlags::Package)),
   }
   PLASMA_END_PROPERTIES;
 }
@@ -37,7 +37,7 @@ void plJoltShapeConvexHullComponent::SerializeComponent(plWorldWriter& inout_str
 void plJoltShapeConvexHullComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
 

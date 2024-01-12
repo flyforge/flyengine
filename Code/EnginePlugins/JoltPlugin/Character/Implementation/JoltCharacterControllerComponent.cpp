@@ -69,7 +69,7 @@ void plJoltCharacterControllerComponent::SerializeComponent(plWorldWriter& inout
 void plJoltCharacterControllerComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
   auto& s = inout_stream.GetStream();
 
   s >> m_DebugFlags;
@@ -189,75 +189,6 @@ void plJoltCharacterControllerComponent::RawMoveWithVelocity(const plVec3& vVelo
   GetOwner()->SetGlobalPosition(plJoltConversionUtils::ToSimdVec3(m_pCharacter->GetPosition()));
 }
 
-// float plJoltCharacterControllerComponent::ClampedRawMoveIntoDirection(const plVec3& vDirection)
-//{
-//   float fMaxDistance = vDirection.GetLength();
-//
-//   if (fMaxDistance <= 0.0f)
-//     return 0.0f;
-//
-//   const plVec3 vDirNormal = vDirection / fMaxDistance;
-//   const plVec3 vShapePos = plJoltConversionUtils::ToVec3(GetJoltCharacter()->GetCenterOfMassTransform().GetTranslation());
-//
-//   plHybridArray<ContactPoint, 32> contacts;
-//   CollectCastContacts(contacts, GetJoltCharacter()->GetShape(), vShapePos, plQuat::IdentityQuaternion(), vDirection /*+ vDirNormal*/);
-//
-//   plDebugRenderer::DrawCross(GetWorld(), vShapePos, 0.2f, plColor::GreenYellow);
-//
-//
-//   const float fPadding = GetJoltCharacter()->GetCharacterPadding();
-//   float fMoveDistance = fMaxDistance;
-//
-//   if (!contacts.IsEmpty())
-//   {
-//     // float fFraction = 1.0f;
-//
-//     plQuat rot;
-//     plUInt32 uiClosestContact = 0;
-//     float fClosestContact = 1.1f;
-//
-//     for (plUInt32 c = 0; c < contacts.GetCount(); ++c)
-//     {
-//       if (contacts[c].m_fCastFraction < fClosestContact)
-//       {
-//         uiClosestContact = c;
-//         fClosestContact = contacts[c].m_fCastFraction;
-//       }
-//     }
-//
-//     const ContactPoint& cont = contacts[uiClosestContact];
-//     const plAngle alpha = plMath::ACos(cont.m_vContactNormal.Dot(-vDirNormal));
-//     const float sinAlpha = plMath::Sin(alpha);
-//     const float gegenKath = fPadding;
-//     const float fHypoth = gegenKath / sinAlpha;
-//
-//     // for (const ContactPoint& contact : contacts)
-//     //{
-//     //   // ignore contacts that we are moving away from or parallel to
-//     //   if (contact.m_vContactNormal.Dot(vDirNormal) >= 0.0f)
-//     //   {
-//     //     rot.SetShortestRotation(plVec3::UnitXAxis(), contact.m_vContactNormal);
-//     //     plDebugRenderer::DrawCylinder(GetWorld(), 0.0f, 0.05f, 0.1f, plColor::ZeroColor(), plColor::DimGrey, plTransform(contact.m_vPosition, rot));
-//     //     continue;
-//     //   }
-//
-//     //  fFraction = plMath::Min(contact.m_fCastFraction, fFraction);
-//     fMoveDistance = plMath::Min((fMaxDistance /*+ 1.0f*/) * cont.m_fCastFraction, fMaxDistance) - fHypoth;
-//
-//     //  {
-//     //    rot.SetShortestRotation(plVec3::UnitXAxis(), contact.m_vContactNormal);
-//     //    plDebugRenderer::DrawCylinder(GetWorld(), 0.0f, 0.05f, 0.1f, plColor::ZeroColor(), plColor::Black, plTransform(contact.m_vPosition, rot));
-//     //  }
-//     //}
-//   }
-//
-//   if (fMoveDistance > 0.0)
-//   {
-//     RawMoveIntoDirection(vDirNormal * fMoveDistance, false);
-//   }
-//
-//   return fMaxDistance;
-// }
 
 void plJoltCharacterControllerComponent::RawMoveIntoDirection(const plVec3& vDirection)
 {
@@ -441,102 +372,6 @@ void plJoltCharacterControllerComponent::SpawnContactInteraction(const ContactPo
   }
 }
 
-// plBitflags<plJoltCharacterControllerComponent::ShapeContacts> plJoltCharacterControllerComponent::ClassifyContacts(const plDynamicArray<ContactPoint>& contacts, plAngle maxSlopeAngle, const plVec3& vCenterPos, plUInt32* out_pBestGroundContact)
-//{
-//   plBitflags<ShapeContacts> flags;
-//
-//   if (contacts.IsEmpty())
-//     return flags;
-//
-//   const float fMaxSlopeAngleCos = plMath::Cos(maxSlopeAngle);
-//
-//   float fFlattestContactCos = -2.0f;    // overall flattest contact point
-//   float fClosestContactFraction = 2.0f; // closest contact point that is flat enough
-//
-//   if (out_pBestGroundContact)
-//     *out_pBestGroundContact = plInvalidIndex;
-//
-//   for (plUInt32 idx = 0; idx < contacts.GetCount(); ++idx)
-//   {
-//     const auto& contact = contacts[idx];
-//
-//     const float fContactAngleCos = contact.m_vSurfaceNormal.Dot(plVec3(0, 0, 1));
-//
-//     if (contact.m_vPosition.z > vCenterPos.z) // contact above
-//     {
-//       if (fContactAngleCos < -fMaxSlopeAngleCos)
-//       {
-//         // TODO: have dedicated max angle value
-//         flags.Add(ShapeContacts::Ceiling);
-//       }
-//     }
-//     else // contact below
-//     {
-//       if (fContactAngleCos > fMaxSlopeAngleCos) // is contact flat enough to stand on?
-//       {
-//         flags.Add(ShapeContacts::FlatGround);
-//
-//         if (out_pBestGroundContact && contact.m_fCastFraction < fClosestContactFraction) // contact closer than previous one?
-//         {
-//           fClosestContactFraction = contact.m_fCastFraction;
-//           *out_pBestGroundContact = idx;
-//         }
-//       }
-//       else
-//       {
-//         flags.Add(ShapeContacts::SteepGround);
-//
-//         if (out_pBestGroundContact && fContactAngleCos > fFlattestContactCos) // is contact flatter than previous one?
-//         {
-//           fFlattestContactCos = fContactAngleCos;
-//
-//           if (!flags.IsSet(ShapeContacts::FlatGround))
-//           {
-//             *out_pBestGroundContact = idx;
-//           }
-//         }
-//       }
-//     }
-//   }
-//
-//   if (flags.IsSet(ShapeContacts::FlatGround))
-//   {
-//     flags.Remove(ShapeContacts::SteepGround);
-//   }
-//
-//   if (flags.IsSet(ShapeContacts::SteepGround))
-//   {
-//     return flags;
-//   }
-//
-//   return flags;
-// }
-//
-// plUInt32 plJoltCharacterControllerComponent::FindFlattestContact(const plDynamicArray<ContactPoint>& contacts, const plVec3& vNormal, ContactFilter filter)
-//{
-//   plUInt32 uiBestIdx = plInvalidIndex;
-//
-//   float fFlattestContactCos = -2.0f; // overall flattest contact point
-//
-//   for (plUInt32 idx = 0; idx < contacts.GetCount(); ++idx)
-//   {
-//     const auto& contact = contacts[idx];
-//
-//     if (filter.IsValid() && !filter(contact))
-//       continue;
-//
-//     const float fContactAngleCos = contact.m_vSurfaceNormal.Dot(plVec3(0, 0, 1));
-//
-//     if (fContactAngleCos > fFlattestContactCos) // is contact flatter than previous one?
-//     {
-//       fFlattestContactCos = fContactAngleCos;
-//       uiBestIdx = idx;
-//     }
-//   }
-//
-//   return uiBestIdx;
-// }
-
 void plJoltCharacterControllerComponent::VisualizeContact(const ContactPoint& contact, const plColor& color) const
 {
   plTransform trans;
@@ -560,9 +395,9 @@ void plJoltCharacterControllerComponent::Update(plTime deltaTime)
   m_fUpdateTimeDelta = deltaTime.AsFloatInSeconds();
   m_fInverseUpdateTimeDelta = static_cast<float>(1.0 / deltaTime.GetSeconds());
 
-  MovePresenceBody(deltaTime);
-
   UpdateCharacter();
+
+  MovePresenceBody(deltaTime);
 }
 
 void plJoltCharacterControllerComponent::CreatePresenceBody()
@@ -572,7 +407,6 @@ void plJoltCharacterControllerComponent::CreatePresenceBody()
 
   auto* pSystem = pModule->GetJoltSystem();
   auto* pBodies = &pSystem->GetBodyInterface();
-  auto* pMaterial = plJoltCore::GetDefaultMaterial();
 
   JPH::BodyCreationSettings bodyCfg;
   bodyCfg.SetShape(m_pCharacter->GetShape());
@@ -594,7 +428,7 @@ void plJoltCharacterControllerComponent::CreatePresenceBody()
   JPH::Body* pBody = pBodies->CreateBody(bodyCfg);
   m_uiPresenceBodyID = pBody->GetID().GetIndexAndSequenceNumber();
 
-  pModule->QueueBodyToAdd(pBody, true);
+  m_uiPresenceBodyAddCounter = pModule->QueueBodyToAdd(pBody, true);
 }
 
 void plJoltCharacterControllerComponent::RemovePresenceBody()
@@ -631,6 +465,10 @@ void plJoltCharacterControllerComponent::MovePresenceBody(plTime deltaTime)
     return;
 
   plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
+
+  if (pModule->IsBodyStillQueuedToAdd(m_uiPresenceBodyAddCounter))
+    return;
+
   auto* pSystem = pModule->GetJoltSystem();
   auto* pBodies = &pSystem->GetBodyInterface();
 
@@ -643,4 +481,3 @@ void plJoltCharacterControllerComponent::MovePresenceBody(plTime deltaTime)
 
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Character_Implementation_JoltCharacterControllerComponent);
-

@@ -10,7 +10,7 @@
 class plJoltVisColMeshComponentManager : public plComponentManager<class plJoltVisColMeshComponent, plBlockStorageType::Compact>
 {
 public:
-  typedef plComponentManager<plJoltVisColMeshComponent, plBlockStorageType::Compact> SUPER;
+  using SUPER = plComponentManager<plJoltVisColMeshComponent, plBlockStorageType::Compact>;
 
   plJoltVisColMeshComponentManager(plWorld* pWorld)
     : SUPER(pWorld)
@@ -31,6 +31,13 @@ protected:
   virtual void Deinitialize() override;
 };
 
+/// \brief Visualizes a Jolt collision mesh that is attached to the same game object.
+///
+/// When attached to a game object where a plJoltStaticActorComponent or a plJoltShapeConvexHullComponent is attached as well,
+/// this component will retrieve the triangle mesh and turn it into a render mesh.
+///
+/// This is used for displaying the collision mesh of a single object.
+/// It doesn't work for non-mesh shape types (sphere, box, capsule).
 class PLASMA_JOLTPLUGIN_DLL plJoltVisColMeshComponent : public plRenderComponent
 {
   PLASMA_DECLARE_COMPONENT_TYPE(plJoltVisColMeshComponent, plRenderComponent, plJoltVisColMeshComponentManager);
@@ -45,13 +52,11 @@ public:
 protected:
   virtual void Initialize() override;
 
-
   //////////////////////////////////////////////////////////////////////////
   // plRenderComponent
 
 public:
   virtual plResult GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg) override;
-
 
   //////////////////////////////////////////////////////////////////////////
   // plJoltVisColMeshComponent
@@ -63,6 +68,7 @@ public:
   void SetMeshFile(const char* szFile); // [ property ]
   const char* GetMeshFile() const;      // [ property ]
 
+  /// \brief If this is set directly, the mesh is not taken from the sibling components.
   void SetMesh(const plJoltMeshResourceHandle& hMesh);
   PLASMA_ALWAYS_INLINE const plJoltMeshResourceHandle& GetMesh() const { return m_hCollisionMesh; }
 

@@ -152,6 +152,13 @@ SamplerState $prop0_AutoSampler;
     string %Type { "float" }
     string %DefaultValue { "1" }
   }
+
+  InputPin %WorldPosition
+  {
+    string %Type { "float3" }
+    string %Color { "Indigo" }
+    string %DefaultValue { "G.Input.WorldPosition" }
+  }
   
   InputPin %WorldNormal
   {
@@ -165,7 +172,7 @@ SamplerState $prop0_AutoSampler;
   {
     string %Type { "float4" }
     unsigned_int8 %Color { 107, 70, 24 }
-    string %Inline { "SampleTexture3Way($prop0, $prop0_AutoSampler, $in0, G.Input.WorldPosition, $prop2)" }
+    string %Inline { "SampleTexture3Way($prop0, $prop0_AutoSampler, $in1, $in0, $prop2)" }
   }
 }
 

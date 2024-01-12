@@ -16,6 +16,12 @@ namespace JPH
 PLASMA_DECLARE_FLAGS(plUInt32, plJoltCharacterDebugFlags, PrintState, VisShape, VisContacts, VisCasts, VisGroundContact, VisFootCheck);
 PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltCharacterDebugFlags);
 
+/// \brief Base class for character controllers (CC).
+///
+/// This class provides general functionality for building a character controller.
+/// It tries not to implement things that are game specific.
+/// It is assumed that most games implement their own character controller to be able to build very specific behavior.
+/// The plJoltDefaultCharacterComponent is an example implementation that shows how this can be achieved on top of this class.
 class PLASMA_JOLTPLUGIN_DLL plJoltCharacterControllerComponent : public plComponent
 {
   PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltCharacterControllerComponent, plComponent);
@@ -38,6 +44,7 @@ public:
   plJoltCharacterControllerComponent();
   ~plJoltCharacterControllerComponent();
 
+  /// \brief Describes a point where the CC collided with other geometry.
   struct ContactPoint
   {
     float m_fCastFraction = 0.0f;
@@ -48,21 +55,25 @@ public:
     JPH::SubShapeID m_SubShapeID;
   };
 
-  /// \brief Checks what the ground state would be at the given position. If there is any contact, returns the most interesting contact point.
-  // GroundState DetermineGroundState(ContactPoint& out_Contact, const plVec3& vFootPosition, float fAllowedStepUp, float fAllowedStepDown, float fCylinderRadius) const;
-
-  /// \brief Checks whether the character could stand at the target position with the desired height without intersecting other geometry
-  // bool TestShapeOverlap(const plVec3& vGlobalFootPos, float fNewShapeHeight) const;
-
-  /// \brief Checks whether the character can be resized to the new height without intersecting other geometry.
-  // bool CanResize(float fNewShapeHeight) const;
-
+  /// \brief The CC will move through the given physics body.
+  ///
+  /// Currently only one such object can be set. This is mainly used to ignore an object that the player is currently carrying,
+  /// so that there are no unintended collisions.
+  ///
+  /// Call ClearObjectToIgnore() to re-enable collisions.
   void SetObjectToIgnore(plUInt32 uiObjectFilterID);
+
+  /// \see SetObjectToIgnore()
   void ClearObjectToIgnore();
 
-public:                                               // [ properties ]
-  plUInt8 m_uiCollisionLayer = 0;                     // [ property ]
-  plUInt8 m_uiPresenceCollisionLayer = 0;             // [ property ]
+public:
+  /// The collision layer determines with which other actors this actor collides. \see plJoltActorComponent
+  plUInt8 m_uiCollisionLayer = 0; // [ property ]
+
+  /// In case a 'presence shape' is used, this defines which geometry the presence bodies collides with.
+  plUInt8 m_uiPresenceCollisionLayer = 0; // [ property ]
+
+  /// What aspects of the CC to visualize.
   plBitflags<plJoltCharacterDebugFlags> m_DebugFlags; // [ property ]
 
   /// \brief The maximum slope that the character can walk up.
@@ -77,10 +88,10 @@ public:                                               // [ properties ]
   void SetStrength(float fStrength);                // [ property ]
   float GetStrength() const { return m_fStrength; } // [ property ]
 
-private:                                            // [ properties ]
+private:
   plAngle m_MaxClimbingSlope = plAngle::Degree(45); // [ property ]
-  float m_fMass = 70.0f;                            // [ property ]
-  float m_fStrength = 500.0f;                       // [ property ]
+  float m_fMass = 70.0f;                                    // [ property ]
+  float m_fStrength = 500.0f;                               // [ property ]
 
 protected:
   /// \brief Returns the time delta to use for updating the character. This may differ from the world delta.
@@ -96,10 +107,10 @@ protected:
   /// The shape may not get applied to the character, in case this is used by things like TryResize and the next shape is
   /// determined to not fit.
   virtual JPH::Ref<JPH::Shape> MakeNextCharacterShape() = 0;
-  
+
   /// \brief Returns the radius of the shape. This never changes at runtime.
   virtual float GetShapeRadius() const = 0;
-  
+
   /// \brief Called up to once per frame, but potentially less often, if physics updates were skipped due to high framerates.
   ///
   /// All shape modifications and moves should only be executed during this step.
@@ -108,6 +119,7 @@ protected:
 
   /// \brief Gives access to the internally used JPH::CharacterVirtual.
   JPH::CharacterVirtual* GetJoltCharacter() { return m_pCharacter; }
+  const JPH::CharacterVirtual* GetJoltCharacter() const { return m_pCharacter; }
 
   /// \brief Attempts to change the character shape to the new one. Fails if the new shape overlaps with surrounding geometry.
   plResult TryChangeShape(JPH::Shape* pNewShape);
@@ -124,6 +136,9 @@ protected:
   /// \brief Teleports the character to the destination position, even if it would get stuck there.
   void TeleportToPosition(const plVec3& vGlobalFootPos);
 
+  /// \brief If the CC is slightly above the ground, this will move it down so that it touches the ground.
+  ///
+  /// If within the max distance no ground contact is found, the function does nothing and returns false.
   bool StickToGround(float fMaxDist);
 
   /// \brief Gathers all contact points that are found by sweeping the shape along a direction
@@ -147,44 +162,10 @@ protected:
   /// hFallbackSurface is used, if no other surface could be determined from the contact point.
   void SpawnContactInteraction(const ContactPoint& contact, const plHashedString& sSurfaceInteraction, plSurfaceResourceHandle hFallbackSurface, const plVec3& vInteractionNormal = plVec3(0, 0, 1));
 
-  struct ShapeContacts
-  {
-    using StorageType = plUInt8;
-
-    enum Enum
-    {
-      Default = 0,
-      FlatGround = PLASMA_BIT(0),
-      SteepGround = PLASMA_BIT(1),
-      Ceiling = PLASMA_BIT(2),
-    };
-
-    struct Bits
-    {
-      StorageType FlatGround : 1;
-      StorageType SteepGround : 1;
-      StorageType Ceiling : 1;
-    };
-  };
-
-  /// \brief Looks at all the contact points and determines what kind of contacts they are.
-  ///
-  /// maxSlopeAngle is used to determine whether there are steep or flat contacts.
-  /// vCenterPos (and -maxSlopeAngle) are used to determine whether there are ground/ceiling contacts.
-  /// If out_pBestGroundContact != nullptr, an index to some contact point may be returned.
-  /// * if there is any flat enough contact, the closest one of those is returned
-  /// * if there are no flat contacts, the flattest of the steep contacts is returned
-  /// * otherwise an invalid index
-  // static plBitflags<ShapeContacts> ClassifyContacts(const plDynamicArray<ContactPoint>& contacts, plAngle maxSlopeAngle, const plVec3& vCenterPos, plUInt32* out_pBestGroundContact);
-
-  using ContactFilter = plDelegate<bool(const ContactPoint&)>;
-
-  /// \brief Returns the index or plInvalidIndex of the contact point whose normal is closest to vNormal.
-  ///
-  /// \param filter allows to ignore contact points by other criteria, such as position.
-  // static plUInt32 FindFlattestContact(const plDynamicArray<ContactPoint>& contacts, const plVec3& vNormal, ContactFilter filter);
-
+  /// \brief Debug draws the contact point.
   void VisualizeContact(const ContactPoint& contact, const plColor& color) const;
+
+  /// \brief Debug draws all the contact points.
   void VisualizeContacts(const plDynamicArray<ContactPoint>& contacts, const plColor& color) const;
 
 private:
@@ -201,6 +182,7 @@ private:
   void MovePresenceBody(plTime deltaTime);
 
   plUInt32 m_uiPresenceBodyID = plInvalidIndex;
+  plUInt32 m_uiPresenceBodyAddCounter = 0;
 
   plJoltBodyFilter m_BodyFilter;
   plUInt32 m_uiUserDataIndex = plInvalidIndex;

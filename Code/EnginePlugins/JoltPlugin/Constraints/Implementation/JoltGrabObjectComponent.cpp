@@ -12,11 +12,12 @@
 #include <RendererCore/Debug/DebugRenderer.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltGrabObjectComponent, 1, plComponentMode::Static)
+PLASMA_BEGIN_COMPONENT_TYPE(plJoltGrabObjectComponent, 2, plComponentMode::Static)
 {
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("MaxGrabPointDistance", m_fMaxGrabPointDistance)->AddAttributes(new plDefaultValueAttribute(2.0f)),
+    PLASMA_MEMBER_PROPERTY("CastRadius", m_fCastRadius)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
     PLASMA_MEMBER_PROPERTY("SpringStiffness", m_fSpringStiffness)->AddAttributes(new plDefaultValueAttribute(2.0f), new plClampValueAttribute(1.0f, 60.0f)),
     PLASMA_MEMBER_PROPERTY("SpringDamping", m_fSpringDamping)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
@@ -61,6 +62,7 @@ void plJoltGrabObjectComponent::SerializeComponent(plWorldWriter& inout_stream) 
   s << m_fSpringStiffness;
   s << m_fSpringDamping;
   s << m_fMaxGrabPointDistance;
+  s << m_fCastRadius;
   s << m_uiCollisionLayer;
   s << m_fAllowGrabAnyObjectWithSize;
 
@@ -78,6 +80,10 @@ void plJoltGrabObjectComponent::DeserializeComponent(plWorldReader& inout_stream
   s >> m_fSpringStiffness;
   s >> m_fSpringDamping;
   s >> m_fMaxGrabPointDistance;
+  if (uiVersion >= 2)
+  {
+    s >> m_fCastRadius;
+  }
   s >> m_uiCollisionLayer;
   s >> m_fAllowGrabAnyObjectWithSize;
 
@@ -99,25 +105,36 @@ bool plJoltGrabObjectComponent::FindNearbyObject(plGameObject*& out_pObject, plT
   queryParam.m_uiCollisionLayer = m_uiCollisionLayer;
   queryParam.m_ShapeTypes = plPhysicsShapeType::Static | plPhysicsShapeType::Dynamic;
 
-  if (!pPhysicsModule->Raycast(hit, pOwner->GetGlobalPosition(), pOwner->GetGlobalDirForwards().GetNormalized(), m_fMaxGrabPointDistance * 5.0f, queryParam))
-    return false;
-
-  if (hit.m_fDistance > m_fMaxGrabPointDistance)
-    return false;
+  if (m_fCastRadius > 0.0f)
+  {
+    if (!pPhysicsModule->SweepTestSphere(hit, m_fCastRadius, pOwner->GetGlobalPosition(), pOwner->GetGlobalDirForwards().GetNormalized(), m_fMaxGrabPointDistance * 5.0f, queryParam))
+      return false;
+  }
+  else
+  {
+    if (!pPhysicsModule->Raycast(hit, pOwner->GetGlobalPosition(), pOwner->GetGlobalDirForwards().GetNormalized(), m_fMaxGrabPointDistance * 5.0f, queryParam))
+      return false;
+  }  
 
   const plGameObject* pActorObj = nullptr;
   if (!GetWorld()->TryGetObject(hit.m_hActorObject, pActorObj))
     return false;
 
+  // If we hit a non-kinematic dynamic actor try to find a grab point.
+  // If we don't have an dynamic actor or it is kinematic still report the hit so it can be used for other interactions like buttons etc.
   const plJoltDynamicActorComponent* pActorComp = nullptr;
-  if (!pActorObj->TryGetComponentOfBaseType(pActorComp))
-    return false;
+  if (pActorObj->TryGetComponentOfBaseType(pActorComp) && !pActorComp->GetKinematic())
+  {
+    if (DetermineGrabPoint(pActorComp, out_localGrabPoint).Failed())
+      return false;
+  }
+  else
+  {
+    if (hit.m_fDistance > m_fMaxGrabPointDistance)
+      return false;
 
-  if (pActorComp->GetKinematic())
-    return false;
-
-  if (DetermineGrabPoint(pActorComp, out_localGrabPoint).Failed())
-    return false;
+    out_localGrabPoint = plTransform::IdentityTransform();
+  }
 
   out_pObject = const_cast<plGameObject*>(pActorObj);
   return true;
@@ -239,7 +256,7 @@ void plJoltGrabObjectComponent::ReleaseGrabbedObject()
     JPH::BodyLockWrite bodyLock(pModule->GetJoltSystem()->GetBodyLockInterface(), JPH::BodyID(pGrabbedActor->GetJoltBodyID()));
     if (bodyLock.Succeeded())
     {
-      bodyLock.GetBody().GetMotionProperties()->SetInverseMass(m_fGrabbedActorMass);
+      bodyLock.GetBody().GetMotionProperties()->SetInverseMass(m_fGrabbedActorInverseMass);
       // TODO: this needs to be set as well : bodyLock.GetBody().GetMotionProperties()->SetInverseInertia(m_fGrabbedActorMass);
       bodyLock.GetBody().GetMotionProperties()->SetGravityFactor(m_fGrabbedActorGravity);
 
@@ -330,13 +347,13 @@ plResult plJoltGrabObjectComponent::DetermineGrabPoint(const plComponent* pActor
       grabPoints[1].m_vLocalPosition.Set(+halfExt.x, 0, 0);
       grabPoints[1].m_qLocalRotation.SetShortestRotation(plVec3::UnitXAxis(), -plVec3::UnitXAxis());
       grabPoints[2].m_vLocalPosition.Set(0, -halfExt.y, 0);
-      grabPoints[2].m_qLocalRotation.SetShortestRotation(plVec3::UnitXAxis(), plVec3::UnitYAxis());
+      grabPoints[2].m_qLocalRotation .SetShortestRotation(plVec3::UnitXAxis(), plVec3::UnitYAxis());
       grabPoints[3].m_vLocalPosition.Set(0, +halfExt.y, 0);
       grabPoints[3].m_qLocalRotation.SetShortestRotation(plVec3::UnitXAxis(), -plVec3::UnitYAxis());
       // grabPoints[4].m_vLocalPosition.Set(0, 0, -halfExt.z);
-      // grabPoints[4].m_qLocalRotation.SetShortestRotation(plVec3::UnitXAxis(), plVec3::UnitZAxis());
+      // grabPoints[4].m_qLocalRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), plVec3::MakeAxisZ());
       // grabPoints[5].m_vLocalPosition.Set(0, 0, +halfExt.z);
-      // grabPoints[5].m_qLocalRotation.SetShortestRotation(plVec3::UnitXAxis(), -plVec3::UnitZAxis());
+      // grabPoints[5].m_qLocalRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), -plVec3::MakeAxisZ());
 
       for (plUInt32 i = 0; i < grabPoints.GetCount(); ++i)
       {
@@ -395,7 +412,7 @@ void plJoltGrabObjectComponent::CreateJoint(plJoltDynamicActorComponent* pParent
   auto pBody0 = bodyLock.GetBody(0);
   auto pBody1 = bodyLock.GetBody(1);
 
-  m_fGrabbedActorMass = pBody1->GetMotionProperties()->GetInverseMass();
+  m_fGrabbedActorInverseMass = pBody1->GetMotionProperties()->GetInverseMass();
   m_fGrabbedActorGravity = pBody1->GetMotionProperties()->GetGravityFactor();
 
   pBody1->GetMotionProperties()->SetInverseMass(10.0f);
@@ -426,14 +443,15 @@ void plJoltGrabObjectComponent::CreateJoint(plJoltDynamicActorComponent* pParent
 
     for (int i = 0; i < 6; ++i)
     {
-      opt.mMotorSettings[JPH::SixDOFConstraintSettings::EAxis::TranslationX + i].mDamping = m_fSpringDamping;
-      opt.mMotorSettings[JPH::SixDOFConstraintSettings::EAxis::TranslationX + i].mFrequency = m_fSpringStiffness;
+      opt.mMotorSettings[JPH::SixDOFConstraintSettings::EAxis::TranslationX + i].mSpringSettings.mMode = JPH::ESpringMode::FrequencyAndDamping;
+      opt.mMotorSettings[JPH::SixDOFConstraintSettings::EAxis::TranslationX + i].mSpringSettings.mDamping = m_fSpringDamping;
+      opt.mMotorSettings[JPH::SixDOFConstraintSettings::EAxis::TranslationX + i].mSpringSettings.mFrequency = m_fSpringStiffness;
     }
   }
 
   // plTransform tAnchor = m_ChildAnchorLocal;
   // tAnchor.m_vPosition = tAnchor.m_vPosition.CompMul(pChild->GetOwner()->GetGlobalScaling());
-  // pJoint->SetActors(pParent->GetOwner()->GetHandle(), plTransform::IdentityTransform(), pChild->GetOwner()->GetHandle(), tAnchor);
+  // pJoint->SetActors(pParent->GetOwner()->GetHandle(), plTransform::MakeIdentity(), pChild->GetOwner()->GetHandle(), tAnchor);
 
   m_pConstraint = static_cast<JPH::SixDOFConstraint*>(opt.Create(*bodyLock.GetBody(0), *bodyLock.GetBody(1)));
   m_pConstraint->AddRef();
@@ -444,6 +462,7 @@ void plJoltGrabObjectComponent::CreateJoint(plJoltDynamicActorComponent* pParent
   }
 
   pModule->GetJoltSystem()->AddConstraint(m_pConstraint);
+  pModule->GetJoltSystem()->GetBodyInterfaceNoLock().ActivateBodies(bodies, 2);
 }
 
 void plJoltGrabObjectComponent::DetectDistanceViolation(plJoltDynamicActorComponent* pGrabbedActor)
@@ -451,12 +470,12 @@ void plJoltGrabObjectComponent::DetectDistanceViolation(plJoltDynamicActorCompon
   if (m_fBreakDistance <= 0)
     return;
 
-  plGameObject* pAnchor = nullptr;
-  if (!GetWorld()->TryGetObject(m_hAttachTo, pAnchor))
+  plGameObject* pJointObject = nullptr;
+  if (!GetWorld()->TryGetObject(m_hAttachTo, pJointObject))
     return;
 
   const plVec3 vAnchorPos = pGrabbedActor->GetOwner()->GetGlobalTransform().TransformPosition(m_ChildAnchorLocal.m_vPosition);
-  const plVec3 vJointPos = pAnchor->GetGlobalPosition();
+  const plVec3 vJointPos = pJointObject->GetGlobalPosition();
   const float fDistance = (vAnchorPos - vJointPos).GetLength();
 
   if (fDistance < m_fBreakDistance)
@@ -559,4 +578,3 @@ void plJoltGrabObjectComponent::Update()
 
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltGrabObjectComponent);
-

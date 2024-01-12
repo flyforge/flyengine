@@ -46,7 +46,7 @@ void plJoltShapeCylinderComponent::SerializeComponent(plWorldWriter& inout_strea
 void plJoltShapeCylinderComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
 
   auto& s = inout_stream.GetStream();
@@ -56,7 +56,8 @@ void plJoltShapeCylinderComponent::DeserializeComponent(plWorldReader& inout_str
 
 void plJoltShapeCylinderComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingBox(plVec3(-m_fRadius, -m_fRadius, -m_fHeight * 0.5f), plVec3(m_fRadius, m_fRadius, m_fHeight * 0.5f)), plInvalidSpatialDataCategory);
+  plBoundingBox box = plBoundingBox(plVec3(-m_fRadius, -m_fRadius, -m_fHeight * 0.5f), plVec3(m_fRadius, m_fRadius, m_fHeight * 0.5f));
+  msg.AddBounds(plBoundingBoxSphere(box), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeCylinderComponent::SetRadius(float f)

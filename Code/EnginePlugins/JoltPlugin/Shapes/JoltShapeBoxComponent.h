@@ -4,6 +4,7 @@
 
 using plJoltShapeBoxComponentManager = plComponentManager<class plJoltShapeBoxComponent, plBlockStorageType::FreeList>;
 
+/// \brief Adds a Jolt box shape to a Jolt actor.
 class PLASMA_JOLTPLUGIN_DLL plJoltShapeBoxComponent : public plJoltShapeComponent
 {
   PLASMA_DECLARE_COMPONENT_TYPE(plJoltShapeBoxComponent, plJoltShapeComponent, plJoltShapeBoxComponentManager);
@@ -14,7 +15,6 @@ class PLASMA_JOLTPLUGIN_DLL plJoltShapeBoxComponent : public plJoltShapeComponen
 public:
   virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
   virtual void DeserializeComponent(plWorldReader& inout_stream) override;
-
 
   //////////////////////////////////////////////////////////////////////////
   // plJoltShapeComponent

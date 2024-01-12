@@ -46,7 +46,7 @@ void plJoltShapeBoxComponent::SerializeComponent(plWorldWriter& inout_stream) co
 void plJoltShapeBoxComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
   auto& s = inout_stream.GetStream();
   s >> m_vHalfExtents;
@@ -54,7 +54,7 @@ void plJoltShapeBoxComponent::DeserializeComponent(plWorldReader& inout_stream)
 
 void plJoltShapeBoxComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingBox(-m_vHalfExtents, m_vHalfExtents), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingBoxSphere(plBoundingBox(-m_vHalfExtents, m_vHalfExtents)), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeBoxComponent::ExtractGeometry(plMsgExtractGeometry& ref_msg) const

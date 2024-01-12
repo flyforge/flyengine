@@ -209,6 +209,8 @@ void plCustomMeshComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
 
 void plCustomMeshComponent::OnActivated()
 {
+  SUPER::OnActivated();
+
   if (false)
   {
     plGeometry geo;

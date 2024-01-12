@@ -22,6 +22,7 @@ enum class plJoltBroadphaseLayer : plUInt8
   Character,
   Ragdoll,
   Rope,
+  Cloth,
 
   ENUM_COUNT
 };

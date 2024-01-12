@@ -1,5 +1,7 @@
 #include <JoltPlugin/JoltPluginPCH.h>
 
+#include <Foundation/Types/TagRegistry.h>
+#include <GameEngine/Physics/CollisionFilter.h>
 #include <JoltPlugin/Actors/JoltDynamicActorComponent.h>
 #include <JoltPlugin/Actors/JoltQueryShapeActorComponent.h>
 #include <JoltPlugin/Actors/JoltStaticActorComponent.h>
@@ -13,6 +15,10 @@
 #include <JoltPlugin/System/JoltCore.h>
 #include <JoltPlugin/System/JoltDebugRenderer.h>
 #include <JoltPlugin/System/JoltWorldModule.h>
+#include <Physics/Collision/CollisionCollectorImpl.h>
+#include <Physics/Collision/Shape/Shape.h>
+#include <RendererCore/Meshes/CustomMeshComponent.h>
+#include <RendererCore/Meshes/DynamicMeshBufferResource.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
@@ -31,11 +37,16 @@ plCVarBool cvar_JoltDebugDrawConstraintFrames("Jolt.DebugDraw.ConstraintFrames",
 plCVarBool cvar_JoltDebugDrawBodies("Jolt.DebugDraw.Bodies", false, plCVarFlags::None, "Visualize physics bodies.");
 #endif
 
+plCVarBool cvar_JoltVisualizeGeometry("Jolt.Visualize.Geometry", false, plCVarFlags::None, "Renders collision geometry.");
+plCVarBool cvar_JoltVisualizeGeometryExclusive("Jolt.Visualize.Exclusive", false, plCVarFlags::Save, "Hides regularly rendered geometry.");
+plCVarFloat cvar_JoltVisualizeDistance("Jolt.Visualize.Distance", 30.0f, plCVarFlags::Save, "How far away objects to visualize.");
+
+
 plJoltWorldModule::plJoltWorldModule(plWorld* pWorld)
   : plPhysicsWorldModuleInterface(pWorld)
 //, m_FreeObjectFilterIDs(plJolt::GetSingleton()->GetAllocator()) // could use a proxy allocator to bin those
 {
-  m_pSimulateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "", plMakeDelegate(&plJoltWorldModule::Simulate, this));
+  m_pSimulateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "Jolt::Simulate", plMakeDelegate(&plJoltWorldModule::Simulate, this));
   m_pSimulateTask->ConfigureTask("Jolt Simulate", plTaskNesting::Maybe);
 }
 
@@ -309,7 +320,7 @@ void plJoltWorldModule::OnSimulationStarted()
   UpdateSettingsCfg();
   ApplySettingsCfg();
 
-  m_AccumulatedTimeSinceUpdate.SetZero();
+  m_AccumulatedTimeSinceUpdate = plTime::Zero();
 }
 
 plUInt32 plJoltWorldModule::CreateObjectFilterID()
@@ -380,6 +391,11 @@ void plJoltWorldModule::SetGravity(const plVec3& vObjectGravity, const plVec3& v
   }
 }
 
+plUInt32 plJoltWorldModule::GetCollisionLayerByName(plStringView sName) const
+{
+  return plJoltCollisionFiltering::GetCollisionFilterConfig().GetFilterGroupByName(sName);
+}
+
 void plJoltWorldModule::AddStaticCollisionBox(plGameObject* pObject, plVec3 vBoxSize)
 {
   plJoltStaticActorComponent* pActor = nullptr;
@@ -397,12 +413,14 @@ void plJoltWorldModule::AddFixedJointComponent(plGameObject* pOwner, const plPhy
   pConstraint->SetActors(cfg.m_hActorA, cfg.m_LocalFrameA, cfg.m_hActorB, cfg.m_LocalFrameB);
 }
 
-void plJoltWorldModule::QueueBodyToAdd(JPH::Body* pBody, bool bAwake)
+plUInt32 plJoltWorldModule::QueueBodyToAdd(JPH::Body* pBody, bool bAwake)
 {
   if (bAwake)
     m_BodiesToAddAndActivate.PushBack(pBody->GetID().GetIndexAndSequenceNumber());
   else
     m_BodiesToAdd.PushBack(pBody->GetID().GetIndexAndSequenceNumber());
+
+  return m_uiBodiesAddCounter;
 }
 
 void plJoltWorldModule::EnableJoinedBodiesCollisions(plUInt32 uiObjectFilterID1, plUInt32 uiObjectFilterID2, bool bEnable)
@@ -505,6 +523,7 @@ void plJoltWorldModule::StartSimulation(const plWorldModule::UpdateContext& cont
     }
 
     m_BodiesToAdd.Clear();
+    ++m_uiBodiesAddCounter;
   }
 
   if (!m_BodiesToAddAndActivate.IsEmpty())
@@ -528,6 +547,7 @@ void plJoltWorldModule::StartSimulation(const plWorldModule::UpdateContext& cont
     }
 
     m_BodiesToAddAndActivate.Clear();
+    ++m_uiBodiesAddCounter;
   }
 
   if (m_uiBodiesAddedSinceOptimize > 128)
@@ -620,6 +640,8 @@ void plJoltWorldModule::FetchResults(const plWorldModule::UpdateContext& context
   CheckBreakableConstraints();
 
   FreeUserDataAfterSimulationStep();
+
+  DebugDrawGeometry();
 }
 
 plTime plJoltWorldModule::CalculateUpdateSteps()
@@ -634,7 +656,7 @@ plTime plJoltWorldModule::CalculateUpdateSteps()
     m_UpdateSteps.PushBack(m_AccumulatedTimeSinceUpdate);
 
     tSimulatedTimeStep = m_AccumulatedTimeSinceUpdate;
-    m_AccumulatedTimeSinceUpdate.SetZero();
+    m_AccumulatedTimeSinceUpdate = plTime::Zero();
   }
   else if (m_Settings.m_SteppingMode == plJoltSteppingMode::Fixed)
   {
@@ -703,14 +725,14 @@ void plJoltWorldModule::Simulate()
       // do a single Update call with multiple sub-steps, if possible
       // this saves a bit of time compared to just doing multiple Update calls
 
-      m_pSystem->Update((uiSteps * tDelta).AsFloatInSeconds(), uiSteps, 1, m_pTempAllocator.get(), plJoltCore::GetJoltJobSystem());
+      m_pSystem->Update((uiSteps * tDelta).AsFloatInSeconds(), uiSteps, m_pTempAllocator.get(), plJoltCore::GetJoltJobSystem());
 
       tDelta = m_UpdateSteps[i];
       uiSteps = 1;
     }
   }
 
-  m_pSystem->Update((uiSteps * tDelta).AsFloatInSeconds(), uiSteps, 1, m_pTempAllocator.get(), plJoltCore::GetJoltJobSystem());
+  m_pSystem->Update((uiSteps * tDelta).AsFloatInSeconds(), uiSteps, m_pTempAllocator.get(), plJoltCore::GetJoltJobSystem());
 }
 
 void plJoltWorldModule::UpdateSettingsCfg()
@@ -751,5 +773,273 @@ void plJoltWorldModule::UpdateConstraints()
   m_RequireUpdate.Clear();
 }
 
+plAtomicInteger32 s_iColMeshVisGeoCounter;
+
+struct DebugVis
+{
+  const char* m_szMaterial = nullptr;
+  plColor m_Color;
+};
+
+const char* szMatSolid = "{ ecf3cc38-3d23-4f35-a34d-ab056d5ff6a5 }";       // Data/Base/Materials/Common/PhysicsColliders.plMaterialAsset
+const char* szMatTransparent = "{ 7e842c33-ff80-437b-9a44-21536c9cdc99 }"; // Data/Base/Materials/Common/PhysicsCollidersTransparent.plMaterialAsset
+const char* szMatTwoSided = "{ f2d14696-2040-4a46-a957-fd6ad75cee32 }";    // Data/Base/Materials/Common/PhysicsCollidersSoft.plMaterialAsset
+
+static const DebugVis s_Vis[plPhysicsShapeType::Count][2] =
+  {
+    // Static
+    {
+      {szMatSolid, plColor::LightSkyBlue}, // non-kinematic
+      {szMatSolid, plColor::Red}           // kinematic
+    },
+
+    // Dynamic
+    {
+      {szMatSolid, plColor::Gold},      // non-kinematic
+      {szMatSolid, plColor::DodgerBlue} // kinematic
+    },
+
+    // Query
+    {
+      {szMatTransparent, plColor::GreenYellow.WithAlpha(0.5f)}, // non-kinematic
+      {szMatTransparent, plColor::GreenYellow.WithAlpha(0.5f)}  // kinematic
+    },
+
+    // Trigger
+    {
+      {szMatTransparent, plColor::Purple.WithAlpha(0.3f)}, // non-kinematic
+      {szMatTransparent, plColor::Purple.WithAlpha(0.3f)}  // kinematic
+    },
+
+    // Character
+    {
+      {szMatTransparent, plColor::DarkTurquoise.WithAlpha(0.5f)}, // non-kinematic
+      {szMatTransparent, plColor::DarkTurquoise.WithAlpha(0.5f)}  // kinematic
+    },
+
+    // Ragdoll
+    {
+      {szMatSolid, plColor::DeepPink}, // non-kinematic
+      {szMatSolid, plColor::DeepPink}  // kinematic
+    },
+
+    // Rope
+    {
+      {szMatSolid, plColor::MediumVioletRed}, // non-kinematic
+      {szMatSolid, plColor::MediumVioletRed}  // kinematic
+    },
+
+    // Cloth
+    {
+      {szMatTwoSided, plColor::Crimson}, // non-kinematic
+      {szMatTwoSided, plColor::Red}      // kinematic
+    },
+};
+
+void plJoltWorldModule::DebugDrawGeometry()
+{
+  plView* pView = plRenderWorld::GetViewByUsageHint(plCameraUsageHint::MainView, plCameraUsageHint::EditorView, GetWorld());
+
+  if (pView == nullptr)
+    return;
+
+  ++m_uiDebugGeoLastSeenCounter;
+
+  const plTag& tag = plTagRegistry::GetGlobalRegistry().RegisterTag("PhysicsCollider");
+
+  if (cvar_JoltVisualizeGeometry && cvar_JoltVisualizeGeometryExclusive)
+  {
+    // deactivate other geometry rendering
+    pView->m_IncludeTags.Set(tag);
+  }
+  else
+  {
+    pView->m_IncludeTags.Remove(tag);
+  }
+
+  if (cvar_JoltVisualizeGeometry)
+  {
+    const plVec3 vCenterPos = pView->GetCamera()->GetCenterPosition();
+
+    DebugDrawGeometry(vCenterPos, cvar_JoltVisualizeDistance, plPhysicsShapeType::Static, tag);
+    DebugDrawGeometry(vCenterPos, cvar_JoltVisualizeDistance, plPhysicsShapeType::Dynamic, tag);
+    DebugDrawGeometry(vCenterPos, cvar_JoltVisualizeDistance, plPhysicsShapeType::Query, tag);
+    DebugDrawGeometry(vCenterPos, cvar_JoltVisualizeDistance, plPhysicsShapeType::Ragdoll, tag);
+    DebugDrawGeometry(vCenterPos, cvar_JoltVisualizeDistance, plPhysicsShapeType::Trigger, tag);
+    DebugDrawGeometry(vCenterPos, cvar_JoltVisualizeDistance, plPhysicsShapeType::Rope, tag);
+    DebugDrawGeometry(vCenterPos, cvar_JoltVisualizeDistance, plPhysicsShapeType::Cloth, tag);
+  }
+
+  for (auto it = m_DebugDrawComponents.GetIterator(); it.IsValid();)
+  {
+    if (it.Value().m_uiLastSeenCounter < m_uiDebugGeoLastSeenCounter)
+    {
+      GetWorld()->DeleteObjectDelayed(it.Value().m_hObject);
+      it = m_DebugDrawComponents.Remove(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+
+  for (auto it = m_DebugDrawShapeGeo.GetIterator(); it.IsValid();)
+  {
+    if (it.Value().m_uiLastSeenCounter < m_uiDebugGeoLastSeenCounter)
+    {
+      it = m_DebugDrawShapeGeo.Remove(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+}
+
+void plJoltWorldModule::DebugDrawGeometry(const plVec3& vCenter, float fRadius, plPhysicsShapeType::Enum shapeType, const plTag& tag)
+{
+  const plVec3 vAabbMin = vCenter - plVec3(fRadius);
+  const plVec3 vAabbMax = vCenter + plVec3(fRadius);
+
+  JPH::AABox aabb;
+  aabb.mMin = plJoltConversionUtils::ToVec3(vAabbMin);
+  aabb.mMax = plJoltConversionUtils::ToVec3(vAabbMax);
+
+  JPH::AllHitCollisionCollector<JPH::TransformedShapeCollector> collector;
+
+  plJoltBroadPhaseLayerFilter broadphaseFilter(shapeType);
+  JPH::ObjectLayerFilter objectFilterAll;
+  JPH::BodyFilter bodyFilterAll;
+
+  m_pSystem->GetNarrowPhaseQuery().CollectTransformedShapes(aabb, collector, broadphaseFilter, objectFilterAll, bodyFilterAll);
+
+  auto* pBodies = &m_pSystem->GetBodyInterface();
+
+  const int cMaxTriangles = 128;
+
+
+  plStaticArray<plVec3, cMaxTriangles * 3> positionsTmp;
+  positionsTmp.SetCountUninitialized(cMaxTriangles * 3);
+
+  plStaticArray<const JPH::PhysicsMaterial*, cMaxTriangles> materialsTmp;
+  materialsTmp.SetCountUninitialized(cMaxTriangles);
+
+  plHybridArray<plVec3, cMaxTriangles * 3> positionsTmp2;
+  plHybridArray<const JPH::PhysicsMaterial*, cMaxTriangles> materialsTmp2;
+
+  for (const JPH::TransformedShape& ts : collector.mHits)
+  {
+    DebugBodyShapeKey key;
+    key.m_uiBodyID = ts.mBodyID.GetIndexAndSequenceNumber();
+    key.m_pShapePtr = ts.mShape.GetPtr();
+
+    bool bExisted = false;
+    auto& geo = m_DebugDrawComponents.FindOrAdd(key, &bExisted).Value();
+    geo.m_uiLastSeenCounter = m_uiDebugGeoLastSeenCounter;
+
+    DebugGeoShape& shapeGeo = m_DebugDrawShapeGeo[key.m_pShapePtr];
+    shapeGeo.m_uiLastSeenCounter = m_uiDebugGeoLastSeenCounter;
+
+    plTransform objTrans;
+    objTrans.m_vPosition = plJoltConversionUtils::ToVec3(ts.mShapePositionCOM);
+    objTrans.m_qRotation = plJoltConversionUtils::ToQuat(ts.mShapeRotation);
+    objTrans.m_vScale = plJoltConversionUtils::ToVec3(ts.mShapeScale);
+
+    if (bExisted)
+    {
+      plGameObject* pObj;
+      if (GetWorld()->TryGetObject(geo.m_hObject, pObj))
+      {
+        pObj->SetGlobalTransform(objTrans);
+      }
+
+      if (!geo.m_bMutableGeometry)
+        continue;
+    }
+
+    JPH::BodyLockRead lock(m_pSystem->GetBodyLockInterface(), ts.mBodyID);
+    if (!lock.Succeeded())
+      continue;
+
+    positionsTmp2.Clear();
+    materialsTmp2.Clear();
+
+    if (!shapeGeo.m_hMesh.IsValid() || (geo.m_bMutableGeometry && lock.GetBody().IsActive()))
+    {
+      shapeGeo.m_Bounds.SetInvalid();
+
+      JPH::Shape::GetTrianglesContext ctx;
+      ts.mShape->GetTrianglesStart(ctx, JPH::AABox::sBiggest(), JPH::Vec3::sZero(), JPH::Quat::sIdentity(), JPH::Vec3::sReplicate(1.0f));
+
+      while (true)
+      {
+        const int triCount = ts.mShape->GetTrianglesNext(ctx, cMaxTriangles, reinterpret_cast<JPH::Float3*>(positionsTmp.GetData()), materialsTmp.GetData());
+
+        if (triCount == 0)
+          break;
+
+        positionsTmp2.PushBackRange(positionsTmp.GetArrayPtr().GetSubArray(0, triCount * 3));
+        materialsTmp2.PushBackRange(materialsTmp.GetArrayPtr().GetSubArray(0, triCount));
+      }
+
+      if (positionsTmp2.GetCount() >= 3)
+      {
+        plDynamicMeshBufferResourceDescriptor desc;
+        desc.m_Topology = plGALPrimitiveTopology::Triangles;
+        desc.m_uiMaxVertices = positionsTmp2.GetCount();
+        desc.m_uiMaxPrimitives = positionsTmp2.GetCount() / 3;
+        desc.m_IndexType = plGALIndexType::None;
+        desc.m_bColorStream = false;
+
+        plStringBuilder sGuid;
+        sGuid.Format("ColMeshVisGeo_{}", s_iColMeshVisGeoCounter.Increment());
+
+        if (!shapeGeo.m_hMesh.IsValid())
+        {
+          shapeGeo.m_hMesh = plResourceManager::CreateResource<plDynamicMeshBufferResource>(sGuid, std::move(desc));
+        }
+
+        plResourceLock<plDynamicMeshBufferResource> pMeshBuf(shapeGeo.m_hMesh, plResourceAcquireMode::BlockTillLoaded);
+
+        plArrayPtr<plDynamicMeshVertex> vertices = pMeshBuf->AccessVertexData();
+        for (plUInt32 vtxIdx = 0; vtxIdx < vertices.GetCount(); ++vtxIdx)
+        {
+          auto& vtx = vertices[vtxIdx];
+          vtx.m_vPosition = positionsTmp2[vtxIdx];
+          vtx.m_vTexCoord.SetZero();
+          vtx.m_vEncodedNormal.SetZero();
+          vtx.m_vEncodedTangent.SetZero();
+
+          shapeGeo.m_Bounds.ExpandToInclude(vtx.m_vPosition);
+        }
+      }
+    }
+
+    if (bExisted)
+      continue;
+
+    plGameObjectDesc gd;
+    gd.m_bDynamic = true;
+    gd.m_LocalPosition = objTrans.m_vPosition;
+    gd.m_LocalRotation = objTrans.m_qRotation;
+    gd.m_LocalScaling =  objTrans.m_vScale;
+
+    gd.m_Tags.Set(tag);
+    plGameObject* pObj;
+    geo.m_hObject = GetWorld()->CreateObject(gd, pObj);
+    geo.m_bMutableGeometry = lock.GetBody().IsSoftBody();
+
+    plCustomMeshComponent* pMesh;
+    plCustomMeshComponent::CreateComponent(pObj, pMesh);
+
+    const bool bKinematic = (lock.GetBody().GetMotionType() == JPH::EMotionType::Kinematic);
+    const auto& vis = s_Vis[plMath::FirstBitLow((plUInt32)shapeType)][bKinematic ? 1 : 0];
+
+    pMesh->SetMeshResource(shapeGeo.m_hMesh);
+    pMesh->SetBounds(shapeGeo.m_Bounds);
+    pMesh->SetMaterialFile(vis.m_szMaterial);
+    pMesh->SetColor(vis.m_Color);
+  }
+}
 
 PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltWorldModule);

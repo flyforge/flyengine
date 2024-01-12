@@ -11,7 +11,7 @@ o
 		s %AssetType{"RenderPipeline"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{5189305147899033520,5264929536831011917}}
-		u4 %Hash{15637228566310044893}
+		u4 %Hash{12337659546061064707}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %References
@@ -172,19 +172,6 @@ o
 }
 o
 {
-	Uuid %id{u4{2464397755995824008,4621760981955990038}}
-	s %t{"DocumentNodeManager_DefaultConnection"}
-	u3 %v{1}
-	p
-	{
-		Uuid %Connection::Source{u4{9903127900685275008,5190012807922781911}}
-		s %Connection::SourcePin{"Output"}
-		Uuid %Connection::Target{u4{12025421613094468508,5132296434815839289}}
-		s %Connection::TargetPin{"Color"}
-	}
-}
-o
-{
 	Uuid %id{u4{14739724847903551148,4629750639138916122}}
 	s %t{"DocumentNodeManager_DefaultConnection"}
 	u3 %v{1}
@@ -286,6 +273,19 @@ o
 }
 o
 {
+	Uuid %id{u4{15797501664181889705,4780184644699453173}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{6152167202081987995,5199964961373210163}}
+		s %Connection::SourcePin{"Output"}
+		Uuid %Connection::Target{u4{12025421613094468508,5132296434815839289}}
+		s %Connection::TargetPin{"Color"}
+	}
+}
+o
+{
 	Uuid %id{u4{12084416142999379833,4815788046635205849}}
 	s %t{"plRenderPipelineNodeOutputPin"}
 	u3 %v{1}
@@ -318,19 +318,6 @@ o
 		s %Connection::SourcePin{"Output"}
 		Uuid %Connection::Target{u4{14911064979325086393,5550278331022837996}}
 		s %Connection::TargetPin{"Input"}
-	}
-}
-o
-{
-	Uuid %id{u4{357431175206781339,4851307904349101964}}
-	s %t{"DocumentNodeManager_DefaultConnection"}
-	u3 %v{1}
-	p
-	{
-		Uuid %Connection::Source{u4{6152167202081987995,5199964961373210163}}
-		s %Connection::SourcePin{"Output"}
-		Uuid %Connection::Target{u4{5337417953507971717,4998845232377556947}}
-		s %Connection::TargetPin{"Color"}
 	}
 }
 o
@@ -432,13 +419,13 @@ o
 }
 o
 {
-	Uuid %id{u4{1396970919713842603,4989559530920498312}}
+	Uuid %id{u4{16103421214063261115,4991595745276256104}}
 	s %t{"DocumentNodeManager_DefaultConnection"}
 	u3 %v{1}
 	p
 	{
-		Uuid %Connection::Source{u4{12025421613094468508,5132296434815839289}}
-		s %Connection::SourcePin{"Color"}
+		Uuid %Connection::Source{u4{9903127900685275008,5190012807922781911}}
+		s %Connection::SourcePin{"Output"}
 		Uuid %Connection::Target{u4{17267767646664565132,5333307354884538961}}
 		s %Connection::TargetPin{"Input"}
 	}
@@ -601,7 +588,7 @@ o
 		Uuid %DepthStencil{u4{14781329720410134245,9401591029305841606}}
 		s %Message{""}
 		s %Name{"SimplePass"}
-		Vec2 %Node::Pos{f{0xCC7E4242,0x1CD888C3}}
+		Vec2 %Node::Pos{f{0x89333644,0x0AFA9CC2}}
 	}
 }
 o
@@ -837,6 +824,19 @@ o
 		Uuid %Output{u4{12084416142999379833,4815788046635205849}}
 		b %UpscaleEnabled{1}
 		Uuid %Velocity{u4{4114280109297894358,18363237135293803760}}
+	}
+}
+o
+{
+	Uuid %id{u4{2218701694682581947,5404219773239985690}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{12025421613094468508,5132296434815839289}}
+		s %Connection::SourcePin{"Color"}
+		Uuid %Connection::Target{u4{5337417953507971717,4998845232377556947}}
+		s %Connection::TargetPin{"Color"}
 	}
 }
 o
@@ -1236,15 +1236,12 @@ o
 			Uuid{u4{5524882161712484274,4982117943945915634}}
 			Uuid{u4{16617889608363403186,5377674368194658966}}
 			Uuid{u4{5285405205037964724,4967810713938496220}}
-			Uuid{u4{357431175206781339,4851307904349101964}}
 			Uuid{u4{6339402469517062559,4680448453058581970}}
 			Uuid{u4{11068736125238634632,5537770831883967078}}
 			Uuid{u4{12864880133228612247,4710535837566660757}}
-			Uuid{u4{1396970919713842603,4989559530920498312}}
 			Uuid{u4{4570380832470621867,5550177877612347995}}
 			Uuid{u4{14232703663414075779,5729616070023396211}}
 			Uuid{u4{14801895231361158584,5013413755871146685}}
-			Uuid{u4{2464397755995824008,4621760981955990038}}
 			Uuid{u4{15347329702864638633,5590187844097120390}}
 			Uuid{u4{16624533713258658451,4963636818807721589}}
 			Uuid{u4{16494319396272439209,4952977372463378685}}
@@ -1255,6 +1252,9 @@ o
 			Uuid{u4{14739724847903551148,4629750639138916122}}
 			Uuid{u4{770590530753266847,5012666429050904933}}
 			Uuid{u4{10576761256445137304,5599707902775592738}}
+			Uuid{u4{16103421214063261115,4991595745276256104}}
+			Uuid{u4{15797501664181889705,4780184644699453173}}
+			Uuid{u4{2218701694682581947,5404219773239985690}}
 		}
 	}
 }

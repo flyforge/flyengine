@@ -7,6 +7,12 @@ struct plMsgExtractGeometry;
 
 using plJoltStaticActorComponentManager = plComponentManager<class plJoltStaticActorComponent, plBlockStorageType::FreeList>;
 
+/// \brief Turns an object into an immovable obstacle in the physics simulation.
+///
+/// Dynamic actors collide with static actors. Static actors cannot be moved, not even programmatically.
+/// If that is desired, use a dynamic actor instead and set it to be "kinematic".
+///
+/// Static actors are the only ones that can use concave collision meshes.
 class PLASMA_JOLTPLUGIN_DLL plJoltStaticActorComponent : public plJoltActorComponent
 {
   PLASMA_DECLARE_COMPONENT_TYPE(plJoltStaticActorComponent, plJoltActorComponent, plJoltStaticActorComponentManager);
@@ -18,10 +24,9 @@ public:
   virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
   virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
+protected:
   virtual void OnDeactivated() override;
   virtual void OnSimulationStarted() override;
-
-  void PullSurfacesFromGraphicsMesh(plDynamicArray<const plJoltMaterial*>& ref_materials);
 
   //////////////////////////////////////////////////////////////////////////
   // plJoltActorComponent
@@ -34,6 +39,9 @@ protected:
 public:
   plJoltStaticActorComponent();
   ~plJoltStaticActorComponent();
+
+  /// \brief Searches for a sibling plMeshComponent and attempts to retrieve information about the plJoltMaterial to use for each submesh from its plMaterial information.
+  void PullSurfacesFromGraphicsMesh(plDynamicArray<const plJoltMaterial*>& ref_materials);
 
   void SetMeshFile(const char* szFile); // [ property ]
   const char* GetMeshFile() const;      // [ property ]

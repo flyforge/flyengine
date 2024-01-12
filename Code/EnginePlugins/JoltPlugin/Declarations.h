@@ -26,6 +26,14 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltSteppingMode);
 
 //////////////////////////////////////////////////////////////////////////
 
+/// \brief Flags for what should happen when two physical bodies touch.
+///
+/// The reactions need to be set up through plSurface's.
+/// For most objects only some reactions make sense.
+/// For example a box may hit another object as well as slide, but it cannot roll.
+/// A barrel can impact and slide on some sides, but roll around its up axis (Z).
+/// A sphere can impact and roll around all its axis, but never slide.
+/// A soft object may not have any impact reactions.
 struct plOnJoltContact
 {
   using StorageType = plUInt32;
@@ -34,11 +42,11 @@ struct plOnJoltContact
   {
     None = 0,
     // SendReportMsg = PLASMA_BIT(0),
-    ImpactReactions = PLASMA_BIT(1),
-    SlideReactions = PLASMA_BIT(2),
-    RollXReactions = PLASMA_BIT(3),
-    RollYReactions = PLASMA_BIT(4),
-    RollZReactions = PLASMA_BIT(5),
+    ImpactReactions = PLASMA_BIT(1), ///< Spawn prefabs for impacts (two objects hit each other with enough force).
+    SlideReactions = PLASMA_BIT(2),  ///< Spawn prefabs for sliding (one object slides along the surface of another).
+    RollXReactions = PLASMA_BIT(3),  ///< Spawn prefabs for rolling (one object rotates around its X axis while touching another).
+    RollYReactions = PLASMA_BIT(4),  ///< Spawn prefabs for rolling (one object rotates around its Y axis while touching another).
+    RollZReactions = PLASMA_BIT(5),  ///< Spawn prefabs for rolling (one object rotates around its Z axis while touching another).
 
     AllRollReactions = RollXReactions | RollYReactions | RollZReactions,
     SlideAndRollReactions = AllRollReactions | SlideReactions,
@@ -77,6 +85,7 @@ struct plJoltSettings
 
 //////////////////////////////////////////////////////////////////////////
 
+/// \brief This message can be sent to a constraint component to break the constraint.
 struct PLASMA_JOLTPLUGIN_DLL plJoltMsgDisconnectConstraints : public plMessage
 {
   PLASMA_DECLARE_MESSAGE_TYPE(plJoltMsgDisconnectConstraints, plMessage);
@@ -85,5 +94,5 @@ struct PLASMA_JOLTPLUGIN_DLL plJoltMsgDisconnectConstraints : public plMessage
   plJoltActorComponent* m_pActor = nullptr;
 
   /// The ID of the Jolt body that is being removed. If an actor were to have multiple bodies, this message may be sent multiple times.
-  plUInt32 m_uiJoltBodyID = 0;
+  plUInt32 m_uiJoltBodyID = plInvalidIndex;
 };
