@@ -1,0 +1,22 @@
+#include <RendererDX12/RendererDX12PCH.h>
+
+PLASMA_STATICLINK_LIBRARY(RendererDX12)
+{
+  if (bReturn)
+    return;
+
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Context_Implementation_ContextDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Device_Implementation_DeviceDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Device_Implementation_SwapChainDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Resources_Implementation_BufferDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Resources_Implementation_FenceDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Resources_Implementation_QueryDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Resources_Implementation_RenderTargetViewDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Resources_Implementation_ResourceViewDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Resources_Implementation_TextureDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Resources_Implementation_SharedTextureDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Resources_Implementation_UnorderedAccessViewDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Shader_Implementation_ShaderDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_Shader_Implementation_VertexDeclarationDX12);
+  PLASMA_STATICLINK_REFERENCE(RendererDX12_State_Implementation_StateDX12);
+}
