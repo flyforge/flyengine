@@ -1,6 +1,6 @@
-#include <RendererDX12/Device/D3D12Pass.h>
 #include <RendererDX12/CommandEncoder/CommandEncoderImplD3D12.h>
 #include <RendererDX12/Device/D3D12Device.h>
+#include <RendererDX12/Device/D3D12Pass.h>
 
 #include <RendererFoundation/CommandEncoder/CommandEncoderState.h>
 #include <RendererFoundation/CommandEncoder/ComputeCommandEncoder.h>

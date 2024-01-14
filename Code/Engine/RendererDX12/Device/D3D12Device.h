@@ -5,8 +5,8 @@
 #include <RendererDX12/RendererDX12PCH.h>
 #include <RendererFoundation/Device/Device.h>
 
-#include <dxgi.h>
 #include <d3d12.h>
+#include <dxgi.h>
 
 struct ID3D12CommandAllocator3;
 struct ID3D12CommandList3;

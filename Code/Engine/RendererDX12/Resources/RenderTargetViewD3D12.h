@@ -28,7 +28,7 @@ protected:
   friend class plGALDeviceDX12;
   friend class plMemoryUtils;
 
-  plGALRenderTargetViewD3D12(plGALTexture* pTexture, const plGALRenderTargetBlendDescription& Description);
+  plGALRenderTargetViewD3D12(plGALTexture* pTexture, const plGALRenderTargetViewCreationDescription& Description);
 
   virtual ~plGALRenderTargetViewD3D12();
 

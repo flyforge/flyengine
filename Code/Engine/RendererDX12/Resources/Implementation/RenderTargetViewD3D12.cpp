@@ -4,7 +4,7 @@
 #include <RendererDX12/Resources/RenderTargetViewD3D12.h>
 #include <RendererDX12/Resources/TextureD3D12.h>
 
-plGALRenderTargetViewD3D12::plGALRenderTargetViewD3D12(plGALTexture* pTexture, const plGALRenderTargetBlendDescription& Description)
+plGALRenderTargetViewD3D12::plGALRenderTargetViewD3D12(plGALTexture* pTexture, const plGALRenderTargetViewCreationDescription& Description)
   : plGALRenderTargetView(pTexture,Description)
 {
 }

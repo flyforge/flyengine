@@ -4,10 +4,9 @@ set(PLASMA_BUILD_EXPERIMENTAL_D3D12_SUPPORT ON CACHE BOOL "Add support for D3D12
 
 mark_as_advanced(FORCE PLASMA_D3D12_AGILITY_SDK_DIR)
 mark_as_advanced(FORCE PLASMA_D3D12_AGILITY_SDK_INCLUDE_DIR)
-mark_as_advanced(FORCE PLASMA_BUILD_EXPERIMENTAL_D3D12_SUPPORT)
 
 # NOTE: This shouldnt be fixed Aglity Version. Find a way to "adjust this."
-set(PLASMA_D3D12_AGILITY_SDK_PACKAGE_PATH "${CMAKE_BINARY_DIR}/packages/Microsoft.Direct3D.D3D12.1.711.3/build/native")
+set(PLASMA_D3D12_AGILITY_SDK_PACKAGE_PATH "${CMAKE_BINARY_DIR}/packages/Microsoft.Direct3D.D3D12.1.611.2/build/native")
 set(PLASMA_D3D12_AGILITY_SDK_PACKAGE_PATH_INCLUDE "${PLASMA_D3D12_AGILITY_SDK_PACKAGE_PATH}/include")
 
 macro(pl_requires_d3d12)
@@ -30,7 +29,7 @@ function(pl_export_target_dx12 TARGET_NAME)
         file(MAKE_DIRECTORY ${PLASMA_D3D12_RESOURCES})
     endif()
 
-    target_include_directories(${TARGET_NAME} PUBLIC ${PLASMA_D3D12_AGILITY_SDK_PACKAGE_PATH_INCLUDE})
+    target_include_directories(${TARGET_NAME} PRIVATE ${PLASMA_D3D12_AGILITY_SDK_PACKAGE_PATH_INCLUDE})
 
     execute_process(COMMAND ${NUGET} restore ${CMAKE_SOURCE_DIR}/${PLASMA_CMAKE_RELPATH}/CMakeUtils/packages.config -PackagesDirectory ${CMAKE_BINARY_DIR}/packages
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -42,7 +41,6 @@ function(pl_export_target_dx12 TARGET_NAME)
 #            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 #    )
 
-    target_include_directories(${PROJECT_NAME} PUBLIC ${PLASMA_D3D12_AGILITY_SDK_PACKAGE_PATH})
 endfunction()
 
 # #####################################

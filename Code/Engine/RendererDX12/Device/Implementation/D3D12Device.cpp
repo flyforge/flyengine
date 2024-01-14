@@ -1,7 +1,7 @@
 #include <RendererDX12/Device/D3D12Device.h>
-#include <RendererDX12/RendererDX12PCH.h>
-#include <RendererDX12/RendererDX12Helpers.h>
 #include <RendererDX12/Device/D3D12Pass.h>
+#include <RendererDX12/RendererDX12Helpers.h>
+#include <RendererDX12/RendererDX12PCH.h>
 
 #include <Core/System/Window.h>
 #include <Foundation/Basics/Platform/Win/IncludeWindows.h>

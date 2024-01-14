@@ -14,4 +14,12 @@
 #  define PLASMA_RENDERERDX11_DLL
 #endif
 
-#define PLASMA_GAL_DX12_RELEASE(d3dobj)
+#define PLASMA_GAL_DX12_RELEASE(d3dobj) \
+      do                                \
+      {                                 \
+        if ((d3dobj) != nullptr)        \
+        {                               \
+          (d3dobj)->Release();          \
+          (d3dobj) = nullptr;           \
+        }                               \
+      } while (0)

@@ -1,5 +1,5 @@
-#include <RendererDX12/RendererDX12PCH.h>
 #include <RendererDX12/Device/D3D12Device.h>
+#include <RendererDX12/RendererDX12PCH.h>
 #include <RendererDX12/Resources/TextureD3D12.h>
 
 
@@ -30,9 +30,6 @@ plResult plGALTextureD3D12::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGALS
 
       plHybridArray<D3D12_SUBRESOURCE_DATA, 16> InitialData;
       ConvertInitialData(m_Description, pInitialData, InitialData);
-
-     /// Create the committed resource.
-      if (FAILED(pdxDevice->GetDXDevice()->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES,&CD3DX12_RESOURCE_DESC(D3D12_RESOURCE_DI)))
     }
     break;
 
