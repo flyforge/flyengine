@@ -1,6 +1,5 @@
 #include <EditorFramework/EditorFrameworkPCH.h>
 
-#include "Foundation/Logging/Log.h"
 #include <EditorFramework/CodeGen/CppProject.h>
 #include <EditorFramework/CodeGen/CppSettings.h>
 #include <EditorFramework/Dialogs/CppProjectDlg.moc.h>
@@ -8,7 +7,10 @@
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/IO/FileSystem/FileWriter.h>
 #include <Foundation/IO/OSFile.h>
+#include <Foundation/Logging/Log.h>
+#include <Foundation/System/Process.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
+
 
 plQtCppProjectDlg::plQtCppProjectDlg(QWidget* pParent)
   : QDialog(pParent)
@@ -24,21 +26,11 @@ plQtCppProjectDlg::plQtCppProjectDlg(QWidget* pParent)
     PluginName->setText(m_CppSettings.m_sPluginName.GetData());
   }
 
+  if(plStatus compilerTestResult = plCppProject::TestCompiler(); compilerTestResult.Failed())
   {
-    plQtScopedBlockSignals _1(Generator);
-    Generator->addItem("None");
-    Generator->addItem("Visual Studio 2019");
-    Generator->addItem("Visual Studio 2022");
-    Generator->setCurrentIndex(0);
-
-    if (m_CppSettings.m_Compiler == plCppSettings::Compiler::Vs2019)
-    {
-      Generator->setCurrentIndex(1);
-    }
-    else if (m_CppSettings.m_Compiler == plCppSettings::Compiler::Vs2022)
-    {
-      Generator->setCurrentIndex(2);
-    }
+    plStringBuilder fmt;
+    ErrorText->setText(plFmt("<html><b>Error:</b> {}<br>Please go to preferences and configure the C & C++ compiler.", compilerTestResult.m_sMessage).GetTextCStr(fmt));
+    GenerateSolution->setDisabled(true);
   }
 
   UpdateUI();
@@ -59,29 +51,11 @@ void plQtCppProjectDlg::on_OpenBuildFolder_clicked()
   plQtUiServices::OpenInExplorer(BuildFolder->text().toUtf8().data(), false);
 }
 
-void plQtCppProjectDlg::on_Generator_currentIndexChanged(int)
-{
-  switch (Generator->currentIndex())
-  {
-    case 0:
-      m_CppSettings.m_Compiler = plCppSettings::Compiler::None;
-      break;
-    case 1:
-      m_CppSettings.m_Compiler = plCppSettings::Compiler::Vs2019;
-      break;
-    case 2:
-      m_CppSettings.m_Compiler = plCppSettings::Compiler::Vs2022;
-      break;
-  }
-
-  UpdateUI();
-}
-
 void plQtCppProjectDlg::on_OpenSolution_clicked()
 {
-  if (!plQtUiServices::OpenFileInDefaultProgram(plCppProject::GetSolutionPath(m_CppSettings)))
+  if (auto result = plCppProject::OpenSolution(m_CppSettings); result.Failed())
   {
-    plQtUiServices::GetSingleton()->MessageBoxWarning("Opening the solution failed.");
+    plQtUiServices::GetSingleton()->MessageBoxWarning(result.m_sMessage.GetView());
   }
 }
 
@@ -104,7 +78,6 @@ void plQtCppProjectDlg::UpdateUI()
   PluginLocation->setText(plCppProject::GetTargetSourceDir().GetData());
   BuildFolder->setText(plCppProject::GetBuildDir(m_CppSettings).GetData());
 
-  GenerateSolution->setEnabled(m_CppSettings.m_Compiler != plCppSettings::Compiler::None);
   OpenPluginLocation->setEnabled(plOSFile::ExistsDirectory(PluginLocation->text().toUtf8().data()));
   OpenBuildFolder->setEnabled(plOSFile::ExistsDirectory(BuildFolder->text().toUtf8().data()));
   OpenSolution->setEnabled(plCppProject::ExistsSolution(m_CppSettings));
@@ -180,10 +153,12 @@ void plQtCppProjectDlg::on_GenerateSolution_clicked()
 
   m_OldCppSettings.Load().IgnoreResult();
 
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
   if (plSystemInformation::IsDebuggerAttached())
   {
     plQtUiServices::GetSingleton()->MessageBoxWarning("When a debugger is attached, CMake usually fails with the error that no C/C++ compiler can be found.\n\nDetach the debugger now, then press OK to continue.");
   }
+#endif
 
   OutputLog->clear();
 

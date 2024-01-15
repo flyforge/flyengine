@@ -7,7 +7,7 @@ endif()
 
 find_path(PLASMA_EMBREE_DIR include/embree3/rtcore.h
 	PATHS
-	${CMAKE_SOURCE_DIR}/Code/ThirdParty/embree
+	${PLASMA_ROOT}/Code/ThirdParty/embree
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)

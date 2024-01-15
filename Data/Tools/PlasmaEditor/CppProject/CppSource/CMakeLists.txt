@@ -4,7 +4,7 @@ project (CppProject VERSION 1.0 LANGUAGES C CXX)
 
 if(PROJECT_IS_TOP_LEVEL)
 
-	set (PLASMA_SDK_DIR "" CACHE PATH "The PlasmaEngine SDK root directory.")
+	set (PLASMA_SDK_DIR "" CACHE PATH "The plEngine SDK root directory.")
 
 	message(STATUS "PLASMA_SDK_DIR is set to '${PLASMA_SDK_DIR}'")
 
@@ -17,6 +17,9 @@ if(PROJECT_IS_TOP_LEVEL)
 	get_property(PLASMA_CMAKE_RELPATH_CODE GLOBAL PROPERTY PLASMA_CMAKE_RELPATH_CODE)
 
 	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PLASMA_SDK_DIR}/${PLASMA_CMAKE_RELPATH}")
+
+	set(PLASMA_ROOT ${PLASMA_SDK_DIR})
+	set_property(GLOBAL PROPERTY PLASMA_ROOT ${PLASMA_ROOT})
 
 	include("plUtils")
 	include("plPlatformVars")

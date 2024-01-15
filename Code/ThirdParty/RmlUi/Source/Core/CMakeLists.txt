@@ -11,7 +11,7 @@ set (PROJECT_NAME "RmlCore")
 pl_create_target(LIBRARY ${PROJECT_NAME} NO_PLASMA_PREFIX)
 
 # override the default IDE folder
-pl_set_project_ide_folder(${PROJECT_NAME} "Code/ThirdParty/RmlCore")
+pl_set_project_ide_folder(${PROJECT_NAME} "${PLASMA_ROOT}/Code/ThirdParty/RmlCore")
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC BUILDSYSTEM_ENABLE_RMLUI_SUPPORT)
 
@@ -28,7 +28,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../../Include")
 
 # Freetype
-set(RMLUI_FREETYPE_PATH ${CMAKE_SOURCE_DIR}/${PLASMA_SUBMODULE_PREFIX_PATH}/Code/ThirdParty/RmlUi/Dependencies/freetype)
+set(RMLUI_FREETYPE_PATH ${PLASMA_ROOT}/Code/ThirdParty/RmlUi/Dependencies/freetype)
 target_include_directories(${PROJECT_NAME} PRIVATE "${RMLUI_FREETYPE_PATH}/Include")
 
 if(PLASMA_CMAKE_PLATFORM_WINDOWS)

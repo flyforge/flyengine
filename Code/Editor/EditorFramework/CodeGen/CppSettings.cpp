@@ -19,21 +19,6 @@ plResult plCppSettings::Save(plStringView sFile)
 
   plOpenDdlUtils::StoreString(ddl, m_sPluginName, "PluginName");
 
-  switch (m_Compiler)
-  {
-    case Compiler::None:
-      plOpenDdlUtils::StoreString(ddl, "", "Compiler");
-      break;
-    case Compiler::Vs2019:
-      plOpenDdlUtils::StoreString(ddl, "Vs2019", "Compiler");
-      break;
-    case Compiler::Vs2022:
-      plOpenDdlUtils::StoreString(ddl, "Vs2022", "Compiler");
-      break;
-
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
-  }
-
   ddl.EndObject();
 
   return PLASMA_SUCCESS;
@@ -52,16 +37,6 @@ plResult plCppSettings::Load(plStringView sFile)
     if (auto pValue = pTarget->FindChildOfType(plOpenDdlPrimitiveType::String, "PluginName"))
     {
       m_sPluginName = pValue->GetPrimitivesString()[0];
-    }
-
-    if (auto pValue = pTarget->FindChildOfType(plOpenDdlPrimitiveType::String, "Compiler"))
-    {
-      if (pValue->GetPrimitivesString()[0] == "Vs2019")
-        m_Compiler = Compiler::Vs2019;
-      else if (pValue->GetPrimitivesString()[0] == "Vs2022")
-        m_Compiler = Compiler::Vs2022;
-      else
-        m_Compiler = Compiler::None;
     }
   }
 

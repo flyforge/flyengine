@@ -6,7 +6,7 @@ macro(pl_include_plExport)
 	# Create a modified version of the plExport.cmake file,
 	# where the absolute paths to the original locations are replaced
 	# with the absolute paths to this installation
-	set(EXP_FILE "${PLASMA_OUTPUT_DIRECTORY_DLL}/plExport.cmake")
+	pl_get_export_location(EXP_FILE)
 	set(IMP_FILE "${CMAKE_BINARY_DIR}/plExport.cmake")
 	set(EXPINFO_FILE "${PLASMA_OUTPUT_DIRECTORY_DLL}/plExportInfo.cmake")
 

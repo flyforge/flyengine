@@ -60,9 +60,8 @@ void PlasmaEditorEngineProcessConnection::HandleIPCEvent(const plProcessCommunic
   {
     const PlasmaEditorEngineDocumentMsg* pMsg = static_cast<const PlasmaEditorEngineDocumentMsg*>(e.m_pMessage);
 
-    plAssetDocument* pDocument = m_DocumentByGuid[pMsg->m_DocumentGuid];
-
-    if (pDocument)
+    plAssetDocument* pDocument = nullptr;
+    if(m_DocumentByGuid.TryGetValue(pMsg->m_DocumentGuid, pDocument))
     {
       pDocument->HandleEngineMessage(pMsg);
     }

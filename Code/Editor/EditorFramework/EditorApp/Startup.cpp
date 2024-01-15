@@ -1,5 +1,6 @@
 #include <EditorFramework/EditorFrameworkPCH.h>
 
+#include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 #include <EditorFramework/Actions/AssetActions.h>
 #include <EditorFramework/Actions/CommonAssetActions.h>
 #include <EditorFramework/Actions/GameObjectContextActions.h>
@@ -10,6 +11,8 @@
 #include <EditorFramework/Actions/TransformGizmoActions.h>
 #include <EditorFramework/Actions/ViewActions.h>
 #include <EditorFramework/Actions/ViewLightActions.h>
+#include <EditorFramework/CodeGen/CompilerPreferencesWidget.moc.h>
+#include <EditorFramework/CodeGen/CppProject.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <EditorFramework/GUI/DynamicDefaultStateProvider.h>
 #include <EditorFramework/GUI/ExposedParametersDefaultStateProvider.h>
@@ -61,6 +64,8 @@
 #include <ToolsFoundation/Document/PrefabUtils.h>
 #include <ads/DockManager.h>
 
+void plCompilerPreferences_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
+
 // clang-format off
 PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
 
@@ -101,6 +106,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plExposedParametersAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtExposedParametersPropertyWidget(); });
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plGameObjectReferenceAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtGameObjectReferencePropertyWidget(); });
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plExposedBone>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtExposedBoneWidget(); });
+    plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plCompilerPreferences>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtCompilerPreferencesWidget(); });
 
     plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plSphereManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plSphereManipulatorAdapter); });
     plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCapsuleManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plCapsuleManipulatorAdapter); });
@@ -119,6 +125,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plConeVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plConeVisualizerAdapter); });
     plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCameraVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plCameraVisualizerAdapter); });
 
+    plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plCompilerPreferences_PropertyMetaStateEventHandler);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
@@ -144,6 +151,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plGameObjectReferenceAttribute>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plExposedParametersAttribute>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plExposedBone>());
+    plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plCompilerPreferences>());
 
     plManipulatorAdapterRegistry::GetSingleton()->m_Factory.UnregisterCreator(plGetStaticRTTI<plSphereManipulatorAttribute>());
     plManipulatorAdapterRegistry::GetSingleton()->m_Factory.UnregisterCreator(plGetStaticRTTI<plCapsuleManipulatorAttribute>());
@@ -161,6 +169,8 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plVisualizerAdapterRegistry::GetSingleton()->m_Factory.UnregisterCreator(plGetStaticRTTI<plDirectionVisualizerAttribute>());
     plVisualizerAdapterRegistry::GetSingleton()->m_Factory.UnregisterCreator(plGetStaticRTTI<plConeVisualizerAttribute>());
     plVisualizerAdapterRegistry::GetSingleton()->m_Factory.UnregisterCreator(plGetStaticRTTI<plCameraVisualizerAttribute>());
+
+    plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plCompilerPreferences_PropertyMetaStateEventHandler);
   }
 
 PLASMA_END_SUBSYSTEM_DECLARATION;
@@ -318,6 +328,7 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   // plTranslationLookup::AddTranslator(std::move(pTranslatorDe));
 
   LoadEditorPreferences();
+  plCppProject::LoadPreferences();
 
   plQtUiServices::GetSingleton()->LoadState();
 

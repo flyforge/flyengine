@@ -33,6 +33,64 @@ macro(pl_pull_config_vars)
 endmacro()
 
 # #####################################
+# ## pl_pull_output_vars(LIB_OUTPUT_DIR DLL_OUTPUT_DIR)
+# #####################################
+macro(pl_pull_output_vars LIB_OUTPUT_DIR DLL_OUTPUT_DIR)
+	pl_pull_all_vars()
+	pl_pull_config_vars()
+
+	set(SUB_DIR "")
+	set(PLATFORM_PREFIX "")
+	set(PLATFORM_POSTFIX "")
+	set(ARCH "x${PLASMA_CMAKE_ARCHITECTURE_POSTFIX}")
+
+	if(PLASMA_CMAKE_PLATFORM_WINDOWS_UWP)
+		# UWP has deployment problems if all applications output to the same path.
+		set(SUB_DIR "/${TARGET_NAME}")
+		set(PLATFORM_PREFIX "uwp_")
+
+		if(${ARCH} STREQUAL "x32")
+			set(ARCH "x86")
+		endif()
+
+		if(${ARCH} STREQUAL "xArm32")
+			set(ARCH "arm")
+		endif()
+
+		if(${ARCH} STREQUAL "xArm64")
+			set(ARCH "arm64")
+		endif()
+
+	elseif(PLASMA_CMAKE_PLATFORM_WINDOWS_DESKTOP)
+		set(PLATFORM_POSTFIX "_win10")
+
+	elseif(PLASMA_CMAKE_PLATFORM_EMSCRIPTEN)
+		set(PLATFORM_POSTFIX "_wasm")
+
+	elseif(PLASMA_CMAKE_PLATFORM_ANDROID)
+		set(PLATFORM_POSTFIX "_android")
+	endif()
+
+	string(TOLOWER ${PLASMA_CMAKE_GENERATOR_PREFIX} LOWER_GENERATOR_PREFIX)
+
+	set(PRE_PATH "${PLASMA_CMAKE_PLATFORM_PREFIX}${PLASMA_CMAKE_GENERATOR_PREFIX}${PLASMA_CMAKE_COMPILER_POSTFIX}")
+	set(OUTPUT_DEBUG "${PRE_PATH}${PLASMA_BUILDTYPENAME_DEBUG}${PLASMA_CMAKE_ARCHITECTURE_POSTFIX}${SUB_DIR}")
+	set(OUTPUT_RELEASE "${PRE_PATH}${PLASMA_BUILDTYPENAME_RELEASE}${PLASMA_CMAKE_ARCHITECTURE_POSTFIX}${SUB_DIR}")
+	set(OUTPUT_DEV "${PRE_PATH}${PLASMA_BUILDTYPENAME_DEV}${PLASMA_CMAKE_ARCHITECTURE_POSTFIX}${SUB_DIR}")
+
+	set(OUTPUT_DLL_DEBUG "${DLL_OUTPUT_DIR}/${OUTPUT_DEBUG}")
+	set(OUTPUT_LIB_DEBUG "${LIB_OUTPUT_DIR}/${OUTPUT_DEBUG}")
+
+	set(OUTPUT_DLL_RELEASE "${DLL_OUTPUT_DIR}/${OUTPUT_RELEASE}")
+	set(OUTPUT_LIB_RELEASE "${LIB_OUTPUT_DIR}/${OUTPUT_RELEASE}")
+
+	set(OUTPUT_DLL_DEV "${DLL_OUTPUT_DIR}/${OUTPUT_DEV}")
+	set(OUTPUT_LIB_DEV "${LIB_OUTPUT_DIR}/${OUTPUT_DEV}")
+
+endmacro()
+
+
+# #####################################
 # ## pl_set_target_output_dirs(<target> <lib-output-dir> <dll-output-dir>)
 # #####################################
 function(pl_set_target_output_dirs TARGET_NAME LIB_OUTPUT_DIR DLL_OUTPUT_DIR)
@@ -476,7 +534,7 @@ endfunction()
 # The build filter is intended to only build a subset of PlasmaEngine.
 # The build filters are configured through cmake files in the 'BuildFilters' directory.
 function(pl_build_filter_init)
-	file(GLOB_RECURSE FILTER_FILES "${CMAKE_SOURCE_DIR}/${PLASMA_SUBMODULE_PREFIX_PATH}/Code/BuildSystem/CMake/BuildFilters/*.BuildFilter")
+	file(GLOB_RECURSE FILTER_FILES "${PLASMA_ROOT}/Code/BuildSystem/CMake/BuildFilters/*.BuildFilter")
 
 	get_property(PLASMA_BUILD_FILTER_NAMES GLOBAL PROPERTY PLASMA_BUILD_FILTER_NAMES)
 
@@ -644,7 +702,8 @@ function(pl_download_and_extract URL DEST_FOLDER DEST_FILENAME)
 	message(STATUS "Extracting '${FULL_FILENAME}'...")
 
 	if(${PKG_TYPE} MATCHES "7z")
-		execute_process(COMMAND "${PLASMA_CONFIG_PATH_7ZA}"
+		set(FULL_7ZA_PATH "${PLASMA_ROOT}/${PLASMA_CONFIG_PATH_7ZA}")
+		execute_process(COMMAND "${FULL_7ZA_PATH}"
 			x "${PKG_FILE}"
 			-aoa
 			WORKING_DIRECTORY "${DEST_FOLDER}"
@@ -665,4 +724,23 @@ function(pl_download_and_extract URL DEST_FOLDER DEST_FILENAME)
 	endif()
 
 	file(TOUCH ${EXTRACT_MARKER})
+endfunction()
+
+function(pl_get_export_location DST_VAR)
+	pl_pull_config_vars()
+	pl_pull_output_vars("" "${PLASMA_OUTPUT_DIRECTORY_DLL}")
+
+	if(GENERATOR_IS_MULTI_CONFIG OR (CMAKE_GENERATOR MATCHES "Visual Studio"))
+		set("${DST_VAR}" "${PLASMA_OUTPUT_DIRECTORY_DLL}/plExport.cmake" PARENT_SCOPE)
+	else()
+		if("${CMAKE_BUILD_TYPE}" STREQUAL ${PLASMA_BUILDTYPENAME_DEBUG})
+			set("${DST_VAR}" "${PLASMA_OUTPUT_DIRECTORY_DLL}/${OUTPUT_DEBUG}/plExport.cmake" PARENT_SCOPE)
+		elseif("${CMAKE_BUILD_TYPE}" STREQUAL ${PLASMA_BUILDTYPENAME_RELEASE})
+			set("${DST_VAR}" "${PLASMA_OUTPUT_DIRECTORY_DLL}/${OUTPUT_RELEASE}/plExport.cmake" PARENT_SCOPE)
+		elseif("${CMAKE_BUILD_TYPE}" STREQUAL ${PLASMA_BUILDTYPENAME_DEV})
+			set("${DST_VAR}" "${PLASMA_OUTPUT_DIRECTORY_DLL}/${OUTPUT_DEV}/plExport.cmake" PARENT_SCOPE)
+		else()
+			message(FATAL_ERROR "Unknown CMAKE_BUILD_TYPE: '${CMAKE_BUILD_TYPE}'")
+		endif()
+	endif()
 endfunction()

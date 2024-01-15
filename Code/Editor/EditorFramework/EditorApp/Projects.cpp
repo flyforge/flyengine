@@ -303,17 +303,29 @@ void plQtEditorApp::ProjectEventHandler(const plToolsProjectEvent& r)
 
       if (m_StartupFlags.AreNoneSet(plQtEditorApp::StartupFlags::Headless | plQtEditorApp::StartupFlags::SafeMode | plQtEditorApp::StartupFlags::UnitTest))
       {
-        if (plCppProject::IsBuildRequired())
+        if (plCppProject::ExistsProjectCMakeListsTxt())
         {
-          const auto clicked = plQtUiServices::MessageBoxQuestion("<html>Compile this project's C++ plugin?<br><br>\
+          plStatus compilerStatus = plCppProject::TestCompiler();
+          if (compilerStatus.Failed())
+          {
+            plQtUiServices::MessageBoxWarning(plFmt("<html>The compiler preferences are invalid.<br><br>\
+              This project has <a href='https://ezengine.net/pages/docs/custom-code/cpp/cpp-project-generation.html'>a dedicated C++ plugin</a> with custom code.<br><br>\
+              The compiler set in the preferences does not appear to work, as a result the plugin cannot be compiled <br><br><b>Error:</b> {}</html>",
+              compilerStatus.m_sMessage.GetView()));
+            break;
+          }
+          else if (plCppProject::IsBuildRequired())
+          {
+            const auto clicked = plQtUiServices::MessageBoxQuestion("<html>Compile this project's C++ plugin?<br><br>\
 Explanation: This project has <a href='https://plasmaengine.github.io/PlasmaDocs/#custom-code/cpp/cpp-project-generation/'>a dedicated C++ plugin</a> with custom code. The plugin is currently not compiled and therefore the project won't fully work and certain assets will fail to transform.<br><br>\
 It is advised to compile the plugin now, but you can also do so later.</html>",
             QMessageBox::StandardButton::Apply | QMessageBox::StandardButton::Ignore, QMessageBox::StandardButton::Apply);
 
-          if (clicked == QMessageBox::StandardButton::Ignore)
-            break;
+            if (clicked == QMessageBox::StandardButton::Ignore)
+              break;
 
-          QTimer::singleShot(1000, this, [this]() { plCppProject::EnsureCppPluginReady().IgnoreResult(); });
+            QTimer::singleShot(1000, this, [this]() { plCppProject::EnsureCppPluginReady().IgnoreResult(); });
+          }
         }
 
         plTimestamp lastTransform = plAssetCurator::GetSingleton()->GetLastFullTransformDate().GetTimestamp();

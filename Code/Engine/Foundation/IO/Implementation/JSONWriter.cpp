@@ -349,7 +349,19 @@ void plJSONWriter::WriteVariant(const plVariant& value)
       EndArray();
     }
       return;
+    case plVariant::Type::VariantDictionary:
+    {
+      BeginObject();
 
+      const auto& dict = value.Get<plVariantDictionary>();
+
+      for(auto& kv : dict)
+      {
+        AddVariableVariant(kv.Key(), kv.Value());
+      }
+      EndObject();
+    }
+      return;
     default:
       break;
   }

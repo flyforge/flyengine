@@ -34,6 +34,10 @@ set_property(GLOBAL PROPERTY PLASMA_SUBMODULE_MODE ${PLASMA_SUBMODULE_MODE})
 set(PLASMA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set_property(GLOBAL PROPERTY PLASMA_ROOT ${PLASMA_ROOT})
 
+# Set a global variable pointing to the root of the EZ source tree
+set(PLASMA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+set_property(GLOBAL PROPERTY PLASMA_ROOT ${PLASMA_ROOT})
+
 pl_build_filter_init()
 
 pl_detect_project_name(DETECTED_NAME)
@@ -90,7 +94,8 @@ pl_finalize_projects()
 endif()
 
 get_property(EXPORT_PROJECTS GLOBAL PROPERTY "EXPORT_PROJECTS")
-export(TARGETS ${EXPORT_PROJECTS} FILE "${PLASMA_OUTPUT_DIRECTORY_DLL}/plExport.cmake")
+pl_get_export_location(PLASMA_EXPORT_LOCATION)
+export(TARGETS ${EXPORT_PROJECTS} FILE "${PLASMA_EXPORT_LOCATION}")
 
 set(EXPORT_INFO "
 set(EXPINP_OUTPUT_DIRECTORY_DLL ${PLASMA_OUTPUT_DIRECTORY_DLL})

@@ -699,7 +699,8 @@ void plProjectAction::Execute(const plVariant& value)
       plStringBuilder sEngineProfilingFile;
       {
         // Wait for engine process response
-        auto callback = [&](plProcessMessage* pMsg) -> bool {
+        auto callback = [&](plProcessMessage* pMsg) -> bool
+        {
           auto pSimpleCfg = static_cast<plSaveProfilingResponseToEditor*>(pMsg);
           sEngineProfilingFile = pSimpleCfg->m_sProfilingFile;
           return true;
@@ -817,9 +818,12 @@ void plProjectAction::Execute(const plVariant& value)
         {
           plQtUiServices::GetSingleton()->MessageBoxWarning("Generating the C++ solution failed.");
         }
-        else if (!plQtUiServices::OpenFileInDefaultProgram(plCppProject::GetSolutionPath(cpp)))
+        else
         {
-          plQtUiServices::GetSingleton()->MessageBoxWarning("Opening the solution failed.");
+          if(auto status = plCppProject::OpenSolution(cpp); status.Failed())
+          {
+            plQtUiServices::GetSingleton()->MessageBoxWarning(status.m_sMessage.GetView());
+          }
         }
       }
       else

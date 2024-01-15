@@ -2,9 +2,14 @@
 
 #include <EditorFramework/CodeGen/CppProject.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
+#include <Foundation/IO/FileSystem/DeferredFileWriter.h>
 #include <Foundation/IO/FileSystem/FileReader.h>
+#include <Foundation/IO/JSONReader.h>
+#include <Foundation/IO/JSONWriter.h>
 #include <Foundation/IO/OSFile.h>
+#include <Foundation/Profiling/Profiling.h>
 #include <Foundation/System/Process.h>
+#include <GuiFoundation/UIServices/DynamicEnums.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 #include <ToolsFoundation/Project/ToolsProject.h>
 
@@ -12,7 +17,150 @@
 #  include <Shlobj.h>
 #endif
 
+// clang-format off
+PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plIDE, 1)
+  PLASMA_ENUM_CONSTANT(plIDE::VisualStudioCode),
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+  PLASMA_ENUM_CONSTANT(plIDE::VisualStudio),
+#endif
+PLASMA_END_STATIC_REFLECTED_ENUM;
+
+PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plCompiler, 1)
+  PLASMA_ENUM_CONSTANT(plCompiler::Clang),
+#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+  PLASMA_ENUM_CONSTANT(plCompiler::Gcc),
+#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+  PLASMA_ENUM_CONSTANT(plCompiler::Vs2022),
+#endif
+PLASMA_END_STATIC_REFLECTED_ENUM;
+
+#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#define CPP_COMPILER_DEFAULT "g++"
+#define C_COMPILER_DEFAULT "gcc"
+#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#define CPP_COMPILER_DEFAULT ""
+#define C_COMPILER_DEFAULT ""
+#else
+#error Platform not implemented
+#endif
+
+PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plCompilerPreferences, plNoBase, 1, plRTTIDefaultAllocator<plCompilerPreferences>)
+{
+  PLASMA_BEGIN_PROPERTIES
+  {
+    PLASMA_ENUM_MEMBER_PROPERTY("Compiler", plCompiler, m_Compiler)->AddAttributes(new plHiddenAttribute()),
+    PLASMA_MEMBER_PROPERTY("CustomCompiler", m_bCustomCompiler)->AddAttributes(new plHiddenAttribute()),
+    PLASMA_MEMBER_PROPERTY("CppCompiler", m_sCppCompiler)->AddAttributes(new plDefaultValueAttribute(CPP_COMPILER_DEFAULT)),
+    PLASMA_MEMBER_PROPERTY("CCompiler", m_sCCompiler)->AddAttributes(new plDefaultValueAttribute(C_COMPILER_DEFAULT)),
+    PLASMA_MEMBER_PROPERTY("RcCompiler", m_sRcCompiler),
+  }
+  PLASMA_END_PROPERTIES;
+}
+PLASMA_END_STATIC_REFLECTED_TYPE;
+
+PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCppProject, 1, plRTTIDefaultAllocator<plCppProject>)
+{
+  PLASMA_BEGIN_PROPERTIES
+  {
+    PLASMA_ENUM_MEMBER_PROPERTY("CppIDE", plIDE, m_Ide),
+    PLASMA_MEMBER_PROPERTY("CompilerPreferences", m_CompilerPreferences),
+  }
+  PLASMA_END_PROPERTIES;
+}
+PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+// clang-format on
+
 plEvent<const plCppSettings&> plCppProject::s_ChangeEvents;
+
+plDynamicArray<plCppProject::MachineSpecificCompilerPaths> plCppProject::s_MachineSpecificCompilers;
+
+namespace
+{
+  static constexpr plUInt32 minGccVersion = 10;
+  static constexpr plUInt32 maxGccVersion = 20;
+  static constexpr plUInt32 minClangVersion = 10;
+  static constexpr plUInt32 maxClangVersion = 20;
+
+  plResult TestCompilerExecutable(plStringView sName, plString* out_pVersion = nullptr)
+  {
+    plStringBuilder sStdout;
+    plProcessOptions po;
+    po.AddArgument("--version");
+    po.m_sProcess = sName;
+    po.m_onStdOut = [&sStdout](plStringView out) { sStdout.Append(out); };
+
+    if (plProcess::Execute(po).Failed())
+      return PLASMA_FAILURE;
+
+    plHybridArray<plStringView, 8> lines;
+    sStdout.Split(false, lines, "\r", "\n");
+    if (lines.IsEmpty())
+      return PLASMA_FAILURE;
+
+    plHybridArray<plStringView, 4> splitResult;
+    lines[0].Split(false, splitResult, " ");
+
+    if (splitResult.IsEmpty())
+      return PLASMA_FAILURE;
+
+    plStringView version = splitResult.PeekBack();
+    splitResult.Clear();
+    version.Split(false, splitResult, ".");
+    if (splitResult.GetCount() < 3)
+    {
+      return PLASMA_FAILURE;
+    }
+
+    if (out_pVersion)
+    {
+      *out_pVersion = version;
+    }
+
+    return PLASMA_SUCCESS;
+  }
+
+  void AddCompilerVersions(plDynamicArray<plCppProject::MachineSpecificCompilerPaths>& inout_compilers, plCompiler::Enum compiler, plStringView sRequiredMajorVersion)
+  {
+    plStringView compilerBaseName;
+    plStringView compilerBaseNameCpp;
+    switch (compiler)
+    {
+      case plCompiler::Clang:
+        compilerBaseName = "clang";
+        compilerBaseNameCpp = "clang++";
+        break;
+#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+      case plCompiler::Gcc:
+        compilerBaseName = "gcc";
+        compilerBaseNameCpp = "g++";
+        break;
+#endif
+      default:
+        PLASMA_ASSERT_NOT_IMPLEMENTED
+    }
+
+
+    plString compilerVersion;
+    plStringBuilder requiredVersion = sRequiredMajorVersion;
+    requiredVersion.Append('.');
+    plStringBuilder fmt;
+    if (TestCompilerExecutable(compilerBaseName, &compilerVersion).Succeeded() && TestCompilerExecutable(compilerBaseNameCpp).Succeeded() && compilerVersion.StartsWith(requiredVersion))
+    {
+      fmt.Format("{} (system default = {})", compilerBaseName, compilerVersion);
+      inout_compilers.PushBack({fmt.GetView(), compiler, compilerBaseName, compilerBaseNameCpp, false});
+    }
+
+    plStringBuilder compilerExecutable;
+    plStringBuilder compilerExecutableCpp;
+    compilerExecutable.Format("{}-{}", compilerBaseName, sRequiredMajorVersion);
+    compilerExecutableCpp.Format("{}-{}", compilerBaseNameCpp, sRequiredMajorVersion);
+    if (TestCompilerExecutable(compilerExecutable, &compilerVersion).Succeeded() && TestCompilerExecutable(compilerExecutableCpp).Succeeded() && compilerVersion.StartsWith(requiredVersion))
+    {
+      fmt.Format("{} (version {})", compilerBaseName, compilerVersion);
+      inout_compilers.PushBack({fmt.GetView(), compiler, compilerExecutable, compilerExecutableCpp, false});
+    }
+  }
+} // namespace
 
 plString plCppProject::GetTargetSourceDir(plStringView sProjectDirectory /*= {}*/)
 {
@@ -29,40 +177,45 @@ plString plCppProject::GetTargetSourceDir(plStringView sProjectDirectory /*= {}*
 
 plString plCppProject::GetGeneratorFolderName(const plCppSettings& cfg)
 {
-  switch (cfg.m_Compiler)
+  const plCppProject* preferences = plPreferences::QueryPreferences<plCppProject>();
+
+  switch (preferences->m_CompilerPreferences.m_Compiler.GetValue())
   {
-    case plCppSettings::Compiler::None:
-      return "";
-
-    case plCppSettings::Compiler::Vs2019:
-      return "Vs2019x64";
-
-    case plCppSettings::Compiler::Vs2022:
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+    case plCompiler::Vs2022:
       return "Vs2022x64";
-
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+#endif
+    case plCompiler::Clang:
+      return "Clangx64";
+#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+    case plCompiler::Gcc:
+      return "Gccx64";
+#endif
   }
-
-  return {};
+  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  return "";
 }
 
 plString plCppProject::GetCMakeGeneratorName(const plCppSettings& cfg)
 {
-  switch (cfg.m_Compiler)
+
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+  const plCppProject* preferences = plPreferences::QueryPreferences<plCppProject>();
+
+  switch (preferences->m_CompilerPreferences.m_Compiler.GetValue())
   {
-    case plCppSettings::Compiler::None:
-      return "";
-
-    case plCppSettings::Compiler::Vs2019:
-      return "Visual Studio 16 2019";
-
-    case plCppSettings::Compiler::Vs2022:
+    case plCompiler::Vs2022:
       return "Visual Studio 17 2022";
-
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+    case plCompiler::Clang:
+      return "Ninja";
   }
-
-  return {};
+#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+  return "Ninja";
+#else
+#  error Platform not implemented
+#endif
+  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  return "";
 }
 
 plString plCppProject::GetPluginSourceDir(const plCppSettings& cfg, plStringView sProjectDirectory /*= {}*/)
@@ -84,9 +237,159 @@ plString plCppProject::GetSolutionPath(const plCppSettings& cfg)
 {
   plStringBuilder sSolutionFile;
   sSolutionFile = GetBuildDir(cfg);
-  sSolutionFile.AppendPath(cfg.m_sPluginName);
-  sSolutionFile.Append(".sln");
+
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+  const plCppProject* preferences = plPreferences::QueryPreferences<plCppProject>();
+  if (preferences->m_CompilerPreferences.m_Compiler == plCompiler::Vs2022)
+  {
+    sSolutionFile.AppendPath(cfg.m_sPluginName);
+    sSolutionFile.Append(".sln");
+    return sSolutionFile;
+  }
+#endif
+
+  sSolutionFile.AppendPath("build.ninja");
   return sSolutionFile;
+}
+
+plStatus plCppProject::OpenSolution(const plCppSettings& cfg)
+{
+  const plCppProject* preferences = plPreferences::QueryPreferences<plCppProject>();
+
+  switch (preferences->m_Ide.GetValue())
+  {
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+    case plIDE::VisualStudio:
+      if (!plQtUiServices::OpenFileInDefaultProgram(plCppProject::GetSolutionPath(cfg)))
+      {
+        return plStatus("Opening the solution in Visual Studio failed.");
+      }
+      break;
+#endif
+    case plIDE::VisualStudioCode:
+    {
+      auto solutionPath = plCppProject::GetTargetSourceDir();
+      QStringList args;
+      args.push_back(QString::fromUtf8(solutionPath.GetData(), solutionPath.GetElementCount()));
+      if (plStatus status = plQtUiServices::OpenInVsCode(args); status.Failed())
+      {
+        return plStatus(plFmt("Opening Visual Studio Code failed: {}", status.m_sMessage));
+      }
+    }
+    break;
+  }
+
+  return plStatus(PLASMA_SUCCESS);
+}
+
+plStringView plCppProject::CompilerToString(plCompiler::Enum compiler)
+{
+  switch (compiler)
+  {
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+    case plCompiler::Vs2022:
+      return "Vs2022";
+#endif
+    case plCompiler::Clang:
+      return "Clang";
+#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+    case plCompiler::Gcc:
+      return "Gcc";
+#endif
+    default:
+      break;
+  }
+  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  return "<not implemented>";
+}
+
+plCompiler::Enum plCppProject::GetSdkCompiler()
+{
+#if PLASMA_ENABLED(PLASMA_COMPILER_CLANG)
+  return plCompiler::Clang;
+#elif PLASMA_ENABLED(PLASMA_COMPILER_GCC)
+  return plCompiler::Gcc;
+#elif PLASMA_ENABLED(PLASMA_COMPILER_MSVC)
+  return plCompiler::Vs2022;
+#else
+#  error Unknown compiler
+#endif
+}
+
+plString plCppProject::GetSdkCompilerMajorVersion()
+{
+#if PLASMA_ENABLED(PLASMA_COMPILER_MSVC)
+  plStringBuilder fmt;
+  fmt.Format("{}.{}", _MSC_VER / 100, _MSC_VER % 100);
+  return fmt;
+#elif PLASMA_ENABLED(PLASMA_COMPILER_CLANG)
+  return PLASMA_PP_STRINGIFY(__clang_major__);
+#elif PLASMA_ENABLED(PLASMA_COMPILER_GCC)
+  return PLASMA_PP_STRINGIFY(__GNUC__);
+#else
+#  error Unsupported compiler
+#endif
+}
+
+plStatus plCppProject::TestCompiler()
+{
+  const plCppProject* preferences = plPreferences::QueryPreferences<plCppProject>();
+  if (preferences->m_CompilerPreferences.m_Compiler != GetSdkCompiler())
+  {
+    return plStatus(plFmt("The currently configured compiler is incompatible with this SDK. The SDK was built with '{}' but the currently configured compiler is '{}'.",
+      CompilerToString(GetSdkCompiler()),
+      CompilerToString(preferences->m_CompilerPreferences.m_Compiler)));
+  }
+
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+  // As CMake is selecting the compiler it is hard to do a version check, for now just assume they are compatible.
+  if (GetSdkCompiler() == plCompiler::Vs2022)
+  {
+    return plStatus(PLASMA_SUCCESS);
+  }
+
+  if (GetSdkCompiler() == plCompiler::Clang)
+  {
+    if (!plOSFile::ExistsFile(preferences->m_CompilerPreferences.m_sRcCompiler))
+    {
+      return plStatus(plFmt("The selected RC compiler '{}' does not exist on disk.", preferences->m_CompilerPreferences.m_sRcCompiler));
+    }
+  }
+#endif
+
+  plString cCompilerVersion, cppCompilerVersion;
+  if (TestCompilerExecutable(preferences->m_CompilerPreferences.m_sCCompiler, &cCompilerVersion).Failed())
+  {
+    return plStatus("The selected C Compiler doesn't work or doesn't exist.");
+  }
+  if (TestCompilerExecutable(preferences->m_CompilerPreferences.m_sCppCompiler, &cppCompilerVersion).Failed())
+  {
+    return plStatus("The selected C++ Compiler doesn't work or doesn't exist.");
+  }
+
+  plStringBuilder sdkCompilerMajorVersion = GetSdkCompilerMajorVersion();
+  sdkCompilerMajorVersion.Append('.');
+  if (!cCompilerVersion.StartsWith(sdkCompilerMajorVersion))
+  {
+    return plStatus(plFmt("The selected C Compiler has an incompatible version. The SDK was built with version {} but the compiler has version {}.", GetSdkCompilerMajorVersion(), cCompilerVersion));
+  }
+  if (!cppCompilerVersion.StartsWith(sdkCompilerMajorVersion))
+  {
+    return plStatus(plFmt("The selected C++ Compiler has an incompatible version. The SDK was built with version {} but the compiler has version {}.", GetSdkCompilerMajorVersion(), cppCompilerVersion));
+  }
+
+  return plStatus(PLASMA_SUCCESS);
+}
+
+const char* plCppProject::GetCMakePath()
+{
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+  return "cmake/bin/cmake";
+#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+  return "cmake";
+#else
+#  error Platform not implemented
+#endif
 }
 
 plResult plCppProject::CheckCMakeCache(const plCppSettings& cfg)
@@ -121,6 +424,79 @@ plResult plCppProject::CheckCMakeCache(const plCppSettings& cfg)
     return PLASMA_FAILURE;
 
   return PLASMA_SUCCESS;
+}
+
+plCppProject::ModifyResult plCppProject::CheckCMakeUserPresets(const plCppSettings& cfg, bool bWriteResult)
+{
+  plStringBuilder configureJsonPath = plCppProject::GetPluginSourceDir(cfg).GetFileDirectory();
+  configureJsonPath.AppendPath("CMakeUserPresets.json");
+
+  if (plOSFile::ExistsFile(configureJsonPath))
+  {
+    plFileReader fileReader;
+    if (fileReader.Open(configureJsonPath).Failed())
+    {
+      plLog::Error("Failed to open '{}' for reading", configureJsonPath);
+      return ModifyResult::FAILURE;
+    }
+    plJSONReader reader;
+    if (reader.Parse(fileReader).Failed())
+    {
+      plLog::Error("Failed to parse JSON of '{}'", configureJsonPath);
+      return ModifyResult::FAILURE;
+    }
+    fileReader.Close();
+
+    // if (reader.GetTopLevelElementType() != plJSONReader::ElementType::Dictionary)
+    // {
+    //   plLog::Error("Top level element of '{}' is expected to be a dictionary. Please manually fix, rename or delete the file.", configureJsonPath);
+    //   return ModifyResult::FAILURE;
+    // }
+
+    plVariantDictionary json = reader.GetTopLevelObject();
+    auto modifyResult = ModifyCMakeUserPresetsJson(cfg, json);
+    if (modifyResult == ModifyResult::FAILURE)
+    {
+      plLog::Error("Failed to modify '{}' in place. Please manually fix, rename or delete the file.", configureJsonPath);
+      return ModifyResult::FAILURE;
+    }
+
+    if (bWriteResult && modifyResult == ModifyResult::MODIFIED)
+    {
+      plStandardJSONWriter jsonWriter;
+      plDeferredFileWriter fileWriter;
+      fileWriter.SetOutput(configureJsonPath);
+      jsonWriter.SetOutputStream(&fileWriter);
+
+      jsonWriter.WriteVariant(plVariant(json));
+      if (fileWriter.Close().Failed())
+      {
+        plLog::Error("Failed to write CMakeUserPresets.json to '{}'", configureJsonPath);
+        return ModifyResult::FAILURE;
+      }
+    }
+
+    return modifyResult;
+  }
+  else
+  {
+    if (bWriteResult)
+    {
+      plStandardJSONWriter jsonWriter;
+      plDeferredFileWriter fileWriter;
+      fileWriter.SetOutput(configureJsonPath);
+      jsonWriter.SetOutputStream(&fileWriter);
+
+      jsonWriter.WriteVariant(plVariant(CreateEmptyCMakeUserPresetsJson(cfg)));
+      if (fileWriter.Close().Failed())
+      {
+        plLog::Error("Failed to write CMakeUserPresets.json to '{}'", configureJsonPath);
+        return ModifyResult::FAILURE;
+      }
+    }
+  }
+
+  return ModifyResult::MODIFIED;
 }
 
 bool plCppProject::ExistsSolution(const plCppSettings& cfg)
@@ -265,48 +641,43 @@ plResult plCppProject::RunCMake(const plCppSettings& cfg)
     return PLASMA_FAILURE;
   }
 
-  const plString sSdkDir = plFileSystem::GetSdkRootDirectory();
-  const plString sBuildDir = plCppProject::GetBuildDir(cfg);
-  const plString sSolutionFile = plCppProject::GetSolutionPath(cfg);
+  if (auto compilerWorking = TestCompiler(); compilerWorking.Failed())
+  {
+    compilerWorking.LogFailure();
+    return PLASMA_FAILURE;
+  }
+
+  if (CheckCMakeUserPresets(cfg, true) == ModifyResult::FAILURE)
+  {
+    return PLASMA_FAILURE;
+  }
 
   plStringBuilder tmp;
 
   QStringList args;
-  args << "-S";
-  args << plCppProject::GetTargetSourceDir().GetData();
-
-  tmp.Format("-DPLASMA_SDK_DIR:PATH={}", sSdkDir);
-  args << tmp.GetData();
-
-  tmp.Format("-DPLASMA_BUILDTYPE_ONLY:STRING={}", BUILDSYSTEM_BUILDTYPE);
-  args << tmp.GetData();
-
-  args << "-G";
-  args << plCppProject::GetCMakeGeneratorName(cfg).GetData();
-
-  args << "-B";
-  args << sBuildDir.GetData();
-
-  args << "-A";
-  args << "x64";
+  args << "--preset";
+  args << "plEngine";
 
   plLogSystemToBuffer log;
 
-  plStatus res = plQtEditorApp::GetSingleton()->ExecuteTool("cmake/bin/cmake", args, 120, &log, plLogMsgType::InfoMsg);
+
+  const plString sTargetSourceDir = plCppProject::GetTargetSourceDir();
+
+  plStatus res = plQtEditorApp::GetSingleton()->ExecuteTool(GetCMakePath(), args, 120, &log, plLogMsgType::InfoMsg, sTargetSourceDir);
 
   if (res.Failed())
   {
-    plLog::Error("Solution generation failed:\n\n{}\n{}\n", log.m_sBuffer, res.m_sMessage);
+    plLog::Error("CMake generation failed:\n\n{}\n{}\n", log.m_sBuffer, res.m_sMessage);
     return PLASMA_FAILURE;
   }
 
   if (!ExistsSolution(cfg))
   {
-    plLog::Error("CMake did not generate the expected solution. Did you attempt to rename it? If so, you may need to delete the top-level CMakeLists.txt file and set up the C++ project again.");
+    plLog::Error("CMake did not generate the expected output. Did you attempt to rename it? If so, you may need to delete the top-level CMakeLists.txt file and set up the C++ project again.");
     return PLASMA_FAILURE;
   }
 
-  plLog::Success("Solution generated.\n\n{}\n", log.m_sBuffer);
+  plLog::Success("CMake generation successful.\n\n{}\n", log.m_sBuffer);
   s_ChangeEvents.Broadcast(cfg);
   return PLASMA_SUCCESS;
 }
@@ -316,7 +687,13 @@ plResult plCppProject::RunCMakeIfNecessary(const plCppSettings& cfg)
   if (!plCppProject::ExistsProjectCMakeListsTxt())
     return PLASMA_SUCCESS;
 
-  if (plCppProject::ExistsSolution(cfg) && plCppProject::CheckCMakeCache(cfg).Succeeded())
+  auto userPresetResult = CheckCMakeUserPresets(cfg, false);
+  if (userPresetResult == ModifyResult::FAILURE)
+  {
+    return PLASMA_FAILURE;
+  }
+
+  if (plCppProject::ExistsSolution(cfg) && plCppProject::CheckCMakeCache(cfg).Succeeded() && userPresetResult == ModifyResult::NOT_MODIFIED)
     return PLASMA_SUCCESS;
 
   return plCppProject::RunCMake(cfg);
@@ -327,60 +704,60 @@ plResult plCppProject::CompileSolution(const plCppSettings& cfg)
   QApplication::setOverrideCursor(Qt::WaitCursor);
   PLASMA_SCOPE_EXIT(QApplication::restoreOverrideCursor());
 
-  PLASMA_LOG_BLOCK("Compile Solution");
+  PLASMA_LOG_BLOCK("Compile C++ Plugin");
 
-  if (cfg.m_sMsBuildPath.IsEmpty())
-  {
-    FindMsBuild(cfg).IgnoreResult();
-
-    if (cfg.m_sMsBuildPath.IsEmpty())
-    {
-      plLog::Error("MSBuild path is not available.");
-
-      return PLASMA_FAILURE;
-    }
-  }
-
+  plHybridArray<plString, 32> errors;
+  plInt32 iReturnCode = 0;
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
   if (plSystemInformation::IsDebuggerAttached())
   {
     plQtUiServices::GetSingleton()->MessageBoxWarning("When a debugger is attached, MSBuild usually fails to compile the project.\n\nDetach the debugger now, then press OK to continue.");
   }
-
-  plHybridArray<plString, 32> errors;
+#endif
 
   plProcessOptions po;
-  po.m_sProcess = cfg.m_sMsBuildPath;
+
+  plString cmakePath = plQtEditorApp::GetSingleton()->FindToolApplication(plCppProject::GetCMakePath());
+
+  po.m_sProcess = cmakePath;
+  po.AddArgument("--build");
+  po.AddArgument(GetBuildDir(cfg));
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+  const plCppProject* preferences = plPreferences::QueryPreferences<plCppProject>();
+
+  if (preferences->m_CompilerPreferences.m_Compiler == plCompiler::Vs2022)
+  {
+    po.AddArgument("--config");
+    po.AddArgument(BUILDSYSTEM_BUILDTYPE);
+  }
+#endif
+  po.m_sWorkingDirectory = GetBuildDir(cfg);
   po.m_bHideConsoleWindow = true;
   po.m_onStdOut = [&](plStringView sText) {
     if (sText.FindSubString_NoCase("error") != nullptr)
       errors.PushBack(sText);
   };
+  po.m_onStdError = [&](plStringView sText) {
+    if (sText.FindSubString_NoCase("error") != nullptr)
+      errors.PushBack(sText);
+  };
 
-  po.AddArgument(plCppProject::GetSolutionPath(cfg));
-  po.AddArgument("/m"); // multi-threaded compilation
-  po.AddArgument("/nr:false");
-  po.AddArgument("/t:Build");
-  po.AddArgument("/p:Configuration={}", BUILDSYSTEM_BUILDTYPE);
-  po.AddArgument("/p:Platform=x64");
-
-  plStringBuilder sMsBuildCmd;
-  po.BuildCommandLineString(sMsBuildCmd);
-  plLog::Dev("Running MSBuild: {}", sMsBuildCmd);
-
-  plInt32 iReturnCode = 0;
+  plStringBuilder sCMakeBuildCmd;
+  po.BuildCommandLineString(sCMakeBuildCmd);
+  plLog::Dev("Running {} {}", cmakePath, sCMakeBuildCmd);
   if (plProcess::Execute(po, &iReturnCode).Failed())
   {
-    plLog::Error("MSBuild failed to run.");
+    plLog::Error("Failed to start CMake.");
     return PLASMA_FAILURE;
   }
 
   if (iReturnCode == 0)
   {
-    plLog::Success("Compiled C++ solution.");
+    plLog::Success("Compiled C++ code.");
     return PLASMA_SUCCESS;
   }
 
-  plLog::Error("MSBuild failed with return code {}", iReturnCode);
+  plLog::Error("CMake --build failed with return code {}", iReturnCode);
 
   for (const auto& err : errors)
   {
@@ -392,8 +769,6 @@ plResult plCppProject::CompileSolution(const plCppSettings& cfg)
 
 plResult plCppProject::BuildCodeIfNecessary(const plCppSettings& cfg)
 {
-  PLASMA_SUCCEED_OR_RETURN(plCppProject::FindMsBuild(cfg));
-
   if (!plCppProject::ExistsProjectCMakeListsTxt())
     return PLASMA_SUCCESS;
 
@@ -405,51 +780,49 @@ plResult plCppProject::BuildCodeIfNecessary(const plCppSettings& cfg)
   return CompileSolution(cfg);
 }
 
-plResult plCppProject::FindMsBuild(const plCppSettings& cfg)
+plVariantDictionary plCppProject::CreateEmptyCMakeUserPresetsJson(const plCppSettings& cfg)
 {
-  if (!cfg.m_sMsBuildPath.IsEmpty())
-    return PLASMA_SUCCESS;
+  plVariantDictionary json;
+  json.Insert("version", 3);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-  plStringBuilder sVsWhere;
-
-  wchar_t* pPath = nullptr;
-  if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_ProgramFilesX86, KF_FLAG_DEFAULT, nullptr, &pPath)))
   {
-    sVsWhere = plStringWChar(pPath);
-    sVsWhere.AppendPath("Microsoft Visual Studio/Installer/vswhere.exe");
+    plVariantDictionary cmakeMinimumRequired;
+    cmakeMinimumRequired.Insert("major", 3);
+    cmakeMinimumRequired.Insert("minor", 21);
+    cmakeMinimumRequired.Insert("patch", 0);
 
-    CoTaskMemFree(pPath);
-  }
-  else
-  {
-    plLog::Error("Could not find the 'Program Files (x86)' folder.");
-    return PLASMA_FAILURE;
+    json.Insert("cmakeMinimumRequired", std::move(cmakeMinimumRequired));
   }
 
-  plStringBuilder sStdOut;
-  plProcessOptions po;
-  po.m_sProcess = sVsWhere;
-  po.m_bHideConsoleWindow = true;
-  po.m_onStdOut = [&](plStringView sText) { sStdOut.Append(sText); };
-
-  // TODO: search for VS2022 or VS2019 depending on cfg
-  po.AddCommandLine("-latest -requires Microsoft.Component.MSBuild -find MSBuild\\**\\Bin\\MSBuild.exe");
-
-  if (plProcess::Execute(po).Failed())
   {
-    plLog::Error("Executing vsWhere.exe failed. Do you have the correct version of Visual Studio installed?");
-    return PLASMA_FAILURE;
+    plVariantArray configurePresets;
+    plVariantDictionary plEnginePreset;
+    plEnginePreset.Insert("name", "plEngine");
+    plEnginePreset.Insert("displayName", "Build the plEngine Plugin");
+
+    {
+      plVariantDictionary cacheVariables;
+      plEnginePreset.Insert("cacheVariables", std::move(cacheVariables));
+    }
+
+    configurePresets.PushBack(std::move(plEnginePreset));
+    json.Insert("configurePresets", std::move(configurePresets));
   }
 
-  sStdOut.Trim("\n\r");
-  sStdOut.MakeCleanPath();
+  {
+    plVariantArray buildPresets;
+    {
+      plVariantDictionary plEngineBuildPreset;
+      plEngineBuildPreset.Insert("name", "plEngine");
+      plEngineBuildPreset.Insert("configurePreset", "plEngine");
+      buildPresets.PushBack(std::move(plEngineBuildPreset));
+    }
+    json.Insert("buildPresets", std::move(buildPresets));
+  }
 
-  cfg.m_sMsBuildPath = sStdOut;
-  return PLASMA_SUCCESS;
-#else
-  return PLASMA_FAILURE;
-#endif
+  PLASMA_VERIFY(ModifyCMakeUserPresetsJson(cfg, json) == ModifyResult::MODIFIED, "Freshly created user presets file should always be modified");
+
+  return json;
 }
 
 void plCppProject::UpdatePluginConfig(const plCppSettings& cfg)
@@ -514,6 +887,7 @@ bool plCppProject::IsBuildRequired()
 
   plStringBuilder sPath = plOSFile::GetApplicationDirectory();
   sPath.AppendPath(cfg.m_sPluginName);
+
   sPath.Append("Plugin");
 
 #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
@@ -527,3 +901,243 @@ bool plCppProject::IsBuildRequired()
 
   return false;
 }
+
+namespace
+{
+  template <typename T>
+  T* Expect(plVariantDictionary& inout_json, plStringView sName)
+  {
+    plVariant* var = nullptr;
+    if (inout_json.TryGetValue(sName, var) && var->IsA<T>())
+    {
+      return &var->GetWritable<T>();
+    }
+    return nullptr;
+  }
+
+  void Modify(plVariantDictionary& inout_json, plStringView sName, plStringView sValue, plCppProject::ModifyResult& inout_modified)
+  {
+    plVariant* currentValue = nullptr;
+    if (inout_json.TryGetValue(sName, currentValue) && currentValue->IsA<plString>() && currentValue->Get<plString>() == sValue)
+      return;
+
+    inout_json[sName] = sValue;
+    inout_modified = plCppProject::ModifyResult::MODIFIED;
+  }
+} // namespace
+
+plCppProject::ModifyResult plCppProject::ModifyCMakeUserPresetsJson(const plCppSettings& cfg, plVariantDictionary& inout_json)
+{
+  auto result = ModifyResult::NOT_MODIFIED;
+  auto configurePresets = Expect<plVariantArray>(inout_json, "configurePresets");
+  if (!configurePresets)
+    return ModifyResult::FAILURE;
+
+  const plCppProject* preferences = plPreferences::QueryPreferences<plCppProject>();
+
+  for (auto& preset : *configurePresets)
+  {
+    if (!preset.IsA<plVariantDictionary>())
+      continue;
+
+    auto& presetDict = preset.GetWritable<plVariantDictionary>();
+
+    auto name = Expect<plString>(presetDict, "name");
+    if (!name || *name != "plEngine")
+    {
+      continue;
+    }
+
+    auto cacheVariables = Expect<plVariantDictionary>(presetDict, "cacheVariables");
+    if (!cacheVariables)
+      return ModifyResult::FAILURE;
+
+    Modify(*cacheVariables, "PLASMA_SDK_DIR", plFileSystem::GetSdkRootDirectory(), result);
+    Modify(*cacheVariables, "PLASMA_BUILDTYPE_ONLY", BUILDSYSTEM_BUILDTYPE, result);
+    Modify(*cacheVariables, "CMAKE_BUILD_TYPE", BUILDSYSTEM_BUILDTYPE, result);
+
+    bool needsCompilerPaths = true;
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+    if (preferences->m_CompilerPreferences.m_Compiler == plCompiler::Vs2022)
+    {
+      needsCompilerPaths = false;
+    }
+#endif
+
+    if (needsCompilerPaths)
+    {
+      Modify(*cacheVariables, "CMAKE_C_COMPILER", preferences->m_CompilerPreferences.m_sCCompiler, result);
+      Modify(*cacheVariables, "CMAKE_CXX_COMPILER", preferences->m_CompilerPreferences.m_sCppCompiler, result);
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+      Modify(*cacheVariables, "CMAKE_RC_COMPILER", preferences->m_CompilerPreferences.m_sRcCompiler, result);
+      Modify(*cacheVariables, "CMAKE_RC_COMPILER_INIT", "rc", result);
+#endif
+    }
+    else
+    {
+      cacheVariables->Remove("CMAKE_C_COMPILER");
+      cacheVariables->Remove("CMAKE_CXX_COMPILER");
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+      cacheVariables->Remove("CMAKE_RC_COMPILER");
+      cacheVariables->Remove("CMAKE_RC_COMPILER_INIT");
+#endif
+    }
+
+    Modify(presetDict, "generator", GetCMakeGeneratorName(cfg), result);
+    Modify(presetDict, "binaryDir", GetBuildDir(cfg), result);
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+    if (preferences->m_CompilerPreferences.m_Compiler == plCompiler::Vs2022)
+    {
+      Modify(presetDict, "architecture", "x64", result);
+    }
+    else
+    {
+      presetDict.Remove("architecture");
+    }
+#endif
+  }
+
+  return result;
+}
+
+plCppProject::plCppProject()
+  : plPreferences(plPreferences::Domain::Application, "C++ Projects")
+{
+}
+void plCppProject::LoadPreferences()
+{
+  PLASMA_PROFILE_SCOPE("Preferences");
+  auto preferences = plPreferences::QueryPreferences<plCppProject>();
+
+  plCompiler::Enum sdkCompiler = GetSdkCompiler();
+
+#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+  if (sdkCompiler == plCompiler::Vs2022)
+  {
+    s_MachineSpecificCompilers.PushBack({"Visual Studio 2022 (system default)", plCompiler::Vs2022, "", "", false});
+  }
+
+#  if PLASMA_ENABLED(PLASMA_COMPILER_CLANG)
+  // if the rcCompiler path is empty or points to a non existant file, try to autodetect it
+  if ((preferences->m_CompilerPreferences.m_sRcCompiler.IsEmpty() || !plOSFile::ExistsFile(preferences->m_CompilerPreferences.m_sRcCompiler)))
+  {
+    plStringBuilder rcPath;
+    HKEY hInstalledRoots = nullptr;
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots", 0, KEY_READ, &hInstalledRoots) == ERROR_SUCCESS)
+    {
+      PLASMA_SCOPE_EXIT(RegCloseKey(hInstalledRoots));
+      DWORD pathLengthInBytes = 0;
+      plDynamicArray<wchar_t> path;
+      if (RegGetValueW(hInstalledRoots, nullptr, L"KitsRoot10", RRF_RT_REG_SZ, nullptr, nullptr, &pathLengthInBytes) == ERROR_SUCCESS)
+      {
+        path.SetCount(pathLengthInBytes / sizeof(wchar_t));
+        if (RegGetValueW(hInstalledRoots, nullptr, L"KitsRoot10", RRF_RT_REG_SZ, nullptr, path.GetData(), &pathLengthInBytes) == ERROR_SUCCESS)
+        {
+          plStringBuilder windowsSdkBinPath;
+          windowsSdkBinPath = plStringWChar(path.GetData());
+          windowsSdkBinPath.MakeCleanPath();
+          windowsSdkBinPath.AppendPath("bin");
+
+          plDynamicArray<plFileStats> folders;
+          plOSFile::GatherAllItemsInFolder(folders, windowsSdkBinPath, plFileSystemIteratorFlags::ReportFolders);
+
+          folders.Sort([](const plFileStats& a, const plFileStats& b) { return a.m_sName > b.m_sName; });
+
+          for (const plFileStats& folder : folders)
+          {
+            if (!folder.m_sName.StartsWith("10."))
+            {
+              continue;
+            }
+            rcPath = windowsSdkBinPath;
+            rcPath.AppendPath(folder.m_sName);
+            rcPath.AppendPath("x64/rc.exe");
+            if (plOSFile::ExistsFile(rcPath))
+            {
+              break;
+            }
+            rcPath.Clear();
+          }
+        }
+      }
+    }
+    if (!rcPath.IsEmpty())
+    {
+      preferences->m_CompilerPreferences.m_sRcCompiler = rcPath;
+    }
+  }
+
+  plString clangVersion;
+
+  wchar_t* pProgramFiles = nullptr;
+  if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, nullptr, &pProgramFiles)))
+  {
+    plStringBuilder clangDefaultPath;
+    clangDefaultPath = plStringWChar(pProgramFiles);
+    CoTaskMemFree(pProgramFiles);
+    pProgramFiles = nullptr;
+
+    clangDefaultPath.AppendPath("LLVM/bin/clang.exe");
+    clangDefaultPath.MakeCleanPath();
+    plStringBuilder clangCppDefaultPath = clangDefaultPath;
+    clangCppDefaultPath.ReplaceLast(".exe", "++.exe");
+
+    plStringView clangMajorSdkVersion = PLASMA_PP_STRINGIFY(__clang_major__) ".";
+    if (TestCompilerExecutable(clangDefaultPath, &clangVersion).Succeeded() && TestCompilerExecutable(clangCppDefaultPath).Succeeded() && clangVersion.StartsWith(clangMajorSdkVersion))
+    {
+      plStringBuilder clangNiceName;
+      clangNiceName.Format("Clang (system default = {})", clangVersion);
+      s_MachineSpecificCompilers.PushBack({clangNiceName, plCompiler::Clang, clangDefaultPath, clangCppDefaultPath, false});
+    }
+  }
+#  endif
+#endif
+
+
+#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+  AddCompilerVersions(s_MachineSpecificCompilers, plCppProject::GetSdkCompiler(), plCppProject::GetSdkCompilerMajorVersion());
+#endif
+
+#if PLASMA_ENABLED(PLASMA_COMPILER_CLANG)
+  s_MachineSpecificCompilers.PushBack({"Clang (Custom)", plCompiler::Clang, "", "", true});
+#endif
+
+#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX) && PLASMA_ENABLED(PLASMA_COMPILER_GCC)
+  s_MachineSpecificCompilers.PushBack({"Gcc (Custom)", plCompiler::Gcc, "", "", true});
+#endif
+
+  if (preferences->m_CompilerPreferences.m_Compiler != sdkCompiler)
+  {
+    plStringBuilder incompatibleCompilerName = u8"⚠ ";
+    incompatibleCompilerName.Format(u8"⚠ {} (incompatible)", plCppProject::CompilerToString(preferences->m_CompilerPreferences.m_Compiler));
+    s_MachineSpecificCompilers.PushBack(
+      {incompatibleCompilerName,
+        preferences->m_CompilerPreferences.m_Compiler,
+        preferences->m_CompilerPreferences.m_sCCompiler,
+        preferences->m_CompilerPreferences.m_sCppCompiler,
+        preferences->m_CompilerPreferences.m_bCustomCompiler});
+  }
+}
+
+plResult plCppProject::ForceSdkCompatibleCompiler()
+{
+  plCppProject* preferences = plPreferences::QueryPreferences<plCppProject>();
+
+  plCompiler::Enum sdkCompiler = GetSdkCompiler();
+  for (auto& compiler : s_MachineSpecificCompilers)
+  {
+    if (!compiler.m_bIsCustom && compiler.m_Compiler == sdkCompiler)
+    {
+      preferences->m_CompilerPreferences.m_Compiler = sdkCompiler;
+      preferences->m_CompilerPreferences.m_sCCompiler = compiler.m_sCCompiler;
+      preferences->m_CompilerPreferences.m_sCppCompiler = compiler.m_sCppCompiler;
+      preferences->m_CompilerPreferences.m_bCustomCompiler = compiler.m_bIsCustom;
+
+      return PLASMA_SUCCESS;
+    }
+  }
+
+  return PLASMA_FAILURE;
+}
+
+plCppProject::~plCppProject() = default;

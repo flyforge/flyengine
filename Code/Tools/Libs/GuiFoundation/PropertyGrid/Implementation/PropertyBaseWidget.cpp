@@ -874,7 +874,7 @@ void plQtEmbeddedClassPropertyWidget::FlushQueuedChanges()
 plQtPropertyTypeWidget::plQtPropertyTypeWidget(bool bAddCollapsibleGroup)
   : plQtPropertyWidget()
 {
-  m_pLayout = new QHBoxLayout(this);
+  m_pLayout = new QVBoxLayout(this);
   m_pLayout->setContentsMargins(0, 0, 0, 0);
   setLayout(m_pLayout);
   m_pGroup = nullptr;
@@ -883,7 +883,7 @@ plQtPropertyTypeWidget::plQtPropertyTypeWidget(bool bAddCollapsibleGroup)
   if (bAddCollapsibleGroup)
   {
     m_pGroup = new plQtCollapsibleGroupBox(this);
-    m_pGroupLayout = new QHBoxLayout(nullptr);
+    m_pGroupLayout = new QVBoxLayout(nullptr);
     m_pGroupLayout->setSpacing(1);
     m_pGroupLayout->setContentsMargins(5, 0, 0, 0);
     m_pGroup->GetContent()->setLayout(m_pGroupLayout);
@@ -911,7 +911,7 @@ void plQtPropertyTypeWidget::SetSelection(const plHybridArray<plPropertySelectio
 
   plQtPropertyWidget::SetSelection(items);
 
-  QHBoxLayout* pLayout = m_pGroup != nullptr ? m_pGroupLayout : m_pLayout;
+  QVBoxLayout* pLayout = m_pGroup != nullptr ? m_pGroupLayout : m_pLayout;
   QWidget* pOwner = m_pGroup != nullptr ? m_pGroup->GetContent() : this;
   if (m_pTypeWidget)
   {

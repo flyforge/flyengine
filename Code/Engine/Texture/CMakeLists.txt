@@ -20,6 +20,6 @@ target_link_libraries(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME} PUBLIC BUILDSYSTEM_HAS_TEXTURE)
 
 if(PLASMA_CMAKE_PLATFORM_LINUX)
-  set(THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/${PLASMA_SUBMODULE_PREFIX_PATH}/Code/ThirdParty")
+  set(THIRDPARTY_DIR "${PLASMA_ROOT}/Code/ThirdParty")
   target_include_directories(${PROJECT_NAME} PRIVATE "${THIRDPARTY_DIR}/DirectXMath/include" "${THIRDPARTY_DIR}/sal")
 endif()
