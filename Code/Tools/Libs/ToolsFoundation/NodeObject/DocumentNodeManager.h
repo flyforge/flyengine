@@ -72,7 +72,7 @@ public:
     Rect,
     RoundRect,
     Arrow,
-    Default = Circle
+    Default = Rect
   };
 
   plPin(Type type, plStringView sName, const plColorGammaUB& color, const plDocumentObject* pObject)

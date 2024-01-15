@@ -142,9 +142,50 @@ void plQtNodeView::resizeEvent(QResizeEvent* event)
   UpdateView();
 }
 
+void plQtNodeView::drawBackground(QPainter *painter, const QRectF &r)
+{
+  QGraphicsView::drawBackground(painter, r);
+
+  QPen pfine(plToQtColor(plColorScheme::GetColor(plColorScheme::Black, 9)), 1.0);
+
+  painter->setPen(pfine);
+  DrawGrid(painter, 15);
+
+  QPen p(plToQtColor(plColorScheme::GetColor(plColorScheme::Gray, 1)), 1.0);
+
+  painter->setPen(p);
+  DrawGrid(painter, 150);
+}
+
 void plQtNodeView::UpdateView()
 {
   QRectF sceneRect(m_ViewPos.x(), m_ViewPos.y(), width() / m_ViewScale.x(), height() / m_ViewScale.y());
   setSceneRect(sceneRect);
   fitInView(sceneRect, Qt::KeepAspectRatio);
+}
+
+void plQtNodeView::DrawGrid(QPainter *painter, const double gridStep)
+{
+  const QRectF sceneRect(m_ViewPos.x(), m_ViewPos.y(), width() / m_ViewScale.x(), height() / m_ViewScale.y());
+  const QPointF topLeft = sceneRect.topLeft();
+  const QPointF bottomRight = sceneRect.bottomRight();
+
+  const double left = plMath::Floor(topLeft.x() / gridStep - 0.5);
+  const double right = plMath::Floor(bottomRight.x() / gridStep + 1.0);
+  const double bottom = plMath::Floor(topLeft.y() / gridStep - 0.5);
+  const double top = plMath::Floor(bottomRight.y() / gridStep + 1.0);
+
+  // vertical lines
+  for (int xi = static_cast<int>(left); xi <= static_cast<int>(right); ++xi)
+  {
+    QLineF line(xi * gridStep, bottom * gridStep, xi * gridStep, top * gridStep);
+    painter->drawLine(line);
+  }
+
+  // horizontal lines
+  for (int yi = static_cast<int>(bottom); yi <= static_cast<int>(top); ++yi)
+  {
+    QLineF line(left * gridStep, yi * gridStep, right * gridStep, yi * gridStep);
+    painter->drawLine(line);
+  }
 }

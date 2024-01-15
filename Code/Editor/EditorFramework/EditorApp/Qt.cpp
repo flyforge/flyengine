@@ -46,29 +46,30 @@ void plQtEditorApp::SetStyleSheet()
 {
   QPalette palette;
 
-  plColorGammaUB highlightColor = plColorScheme::DarkUI(plColorScheme::Cyan);
-  plColorGammaUB highlightColorDisabled = plColorScheme::DarkUI(plColorScheme::Cyan) * 0.5f;
-  plColorGammaUB linkVisitedColor = plColorScheme::LightUI(plColorScheme::Cyan);
+  plColorGammaUB lightColor = plColorScheme::LightUI(plColorScheme::PlasmaBranding);
+  plColorGammaUB highlightColor = plColorScheme::DarkUI(plColorScheme::PlasmaBranding);
+  plColorGammaUB highlightColorDisabled = plColorScheme::DarkUI(plColorScheme::PlasmaBranding) * 0.5f;
+  plColorGammaUB linkVisitedColor = plColorScheme::LightUI(plColorScheme::PlasmaBranding);
 
-  QApplication::setStyle(QStyleFactory::create("fusion"));
+  //QApplication::setStyle(QStyleFactory::create("fusion"));
 
   QBrush NoRoleBrush(QColor(0, 0, 0), Qt::NoBrush);
   palette.setBrush(QPalette::NoRole, NoRoleBrush);
 
   palette.setColor(QPalette::WindowText, QColor(255, 255, 255));          // labels, tabs, property grid
   palette.setColor(QPalette::Button, QColor(51, 51, 51));                 // buttons, toolbuttons, dashboard background
-  palette.setColor(QPalette::Light, QColor(81, 58, 47));                  // lines between tabs, inactive tab gradient
+  palette.setColor(QPalette::Light, QColor(80, 80, 80));                  // lines between tabs, inactive tab gradient
   palette.setColor(QPalette::Dark, QColor(0, 0, 0));                      // line below active window highlight
-  palette.setColor(QPalette::Mid, QColor(90, 90, 90));                    // color of the box around component properties (collapsible group box)
+  palette.setColor(QPalette::Mid, QColor(60, 60, 60));                    // color of the box around component properties (collapsible group box)
   palette.setColor(QPalette::Text, QColor(204, 204, 204));                // scene graph, values in spin boxes, checkmarks
   palette.setColor(QPalette::ButtonText, QColor(204, 204, 204));          // menus, comboboxes, headers
   palette.setColor(QPalette::Base, QColor(24, 24, 24));                   // background inside complex windows (scenegraph)
   palette.setColor(QPalette::Window, QColor(42, 42, 42));                 // window borders, toolbars
   palette.setColor(QPalette::Shadow, QColor(70, 70, 70));                 // background color for arrays in property grids
-  palette.setColor(QPalette::Highlight, plToQtColor(highlightColor));     // selected items
-  palette.setColor(QPalette::HighlightedText, QColor(0, 0, 0));           // text of selected items
+  palette.setColor(QPalette::Highlight, plToQtColor(highlightColor));            // selected items
+  palette.setColor(QPalette::HighlightedText, plToQtColor(linkVisitedColor));      // text of selected items
   palette.setColor(QPalette::Link, QColor(104, 205, 254));                // manipulator links in property grid
-  palette.setColor(QPalette::LinkVisited, plToQtColor(linkVisitedColor)); // manipulator links in property grid when active
+  palette.setColor(QPalette::LinkVisited, plToQtColor(linkVisitedColor));        // manipulator links in property grid when active
   palette.setColor(QPalette::AlternateBase, QColor(49, 49, 49));          // second base color, mainly used for alternate row colors
   palette.setColor(QPalette::PlaceholderText, QColor(142, 142, 142));     // text in search fields
 

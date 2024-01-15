@@ -80,12 +80,16 @@ void plQtPin::SetPin(const plPin& pin)
 
   {
     QPainterPath p;
+    const int rectShrink = 1;
+
     switch (m_pPin->m_Shape)
     {
       case plPin::Shape::Circle:
         p.addEllipse(bounds);
         break;
       case plPin::Shape::Rect:
+        bounds.adjust(rectShrink, rectShrink, -rectShrink, -rectShrink);
+        m_PinCenter = bounds.center();
         p.addRect(bounds);
         break;
       case plPin::Shape::RoundRect:

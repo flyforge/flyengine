@@ -167,7 +167,7 @@ void plQtNode::UpdateGeometry()
 
   {
     QPainterPath p;
-    p.addRoundedRect(-5, -3, w + 10, maxheight + 10, 5, 5);
+    p.addRect(-5, -3, w + 10, maxheight + 10);
     setPath(p);
   }
 }
@@ -336,9 +336,9 @@ void plQtNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
   }
   else
   {
-    painter->setPen(pen());
-
-    labelColor = palette.buttonText().color();
+  //   painter->setPen(pen());
+  //
+     labelColor = palette.buttonText().color();
   }
 
   // Label

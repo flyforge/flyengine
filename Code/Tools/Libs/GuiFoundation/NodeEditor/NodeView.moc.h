@@ -24,8 +24,12 @@ protected:
   virtual void contextMenuEvent(QContextMenuEvent* event) override;
   virtual void resizeEvent(QResizeEvent*) override;
 
+  void drawBackground(QPainter *painter, const QRectF &r) override;
+
 private:
   void UpdateView();
+
+  void DrawGrid(QPainter *painter, const double gridStep);
 
 private:
   plQtNodeScene* m_pScene;

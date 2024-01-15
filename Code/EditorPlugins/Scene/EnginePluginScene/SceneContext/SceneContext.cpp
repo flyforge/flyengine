@@ -66,7 +66,7 @@ void plSceneContext::DrawSelectionBounds(const plViewHandle& hView)
 
     if (bounds.IsValid())
     {
-      plDebugRenderer::DrawLineBoxCorners(hView, bounds.GetBox(), 0.25f, plColorScheme::LightUI(plColorScheme::Yellow));
+      plDebugRenderer::DrawLineBoxCorners(hView, bounds.GetBox(), 0.25f, plColorScheme::LightUI(plColorScheme::PlasmaBranding));
     }
   }
 }
