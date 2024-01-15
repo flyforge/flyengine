@@ -59,13 +59,14 @@ public:
     enum Enum
     {
       DirectionArrows = PLASMA_BIT(0), ///< Draw an arrow to indicate the connection's direction. Only works with straight lines atm.
-
+      Debugging = PLASMA_BIT(1),
       Default = 0
     };
 
     struct Bits
     {
       StorageType DirectionArrows : 1;
+      StorageType Debugging : 1;
     };
   };
 

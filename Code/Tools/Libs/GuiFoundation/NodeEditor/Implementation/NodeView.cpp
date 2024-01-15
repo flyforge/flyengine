@@ -17,6 +17,7 @@ plQtNodeView::plQtNodeView(QWidget* parent)
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   m_ViewPos = QPointF(0, 0);
   m_ViewScale = QPointF(1, 1);
+\
 }
 
 plQtNodeView::~plQtNodeView() {}
@@ -155,6 +156,8 @@ void plQtNodeView::drawBackground(QPainter *painter, const QRectF &r)
 
   painter->setPen(p);
   DrawGrid(painter, 150);
+
+  UpdateView();
 }
 
 void plQtNodeView::UpdateView()

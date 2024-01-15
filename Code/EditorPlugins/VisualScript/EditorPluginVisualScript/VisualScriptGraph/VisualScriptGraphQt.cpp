@@ -240,6 +240,9 @@ plQtVisualScriptNodeScene::plQtVisualScriptNodeScene(QObject* pParent /*= nullpt
   constexpr int iconSize = 32;
   m_CoroutineIcon = QIcon(":/EditorPluginVisualScript/Coroutine.svg").pixmap(QSize(iconSize, iconSize));
   m_LoopIcon = QIcon(":/EditorPluginVisualScript/Loop.svg").pixmap(QSize(iconSize, iconSize));
+
+
+  SetConnectionDecorationFlags(plQtNodeScene::ConnectionDecorationFlags::Debugging);
 }
 
 plQtVisualScriptNodeScene::~plQtVisualScriptNodeScene()

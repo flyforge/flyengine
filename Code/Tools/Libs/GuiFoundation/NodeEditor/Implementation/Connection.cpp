@@ -273,5 +273,16 @@ void plQtConnection::paint(QPainter* painter, const QStyleOptionGraphicsItem* op
   }
 
   painter->drawPath(path());
+
+  if (decorationFlags.IsSet(plQtNodeScene::ConnectionDecorationFlags::Debugging))
+  {
+    const float offset = fmod(plTime::Now().GetSeconds(), 1.0f);
+    const qreal segments = path().length() / 16;
+
+    for (qreal length = 0; length < segments + 0.0005f; ++length)
+    {
+      painter->drawEllipse(path().pointAtPercent(path().percentAtLength((length + offset) * 16)), 2, 2);
+    }
+  }
 }
 

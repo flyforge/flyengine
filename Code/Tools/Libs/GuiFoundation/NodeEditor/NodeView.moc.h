@@ -24,7 +24,7 @@ protected:
   virtual void contextMenuEvent(QContextMenuEvent* event) override;
   virtual void resizeEvent(QResizeEvent*) override;
 
-  void drawBackground(QPainter *painter, const QRectF &r) override;
+  virtual void drawBackground(QPainter *painter, const QRectF &r) override;
 
 private:
   void UpdateView();
