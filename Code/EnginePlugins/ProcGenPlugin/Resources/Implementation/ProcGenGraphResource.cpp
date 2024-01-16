@@ -57,7 +57,7 @@ plResourceLoadDesc plProcGenGraphResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plProcGenGraphResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plProcGenGraphResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

@@ -41,7 +41,7 @@ plResourceLoadDesc plStateMachineResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plStateMachineResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plStateMachineResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plStateMachineResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

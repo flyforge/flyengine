@@ -17,7 +17,7 @@ PrintImplementation::PrintImplementation()
 void PrintImplementation::Print(const plFormatString& text)
 {
   plStringBuilder tmp;
-  const char* szFormattedText = text.GetText(tmp);
+  plStringView sFormattedText = text.GetText(tmp);
 
-  plLog::Info(szFormattedText);
+  plLog::Info(sFormattedText);
 }

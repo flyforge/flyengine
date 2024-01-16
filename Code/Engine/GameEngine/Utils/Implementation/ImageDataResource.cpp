@@ -35,7 +35,7 @@ plResourceLoadDesc plImageDataResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plImageDataResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plImageDataResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plImageDataResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

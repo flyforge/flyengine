@@ -29,7 +29,7 @@ plResourceLoadDesc plBlackboardTemplateResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plBlackboardTemplateResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plBlackboardTemplateResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plBlackboardTemplateResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

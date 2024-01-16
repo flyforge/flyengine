@@ -50,7 +50,7 @@ plResourceLoadDesc plAnimationClipResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plAnimationClipResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plAnimationClipResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plAnimationClipResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

@@ -82,7 +82,7 @@ plResourceLoadDesc plDecalAtlasResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plDecalAtlasResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plDecalAtlasResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plDecalAtlasResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

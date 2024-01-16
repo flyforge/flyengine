@@ -39,7 +39,7 @@ plResourceLoadDesc plColorGradientResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plColorGradientResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plColorGradientResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plColorGradientResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

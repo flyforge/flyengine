@@ -51,7 +51,7 @@ void plQtEditorApp::SetStyleSheet()
   plColorGammaUB highlightColorDisabled = plColorScheme::DarkUI(plColorScheme::PlasmaBranding) * 0.5f;
   plColorGammaUB linkVisitedColor = plColorScheme::LightUI(plColorScheme::PlasmaBranding);
 
-  //QApplication::setStyle(QStyleFactory::create("fusion"));
+  QApplication::setStyle(QStyleFactory::create("fusion"));
 
   QBrush NoRoleBrush(QColor(0, 0, 0), Qt::NoBrush);
   palette.setBrush(QPalette::NoRole, NoRoleBrush);

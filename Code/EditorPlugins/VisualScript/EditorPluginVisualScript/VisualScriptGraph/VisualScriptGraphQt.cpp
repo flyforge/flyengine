@@ -241,12 +241,13 @@ plQtVisualScriptNodeScene::plQtVisualScriptNodeScene(QObject* pParent /*= nullpt
   m_CoroutineIcon = QIcon(":/EditorPluginVisualScript/Coroutine.svg").pixmap(QSize(iconSize, iconSize));
   m_LoopIcon = QIcon(":/EditorPluginVisualScript/Loop.svg").pixmap(QSize(iconSize, iconSize));
 
-
-  SetConnectionDecorationFlags(plQtNodeScene::ConnectionDecorationFlags::Debugging);
+  plGameObjectDocument::s_GameObjectDocumentEvents.AddEventHandler(plMakeDelegate(&plQtVisualScriptNodeScene::GameObjectDocumentEventHandler, this));
 }
 
 plQtVisualScriptNodeScene::~plQtVisualScriptNodeScene()
 {
+  plGameObjectDocument::s_GameObjectDocumentEvents.RemoveEventHandler(plMakeDelegate(&plQtVisualScriptNodeScene::GameObjectDocumentEventHandler, this));
+
   if (m_pManager != nullptr)
   {
     static_cast<const plVisualScriptNodeManager*>(m_pManager)->m_NodeChangedEvent.RemoveEventHandler(plMakeDelegate(&plQtVisualScriptNodeScene::NodeChangedHandler, this));
@@ -258,6 +259,25 @@ void plQtVisualScriptNodeScene::InitScene(const plDocumentNodeManager* pManager)
   plQtNodeScene::InitScene(pManager);
 
   static_cast<const plVisualScriptNodeManager*>(pManager)->m_NodeChangedEvent.AddEventHandler(plMakeDelegate(&plQtVisualScriptNodeScene::NodeChangedHandler, this));
+}
+
+void plQtVisualScriptNodeScene::GameObjectDocumentEventHandler(const plGameObjectDocumentEvent& e)
+{
+  switch (e.m_Type)
+  {
+    case plGameObjectDocumentEvent::Type::GameMode_StartingSimulate:
+    case plGameObjectDocumentEvent::Type::GameMode_StartingPlay:
+    case plGameObjectDocumentEvent::Type::GameMode_StartingExternal:
+    {
+      SetConnectionDecorationFlags(plQtNodeScene::ConnectionDecorationFlags::Debugging);
+      break;
+    }
+    case plGameObjectDocumentEvent::Type::GameMode_Stopped:
+    {
+      SetConnectionDecorationFlags(plQtNodeScene::ConnectionDecorationFlags::Default);
+      break;
+    }
+  }
 }
 
 void plQtVisualScriptNodeScene::NodeChangedHandler(const plDocumentObject* pObject)

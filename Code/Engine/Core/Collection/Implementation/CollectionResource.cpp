@@ -160,7 +160,7 @@ plResourceLoadDesc plCollectionResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plCollectionResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plCollectionResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plCollectionResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

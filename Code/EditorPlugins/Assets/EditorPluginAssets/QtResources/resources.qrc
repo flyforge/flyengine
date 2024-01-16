@@ -28,6 +28,7 @@
     <file>StateMachine.svg</file>
     <file>BlackboardTemplate.svg</file>
     <file>Directory.svg</file>
+    <file>CustomData.svg</file>
   </qresource>
   <qresource prefix="AssetIcons">
     <file>All.svg</file>

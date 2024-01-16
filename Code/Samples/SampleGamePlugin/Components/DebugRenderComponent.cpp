@@ -25,6 +25,7 @@ PLASMA_BEGIN_COMPONENT_TYPE(DebugRenderComponent, 2, plComponentMode::Static)
     PLASMA_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White)),
     PLASMA_ACCESSOR_PROPERTY("Texture", GetTextureFile, SetTextureFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D")),
     PLASMA_BITFLAGS_MEMBER_PROPERTY("Render", DebugRenderComponentMask, m_RenderTypes)->AddAttributes(new plDefaultValueAttribute(DebugRenderComponentMask::Box)),
+    PLASMA_ACCESSOR_PROPERTY("CustomData", GetCustomDataSampleResource, SetCustomDataSampleResource)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_CustomData")),
   }
   PLASMA_END_PROPERTIES;
 
@@ -122,6 +123,26 @@ void DebugRenderComponent::SetRandomColor()
   m_Color.b = static_cast<float>(rng.DoubleMinMax(0.2f, 1.0f));
 }
 
+void DebugRenderComponent::SetCustomDataSampleResource(const char* szFile)
+{
+  CustomDataSampleResourceHandle hCustomData;
+
+  if (!plStringUtils::IsNullOrEmpty(szFile))
+  {
+    hCustomData = plResourceManager::LoadResource<CustomDataSampleResource>(szFile);
+  }
+
+  m_hCustomData = hCustomData;
+}
+
+const char* DebugRenderComponent::GetCustomDataSampleResource() const
+{
+  if (m_hCustomData.IsValid())
+    return m_hCustomData.GetResourceID();
+
+  return "";
+}
+
 void DebugRenderComponent::Update()
 {
   const plTransform ownerTransform = GetOwner()->GetGlobalTransform();
@@ -185,5 +206,15 @@ void DebugRenderComponent::Update()
     }
 
     plDebugRenderer::DrawTexturedTriangles(GetWorld(), triangles, m_Color, m_hTexture);
+  }
+
+  // accessing custom data resources
+  if (m_hCustomData.IsValid())
+  {
+    plResourceLock<CustomDataSampleResource> pCustomDataResource(m_hCustomData, plResourceAcquireMode::BlockTillLoaded);
+
+    const CustomDataSample* pCustomData = pCustomDataResource->GetData();
+
+    plDebugRenderer::Draw3DText(GetWorld(), plFmt(pCustomData->m_sText), GetOwner()->GetGlobalPosition(), pCustomData->m_Color, pCustomData->m_iSize);
   }
 }

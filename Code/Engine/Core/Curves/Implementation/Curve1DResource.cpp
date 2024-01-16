@@ -39,7 +39,7 @@ plResourceLoadDesc plCurve1DResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plCurve1DResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plCurve1DResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plCurve1DResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

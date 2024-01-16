@@ -128,7 +128,7 @@ static void AddStats(plStreamReader& inout_stream, plUInt32& ref_uiVertices, plU
 
 plResourceLoadDesc plJoltMeshResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plJoltMeshResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plJoltMeshResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

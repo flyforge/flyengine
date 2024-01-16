@@ -129,7 +129,7 @@ plResourceLoadDesc plPrefabResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plPrefabResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plPrefabResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plPrefabResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

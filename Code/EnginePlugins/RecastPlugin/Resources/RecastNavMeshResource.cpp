@@ -164,7 +164,7 @@ plResourceLoadDesc plRecastNavMeshResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plRecastNavMeshResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plRecastNavMeshResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plRecastNavMeshResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

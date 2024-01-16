@@ -536,6 +536,29 @@ static void ConfigureBlackboardTemplateAsset()
   }
 }
 
+static void ConfigureCustomDataAsset()
+{
+  // Menu Bar
+  {
+    plActionMapManager::RegisterActionMap("CustomDataAssetMenuBar").IgnoreResult();
+
+    plStandardMenus::MapActions("CustomDataAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+    plProjectActions::MapActions("CustomDataAssetMenuBar");
+    plDocumentActions::MapActions("CustomDataAssetMenuBar", "Menu.File", false);
+    plAssetActions::MapMenuActions("CustomDataAssetMenuBar", "Menu.File");
+    plCommandHistoryActions::MapActions("CustomDataAssetMenuBar", "Menu.Edit");
+    plEditActions::MapActions("CustomDataAssetMenuBar", "Menu.Edit", false, false);
+  }
+
+  // Tool Bar
+  {
+    plActionMapManager::RegisterActionMap("CustomDataAssetToolBar").IgnoreResult();
+    plDocumentActions::MapActions("CustomDataAssetToolBar", "", true);
+    plCommandHistoryActions::MapActions("CustomDataAssetToolBar", "");
+    plAssetActions::MapToolBarActions("CustomDataAssetToolBar", true);
+  }
+}
+
 plVariant CustomAction_CreateShaderFromTemplate(const plDocument* pDoc)
 {
   plQtShaderTemplateDlg dlg(nullptr, pDoc);
@@ -578,6 +601,7 @@ void OnLoadPlugin()
   ConfigureImageDataAsset();
   ConfigureStateMachineAsset();
   ConfigureBlackboardTemplateAsset();
+  ConfigureCustomDataAsset();
 
   plDocumentManager::s_CustomActions["CustomAction_CreateShaderFromTemplate"] = CustomAction_CreateShaderFromTemplate;
 }

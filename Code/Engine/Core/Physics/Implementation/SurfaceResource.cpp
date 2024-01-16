@@ -43,7 +43,7 @@ plResourceLoadDesc plSurfaceResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plSurfaceResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plSurfaceResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plSurfaceResource::UpdateContent", GetResourceIdOrDescription());
 
   m_Interactions.Clear();
 

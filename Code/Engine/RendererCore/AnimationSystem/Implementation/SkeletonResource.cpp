@@ -47,7 +47,7 @@ plResourceLoadDesc plSkeletonResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plSkeletonResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plSkeletonResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plSkeletonResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;

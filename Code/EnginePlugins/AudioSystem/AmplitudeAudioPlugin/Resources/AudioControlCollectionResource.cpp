@@ -509,7 +509,7 @@ plResourceLoadDesc plAmplitudeAudioControlCollectionResource::UnloadData(Unload 
 
 plResourceLoadDesc plAmplitudeAudioControlCollectionResource::UpdateContent(plStreamReader* pStream)
 {
-  PLASMA_LOG_BLOCK("plAmplitudeAudioControlCollectionResource::UpdateContent", GetResourceDescription().GetData());
+  PLASMA_LOG_BLOCK("plAmplitudeAudioControlCollectionResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
