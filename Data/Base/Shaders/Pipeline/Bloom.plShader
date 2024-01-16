@@ -25,7 +25,7 @@ void main(uint3 threadId : SV_DispatchThreadID)
     return;
 
   float3 color = ColorTexture[threadId.xy].rgb;
-  float3 luminance = saturate_16((GetLuminance(color)) * color * BloomIntensity);
+  float3 luminance = saturate_16((GetLuminance(color) - BloomThreshold) * color * BloomIntensity);
 
   Output[threadId.xy] = float4(luminance, Output[threadId.xy].a);
 }
