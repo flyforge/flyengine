@@ -18,6 +18,7 @@ struct PLASMA_GAMEENGINE_DLL plProjectileReaction
   {
     Absorb,      ///< The projectile simply stops and is deleted
     Reflect,     ///< Bounces away along the reflected direction
+    Bounce,      ///< Bounces away along the reflected direction accounting for phyiscs
     Attach,      ///< Stops at the hit point, does not continue further and attaches itself as a child to the hit object
     PassThrough, ///< Continues flying through the geometry (but may spawn prefabs at the intersection points)
 
@@ -64,6 +65,7 @@ public:
 
 protected:
   virtual void OnSimulationStarted() override;
+  void SpawnDeathPrefab();
 
 
   //////////////////////////////////////////////////////////////////////////
@@ -75,13 +77,14 @@ public:
 
   float m_fMetersPerSecond;                                                ///< [ property ] The speed at which the projectile flies
   float m_fGravityMultiplier;                                              ///< [ property ] If 0, the projectile is not affected by gravity.
+  bool m_bSpawnPrefabOnDeath;                                              ///< [ property ]
   plUInt8 m_uiCollisionLayer;                                              ///< [ property ]
   plTime m_MaxLifetime;                                                    ///< [ property ] After this time the projectile is killed, if it didn't die already
   plSurfaceResourceHandle m_hFallbackSurface;                              ///< [ property ]
   plHybridArray<plProjectileSurfaceInteraction, 12> m_SurfaceInteractions; ///< [ property ]
 
-  void SetTimeoutPrefab(const char* szPrefab); // [ property ]
-  const char* GetTimeoutPrefab() const;        // [ property ]
+  void SetPrefab(const char* szPrefab); // [ property ]
+  const char* GetPrefab() const;        // [ property ]
 
   void SetFallbackSurfaceFile(const char* szFile); // [ property ]
   const char* GetFallbackSurfaceFile() const;      // [ property ]
@@ -90,7 +93,7 @@ private:
   void Update();
   void OnTriggered(plMsgComponentInternalTrigger& msg); // [ msg handler ]
 
-  plPrefabResourceHandle m_hTimeoutPrefab; ///< Spawned when the projectile is killed due to m_MaxLifetime coming to an end
+  plPrefabResourceHandle m_hPrefab; ///< Spawned when the projectile is killed
 
   /// \brief If an unknown surface type is hit, the projectile will just delete itself without further interaction
   plInt32 FindSurfaceInteraction(const plSurfaceResourceHandle& hSurface) const;

@@ -13,6 +13,7 @@
 PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProjectileReaction, 1)
   PLASMA_ENUM_CONSTANT(plProjectileReaction::Absorb),
   PLASMA_ENUM_CONSTANT(plProjectileReaction::Reflect),
+  PLASMA_ENUM_CONSTANT(plProjectileReaction::Bounce),
   PLASMA_ENUM_CONSTANT(plProjectileReaction::Attach),
   PLASMA_ENUM_CONSTANT(plProjectileReaction::PassThrough)
 PLASMA_END_STATIC_REFLECTED_ENUM;
@@ -31,14 +32,15 @@ PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plProjectileSurfaceInteraction, plNoBase, 3, 
 }
 PLASMA_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plProjectileComponent, 4, plComponentMode::Dynamic)
+PLASMA_BEGIN_COMPONENT_TYPE(plProjectileComponent, 5, plComponentMode::Dynamic)
 {
   PLASMA_BEGIN_PROPERTIES
   {
     PLASMA_MEMBER_PROPERTY("Speed", m_fMetersPerSecond)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
     PLASMA_MEMBER_PROPERTY("GravityMultiplier", m_fGravityMultiplier),
     PLASMA_MEMBER_PROPERTY("MaxLifetime", m_MaxLifetime)->AddAttributes(new plClampValueAttribute(plTime(), plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("OnTimeoutSpawn", GetTimeoutPrefab, SetTimeoutPrefab)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
+    PLASMA_MEMBER_PROPERTY("SpawnPrefabOnDeath", m_bSpawnPrefabOnDeath)->AddAttributes(new plDefaultValueAttribute(false)),
+    PLASMA_ACCESSOR_PROPERTY("OnDeathPrefab", GetPrefab, SetPrefab)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
     PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
     PLASMA_ACCESSOR_PROPERTY("FallbackSurface", GetFallbackSurfaceFile, SetFallbackSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface")),
     PLASMA_ARRAY_MEMBER_PROPERTY("Interactions", m_SurfaceInteractions),
@@ -85,6 +87,7 @@ plProjectileComponent::plProjectileComponent()
   m_uiCollisionLayer = 0;
   m_fGravityMultiplier = 0.0f;
   m_vVelocity.SetZero();
+  m_bSpawnPrefabOnDeath = false;
 }
 
 plProjectileComponent::~plProjectileComponent() = default;
@@ -190,10 +193,12 @@ void plProjectileComponent::Update()
 
         if (interaction.m_Reaction == plProjectileReaction::Absorb)
         {
+          SpawnDeathPrefab();
+
           GetWorld()->DeleteObjectDelayed(GetOwner()->GetHandle());
           vNewPosition = castResult.m_vPosition;
         }
-        else if (interaction.m_Reaction == plProjectileReaction::Reflect)
+        else if (interaction.m_Reaction == plProjectileReaction::Reflect || interaction.m_Reaction == plProjectileReaction::Bounce)
         {
           /// \todo Should reflect around the actual hit position
           /// \todo Should preserve travel distance while reflecting
@@ -210,6 +215,26 @@ void plProjectileComponent::Update()
           GetOwner()->SetGlobalRotation(qRot * GetOwner()->GetGlobalRotation());
 
           m_vVelocity = qRot * m_vVelocity;
+
+          if(interaction.m_Reaction == plProjectileReaction::Bounce)
+          {
+            plResourceLock<plSurfaceResource> pSurface(hSurface, plResourceAcquireMode::BlockTillLoaded);
+
+            if(pSurface)
+            {
+              m_vVelocity *= pSurface->GetDescriptor().m_fPhysicsRestitution;
+            }
+
+            if(m_vVelocity.GetLength() < 1.0f)
+            {
+              m_vVelocity = plVec3::ZeroVector();
+              m_fGravityMultiplier = 0.0f;
+
+              SpawnDeathPrefab();
+
+              GetWorld()->DeleteObjectDelayed(GetOwner()->GetHandle());
+            }
+          }
         }
         else if (interaction.m_Reaction == plProjectileReaction::Attach)
         {
@@ -246,7 +271,7 @@ void plProjectileComponent::SerializeComponent(plWorldWriter& stream) const
   s << m_fGravityMultiplier;
   s << m_uiCollisionLayer;
   s << m_MaxLifetime;
-  s << m_hTimeoutPrefab;
+  s << m_hPrefab;
 
   // Version 3
   s << m_hFallbackSurface;
@@ -267,6 +292,9 @@ void plProjectileComponent::SerializeComponent(plWorldWriter& stream) const
     // Version 4
     s << ia.m_fDamage;
   }
+
+  // Version 5
+  s << m_bSpawnPrefabOnDeath;
 }
 
 void plProjectileComponent::DeserializeComponent(plWorldReader& stream)
@@ -279,7 +307,7 @@ void plProjectileComponent::DeserializeComponent(plWorldReader& stream)
   s >> m_fGravityMultiplier;
   s >> m_uiCollisionLayer;
   s >> m_MaxLifetime;
-  s >> m_hTimeoutPrefab;
+  s >> m_hPrefab;
 
   if (uiVersion >= 3)
   {
@@ -309,6 +337,11 @@ void plProjectileComponent::DeserializeComponent(plWorldReader& stream)
     {
       s >> ia.m_fDamage;
     }
+  }
+
+  if(uiVersion >= 5)
+  {
+    s >> m_bSpawnPrefabOnDeath;
   }
 }
 
@@ -354,35 +387,44 @@ void plProjectileComponent::OnSimulationStarted()
     PostMessage(msg, m_MaxLifetime);
 
     // make sure the prefab is available when the projectile dies
-    if (m_hTimeoutPrefab.IsValid())
+    if (m_hPrefab.IsValid())
     {
-      plResourceManager::PreloadResource(m_hTimeoutPrefab);
+      plResourceManager::PreloadResource(m_hPrefab);
     }
   }
 
   m_vVelocity = GetOwner()->GetGlobalDirForwards() * m_fMetersPerSecond;
 }
 
-void plProjectileComponent::OnTriggered(plMsgComponentInternalTrigger& msg)
+void plProjectileComponent::SpawnDeathPrefab()
 {
-  if (msg.m_sMessage != s_sSuicide)
-    return;
-
-  if (m_hTimeoutPrefab.IsValid())
+  if(!m_bSpawnPrefabOnDeath)
   {
-    plResourceLock<plPrefabResource> pPrefab(m_hTimeoutPrefab, plResourceAcquireMode::AllowLoadingFallback);
+     return;
+  }
+
+  if (m_hPrefab.IsValid())
+  {
+    plResourceLock<plPrefabResource> pPrefab(m_hPrefab, plResourceAcquireMode::AllowLoadingFallback);
 
     plPrefabInstantiationOptions options;
     options.m_pOverrideTeamID = &GetOwner()->GetTeamID();
 
     pPrefab->InstantiatePrefab(*GetWorld(), GetOwner()->GetGlobalTransform(), options, nullptr);
   }
+}
+void plProjectileComponent::OnTriggered(plMsgComponentInternalTrigger& msg)
+{
+  if (msg.m_sMessage != s_sSuicide)
+    return;
+
+  SpawnDeathPrefab();
 
   GetWorld()->DeleteObjectDelayed(GetOwner()->GetHandle());
 }
 
 
-void plProjectileComponent::SetTimeoutPrefab(const char* szPrefab)
+void plProjectileComponent::SetPrefab(const char* szPrefab)
 {
   plPrefabResourceHandle hPrefab;
 
@@ -391,15 +433,15 @@ void plProjectileComponent::SetTimeoutPrefab(const char* szPrefab)
     hPrefab = plResourceManager::LoadResource<plPrefabResource>(szPrefab);
   }
 
-  m_hTimeoutPrefab = hPrefab;
+  m_hPrefab = hPrefab;
 }
 
-const char* plProjectileComponent::GetTimeoutPrefab() const
+const char* plProjectileComponent::GetPrefab() const
 {
-  if (!m_hTimeoutPrefab.IsValid())
+  if (!m_hPrefab.IsValid())
     return "";
 
-  return m_hTimeoutPrefab.GetResourceID();
+  return m_hPrefab.GetResourceID();
 }
 
 void plProjectileComponent::SetFallbackSurfaceFile(const char* szFile)
