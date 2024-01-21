@@ -84,6 +84,38 @@ void plRectTemplate<Type>::ExpandToInclude(const plRectTemplate<Type>& other)
 }
 
 template <typename Type>
+void plRectTemplate<Type>::ExpandToInclude(const plVec2Template<Type>& other)
+{
+  Type thisRight = Right();
+  Type thisBottom = Bottom();
+
+  if (other.x < x)
+    x = other.x;
+
+  if (other.y < y)
+    y = other.y;
+
+  if (other.x > thisRight)
+    width = other.x - x;
+  else
+    width = thisRight - x;
+
+  if (other.y > thisBottom)
+    height = other.y - y;
+  else
+    height = thisBottom - y;
+}
+
+template <typename Type>
+void plRectTemplate<Type>::Grow(Type xy)
+{
+  x -= xy;
+  y -= xy;
+  width += xy * 2;
+  height += xy * 2;
+}
+
+template <typename Type>
 PLASMA_ALWAYS_INLINE void plRectTemplate<Type>::Clip(const plRectTemplate<Type>& clipRect)
 {
   Type newLeft = plMath::Max<Type>(x, clipRect.x);

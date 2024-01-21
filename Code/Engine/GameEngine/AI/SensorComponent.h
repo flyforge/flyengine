@@ -66,6 +66,22 @@ public:
   /// \brief Returns the list of objects that this sensor has detected during its last update
   plArrayPtr<plGameObjectHandle> GetLastDetectedObjects() const { return m_LastDetectedObjects; }
 
+  /// \brief Updates the sensor state right now.
+  ///
+  /// If the update rate isn't set to 'Never', this is periodically done automatically.
+  /// Otherwise, it has to be called manually to update the state on demand.
+  ///
+  /// Afterwards out_objectsInSensorVolume will contain all objects that were found inside the volume.
+  /// ref_detectedObjects needs to be provided as a temp array, but will not contain a usable result afterwards,
+  /// call GetLastDetectedObjects() instead.
+  ///
+  /// If bPostChangeMsg is true, plMsgSensorDetectedObjectsChanged is posted in case there is a change.
+  /// Physical visibility checks are skipped in case pPhysicsWorldModule is null.
+  ///
+  /// Returns true, if there was a change in detected objects, false if the same objects were detected as last time.
+  bool RunSensorCheck(plPhysicsWorldModuleInterface* pPhysicsWorldModule, plDynamicArray<plGameObject*>& out_objectsInSensorVolume, plDynamicArray<plGameObjectHandle>& ref_detectedObjects, bool bPostChangeMsg) const;
+
+
 protected:
   void UpdateSpatialCategory();
   void UpdateScheduling();

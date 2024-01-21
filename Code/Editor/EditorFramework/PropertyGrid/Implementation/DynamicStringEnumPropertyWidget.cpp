@@ -36,7 +36,7 @@ void plQtDynamicStringEnumPropertyWidget::OnInit()
     m_pWidget->addItem(QString::fromUtf8(val.GetData()));
   }
 
-  if (!plStringUtils::IsNullOrEmpty(m_pEnum->GetStorageFile()))
+  if (!m_pEnum->GetStorageFile().IsEmpty())
   {
     m_pWidget->addItem("< Edit Values... >", QString("<edit>"));
   }

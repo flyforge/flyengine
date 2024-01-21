@@ -150,6 +150,77 @@ plColorGammaUB plSensorComponent::GetColor() const
   return m_Color;
 }
 
+bool plSensorComponent::RunSensorCheck(plPhysicsWorldModuleInterface* pPhysicsWorldModule, plDynamicArray<plGameObject*>& out_objectsInSensorVolume, plDynamicArray<plGameObjectHandle>& ref_detectedObjects, bool bPostChangeMsg) const
+{
+#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+  m_LastOccludedObjectPositions.Clear();
+#endif
+
+  out_objectsInSensorVolume.Clear();
+
+  GetObjectsInSensorVolume(out_objectsInSensorVolume);
+  const plGameObject* pSensorOwner = GetOwner();
+
+  ref_detectedObjects.Clear();
+
+  if (m_bTestVisibility && pPhysicsWorldModule)
+  {
+    const plVec3 rayStart = pSensorOwner->GetGlobalPosition();
+    for (auto pObject : out_objectsInSensorVolume)
+    {
+      const plVec3 rayEnd = pObject->GetGlobalPosition();
+      plVec3 rayDir = rayEnd - rayStart;
+      const float fDistance = rayDir.GetLengthAndNormalize();
+
+      plPhysicsCastResult hitResult;
+      plPhysicsQueryParameters params(m_uiCollisionLayer);
+      params.m_bIgnoreInitialOverlap = true;
+      params.m_ShapeTypes = plPhysicsShapeType::Default;
+
+      // TODO: probably best to expose the plPhysicsShapeType bitflags on the component
+      params.m_ShapeTypes.Remove(plPhysicsShapeType::Rope);
+      params.m_ShapeTypes.Remove(plPhysicsShapeType::Ragdoll);
+      params.m_ShapeTypes.Remove(plPhysicsShapeType::Trigger);
+      params.m_ShapeTypes.Remove(plPhysicsShapeType::Query);
+      params.m_ShapeTypes.Remove(plPhysicsShapeType::Character);
+
+      if (pPhysicsWorldModule->Raycast(hitResult, rayStart, rayDir, fDistance, params))
+      {
+        // hit something in between -> not visible
+#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+        m_LastOccludedObjectPositions.PushBack(rayEnd);
+#endif
+
+        continue;
+      }
+
+      ref_detectedObjects.PushBack(pObject->GetHandle());
+    }
+  }
+  else
+  {
+    for (auto pObject : out_objectsInSensorVolume)
+    {
+      ref_detectedObjects.PushBack(pObject->GetHandle());
+    }
+  }
+
+  ref_detectedObjects.Sort();
+  if (ref_detectedObjects == m_LastDetectedObjects)
+    return false;
+
+  ref_detectedObjects.Swap(m_LastDetectedObjects);
+
+  if (bPostChangeMsg)
+  {
+    plMsgSensorDetectedObjectsChanged msg;
+    msg.m_DetectedObjects = m_LastDetectedObjects;
+    pSensorOwner->PostEventMessage(msg, this, plTime::Zero(), plObjectMsgQueueType::PostAsync);
+  }
+
+  return true;
+}
+
 void plSensorComponent::UpdateSpatialCategory()
 {
   if (!m_sSpatialCategory.IsEmpty())

@@ -47,7 +47,7 @@ public:
   void SetStorageFile(plStringView sFile) { m_sStorageFile = sFile; }
 
   /// \brief The file where values will be stored.
-  const char* GetStorageFile() const { return m_sStorageFile; }
+  plStringView GetStorageFile() const { return m_sStorageFile; }
 
   void ReadFromStorage();
 

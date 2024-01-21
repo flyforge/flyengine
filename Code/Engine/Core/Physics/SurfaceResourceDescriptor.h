@@ -85,6 +85,7 @@ public:
   plHashedString m_sOnCollideInteraction;
   plHashedString m_sSlideInteractionPrefab;
   plHashedString m_sRollInteractionPrefab;
+  plInt8 m_iGroundType = -1; ///< What kind of ground this is for navigation purposes. Ground type properties need to be specified elsewhere, this is just a number.
 
   plHybridArray<plSurfaceInteraction, 16> m_Interactions;
 };
