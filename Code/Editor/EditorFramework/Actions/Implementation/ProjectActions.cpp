@@ -115,7 +115,7 @@ void plProjectActions::RegisterActions()
   s_hCppProjectMenu = PLASMA_REGISTER_MENU("Project.Cpp");
   s_hSetupCppProject = PLASMA_REGISTER_ACTION_1("Project.SetupCppProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::SetupCppProject);
   s_hOpenCppProject = PLASMA_REGISTER_ACTION_1("Project.OpenCppProject", plActionScope::Global, "Project", "Ctrl+Shift+O", plProjectAction, plProjectAction::ButtonType::OpenCppProject);
-  s_hCompileCppProject = PLASMA_REGISTER_ACTION_1("Project.CompileCppProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::CompileCppProject);
+  s_hCompileCppProject = PLASMA_REGISTER_ACTION_1("Project.CompileCppProject", plActionScope::Global, "Project", "Ctrl+Shift+B", plProjectAction, plProjectAction::ButtonType::CompileCppProject);
 
   s_hDocsAndCommunity = PLASMA_REGISTER_ACTION_1("Editor.DocsAndCommunity", plActionScope::Global, "Editor", "", plProjectAction, plProjectAction::ButtonType::ShowDocsAndCommunity);
 }
