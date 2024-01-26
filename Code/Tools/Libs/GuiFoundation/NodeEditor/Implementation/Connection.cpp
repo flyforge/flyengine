@@ -194,7 +194,6 @@ void plQtConnection::UpdateGeometry()
     p.lineTo(offsetStartPoint);
     DrawSubwayPath(p, offsetStartPoint, offsetEndPoint);
     p.lineTo(offsetEndPoint);
-    p.moveTo(offsetEndPoint);
     p.lineTo(endPoint);
   }
   else

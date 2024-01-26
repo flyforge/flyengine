@@ -147,15 +147,23 @@ void plQtNodeView::drawBackground(QPainter *painter, const QRectF &r)
 {
   QGraphicsView::drawBackground(painter, r);
 
-  QPen pfine(plToQtColor(plColorScheme::GetColor(plColorScheme::Black, 9)), 1.0);
+  if(m_ViewScale.manhattanLength() > 1.0)
+  {
+    QPen pfine(plToQtColor(plColorScheme::GetColor(plColorScheme::Black, 9)), 1.0);
 
-  painter->setPen(pfine);
-  DrawGrid(painter, 15);
+    painter->setPen(pfine);
+    DrawGrid(painter, 15);
+  }
 
-  QPen p(plToQtColor(plColorScheme::GetColor(plColorScheme::Gray, 1)), 1.0);
+  if(m_ViewScale.manhattanLength() > 0.1)
+  {
+    double scale = m_ViewScale.manhattanLength() < 0.25 ? 150.0 : 300.0;
 
-  painter->setPen(p);
-  DrawGrid(painter, 150);
+    QPen p(plToQtColor(plColorScheme::GetColor(plColorScheme::Gray, 1)), 1.0);
+
+    painter->setPen(p);
+    DrawGrid(painter, scale);
+  }
 
   UpdateView();
 }
