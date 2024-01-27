@@ -3,8 +3,8 @@
 #include <Foundation/Communication/Telemetry.h>
 #include <GuiFoundation/GuiFoundationDLL.h>
 #include <GuiFoundation/UIServices/UIServices.moc.h>
-#include <Inspector/SubsystemsWidget.moc.h>
 #include <Inspector/MainWindow.moc.h>
+#include <Inspector/SubsystemsWidget.moc.h>
 
 plQtSubsystemsWidget* plQtSubsystemsWidget::s_pWidget = nullptr;
 
@@ -53,7 +53,7 @@ void plQtSubsystemsWidget::UpdateSubSystems()
   Headers.append(" Startup Done ");
   Headers.append(" Dependencies ");
 
-  TableSubsystems->setColumnCount(Headers.size());
+  TableSubsystems->setColumnCount(static_cast<int>(Headers.size()));
 
   TableSubsystems->setHorizontalHeaderLabels(Headers);
 
@@ -66,7 +66,8 @@ void plQtSubsystemsWidget::UpdateSubSystems()
       const SubsystemData& ssd = it.Value();
 
       QLabel* pIcon = new QLabel();
-      pIcon->setPixmap(plQtUiServices::GetCachedPixmapResource(":/Icons/Icons/Subsystem.svg"));
+      QIcon icon = plQtUiServices::GetCachedIconResource(":/Icons/Icons/Subsystem.svg");
+      pIcon->setPixmap(icon.pixmap(QSize(24, 24)));
       pIcon->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
       TableSubsystems->setCellWidget(iRow, 0, pIcon);
 

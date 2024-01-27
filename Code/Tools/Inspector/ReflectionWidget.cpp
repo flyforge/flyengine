@@ -31,7 +31,7 @@ void plQtReflectionWidget::ResetStats()
     Headers.append(" Size (Bytes) ");
     Headers.append(" Plugin ");
 
-    TypeTree->setColumnCount(Headers.size());
+    TypeTree->setColumnCount(static_cast<int>(Headers.size()));
     TypeTree->setHeaderLabels(Headers);
     TypeTree->header()->show();
   }

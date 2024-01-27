@@ -63,7 +63,6 @@ public:
     palette.setColor(QPalette::ToolTipText, QColor(221, 221, 221));
     palette.setColor(QPalette::PlaceholderText, QColor(200, 200, 200).darker());
 
-    palette.setColor(QPalette::Disabled, QPalette::Window, QColor(25, 25, 25));
     palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(128, 128, 128));
     palette.setColor(QPalette::Disabled, QPalette::Button, QColor(35, 35, 35));
     palette.setColor(QPalette::Disabled, QPalette::Text, QColor(105, 105, 105));

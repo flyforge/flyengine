@@ -101,7 +101,7 @@ void plQtDataWidget::ProcessTelemetry(void* pUnuseed)
         while (true)
         {
           plUInt8 uiTemp[1024];
-          const plUInt32 uiRead = msg.GetReader().ReadBytes(uiTemp, 1024);
+          const plUInt64 uiRead = msg.GetReader().ReadBytes(uiTemp, 1024);
 
           if (uiRead == 0)
             break;

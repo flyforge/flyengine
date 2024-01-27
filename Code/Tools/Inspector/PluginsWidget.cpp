@@ -52,7 +52,7 @@ void plQtPluginsWidget::UpdatePlugins()
   Headers.append(" Reloadable ");
   Headers.append(" Dependencies ");
 
-  TablePlugins->setColumnCount(Headers.size());
+  TablePlugins->setColumnCount(static_cast<int>(Headers.size()));
 
   TablePlugins->setHorizontalHeaderLabels(Headers);
 
@@ -63,7 +63,8 @@ void plQtPluginsWidget::UpdatePlugins()
     for (plMap<plString, PluginsData>::Iterator it = m_Plugins.GetIterator(); it.IsValid(); ++it)
     {
       QLabel* pIcon = new QLabel();
-      pIcon->setPixmap(plQtUiServices::GetCachedPixmapResource(":/Icons/Icons/Plugin.svg"));
+      QIcon icon = plQtUiServices::GetCachedIconResource(":/Icons/Icons/Plugin.svg");
+      pIcon->setPixmap(icon.pixmap(QSize(24, 24)));
       pIcon->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
       TablePlugins->setCellWidget(iRow, 0, pIcon);
 

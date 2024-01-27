@@ -34,7 +34,7 @@ void plQtGlobalEventsWidget::ResetStats()
     Headers.append(" # Handlers ");
     Headers.append(" # Handlers Once ");
 
-    TableEvents->setColumnCount(Headers.size());
+    TableEvents->setColumnCount(static_cast<int>(Headers.size()));
 
     TableEvents->setHorizontalHeaderLabels(Headers);
     TableEvents->horizontalHeader()->show();
@@ -98,7 +98,7 @@ void plQtGlobalEventsWidget::UpdateTable(bool bRecreate)
     Headers.append(" # Handlers ");
     Headers.append(" # Handlers Once ");
 
-    TableEvents->setColumnCount(Headers.size());
+    TableEvents->setColumnCount(static_cast<int>(Headers.size()));
 
     TableEvents->setHorizontalHeaderLabels(Headers);
     TableEvents->horizontalHeader()->show();
@@ -111,10 +111,11 @@ void plQtGlobalEventsWidget::UpdateTable(bool bRecreate)
       it.Value().m_iTableRow = iRow;
 
       QLabel* pIcon = new QLabel();
-      pIcon->setPixmap(plQtUiServices::GetCachedPixmapResource(":/Icons/Icons/GlobalEvent.svg"));
+      QIcon icon = plQtUiServices::GetCachedIconResource(":/Icons/Icons/GlobalEvent.svg");
+      pIcon->setPixmap(icon.pixmap(QSize(24, 24)));
       pIcon->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
       TableEvents->setCellWidget(iRow, 0, pIcon);
-
+      
       sTemp.Format("  {0}  ", it.Key());
       TableEvents->setCellWidget(iRow, 1, new QLabel(sTemp.GetData())); // Event
 

@@ -346,7 +346,7 @@ void plQtMainWindow::UpdateAlwaysOnTop()
     if (bOnTop)
       setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     else
-      setWindowFlags(windowFlags() & ~Qt::WindowStaysOnTopHint | Qt::WindowStaysOnBottomHint);
+      setWindowFlags(windowFlags() & ~Qt::WindowStaysOnTopHint);
 
     show();
   }

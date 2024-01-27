@@ -42,7 +42,7 @@ void plQtInputWidget::ClearSlots()
     Headers.append(" Dead Zone ");
     Headers.append(" Flags (Binary) ");
 
-    TableInputSlots->setColumnCount(Headers.size());
+    TableInputSlots->setColumnCount(static_cast<int>(Headers.size()));
 
     TableInputSlots->setHorizontalHeaderLabels(Headers);
     TableInputSlots->horizontalHeader()->show();
@@ -64,7 +64,7 @@ void plQtInputWidget::ClearActions()
     for (plInt32 slot = 0; slot < plInputActionConfig::MaxInputSlotAlternatives; ++slot)
       Headers.append(QString(" Slot %1 ").arg(slot + 1));
 
-    TableInputActions->setColumnCount(Headers.size());
+    TableInputActions->setColumnCount(static_cast<int>(Headers.size()));
 
     TableInputActions->setHorizontalHeaderLabels(Headers);
     TableInputActions->horizontalHeader()->show();
@@ -169,7 +169,7 @@ void plQtInputWidget::UpdateSlotTable(bool bRecreate)
     Headers.append(" Dead Zone ");
     Headers.append(" Flags (Binary) ");
 
-    TableInputSlots->setColumnCount(Headers.size());
+    TableInputSlots->setColumnCount(static_cast<int>(Headers.size()));
 
     TableInputSlots->setHorizontalHeaderLabels(Headers);
     TableInputSlots->horizontalHeader()->show();
@@ -184,7 +184,8 @@ void plQtInputWidget::UpdateSlotTable(bool bRecreate)
       sTemp.Format("  {0}  ", it.Key());
 
       QLabel* pIcon = new QLabel();
-      pIcon->setPixmap(plQtUiServices::GetCachedPixmapResource(":/Icons/Icons/InputSlots.svg"));
+      QIcon icon = plQtUiServices::GetCachedIconResource(":/Icons/Icons/InputSlots.svg");
+      pIcon->setPixmap(icon.pixmap(QSize(24, 24)));
       pIcon->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
       TableInputSlots->setCellWidget(iRow, 0, pIcon);
 
@@ -309,7 +310,7 @@ void plQtInputWidget::UpdateActionTable(bool bRecreate)
     for (plInt32 slot = 0; slot < plInputActionConfig::MaxInputSlotAlternatives; ++slot)
       Headers.append(QString(" Slot %1 ").arg(slot + 1));
 
-    TableInputActions->setColumnCount(Headers.size());
+    TableInputActions->setColumnCount(static_cast<int>(Headers.size()));
 
     TableInputActions->setHorizontalHeaderLabels(Headers);
     TableInputActions->horizontalHeader()->show();
@@ -324,7 +325,8 @@ void plQtInputWidget::UpdateActionTable(bool bRecreate)
       sTemp.Format("  {0}  ", it.Key());
 
       QLabel* pIcon = new QLabel();
-      pIcon->setPixmap(plQtUiServices::GetCachedPixmapResource(":/Icons/Icons/InputActions.svg"));
+      QIcon icon = plQtUiServices::GetCachedIconResource(":/Icons/Icons/InputActions.svg");
+      pIcon->setPixmap(icon.pixmap(QSize(24, 24)));
       pIcon->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
       TableInputActions->setCellWidget(iRow, 0, pIcon);
 
