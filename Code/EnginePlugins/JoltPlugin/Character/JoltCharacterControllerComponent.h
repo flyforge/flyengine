@@ -3,6 +3,7 @@
 #include <Core/World/World.h>
 #include <JoltPlugin/JoltPluginDLL.h>
 #include <JoltPlugin/System/JoltCollisionFiltering.h>
+#include <GameEngine/Physics/CharacterControllerComponent.h>
 
 struct plMsgMoveCharacterController;
 struct plMsgUpdateLocalBounds;
@@ -22,9 +23,9 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltCharacterDebugFlags
 /// It tries not to implement things that are game specific.
 /// It is assumed that most games implement their own character controller to be able to build very specific behavior.
 /// The plJoltDefaultCharacterComponent is an example implementation that shows how this can be achieved on top of this class.
-class PLASMA_JOLTPLUGIN_DLL plJoltCharacterControllerComponent : public plComponent
+class PLASMA_JOLTPLUGIN_DLL plJoltCharacterControllerComponent : public plCharacterControllerComponent
 {
-  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltCharacterControllerComponent, plComponent);
+  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltCharacterControllerComponent, plCharacterControllerComponent);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -87,6 +88,39 @@ public:
   /// \brief The strength with which the character will push against objects that it is running into.
   void SetStrength(float fStrength);                // [ property ]
   float GetStrength() const { return m_fStrength; } // [ property ]
+
+
+  /// \brief Attempts to move the character into the given direction.
+  ///
+  /// Implements the specific constraints, such as colliding with geometry and sliding along walls.
+  /// Should NOT add further functionality, such as gravity. This function applies the result immediately
+  /// and moves the owner object to the final location.
+  virtual void RawMove(const plVec3& vMoveDeltaGlobal) override {}; // [ scriptable ]
+
+  /// \brief Instructs the CC to move in certain directions. An implementation can queue the request for later processing.
+  ///
+  /// It can also add further functionality, such as adding gravity, stair stepping, etc.
+  virtual void MoveCharacter(plMsgMoveCharacterController& msg) override {}; // [ msg handler ]
+
+  /// \brief Teleports the CC to the desired global position. Ignores obstacles on the path.
+  ///
+  /// Careful, the CC may get stuck in the new location, if it is inside static geometry.
+  /// If it teleports into dynamic geometry, the result may also be undesirable.
+  virtual void TeleportCharacter(const plVec3& vGlobalFootPos) override {}; // [ scriptable ]
+
+  /// \brief Checks whether the CC can be teleported to the target position without getting stuck.
+  ///
+  /// This can be used to check before using TeleportCharacter(). It can also be used to check whether a character
+  /// can stand up from a crouching position, by passing a non-zero character height.
+  ///
+  /// If a character height of 0 is passed in, the current height is used.
+  virtual bool IsDestinationUnobstructed(const plVec3& vGlobalFootPos, float fCharacterHeight) override { return false; }; // [ scriptable ]
+
+  /// \brief Checks whether the CC is currently touching the ground.
+  virtual bool IsTouchingGround() override { return true;}; // [ scriptable ]
+
+  /// \brief Checks whether the CC is currently in the crouch state.
+  virtual bool IsCrouching() override { return false; }; // [ scriptable ]
 
 private:
   plAngle m_MaxClimbingSlope = plAngle::Degree(45); // [ property ]
