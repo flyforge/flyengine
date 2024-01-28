@@ -62,6 +62,7 @@ public:
   static plActionDescriptorHandle s_hSetupCppProject;
   static plActionDescriptorHandle s_hOpenCppProject;
   static plActionDescriptorHandle s_hCompileCppProject;
+  static plActionDescriptorHandle s_hRegenerateCppSolution;
 };
 
 ///
@@ -123,6 +124,7 @@ public:
     SetupCppProject,
     OpenCppProject,
     CompileCppProject,
+    RegenerateCppSolution,
     ShowDocsAndCommunity,
     ExportProject,
     PluginSelection,

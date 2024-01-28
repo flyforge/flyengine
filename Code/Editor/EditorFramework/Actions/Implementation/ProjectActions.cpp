@@ -66,6 +66,7 @@ plActionDescriptorHandle plProjectActions::s_hCppProjectMenu;
 plActionDescriptorHandle plProjectActions::s_hSetupCppProject;
 plActionDescriptorHandle plProjectActions::s_hOpenCppProject;
 plActionDescriptorHandle plProjectActions::s_hCompileCppProject;
+plActionDescriptorHandle plProjectActions::s_hRegenerateCppSolution;
 
 void plProjectActions::RegisterActions()
 {
@@ -116,6 +117,7 @@ void plProjectActions::RegisterActions()
   s_hSetupCppProject = PLASMA_REGISTER_ACTION_1("Project.SetupCppProject", plActionScope::Global, "Project", "", plProjectAction, plProjectAction::ButtonType::SetupCppProject);
   s_hOpenCppProject = PLASMA_REGISTER_ACTION_1("Project.OpenCppProject", plActionScope::Global, "Project", "Ctrl+Shift+O", plProjectAction, plProjectAction::ButtonType::OpenCppProject);
   s_hCompileCppProject = PLASMA_REGISTER_ACTION_1("Project.CompileCppProject", plActionScope::Global, "Project", "Ctrl+Shift+B", plProjectAction, plProjectAction::ButtonType::CompileCppProject);
+  s_hRegenerateCppSolution = PLASMA_REGISTER_ACTION_1("Project.RegenerateCppSolution", plActionScope::Global, "Project", "Ctrl+Shift+G", plProjectAction, plProjectAction::ButtonType::RegenerateCppSolution);
 
   s_hDocsAndCommunity = PLASMA_REGISTER_ACTION_1("Editor.DocsAndCommunity", plActionScope::Global, "Editor", "", plProjectAction, plProjectAction::ButtonType::ShowDocsAndCommunity);
 }
@@ -160,6 +162,7 @@ void plProjectActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hSetupCppProject);
   plActionManager::UnregisterAction(s_hOpenCppProject);
   plActionManager::UnregisterAction(s_hCompileCppProject);
+  plActionManager::UnregisterAction(s_hRegenerateCppSolution);
   plActionManager::UnregisterAction(s_hExportProject);
   plActionManager::UnregisterAction(s_hPluginSelection);
 }
@@ -193,6 +196,7 @@ void plProjectActions::MapActions(const char* szMapping)
   pMap->MapAction(s_hSetupCppProject, "Menu.Editor/ProjectCategory/Project.Cpp", 1.0f);
   pMap->MapAction(s_hOpenCppProject, "Menu.Editor/ProjectCategory/Project.Cpp", 2.0f);
   pMap->MapAction(s_hCompileCppProject, "Menu.Editor/ProjectCategory/Project.Cpp", 3.0f);
+  pMap->MapAction(s_hRegenerateCppSolution, "Menu.Editor/ProjectCategory/Project.Cpp", 4.0f);
 
   pMap->MapAction(s_hSettingsCategory, "Menu.Editor", 3.0f);
   //pMap->MapAction(s_hEditorSettingsMenu, "Menu.Editor/SettingsCategory", 1.0f);
@@ -406,6 +410,9 @@ plProjectAction::plProjectAction(const plActionContext& context, const char* szN
     case plProjectAction::ButtonType::CompileCppProject:
       SetIconPath(":/EditorFramework/Icons/VisualStudio.svg");
       break;
+    case plProjectAction::ButtonType::RegenerateCppSolution:
+      SetIconPath(":/EditorFramework/Icons/VisualStudio.svg");
+    break;
     case plProjectAction::ButtonType::SaveProfiling:
       // no icon
       break;
@@ -855,7 +862,29 @@ void plProjectAction::Execute(const plVariant& value)
       }
     }
     break;
+    case plProjectAction::ButtonType::RegenerateCppSolution:
+    {
+      plCppSettings cpp;
+      cpp.Load().IgnoreResult();
 
+      if (!plCppProject::ExistsProjectCMakeListsTxt() || !plCppProject::ExistsSolution(cpp))
+      {
+        plQtCppProjectDlg dlg(nullptr);
+        dlg.exec();
+      }
+      else
+      {
+        if (plCppProject::RunCMake(cpp).Succeeded())
+        {
+          plQtUiServices::GetSingleton()->MessageBoxInformation("Successfully regenerated the C++ solution.");
+        }
+        else
+        {
+          plQtUiServices::GetSingleton()->MessageBoxWarning("Regenerating the solution failed. See log for details.");
+        }
+      }
+    }
+    break;
     case plProjectAction::ButtonType::ShowDocsAndCommunity:
       plQtEditorApp::GetSingleton()->GuiOpenDocsAndCommunity();
       break;
