@@ -76,7 +76,7 @@ struct plJoltSettings
   plVec3 m_vObjectGravity = plVec3(0, 0, -9.81f);
   plVec3 m_vCharacterGravity = plVec3(0, 0, -12.0f);
 
-  plEnum<plJoltSteppingMode> m_SteppingMode = plJoltSteppingMode::SemiFixed;
+  plEnum<plJoltSteppingMode> m_SteppingMode = plJoltSteppingMode::Fixed;
   float m_fFixedFrameRate = 60.0f;
   plUInt32 m_uiMaxSubSteps = 4;
 

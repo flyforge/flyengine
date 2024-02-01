@@ -115,14 +115,16 @@ public:
   /// \brief Returns the radius of the shape. This never changes at runtime.
   virtual float GetShapeRadius() const override;
 
+  virtual bool IsTouchingGround() override { return m_LastGroundState == GroundState::OnGround; }
+
   GroundState GetGroundState() const { return m_LastGroundState; }
   bool IsStandingOnGround() const { return m_LastGroundState == GroundState::OnGround; } // [ scriptable ]
   bool IsSlidingOnGround() const { return m_LastGroundState == GroundState::Sliding; }   // [ scriptable ]
   bool IsInAir() const { return m_LastGroundState == GroundState::InAir; }               // [ scriptable ]
-  bool IsCrouching() const { return m_uiIsCrouchingBit; }                                // [ scriptable ]
+  virtual bool IsCrouching() override { return m_uiIsCrouchingBit; }                     // [ scriptable ]
 
   /// Instantly teleports the character to the target position. Doesn't change its rotation.
-  void TeleportCharacter(const plVec3& vGlobalFootPosition);
+  virtual void TeleportCharacter(const plVec3& vGlobalFootPosition) override;
 
   struct Config
   {
