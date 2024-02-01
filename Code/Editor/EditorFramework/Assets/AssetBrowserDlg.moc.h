@@ -4,12 +4,12 @@
 #include <EditorFramework/ui_AssetBrowserDlg.h>
 #include <QDialog>
 
-class plQtAssetBrowserDlg : public QDialog, public Ui_AssetBrowserDlg
+class PL_EDITORFRAMEWORK_DLL plQtAssetBrowserDlg : public QDialog, public Ui_AssetBrowserDlg
 {
   Q_OBJECT
 
 public:
-  plQtAssetBrowserDlg(QWidget* pParent, const plUuid& preselectedAsset, plStringView sVisibleFilters);
+  plQtAssetBrowserDlg(QWidget* pParent, const plUuid& preselectedAsset, plStringView sVisibleFilters, plStringView sWindowTitle = {});
   plQtAssetBrowserDlg(QWidget* pParent, plStringView sWindowTitle, plStringView sPreselectedFileAbs, plStringView sFileExtensions);
   ~plQtAssetBrowserDlg();
 
@@ -38,4 +38,3 @@ private:
   static plMap<plString, plString> s_PathFilter;
   static plMap<plString, plString> s_TypeFilter;
 };
-

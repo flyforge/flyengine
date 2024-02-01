@@ -261,19 +261,20 @@ plStatus plAssetDocumentGenerator::Import(plStringView sInputFileAbs, plStringVi
   if (!m_SupportedFileTypes.Contains(ext))
     return plStatus(plFmt("Files of type '{}' cannot be imported as '{}' documents.", ext, GetDocumentExtension()));
 
-  plDocument* pGeneratedDoc = nullptr;
-  PL_SUCCEED_OR_RETURN(Generate(sInputFileAbs, sMode, pGeneratedDoc));
+  plHybridArray<plDocument*, 16> pGeneratedDocs;
+  PL_SUCCEED_OR_RETURN(Generate(sInputFileAbs, sMode, pGeneratedDocs));
 
-  PL_ASSERT_DEV(pGeneratedDoc != nullptr, "");
-
-  const plString sDocPath = pGeneratedDoc->GetDocumentPath();
-
-  pGeneratedDoc->SaveDocument(true).LogFailure();
-  pGeneratedDoc->GetDocumentManager()->CloseDocument(pGeneratedDoc);
-
-  if (bOpenDocument)
+  for (plDocument* pDoc : pGeneratedDocs)
   {
-    plQtEditorApp::GetSingleton()->OpenDocumentQueued(sDocPath);
+    const plString sDocPath = pDoc->GetDocumentPath();
+
+    pDoc->SaveDocument(true).LogFailure();
+    pDoc->GetDocumentManager()->CloseDocument(pDoc);
+
+    if (bOpenDocument)
+    {
+      plQtEditorApp::GetSingleton()->OpenDocumentQueued(sDocPath);
+    }
   }
 
   return plStatus(PL_SUCCESS);

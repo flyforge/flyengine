@@ -370,7 +370,7 @@ void plJoltCollisionMeshAssetDocumentGenerator::GetImportModes(plStringView sAbs
   }
 }
 
-plStatus plJoltCollisionMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plJoltCollisionMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments)
 {
   plStringBuilder sOutFile = sInputFileAbs;
   sOutFile.ChangeFileExtension(GetDocumentExtension());
@@ -381,11 +381,13 @@ plStatus plJoltCollisionMeshAssetDocumentGenerator::Generate(plStringView sInput
   plStringBuilder sInputFileRel = sInputFileAbs;
   pApp->MakePathDataDirectoryRelative(sInputFileRel);
 
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
-  if (out_pGeneratedDocument == nullptr)
+  plDocument* pDoc = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  if (pDoc == nullptr)
     return plStatus("Could not create target document");
 
-  plJoltCollisionMeshAssetDocument* pAssetDoc = plDynamicCast<plJoltCollisionMeshAssetDocument*>(out_pGeneratedDocument);
+  out_generatedDocuments.PushBack(pDoc);
+
+  plJoltCollisionMeshAssetDocument* pAssetDoc = plDynamicCast<plJoltCollisionMeshAssetDocument*>(pDoc);
   if (pAssetDoc == nullptr)
     return plStatus("Target document is not a valid plJoltCollisionMeshAssetDocument");
 
@@ -394,7 +396,6 @@ plStatus plJoltCollisionMeshAssetDocumentGenerator::Generate(plStringView sInput
 
   return plStatus(PL_SUCCESS);
 }
-
 //////////////////////////////////////////////////////////////////////////
 
 PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltConvexCollisionMeshAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plJoltConvexCollisionMeshAssetDocumentGenerator>)
@@ -420,7 +421,7 @@ void plJoltConvexCollisionMeshAssetDocumentGenerator::GetImportModes(plStringVie
   }
 }
 
-plStatus plJoltConvexCollisionMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plJoltConvexCollisionMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments)
 {
   plStringBuilder sOutFile = sInputFileAbs;
   sOutFile.ChangeFileExtension(GetDocumentExtension());
@@ -431,11 +432,13 @@ plStatus plJoltConvexCollisionMeshAssetDocumentGenerator::Generate(plStringView 
   plStringBuilder sInputFileRel = sInputFileAbs;
   pApp->MakePathDataDirectoryRelative(sInputFileRel);
 
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
-  if (out_pGeneratedDocument == nullptr)
+  plDocument* pDoc = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  if (pDoc == nullptr)
     return plStatus("Could not create target document");
 
-  plJoltCollisionMeshAssetDocument* pAssetDoc = plDynamicCast<plJoltCollisionMeshAssetDocument*>(out_pGeneratedDocument);
+  out_generatedDocuments.PushBack(pDoc);
+
+  plJoltCollisionMeshAssetDocument* pAssetDoc = plDynamicCast<plJoltCollisionMeshAssetDocument*>(pDoc);
   if (pAssetDoc == nullptr)
     return plStatus("Target document is not a valid plJoltCollisionMeshAssetDocument");
 

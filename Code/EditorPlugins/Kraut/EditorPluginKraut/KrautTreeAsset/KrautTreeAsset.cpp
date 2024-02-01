@@ -235,7 +235,7 @@ void plKrautTreeAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFil
   }
 }
 
-plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments)
 {
   plStringBuilder sOutFile = sInputFileAbs;
   sOutFile.ChangeFileExtension(GetDocumentExtension());
@@ -246,12 +246,13 @@ plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sInputFileAbs,
   plStringBuilder sInputFileRel = sInputFileAbs;
   pApp->MakePathDataDirectoryRelative(sInputFileRel);
 
-  out_pGeneratedDocument = pApp->CreateDocument(sInputFileAbs, plDocumentFlags::None);
-
-  if (out_pGeneratedDocument == nullptr)
+  plDocument* pDoc = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  if (pDoc == nullptr)
     return plStatus("Could not create target document");
 
-  plKrautTreeAssetDocument* pAssetDoc = plDynamicCast<plKrautTreeAssetDocument*>(out_pGeneratedDocument);
+  out_generatedDocuments.PushBack(pDoc);
+
+  plKrautTreeAssetDocument* pAssetDoc = plDynamicCast<plKrautTreeAssetDocument*>(pDoc);
 
   if (pAssetDoc == nullptr)
     return plStatus("Target document is not a valid plKrautTreeAssetDocument");

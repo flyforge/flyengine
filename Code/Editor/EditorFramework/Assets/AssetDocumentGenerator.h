@@ -66,7 +66,7 @@ public:
   virtual plStringView GetGeneratorGroup() const = 0;
 
   /// \brief Tells the generator to create a new asset document with the chosen mode.
-  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) = 0;
+  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments) = 0;
 
   /// \brief Returns whether this generator supports the given file type for import.
   bool SupportsFileType(plStringView sFile) const;

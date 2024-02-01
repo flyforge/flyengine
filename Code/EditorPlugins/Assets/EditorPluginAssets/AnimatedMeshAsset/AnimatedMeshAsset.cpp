@@ -145,7 +145,7 @@ void plAnimatedMeshAssetDocumentGenerator::GetImportModes(plStringView sAbsInput
   }
 }
 
-plStatus plAnimatedMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plAnimatedMeshAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments)
 {
   plStringBuilder sOutFile = sInputFileAbs;
   sOutFile.ChangeFileExtension(GetDocumentExtension());
@@ -156,11 +156,13 @@ plStatus plAnimatedMeshAssetDocumentGenerator::Generate(plStringView sInputFileA
   plStringBuilder sInputFileRel = sInputFileAbs;
   pApp->MakePathDataDirectoryRelative(sInputFileRel);
 
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
-  if (out_pGeneratedDocument == nullptr)
+  plDocument* pDoc = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  if (pDoc == nullptr)
     return plStatus("Could not create target document");
 
-  plAnimatedMeshAssetDocument* pAssetDoc = plDynamicCast<plAnimatedMeshAssetDocument*>(out_pGeneratedDocument);
+  out_generatedDocuments.PushBack(pDoc);
+
+  plAnimatedMeshAssetDocument* pAssetDoc = plDynamicCast<plAnimatedMeshAssetDocument*>(pDoc);
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
   accessor.SetValue("MeshFile", sInputFileRel.GetView());

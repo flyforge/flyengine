@@ -1,5 +1,6 @@
 #include <EditorPluginAssets/EditorPluginAssetsPCH.h>
 
+#include <EditorFramework/Assets/AssetBrowserDlg.moc.h>
 #include <EditorPluginAssets/AnimationClipAsset/AnimationClipAsset.h>
 #include <Foundation/Utilities/Progress.h>
 #include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
@@ -365,12 +366,19 @@ void plAnimationClipAssetDocumentGenerator::GetImportModes(plStringView sAbsInpu
   {
     plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::Undecided;
-    info.m_sName = "AnimationClipImport";
+    info.m_sName = "AnimationClipImport_Single";
+    info.m_sIcon = ":/AssetIcons/Animation_Clip.svg";
+  }
+
+  {
+    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
+    info.m_Priority = plAssetDocGeneratorPriority::Undecided;
+    info.m_sName = "AnimationClipImport_All";
     info.m_sIcon = ":/AssetIcons/Animation_Clip.svg";
   }
 }
 
-plStatus plAnimationClipAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plAnimationClipAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments)
 {
   plStringBuilder sOutFile = sInputFileAbs;
   sOutFile.ChangeFileExtension(GetDocumentExtension());
@@ -381,14 +389,79 @@ plStatus plAnimationClipAssetDocumentGenerator::Generate(plStringView sInputFile
   plStringBuilder sInputFileRel = sInputFileAbs;
   pApp->MakePathDataDirectoryRelative(sInputFileRel);
 
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
-  if (out_pGeneratedDocument == nullptr)
-    return plStatus("Could not create target document");
+  plStringBuilder title;
+  title.SetFormat("Select Preview Mesh for Animation Clip '{}'", sInputFileAbs.GetFileName());
 
-  plAnimationClipAssetDocument* pAssetDoc = plDynamicCast<plAnimationClipAssetDocument*>(out_pGeneratedDocument);
+  plStringBuilder sPreviewMesh;
 
-  auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("File", sInputFileRel.GetView());
+  plQtAssetBrowserDlg dlg(nullptr, plUuid::MakeInvalid(), "CompatibleAsset_Mesh_Skinned", title);
+  if (dlg.exec() != 0)
+  {
+    if (dlg.GetSelectedAssetGuid().IsValid())
+    {
+      plConversionUtils::ToString(dlg.GetSelectedAssetGuid(), sPreviewMesh);
+    }
+  }
 
-  return plStatus(PL_SUCCESS);
+  if (sMode == "AnimationClipImport_Single")
+  {
+    plDocument* pDoc = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+    if (pDoc == nullptr)
+      return plStatus("Could not create target document");
+
+    out_generatedDocuments.PushBack(pDoc);
+
+    plAnimationClipAssetDocument* pAssetDoc = plDynamicCast<plAnimationClipAssetDocument*>(pDoc);
+
+    auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
+    accessor.SetValue("File", sInputFileRel.GetView());
+    accessor.SetValue("PreviewMesh", sPreviewMesh.GetView());
+
+    return plStatus(PL_SUCCESS);
+  }
+
+  if (sMode == "AnimationClipImport_All")
+  {
+    plModelImporter2::ImportOptions opt;
+    opt.m_sSourceFile = sInputFileAbs;
+
+    plUniquePtr<plModelImporter2::Importer> pImporter = plModelImporter2::RequestImporterForFileType(opt.m_sSourceFile);
+    if (pImporter == nullptr)
+      return plStatus("No known importer for this file type.");
+
+    if (pImporter->Import(opt).Failed())
+      return plStatus("Failed to import asset.");
+
+    plStringBuilder sFilename;
+    plStringBuilder sOutFile2;
+
+    for (const auto& clip : pImporter->m_OutputAnimationNames)
+    {
+      sFilename = clip;
+      sFilename.ReplaceAll(" ", "-");
+      sFilename.Prepend(sOutFile.GetFileName(), "_");
+
+      sOutFile2 = sOutFile;
+      sOutFile2.ChangeFileName(sFilename);
+      plOSFile::FindFreeFilename(sOutFile2);
+
+      plDocument* pDoc = pApp->CreateDocument(sOutFile2, plDocumentFlags::None);
+      if (pDoc == nullptr)
+        return plStatus("Could not create target document");
+
+      out_generatedDocuments.PushBack(pDoc);
+
+      plAnimationClipAssetDocument* pAssetDoc = plDynamicCast<plAnimationClipAssetDocument*>(pDoc);
+
+      auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
+      accessor.SetValue("File", sInputFileRel.GetView());
+      accessor.SetValue("UseAnimationClip", clip);
+      accessor.SetValue("PreviewMesh", sPreviewMesh.GetView());
+    }
+
+    return plStatus(PL_SUCCESS);
+  }
+
+  PL_ASSERT_NOT_IMPLEMENTED;
+  return plStatus(PL_FAILURE);
 }

@@ -263,7 +263,7 @@ void plTextureCubeAssetDocumentGenerator::GetImportModes(plStringView sAbsInputF
   }
 }
 
-plStatus plTextureCubeAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plTextureCubeAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments)
 {
   plStringBuilder sOutFile = sInputFileAbs;
   sOutFile.ChangeFileExtension(GetDocumentExtension());
@@ -274,11 +274,13 @@ plStatus plTextureCubeAssetDocumentGenerator::Generate(plStringView sInputFileAb
   plStringBuilder sInputFileRel = sInputFileAbs;
   pApp->MakePathDataDirectoryRelative(sInputFileRel);
 
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
-  if (out_pGeneratedDocument == nullptr)
+  plDocument* pDoc = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  if (pDoc == nullptr)
     return plStatus("Could not create target document");
 
-  plTextureCubeAssetDocument* pAssetDoc = plDynamicCast<plTextureCubeAssetDocument*>(out_pGeneratedDocument);
+  out_generatedDocuments.PushBack(pDoc);
+
+  plTextureCubeAssetDocument* pAssetDoc = plDynamicCast<plTextureCubeAssetDocument*>(pDoc);
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
   accessor.SetValue("Input1", sInputFileRel.GetView());

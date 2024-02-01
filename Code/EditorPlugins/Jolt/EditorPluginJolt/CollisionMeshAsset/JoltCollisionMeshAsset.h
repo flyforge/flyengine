@@ -45,7 +45,7 @@ public:
   virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
   virtual plStringView GetDocumentExtension() const override { return "plJoltCollisionMeshAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "JoltCollisionMeshes"; }
-  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
+  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments) override;
 };
 
 class plJoltConvexCollisionMeshAssetDocumentGenerator : public plAssetDocumentGenerator
@@ -59,5 +59,5 @@ public:
   virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
   virtual plStringView GetDocumentExtension() const override { return "plJoltConvexCollisionMeshAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "JoltCollisionMeshes"; }
-  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
+  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments) override;
 };

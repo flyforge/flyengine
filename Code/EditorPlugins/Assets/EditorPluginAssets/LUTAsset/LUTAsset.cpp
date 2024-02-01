@@ -121,7 +121,7 @@ void plLUTAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plD
   info.m_sIcon = ":/AssetIcons/LUT.svg";
 }
 
-plStatus plLUTAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plLUTAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments)
 {
   plStringBuilder sOutFile = sInputFileAbs;
   sOutFile.ChangeFileExtension(GetDocumentExtension());
@@ -132,11 +132,13 @@ plStatus plLUTAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStr
   plStringBuilder sInputFileRel = sInputFileAbs;
   pApp->MakePathDataDirectoryRelative(sInputFileRel);
 
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
-  if (out_pGeneratedDocument == nullptr)
+  plDocument* pDoc = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  if (pDoc == nullptr)
     return plStatus("Could not create target document");
 
-  plLUTAssetDocument* pAssetDoc = plDynamicCast<plLUTAssetDocument*>(out_pGeneratedDocument);
+  out_generatedDocuments.PushBack(pDoc);
+
+  plLUTAssetDocument* pAssetDoc = plDynamicCast<plLUTAssetDocument*>(pDoc);
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
   accessor.SetValue("Input", sInputFileRel.GetView());

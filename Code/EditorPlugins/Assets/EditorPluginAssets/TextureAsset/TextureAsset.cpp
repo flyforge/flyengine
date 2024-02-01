@@ -762,7 +762,7 @@ void plTextureAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile,
   }
 }
 
-plStatus plTextureAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
+plStatus plTextureAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDynamicArray<plDocument*>& out_generatedDocuments)
 {
   if (sMode == "TextureImport.Auto")
   {
@@ -809,11 +809,13 @@ plStatus plTextureAssetDocumentGenerator::Generate(plStringView sInputFileAbs, p
   plStringBuilder sInputFileRel = sInputFileAbs;
   pApp->MakePathDataDirectoryRelative(sInputFileRel);
 
-  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
-  if (out_pGeneratedDocument == nullptr)
+  plDocument* pDoc = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
+  if (pDoc == nullptr)
     return plStatus("Could not create target document");
 
-  plTextureAssetDocument* pAssetDoc = plDynamicCast<plTextureAssetDocument*>(out_pGeneratedDocument);
+  out_generatedDocuments.PushBack(pDoc);
+
+  plTextureAssetDocument* pAssetDoc = plDynamicCast<plTextureAssetDocument*>(pDoc);
   if (pAssetDoc == nullptr)
     return plStatus("Target document is not a valid plTextureAssetDocument");
 
