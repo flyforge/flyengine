@@ -15,28 +15,28 @@ namespace clang
 {
   namespace tidy
   {
-    namespace ez
+    namespace pl
     {
 
-      class EzModule : public ClangTidyModule
+      class PlModule : public ClangTidyModule
       {
       public:
         void addCheckFactories(ClangTidyCheckFactories& CheckFactories) override
         {
           CheckFactories.registerCheck<NameCheck>(
-            "ez-name-check");
+            "pl-name-check");
         }
       };
 
-    } // namespace ez
+    } // namespace pl
 
     // Register the MiscTidyModule using this statically initialized variable.
-    static ClangTidyModuleRegistry::Add<ez::EzModule>
-      X("ez-module", "Adds ez engine specific lint checks.");
+    static ClangTidyModuleRegistry::Add<pl::PlModule>
+      X("pl-module", "Adds pl engine specific lint checks.");
 
     // This anchor is used to force the linker to link in the generated object file
-    // and thus register the EzModule.
-    volatile int EzModuleAnchorSource = 0;
+    // and thus register the PlModule.
+    volatile int PlModuleAnchorSource = 0;
 
   } // namespace tidy
 } // namespace clang

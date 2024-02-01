@@ -43,7 +43,7 @@ while [[ $# -gt 0 ]]; do
       ;;
 
     --no-unity)
-      NoUnity="-Dpl_ENABLE_FOLDER_UNITY_FILES=OFF"
+      NoUnity="-DPL_ENABLE_FOLDER_UNITY_FILES=OFF"
       shift 1
       ;;
 
@@ -135,6 +135,6 @@ fi
 
 if [ "$RunCMake" = true ]; then
   BuildDir="build-${BuildType}-${CompilerShort}"
-  cmake -B $BuildDir -S . -G Ninja -DCMAKE_CXX_COMPILER=$cxx_compiler -DCMAKE_C_COMPILER=$c_compiler -Dpl_EXPERIMENTAL_EDITOR_ON_LINUX=ON -Dpl_BUILD_EXPERIMENTAL_VULKAN=ON -DCMAKE_BUILD_TYPE=$BuildType -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $NoUnity && \
+  cmake -B $BuildDir -S . -G Ninja -DCMAKE_CXX_COMPILER=$cxx_compiler -DCMAKE_C_COMPILER=$c_compiler -DPL_EXPERIMENTAL_EDITOR_ON_LINUX=ON -DPL_BUILD_EXPERIMENTAL_VULKAN=ON -DCMAKE_BUILD_TYPE=$BuildType -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $NoUnity && \
   echo -e "\nRun 'ninja -C ${BuildDir}' to build"
 fi

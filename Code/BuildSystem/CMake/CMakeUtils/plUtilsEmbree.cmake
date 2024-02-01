@@ -18,15 +18,15 @@ endmacro()
 function(pl_link_target_embree TARGET_NAME)
 	pl_requires_embree()
 
-	find_package(EzEmbree REQUIRED)
+	find_package(PlEmbree REQUIRED)
 
 	if(PLEMBREE_FOUND)
-		target_link_libraries(${TARGET_NAME} PRIVATE EzEmbree::EzEmbree)
+		target_link_libraries(${TARGET_NAME} PRIVATE PlEmbree::PlEmbree)
 
 		target_compile_definitions(${PROJECT_NAME} PUBLIC BUILDSYSTEM_ENABLE_EMBREE_SUPPORT)
 
 		add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:EzEmbree::EzEmbree> $<TARGET_FILE_DIR:${TARGET_NAME}>
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:PlEmbree::PlEmbree> $<TARGET_FILE_DIR:${TARGET_NAME}>
 		)
 	endif()
 endfunction()

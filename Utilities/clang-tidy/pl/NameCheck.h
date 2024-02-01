@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #ifndef LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_MISC_MEMBERVARCHECKCHECK_H
-#  define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_pl_MEMBERVARCHECKCHECK_H
+#  define LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PL_MEMBERVARCHECKCHECK_H
 
 #  include "../utils/RenamerClangTidyCheck.h"
 
@@ -43,4 +43,4 @@ namespace clang
   }   // namespace tidy
 } // namespace clang
 
-#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_pl_MEMBERVARCHECKCHECK_H
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_PL_MEMBERVARCHECKCHECK_H

@@ -38,7 +38,7 @@ PL_ALWAYS_INLINE void plSimdQuat::Normalize()
 inline plResult plSimdQuat::GetRotationAxisAndAngle(plSimdVec4f& ref_vAxis, plSimdFloat& ref_fAngle, const plSimdFloat& fEpsilon) const
 {
   ///\todo optimize
-  const plAngle acos = plMath::ACos(m_v.w());
+  const plAngle acos = plMath::ACos(m_v.w().Max(-1).Min(1));
   const float d = plMath::Sin(acos);
 
   if (d < fEpsilon)

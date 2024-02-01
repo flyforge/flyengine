@@ -70,9 +70,12 @@ plResult plBakingScene::Extract()
   plBoundingBox queryBox = m_BoundingBox;
   queryBox.Grow(plVec3(m_Settings.m_fMaxRayDistance));
 
+  plTagSet excludeTags;
+  excludeTags.SetByName("Editor");
+
   plSpatialSystem::QueryParams queryParams;
   queryParams.m_uiCategoryBitmask = plDefaultSpatialDataCategories::RenderStatic.GetBitmask();
-  queryParams.m_ExcludeTags.SetByName("Editor");
+  queryParams.m_pExcludeTags = &excludeTags;
 
   plMsgExtractGeometry msg;
   msg.m_Mode = plWorldGeoExtractionUtil::ExtractionMode::RenderMesh;

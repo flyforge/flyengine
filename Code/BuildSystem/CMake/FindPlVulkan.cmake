@@ -1,7 +1,7 @@
 # find the folder into which the Vulkan SDK has been installed
 
 # early out, if this target has been created before
-if((TARGET EzVulkan::Loader) AND(TARGET EzVulkan::DXC))
+if((TARGET PlVulkan::Loader) AND(TARGET PlVulkan::DXC))
 	return()
 endif()
 

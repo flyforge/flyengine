@@ -1301,7 +1301,7 @@ void plRenderContext::ApplyBufferBindings(const plGALShader* pShader)
   const auto& bindings = pShader->GetBindingMapping();
   for (const plShaderResourceBinding& binding : bindings)
   {
-    if (binding.m_ResourceType >= plGALShaderResourceType::TexelBuffer && binding.m_ResourceType >= plGALShaderResourceType::StructuredBuffer)
+    if (binding.m_ResourceType == plGALShaderResourceType::TexelBuffer || binding.m_ResourceType == plGALShaderResourceType::StructuredBuffer)
     {
       const plUInt64 uiResourceHash = binding.m_sName.GetHash();
 

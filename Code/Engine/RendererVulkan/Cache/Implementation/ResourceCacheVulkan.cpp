@@ -23,7 +23,7 @@ plMap<const plRefCounted*, plHybridArray<plResourceCacheVulkan::ComputePipelineM
 
 plHashTable<plGALShaderVulkan::DescriptorSetLayoutDesc, vk::DescriptorSetLayout, plResourceCacheVulkan::ResourceCacheHash> plResourceCacheVulkan::s_descriptorSetLayouts;
 
-#define PL_LOG_VULKAN_RESOURCES
+//#define PL_LOG_VULKAN_RESOURCES
 
 PL_CHECK_AT_COMPILETIME(sizeof(plUInt32) == sizeof(plGALRenderTargetViewHandle));
 namespace

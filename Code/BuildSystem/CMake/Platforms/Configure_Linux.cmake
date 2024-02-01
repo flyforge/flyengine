@@ -30,10 +30,10 @@ endmacro()
 macro(pl_platformhook_link_target_vulkan)
 
     # on linux is the loader a dll
-    get_target_property(_dll_location EzVulkan::Loader IMPORTED_LOCATION)
+    get_target_property(_dll_location PlVulkan::Loader IMPORTED_LOCATION)
 
     if(NOT _dll_location STREQUAL "")
-        add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:EzVulkan::Loader> $<TARGET_FILE_DIR:${TARGET_NAME}>)
+        add_custom_command(TARGET ${TARGET_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:PlVulkan::Loader> $<TARGET_FILE_DIR:${TARGET_NAME}>)
     endif()
 
     unset(_dll_location)
@@ -121,7 +121,7 @@ macro(pl_platformhook_find_vulkan)
         if((PL_VULKAN_DIR STREQUAL "PL_VULKAN_DIR-NOTFOUND") OR(PL_VULKAN_DIR STREQUAL ""))
             # set(CMAKE_FIND_DEBUG_MODE TRUE)
             unset(PL_VULKAN_DIR CACHE)
-            unset(EzVulkan_DIR CACHE)
+            unset(PlVulkan_DIR CACHE)
             find_path(PL_VULKAN_DIR config/vk_layer_settings.txt
                 PATHS
                 ${PL_VULKAN_DIR}
@@ -142,7 +142,7 @@ macro(pl_platformhook_find_vulkan)
             endif()
 
             if((PL_VULKAN_DIR STREQUAL "PL_VULKAN_DIR-NOTFOUND") OR (PL_VULKAN_DIR STREQUAL ""))
-                message(FATAL_ERROR "Failed to find vulkan SDK. Ez requires the vulkan sdk ${PL_CONFIG_VULKAN_SDK_LINUXX64_VERSION}. Please set the environment variable VULKAN_SDK to the vulkan sdk location.")
+                message(FATAL_ERROR "Failed to find vulkan SDK. Pl requires the vulkan sdk ${PL_CONFIG_VULKAN_SDK_LINUXX64_VERSION}. Please set the environment variable VULKAN_SDK to the vulkan sdk location.")
             endif()
 
             # set(CMAKE_FIND_DEBUG_MODE FALSE)
@@ -152,16 +152,16 @@ macro(pl_platformhook_find_vulkan)
     endif()
 
     include(FindPackageHandleStandardArgs)
-    find_package_handle_standard_args(EzVulkan DEFAULT_MSG PL_VULKAN_DIR)
+    find_package_handle_standard_args(PlVulkan DEFAULT_MSG PL_VULKAN_DIR)
     
 	if(PL_CMAKE_ARCHITECTURE_64BIT)
-		add_library(EzVulkan::Loader SHARED IMPORTED)
-		set_target_properties(EzVulkan::Loader PROPERTIES IMPORTED_LOCATION "${PL_VULKAN_DIR}/x86_64/lib/libvulkan.so")
-		set_target_properties(EzVulkan::Loader PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PL_VULKAN_DIR}/x86_64/include")
+		add_library(PlVulkan::Loader SHARED IMPORTED)
+		set_target_properties(PlVulkan::Loader PROPERTIES IMPORTED_LOCATION "${PL_VULKAN_DIR}/x86_64/lib/libvulkan.so")
+		set_target_properties(PlVulkan::Loader PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PL_VULKAN_DIR}/x86_64/include")
 
-		add_library(EzVulkan::DXC SHARED IMPORTED)
-		set_target_properties(EzVulkan::DXC PROPERTIES IMPORTED_LOCATION "${PL_VULKAN_DIR}/x86_64/lib/libdxcompiler.so")
-		set_target_properties(EzVulkan::DXC PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PL_VULKAN_DIR}/x86_64/include")
+		add_library(PlVulkan::DXC SHARED IMPORTED)
+		set_target_properties(PlVulkan::DXC PROPERTIES IMPORTED_LOCATION "${PL_VULKAN_DIR}/x86_64/lib/libdxcompiler.so")
+		set_target_properties(PlVulkan::DXC PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PL_VULKAN_DIR}/x86_64/include")
 	else()
 		message(FATAL_ERROR "TODO: Vulkan is not yet supported on this platform and/or architecture.")
 	endif()

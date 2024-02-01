@@ -41,14 +41,14 @@ if ($NoSubmoduleUpdate -eq $False) {
 $CMAKE_ARGS = @("-S", "$PSScriptRoot")
 
 if ($NoUnityBuild) {
-    $CMAKE_ARGS += "-Dpl_ENABLE_FOLDER_UNITY_FILES:BOOL=OFF"
+    $CMAKE_ARGS += "-DPL_ENABLE_FOLDER_UNITY_FILES:BOOL=OFF"
 }
 else {
-    $CMAKE_ARGS += "-Dpl_ENABLE_FOLDER_UNITY_FILES:BOOL=ON"
+    $CMAKE_ARGS += "-DPL_ENABLE_FOLDER_UNITY_FILES:BOOL=ON"
 }
 
 if ($SolutionName -ne "") {
-    $CMAKE_ARGS += "-Dpl_SOLUTION_NAME:STRING='${SolutionName}'"
+    $CMAKE_ARGS += "-DPL_SOLUTION_NAME:STRING='${SolutionName}'"
 }
 
 $CMAKE_ARGS += "-G"
@@ -76,8 +76,8 @@ elseif ($Target -eq "Uwp64vs2022") {
     $CMAKE_ARGS += "$PSScriptRoot\Workspace\vs2022x64uwp"
     $CMAKE_ARGS += "-DCMAKE_TOOLCHAIN_FILE=$PSScriptRoot\Code\BuildSystem\CMake\toolchain-winstore.cmake"
 
-    $CMAKE_ARGS += "-Dpl_ENABLE_QT_SUPPORT:BOOL=OFF"
-    $CMAKE_ARGS += "-Dpl_BUILD_FILTER='UwpProjects'"
+    $CMAKE_ARGS += "-DPL_ENABLE_QT_SUPPORT:BOOL=OFF"
+    $CMAKE_ARGS += "-DPL_BUILD_FILTER='UwpProjects'"
 }
 else {
     throw "Unknown target '$Target'."

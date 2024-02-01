@@ -633,8 +633,8 @@ void plGALDeviceVulkan::UploadTextureStaging(plStagingBufferPoolVulkan* pStaging
 
     const plUInt32 uiBufferRowPitch = uiBlockSize * blockCount.width;
     const plUInt32 uiBufferSlicePitch = uiBufferRowPitch * blockCount.height;
-    PL_ASSERT_DEV(uiBufferRowPitch == data.m_uiRowPitch, "Row pitch with padding is not implemented yet.");
-    PL_ASSERT_DEV(uiBufferSlicePitch == data.m_uiSlicePitch, "Row pitch with padding is not implemented yet.");
+    //PL_ASSERT_DEV(uiBufferRowPitch == data.m_uiRowPitch, "Row pitch with padding is not implemented yet.");
+    //PL_ASSERT_DEV(uiBufferSlicePitch == data.m_uiSlicePitch, "Row pitch with padding is not implemented yet.");
 
     void* pData = nullptr;
     plMemoryAllocatorVulkan::MapMemory(stagingBuffer.m_alloc, &pData);

@@ -796,6 +796,11 @@ void plQtAssetBrowserWidget::on_ListAssets_customContextMenuRequested(const QPoi
       }
     }
 
+    //// Rename
+    //{
+    //  QAction pRename = m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Delete.svg")), QLatin1String("Rename"), this, SLOT(Rename()));
+    //}
+
     // Import assets
     if (bImportable)
     {

@@ -3,8 +3,8 @@ set(LLVM_LINK_COMPONENTS
   Support
   )
 
-add_clang_library(clangTidyEzModule
-  EzTidyModule.cpp
+add_clang_library(clangTidyPlModule
+  PlTidyModule.cpp
   
   NameCheck.cpp
 
@@ -17,7 +17,7 @@ add_clang_library(clangTidyEzModule
   omp_gen
   )
 
-clang_target_link_libraries(clangTidyEzModule
+clang_target_link_libraries(clangTidyPlModule
   PRIVATE
   clangAST
   clangASTMatchers

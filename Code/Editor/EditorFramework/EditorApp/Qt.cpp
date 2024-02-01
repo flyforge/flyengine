@@ -139,6 +139,7 @@ static void QtDebugMessageHandler(QtMsgType type, const QMessageLogContext& cont
 
   switch (type)
   {
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
     case QtDebugMsg:
       plLog::Debug("|Qt| {0} ({1}:{2}, {3})", sMsg, context.file, context.line, context.function);
       break;
@@ -156,7 +157,8 @@ static void QtDebugMessageHandler(QtMsgType type, const QMessageLogContext& cont
       plLog::Warning("|Qt| {0} ({1}:{2}, {3})", sMsg, context.file, context.line, context.function);
       break;
     }
-    case QtCriticalMsg:
+    #endif
+case QtCriticalMsg:
       // BUG in Qt 6 on Windows. Window classes are not properly unregistered so they leak into the next session and cause a warning.
       if (!sMsg.StartsWith("QApplication::regClass: Registering window class"))
       {
